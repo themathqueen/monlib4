@@ -3,11 +3,11 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Logic.Basic
-import Algebra.Group.Defs
-import GroupTheory.GroupAction.Defs
-import Algebra.Star.Basic
-import LinearAlgebra.TensorProduct
+import Mathlib.Logic.Basic
+import Mathlib.Algebra.Group.Defs
+import Mathlib.GroupTheory.GroupAction.Defs
+import Mathlib.Algebra.Star.Basic
+import Mathlib.LinearAlgebra.TensorProduct.Basic
 
 #align_import preq.dite
 
@@ -100,4 +100,3 @@ theorem LinearMap.apply_dite {R H₁ H₂ : Type _} [Semiring R] [AddCommMonoid 
     (b : ¬P → H₁) :
     f (dite P (fun h => a h) fun h => b h) = dite P (fun h => f (a h)) fun h => f (b h) := by
   split_ifs <;> simp
-
