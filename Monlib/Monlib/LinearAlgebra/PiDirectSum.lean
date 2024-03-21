@@ -1,0 +1,352 @@
+/-
+Copyright (c) 2024 Monica Omar. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Monica Omar
+-/
+import Algebra.DirectSum.Basic
+import LinearAlgebra.MyTensorProduct
+import LinearAlgebra.DirectSumFromTo
+
+#align_import linear_algebra.pi_direct_sum
+
+open scoped TensorProduct
+
+local notation x " ⊗ₘ " y => TensorProduct.map x y
+
+theorem DirectSum.tensor_coe_zero {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] :
+    ⇑(0 : DirectSum (ι₁ × ι₂) fun i : ι₁ × ι₂ => M₁ i.fst ⊗[R] M₂ i.snd) = 0 :=
+  rfl
+
+theorem DirectSum.tensor_coe_add {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)]
+    (x y : DirectSum (ι₁ × ι₂) fun i : ι₁ × ι₂ => M₁ i.fst ⊗[R] M₂ i.snd) :
+    ⇑(x + y : DirectSum (ι₁ × ι₂) fun i : ι₁ × ι₂ => M₁ i.fst ⊗[R] M₂ i.snd) = x + y :=
+  rfl
+
+theorem DirectSum.tensor_coe_smul {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)]
+    (x : DirectSum (ι₁ × ι₂) fun i : ι₁ × ι₂ => M₁ i.fst ⊗[R] M₂ i.snd) (r : R) :
+    ⇑(r • x : DirectSum (ι₁ × ι₂) fun i : ι₁ × ι₂ => M₁ i.fst ⊗[R] M₂ i.snd) = r • x :=
+  rfl
+
+def Pi.tensorOf {R : Type _} [CommSemiring R] {ι₁ ι₂ : Type _} [DecidableEq ι₁] [DecidableEq ι₂]
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)]
+    (i : ι₁ × ι₂) : M₁ i.fst ⊗[R] M₂ i.snd →ₗ[R] (∀ j, M₁ j) ⊗[R] ∀ j, M₂ j :=
+  @LinearMap.single R ι₁ _ M₁ _ _ _ i.fst ⊗ₘ @LinearMap.single R ι₂ _ M₂ _ _ _ i.snd
+
+def Pi.tensorProj {R : Type _} [CommSemiring R] {ι₁ ι₂ : Type _} {M₁ : ι₁ → Type _}
+    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (i : ι₁ × ι₂) :
+    ((∀ j, M₁ j) ⊗[R] ∀ j, M₂ j) →ₗ[R] M₁ i.fst ⊗[R] M₂ i.snd :=
+  @LinearMap.proj R ι₁ _ M₁ _ _ i.fst ⊗ₘ @LinearMap.proj R ι₂ _ M₂ _ _ i.snd
+
+def directSumTensorToFun {R : Type _} [CommSemiring R] {ι₁ : Type _} {ι₂ : Type _}
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] :
+    ((∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) →ₗ[R] ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd
+    where
+  toFun x i := Pi.tensorProj i x
+  map_add' x y := by
+    simp only [map_add, DirectSum.tensor_coe_add]
+    rfl
+  map_smul' r x :=
+    by
+    simp only [SMulHomClass.map_smul, DirectSum.tensor_coe_smul, RingHom.id_apply]
+    rfl
+
+theorem directSumTensorToFun_apply {R : Type _} [CommSemiring R] {ι₁ : Type _} {ι₂ : Type _}
+    {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)]
+    [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)] [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)]
+    (x : ∀ i, M₁ i) (y : ∀ i, M₂ i) (i : ι₁ × ι₂) :
+    directSumTensorToFun (x ⊗ₜ[R] y) i = x i.1 ⊗ₜ[R] y i.2 :=
+  rfl
+
+open scoped BigOperators
+
+def directSumTensorInvFun {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
+    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] :
+    (∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd) →ₗ[R] (∀ i, M₁ i) ⊗[R] ∀ i, M₂ i
+    where
+  toFun x := ∑ i : ι₁ × ι₂, Pi.tensorOf i (x i)
+  map_add' x y := by simp only [map_add, Pi.add_apply, Finset.sum_add_distrib]
+  map_smul' r x :=
+    by
+    simp only [SMulHomClass.map_smul, Pi.smul_apply, RingHom.id_apply]
+    rw [← Finset.smul_sum]
+
+theorem Function.sum_update_eq_self {ι₁ : Type _} [DecidableEq ι₁] [Fintype ι₁] {M₁ : ι₁ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] (x : ∀ i, M₁ i) :
+    ∑ x_1 : ι₁, Function.update 0 x_1 (x x_1) = x :=
+  by
+  ext
+  simp only [Finset.sum_apply, Function.update, Finset.sum_dite_eq, Finset.mem_univ, if_true,
+    Pi.zero_apply]
+
+theorem directSumTensorInvFun_apply_to_fun {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
+    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x : (∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) :
+    directSumTensorInvFun (directSumTensorToFun x) = x :=
+  by
+  apply x.induction_on
+  · simp only [map_zero]
+  · intro x y
+    simp only [directSumTensorInvFun, LinearMap.coe_mk, LinearMap.comp_apply,
+      directSumTensorToFun_apply]
+    calc
+      ∑ i : ι₁ × ι₂, (Pi.tensorOf i) (x i.fst ⊗ₜ[R] y i.snd) =
+          ∑ (i : ι₁) (j : ι₂), (Pi.tensorOf (i, j)) (x i ⊗ₜ[R] y j) :=
+        by
+        rw [← Finset.sum_product']
+        simp only [Finset.univ_product_univ]
+        apply Finset.sum_congr rfl
+        intros
+        rfl
+      _ =
+          ∑ (x_1 : ι₁) (x_2 : ι₂),
+            Function.update 0 (x_1, x_2).fst (x x_1) ⊗ₜ[R]
+              Function.update 0 (x_1, x_2).snd (y x_2) :=
+        by
+        simp only [Pi.tensorOf, TensorProduct.map_tmul]
+        rfl
+      _ =
+          ∑ (x_1 : ι₁) (x_2 : ι₂),
+            Function.update 0 x_1 (x x_1) ⊗ₜ[R] Function.update 0 x_2 (y x_2) :=
+        rfl
+      _ =
+          (∑ x_1 : ι₁, Function.update 0 x_1 (x x_1)) ⊗ₜ[R]
+            ∑ x_2 : ι₂, Function.update 0 x_2 (y x_2) :=
+        by simp only [TensorProduct.tmul_sum, TensorProduct.sum_tmul]
+      _ = x ⊗ₜ[R] y := _
+    congr <;> exact @Function.sum_update_eq_self _ _ _ _ _ _
+  · intro x y hx hy
+    simp only [map_add, hx, hy]
+
+theorem Pi.tensorProj_apply_pi_tensorOf {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    [DecidableEq ι₁] [DecidableEq ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (i j : ι₁ × ι₂)
+    (x : ∀ i : ι₁ × ι₂, M₁ i.1 ⊗[R] M₂ i.2) :
+    (Pi.tensorProj i) (Pi.tensorOf j (x j)) = ite (i = j) (x i) 0 :=
+  by
+  have t1 :
+    ∀ i j : ι₁,
+      (LinearMap.proj j).comp (LinearMap.single i) = (directSumFromTo i j : M₁ i →ₗ[R] M₁ j) :=
+    fun i j => rfl
+  have t2 :
+    ∀ i j : ι₂,
+      (LinearMap.proj j).comp (LinearMap.single i) = (directSumFromTo i j : M₂ i →ₗ[R] M₂ j) :=
+    fun i j => rfl
+  simp only [Pi.tensorOf, Pi.tensorProj, ← LinearMap.comp_apply, ← TensorProduct.map_comp, t1, t2]
+  split_ifs
+  · rw [h]
+    simp only [directSumFromTo_apply_same, TensorProduct.map_one, LinearMap.one_apply]
+  · rw [Prod.eq_iff_fst_eq_snd_eq, not_and_or] at h
+    rcases h with (h | h)
+    · rw [directSumFromTo_apply_ne_same h, TensorProduct.zero_map, LinearMap.zero_apply]
+    · rw [directSumFromTo_apply_ne_same h, TensorProduct.map_zero, LinearMap.zero_apply]
+
+theorem directSumTensorToFun_apply_inv_fun {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
+    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)]
+    (x : ∀ i : ι₁ × ι₂, M₁ i.1 ⊗[R] M₂ i.2) : directSumTensorToFun (directSumTensorInvFun x) = x :=
+  by
+  simp only [directSumTensorToFun, directSumTensorInvFun, LinearMap.coe_mk, map_sum,
+    Pi.tensorProj_apply_pi_tensorOf]
+  ext1
+  simp only [Finset.sum_apply, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+
+def directSumTensor {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
+    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] :
+    ((∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) ≃ₗ[R] ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd
+    where
+  toFun := directSumTensorToFun
+  invFun := directSumTensorInvFun
+  left_inv x := directSumTensorInvFun_apply_to_fun x
+  right_inv x := directSumTensorToFun_apply_inv_fun x
+  map_add' x y := map_add _ _ _
+  map_smul' r x := SMulHomClass.map_smul _ _ _
+
+theorem directSumTensor_apply {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
+    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x : ∀ i, M₁ i) (y : ∀ i, M₂ i)
+    (i : ι₁ × ι₂) : directSumTensor (x ⊗ₜ[R] y) i = x i.1 ⊗ₜ[R] y i.2 :=
+  rfl
+
+theorem directSumTensorToFun.map_hMul {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
+    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)]
+    [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)]
+    (x y : (∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) :
+    directSumTensorToFun (x * y) = directSumTensorToFun x * directSumTensorToFun y :=
+  by
+  apply x.induction_on
+  · simp only [MulZeroClass.zero_mul, map_zero]
+  · intro x₁ x₂
+    apply y.induction_on
+    · simp only [MulZeroClass.mul_zero, map_zero]
+    · intro y₁ y₂
+      ext1
+      simp only [Pi.mul_apply, directSumTensorToFun_apply, Algebra.TensorProduct.tmul_mul_tmul]
+    · intro y₁ y₂ hy₁ hy₂
+      simp only [mul_add, map_add, hy₁, hy₂]
+  · intro x₁ x₂ hx hy
+    simp only [add_mul, map_add, hx, hy]
+
+-- @[instance] def pi_prod_tensor.semiring (R : Type*) {ι₁ ι₂ : Type*} [comm_ring R]
+--   (φ : ι₁ → Type*) (ψ : ι₂ → Type*)
+--   [Π i, add_comm_monoid (φ i)] [Π i, module R (φ i)]
+--   [Π i, add_comm_monoid (ψ i)] [Π i, module R (ψ i)] :
+--   semiring ((Π i, φ i) ⊗[R] (Π i, ψ i)) :=
+-- begin
+-- end
+@[instance]
+def PiProdTensor.algebra {R : Type _} {ι₁ ι₂ : Type _} [CommRing R] {φ : ι₁ → Type _}
+    {ψ : ι₂ → Type _} [∀ i, Ring (φ i)] [∀ i, Ring (ψ i)] [∀ i, Algebra R (ψ i)]
+    [∀ i, Algebra R (φ i)] : Algebra R (∀ i : ι₁ × ι₂, φ i.1 ⊗[R] ψ i.2) :=
+  by
+  apply Pi.algebra _ _
+  intro i
+  infer_instance
+
+theorem directSumTensorToFun.map_one {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+    [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
+    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)]
+    [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)] :
+    directSumTensorToFun (1 : (∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) = 1 :=
+  rfl
+
+@[simps]
+def directSumTensorAlgEquiv (R : Type _) {ι₁ ι₂ : Type _} [CommRing R] [Fintype ι₁] [Fintype ι₂]
+    [DecidableEq ι₁] [DecidableEq ι₂] (M₁ : ι₁ → Type _) (M₂ : ι₂ → Type _)
+    [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)] [∀ i₁ : ι₁, Algebra R (M₁ i₁)]
+    [∀ i₂ : ι₂, Algebra R (M₂ i₂)] :
+    ((∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) ≃ₐ[R] ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd
+    where
+  toFun x i := directSumTensorToFun x i
+  invFun x := (directSumTensorInvFun : _ →ₗ[R] _) (x : ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd)
+  right_inv x := by
+    simp only
+    rw [directSumTensorToFun_apply_inv_fun]
+  left_inv x := by
+    simp only
+    rw [directSumTensorInvFun_apply_to_fun]
+  map_add' x y := by simp only [map_add]
+  map_mul' x y := by
+    ext
+    simp only
+    rw [directSumTensorToFun.map_hMul]
+  commutes' r := by
+    ext
+    simp_rw [Algebra.algebraMap_eq_smul_one, SMulHomClass.map_smul, Pi.smul_apply,
+      directSumTensorToFun.map_one]
+
+theorem Pi.tensor_ext_iff {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
+    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x z : ∀ i, M₁ i)
+    (y w : ∀ i, M₂ i) : x ⊗ₜ[R] y = z ⊗ₜ[R] w ↔ ∀ i j, x i ⊗ₜ[R] y j = z i ⊗ₜ[R] w j :=
+  by
+  rw [←
+    Function.Injective.eq_iff
+      (directSumTensor :
+          ((∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) ≃ₗ[R] ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd).Injective]
+  simp_rw [Function.funext_iff, directSumTensor_apply, Prod.forall]
+
+@[ext]
+theorem Pi.tensor_ext {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
+    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
+    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
+    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x z : ∀ i, M₁ i)
+    (y w : ∀ i, M₂ i) : (∀ i j, x i ⊗ₜ[R] y j = z i ⊗ₜ[R] w j) → x ⊗ₜ[R] y = z ⊗ₜ[R] w :=
+  by
+  rw [Pi.tensor_ext_iff]
+  simp only [imp_self]
+
+@[simps]
+def LinearMap.piPiProd (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι₁ → Type _)
+    (ψ : ι₂ → Type _) [∀ i, AddCommMonoid (φ i)] [∀ i, Module R (φ i)] [∀ i, AddCommMonoid (ψ i)]
+    [∀ i, Module R (ψ i)] (S : Type _) [Semiring S] [∀ i, Module S (ψ i)]
+    [∀ i, SMulCommClass R S (ψ i)] :
+    (∀ i : ι₁ × ι₂, φ i.1 →ₗ[R] ψ i.2) ≃ₗ[S] ∀ i j, φ i →ₗ[R] ψ j :=
+  by
+  refine' LinearEquiv.ofLinear _ _ _ _
+  refine'
+    { toFun := fun f j k => f (j, k)
+      map_add' := fun f g => by simp only [Pi.add_apply]; ext; rfl
+      map_smul' := fun r f => by simp only [Pi.smul_apply]; ext; rfl }
+  refine'
+    { toFun := fun f i => f i.1 i.2
+      map_add' := fun f g => by ext; rfl
+      map_smul' := fun r f => by ext; rfl }
+  rfl
+  · rw [LinearMap.ext_iff]
+    intro x
+    simp only [LinearMap.coe_comp, LinearMap.coe_mk, Function.comp_apply, LinearMap.id_coe, id.def]
+    ext
+    congr
+    exact Prod.mk.eta
+
+@[simps]
+def LinearMap.piProdSwap (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι₁ → Type _)
+    (ψ : ι₂ → Type _) [∀ i, AddCommMonoid (φ i)] [∀ i, Module R (φ i)] [∀ i, AddCommMonoid (ψ i)]
+    [∀ i, Module R (ψ i)] (S : Type _) [Semiring S] [∀ i, Module S (ψ i)]
+    [∀ i, SMulCommClass R S (ψ i)] : (∀ i j, φ i →ₗ[R] ψ j) ≃ₗ[S] ∀ j i, φ i →ₗ[R] ψ j :=
+  by
+  refine' LinearEquiv.ofLinear _ _ _ _
+  refine'
+    { toFun := fun f j i => f i j
+      map_add' := fun f g => by ext; rfl
+      map_smul' := fun r f => by ext; rfl }
+  refine'
+    { toFun := fun f i j => f j i
+      map_add' := fun f g => by ext; rfl
+      map_smul' := fun r f => by ext; rfl }
+  rfl
+  · rw [LinearMap.ext_iff]
+    intro x
+    simp only [LinearMap.coe_comp, LinearMap.coe_mk, Function.comp_apply, LinearMap.id_coe, id.def]
+
+@[simps]
+def LinearMap.rsum (R : Type _) {M : Type _} {ι : Type _} [Semiring R] (φ : ι → Type _)
+    [∀ i : ι, AddCommMonoid (φ i)] [∀ i : ι, Module R (φ i)] (S : Type _) [AddCommMonoid M]
+    [Module R M] [Semiring S] [∀ i, Module S (φ i)] [∀ i, SMulCommClass R S (φ i)] :
+    (∀ i, M →ₗ[R] φ i) ≃ₗ[S] M →ₗ[R] ∀ i, φ i
+    where
+  toFun f := LinearMap.pi f
+  invFun f i := LinearMap.proj i ∘ₗ f
+  map_add' f g := by ext; simp only [LinearMap.pi_apply, Pi.add_apply, LinearMap.add_apply]
+  map_smul' r f := by ext;
+    simp only [LinearMap.pi_apply, Pi.smul_apply, LinearMap.smul_apply, RingHom.id_apply]
+  left_inv f := by ext i x; simp only [LinearMap.proj_pi]
+  right_inv f := by
+    ext; simp only [LinearMap.comp_apply, LinearMap.pi_apply]
+    rfl
+
+@[simps]
+def LinearMap.lrsum (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι₁ → Type _) (ψ : ι₂ → Type _)
+    [∀ i, AddCommMonoid (φ i)] [∀ i, Module R (φ i)] [∀ i, AddCommMonoid (ψ i)]
+    [∀ i, Module R (ψ i)] (S : Type _) [Fintype ι₁] [DecidableEq ι₁] [Semiring S]
+    [∀ i, Module S (ψ i)] [∀ i, SMulCommClass R S (ψ i)] :
+    (∀ i : ι₁ × ι₂, φ i.1 →ₗ[R] ψ i.2) ≃ₗ[S] (∀ i, φ i) →ₗ[R] ∀ i, ψ i :=
+  by
+  let h₂ : (∀ (j : ι₂) (i : ι₁), φ i →ₗ[R] ψ j) ≃ₗ[S] ∀ j, (∀ i, φ i) →ₗ[R] ψ j :=
+    by
+    apply LinearEquiv.piCongrRight
+    intro j
+    exact LinearMap.lsum R φ S
+  exact
+    (((LinearMap.piPiProd R φ ψ S).trans (LinearMap.piProdSwap R φ ψ S)).trans h₂).trans
+      (LinearMap.rsum R ψ S)
+
