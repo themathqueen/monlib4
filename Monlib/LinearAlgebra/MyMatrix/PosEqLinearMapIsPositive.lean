@@ -52,7 +52,7 @@ alias Matrix.PosSemidef.mulStarSelf := Matrix.posSemidef_self_mul_conjTranspose
 
 theorem Matrix.toEuclideanLin_eq_piLp_linearEquiv [DecidableEq n] (x : Matrix n n 𝕜) :
     Matrix.toEuclideanLin x =
-      (LinearEquiv.conj (WithLp.linearEquiv 2 𝕜 (n → 𝕜)).symm) (toLin' x) :=
+      (toLin' x) :=
   rfl
 
 lemma Matrix.of_isHermitian' [DecidableEq n] {x : Matrix n n 𝕜}
@@ -81,37 +81,36 @@ theorem Matrix.posSemidef_eq_linearMap_positive [DecidableEq n] (x : Matrix n n 
   by
   simp_rw [LinearMap.IsPositive, ← Matrix.isHermitian_iff_isSymmetric, Matrix.PosSemidef,
     Matrix.toEuclideanLin_eq_piLp_linearEquiv, PiLp.inner_apply, IsROrC.inner_apply, map_sum,
-    LinearEquiv.conj_apply, LinearMap.comp_apply, LinearEquiv.coe_coe, WithLp.linearEquiv_symm_apply,
-    LinearEquiv.symm_symm, WithLp.linearEquiv_apply, Matrix.toLin'_apply, WithLp.equiv_symm_pi_apply,
-    ← IsROrC.star_def, Matrix.mulVec, Matrix.dotProduct, WithLp.equiv_pi_apply, ←
-    Pi.mul_apply (x _) _, Pi.star_apply, Matrix.mulVec,
-    Matrix.dotProduct, Pi.mul_apply, @IsROrC.nonneg_def' 𝕜,
-    map_sum, IsROrC.ofReal_sum]
-  refine ⟨fun h => ⟨h.1, fun y => ?_⟩, fun h => ⟨h.1, fun y => ?_⟩⟩
+    ← IsROrC.star_def, Matrix.dotProduct, Pi.star_apply, Matrix.mulVec,
+    Matrix.dotProduct, @IsROrC.nonneg_def' 𝕜, ← map_sum, ← Pi.star_apply]
+  refine ⟨fun h => ⟨h.1, fun y => (h.2 _).2⟩,
+    fun h => ⟨h.1, fun y => ⟨Matrix.of_isHermitian' h.1 _, (h.2 _)⟩⟩⟩
 
 theorem Matrix.posSemidef_iff [DecidableEq n] (x : Matrix n n 𝕜) :
-    x.PosSemidef ↔ ∃ y : Matrix n n 𝕜, x = yᴴ ⬝ y :=
+    x.PosSemidef ↔ ∃ y : Matrix n n 𝕜, x = yᴴ * y :=
   by
   have : FiniteDimensional.finrank 𝕜 (PiLp 2 fun _x : n => 𝕜) = Fintype.card n := by
     simp_rw [finrank_euclideanSpace]
   simp_rw [Matrix.posSemidef_eq_linearMap_positive,
     LinearMap.isPositive_iff_exists_adjoint_hMul_self _ this,
-    Matrix.toEuclideanLin_eq_piLp_linearEquiv, LinearEquiv.conj_apply, LinearMap.ext_iff,
-    LinearMap.comp_apply, LinearEquiv.coe_coe, PiLp.linearEquiv_symm_apply, LinearEquiv.symm_symm,
-    PiLp.linearEquiv_apply, Matrix.toLin'_apply, Function.funext_iff, WithLp.equiv_symm_pi_apply,
-    Matrix.mulVec, Matrix.dotProduct, WithLp.equiv_pi_apply, Matrix.ext_iff, Matrix.mulVec_eq, ←
-    Matrix.toLin'_apply, Matrix.toLin'_mul, Matrix.conjTranspose_eq_adjoint, Matrix.toLin'_apply,
-    Function.funext_iff, Matrix.mulVec, Matrix.dotProduct, LinearMap.mul_eq_comp,
-    LinearMap.comp_apply]
+    ← LinearEquiv.eq_symm_apply]
+  have thisor : ∀ x y : (PiLp 2 fun _x : n => 𝕜) →ₗ[𝕜] (PiLp 2 fun _x : n => 𝕜),
+    toEuclideanLin.symm (x * y) = (toEuclideanLin.symm x) * (toEuclideanLin.symm y) := λ x y => by
+    calc toEuclideanLin.symm (x * y) = LinearMap.toMatrix' (x * y) := rfl
+      _ = LinearMap.toMatrix' x * LinearMap.toMatrix' y := LinearMap.toMatrix'_mul _ _
+      _ = toEuclideanLin.symm x * toEuclideanLin.symm y := rfl
+  simp_rw [thisor]
   constructor
-  · rintro ⟨S, hS⟩
-    use S.to_matrix'
-    intro c a
-    simp_rw [Matrix.toLin'_toMatrix', hS]
-  · rintro ⟨y, hy⟩
-    use y.to_lin'
-    intro c a
-    exact hy c a
+  . rintro ⟨S, rfl⟩
+    let A := toEuclideanLin.symm S
+    use A
+    have : Aᴴ = (toEuclideanLin.symm (LinearMap.adjoint S)) := by
+      simp_rw [LinearEquiv.eq_symm_apply, toEuclideanLin_conjTranspose_eq_adjoint, A,
+        LinearEquiv.apply_symm_apply]
+    rw [this]
+  . rintro ⟨A, rfl⟩
+    use toEuclideanLin A
+    simp_rw [← toEuclideanLin_conjTranspose_eq_adjoint, LinearEquiv.symm_apply_apply]
 
 local notation "⟪" x "," y "⟫_𝕜" => @inner 𝕜 _ _ x y
 
@@ -122,7 +121,7 @@ theorem Matrix.dotProduct_eq_inner {n : Type _} [Fintype n] (x y : n → 𝕜) :
   rfl
 
 theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [DecidableEq n]
-    {x : Matrix n n 𝕜} (hx : x.PosSemidef) : Function.Bijective x.toLin' ↔ x.PosDef :=
+    {x : Matrix n n 𝕜} (hx : x.PosSemidef) : Function.Bijective (toLin' x) ↔ x.PosDef :=
   by
   simp_rw [Matrix.PosDef, hx.1, true_and_iff]
   cases' (Matrix.posSemidef_iff x).mp hx with y hy
@@ -130,9 +129,9 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
   · intro h v hv
     rw [hy]
     have :
-      IsROrC.re (star v ⬝ᵥ (yᴴ ⬝ y).mulVec v) = IsROrC.re (star (y.mul_vec v) ⬝ᵥ y.mul_vec v) := by
+      (star v ⬝ᵥ (yᴴ * y) *ᵥ v) = (star (y *ᵥ v) ⬝ᵥ y *ᵥ v) := by
       simp_rw [Matrix.star_mulVec, Matrix.dotProduct_mulVec, Matrix.vecMul_vecMul]
-    simp_rw [this, Matrix.dotProduct, map_sum, Pi.star_apply, IsROrC.star_def, ← IsROrC.inner_apply,
+    simp_rw [this, Matrix.dotProduct, Pi.star_apply, IsROrC.star_def, ← IsROrC.inner_apply,
       inner_self_eq_norm_sq_to_K]
     clear this
     apply Finset.sum_pos'
@@ -140,8 +139,8 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
       intro i
       norm_cast
       exact pow_two_nonneg _
-    · simp_rw [Finset.mem_univ, exists_true_left]
-      suffices y.mul_vec v ≠ 0
+    · simp_rw [Finset.mem_univ, true_and]
+      suffices y *ᵥ v ≠ 0
         by
         simp_rw [Ne.def, Function.funext_iff, Pi.zero_apply] at this
         push_neg at this
@@ -152,7 +151,7 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
         exact (sq_pos_iff _).mpr hj
       by_contra!
       apply hv
-      apply_fun x.to_lin'
+      apply_fun (toLin' x)
       · simp_rw [map_zero]
         rw [Matrix.mulVec_eq] at hy
         specialize hy v
@@ -167,46 +166,43 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     push_neg at this
     cases' this with a ha
     specialize h a ha.2
-    rw [← Matrix.toLin'_apply, ha.1, Matrix.dotProduct_zero, IsROrC.zero_re', lt_self_iff_false] at
-      h
+    rw [← Matrix.toLin'_apply, ha.1, Matrix.dotProduct_zero, lt_self_iff_false] at h
     exact h
 
 theorem Matrix.isHermitian_self_hMul_conjTranspose (A : Matrix n n 𝕜) :
-    (A.conjTranspose.mul A).IsHermitian := by
+    (Aᴴ * A).IsHermitian := by
   rw [Matrix.IsHermitian, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose]
 
 theorem Matrix.trace_star {A : Matrix n n 𝕜} : star A.trace = Aᴴ.trace := by
   simp_rw [Matrix.trace, Matrix.diag, star_sum, Matrix.conjTranspose_apply]
 
 theorem Matrix.nonneg_eigenvalues_of_posSemidef [DecidableEq n] {μ : ℝ} {A : Matrix n n 𝕜}
-    (hμ : Module.End.HasEigenvalue A.toEuclideanLin ↑μ) (H : A.PosSemidef) : 0 ≤ μ :=
+    (hμ : Module.End.HasEigenvalue (toEuclideanLin A) ↑μ) (H : A.PosSemidef) : 0 ≤ μ :=
   by
   apply eigenvalue_nonneg_of_nonneg hμ
   simp_rw [Matrix.toEuclideanLin_eq_toLin, Matrix.toLin_apply, inner_sum, inner_smul_right,
     PiLp.basisFun_apply, WithLp.equiv_symm_single, EuclideanSpace.inner_single_right, one_mul]
   intro x
   have :
-    ∑ x_1 : n,
-        A.mul_vec ((PiLp.basisFun 2 𝕜 n).repr x) x_1 *
-          (starRingEnd ((fun i : n => 𝕜) x_1)) (x x_1) =
-      Matrix.dotProduct (star x) (A.mul_vec x) :=
+    (∑ x_1 : n, (A *ᵥ ⇑((PiLp.basisFun 2 𝕜 n).repr x)) x_1 * (starRingEnd 𝕜) (x x_1)) =
+      (star x) ⬝ᵥ (A *ᵥ x) :=
     by
     simp_rw [mul_comm, Matrix.dotProduct]
     congr
   rw [this]
-  exact H.2 _
+  exact (IsROrC.nonneg_def.mp (H.2 _)).1
 
 theorem Matrix.IsHermitian.nonneg_eigenvalues_of_posSemidef [DecidableEq n] [DecidableEq 𝕜]
-    {A : Matrix n n 𝕜} (hA : A.PosSemidef) (i : n) : 0 ≤ hA.1.Eigenvalues i :=
+    {A : Matrix n n 𝕜} (hA : A.PosSemidef) (i : n) : 0 ≤ hA.1.eigenvalues i :=
   Matrix.nonneg_eigenvalues_of_posSemidef (hA.1.eigenvalues_hasEigenvalue _) hA
 
 @[instance]
 noncomputable def Matrix.PosDef.invertible [DecidableEq n] {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
     Invertible Q :=
   by
-  suffices Function.Bijective Q.to_lin'
+  suffices Function.Bijective (toLin' Q)
     by
-    have h : Invertible Q.to_lin' := by
+    have h : Invertible (toLin' Q) := by
       refine' IsUnit.invertible _
       rw [LinearMap.isUnit_iff_ker_eq_bot]
       exact LinearMap.ker_eq_bot_of_injective this.1
@@ -216,14 +212,23 @@ noncomputable def Matrix.PosDef.invertible [DecidableEq n] {Q : Matrix n n 𝕜}
     apply LinearMap.isUnit_det
     rw [← nonempty_invertible_iff_isUnit]
     exact Nonempty.intro h
-  rw [Matrix.PosSemidef.invertible_iff_posDef hQ.pos_semidef]
+  rw [Matrix.PosSemidef.invertible_iff_posDef hQ.posSemidef]
   exact hQ
 
-theorem Matrix.mulVec_sum {n : Type _} [Fintype n] (x : Matrix n n 𝕜) (y : n → n → 𝕜) :
-    x.mulVec (∑ i : n, y i) = ∑ i : n, x.mulVec (y i) :=
+theorem Matrix.mulVec_sum {n m k R : Type _} [NonUnitalNonAssocSemiring R] [Fintype n] [Fintype m] [Fintype k]
+  (x : Matrix m n R) (y : k → n → R) :
+    x.mulVec (∑ i : k, y i) = ∑ i : k, x.mulVec (y i) :=
   by
-  ext1
+  ext
   simp only [Finset.sum_apply, Matrix.mulVec, Matrix.dotProduct, Finset.mul_sum]
+  rw [Finset.sum_comm]
+
+theorem Matrix.vecMul_sum {n m k R : Type _} [NonUnitalNonAssocSemiring R] [Fintype m] [Fintype n] [Fintype k]
+  (x : Matrix n m R) (y : k → n → R) :
+  (∑ i : k, y i) ᵥ* x = ∑ i : k, (y i) ᵥ* x :=
+  by
+  ext
+  simp only [Finset.sum_apply, Matrix.vecMul, Matrix.dotProduct, Finset.sum_mul]
   rw [Finset.sum_comm]
 
 open Matrix
@@ -236,92 +241,122 @@ theorem Matrix.toLin_piLp_eq_toLin' {n : Type _} [Fintype n] [DecidableEq n] :
     toLin (PiLp.basisFun 2 𝕜 n) (PiLp.basisFun 2 𝕜 n) = toLin' :=
   rfl
 
-theorem Matrix.posSemidef_iff_eq_rankOne {n : ℕ} [DecidableEq 𝕜] {x : Matrix (Fin n) (Fin n) 𝕜} :
+theorem Matrix.posSemidef_iff_eq_rankOne [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
-      ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 (Fin n)),
+      ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
         x =
           ∑ i : Fin m,
-            ((rankOne (v i) (v i) : EuclideanSpace 𝕜 (Fin n) →L[𝕜] EuclideanSpace 𝕜 (Fin n)) :
-                EuclideanSpace 𝕜 (Fin n) →ₗ[𝕜] EuclideanSpace 𝕜 (Fin n)).toMatrix' :=
+            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
+                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
   by
-  have : FiniteDimensional.finrank 𝕜 (EuclideanSpace 𝕜 (Fin n)) = n := finrank_euclideanSpace_fin
-  simp_rw [pos_semidef_eq_linear_map_positive, LinearMap.isPositive_iff_eq_sum_rankOne this,
-    to_euclidean_lin_eq_to_lin, Matrix.toLin_piLp_eq_toLin', ← map_sum]
+  have : FiniteDimensional.finrank 𝕜 (EuclideanSpace 𝕜 n) = Fintype.card n := FiniteDimensional.finrank_pi _
+  simp_rw [posSemidef_eq_linearMap_positive, LinearMap.isPositive_iff_eq_sum_rankOne this,
+    toEuclideanLin_eq_toLin, Matrix.toLin_piLp_eq_toLin', ← map_sum]
   constructor <;> rintro ⟨m, y, hy⟩ <;> refine' ⟨m, y, _⟩
-  · simp_rw [← hy, LinearMap.toMatrix'_toLin']
-  · rw [hy, to_lin'_to_matrix']
+  · rw [← hy]
+    exact (LinearMap.toMatrix'_toLin' _).symm
+  · rw [hy]
+    exact (toLin'_toMatrix' _)
+theorem Matrix.posSemidef_iff_eq_rankOne' [DecidableEq n] {x : Matrix n n 𝕜} :
+    x.PosSemidef ↔
+      ∃ (m : ℕ) (v : Fin m → (n → 𝕜)),
+        x =
+          ∑ i : Fin m,
+            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
+                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+Matrix.posSemidef_iff_eq_rankOne
+theorem Matrix.posSemidef_iff_eq_rankOne'' [DecidableEq n] {x : Matrix n n 𝕜} :
+    x.PosSemidef ↔
+      ∃ (m : Type) (hm : Fintype m) (v : m → (n → 𝕜)),
+        x =
+          ∑ i : m,
+            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
+                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+by
+  rw [Matrix.posSemidef_iff_eq_rankOne']
+  constructor
+  . rintro ⟨m, v, rfl⟩
+    exact ⟨Fin m, by infer_instance, v, rfl⟩
+  . rintro ⟨m, hm, v, rfl⟩
+    let v' : Fin (Fintype.card m) → (n → 𝕜) := fun i j => v ((Fintype.equivFin m).symm i) j
+    use Fintype.card m, v'
+    apply Finset.sum_bijective ((Fintype.equivFin m))
+    . simp only [Multiset.bijective_iff_map_univ_eq_univ, Multiset.map_univ_val_equiv]
+    . simp only [Finset.mem_univ, implies_true]
+    . simp_rw [v', Finset.mem_univ, Equiv.symm_apply_apply, forall_true_left, implies_true]
+
+theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [IsROrC 𝕜] {n : Type _} [Fintype n]
+    [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
+    toEuclideanLin.symm ((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
+      EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n)) =
+      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+  by
+  simp_rw [← Matrix.ext_iff, toEuclideanLin_eq_toLin, toLin_symm, LinearMap.toMatrix_apply,
+    ContinuousLinearMap.coe_coe, rankOne_apply, PiLp.basisFun_repr, PiLp.basisFun_apply,
+    PiLp.smul_apply]
+  have : ∀ j, (WithLp.equiv 2 (n → 𝕜)).symm (Pi.single j 1) = EuclideanSpace.single j 1 := λ j => rfl
+  simp_rw [this, EuclideanSpace.inner_single_right, one_mul, conjTranspose_col, ← vecMulVec_eq,
+    vecMulVec_apply, smul_eq_mul, Pi.star_apply, mul_comm]
+  intro i j
+  rfl
+
+theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [IsROrC 𝕜] {n : Type _} [Fintype n]
+    [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
+    LinearMap.toMatrix' (((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
+      EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n))
+        : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
+      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+rankOne.EuclideanSpace.toEuclideanLin_symm _ _
+theorem rankOne.Pi.toMatrix'' {𝕜 : Type _} [IsROrC 𝕜] {n : Type _} [Fintype n]
+    [DecidableEq n] (x y : n → 𝕜) :
+    LinearMap.toMatrix' (((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
+      EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n))
+        : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
+      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+rankOne.EuclideanSpace.toEuclideanLin_symm _ _
 
 /-- a matrix $x$ is positive semi-definite if and only if there exists vectors $(v_i)$ such that
   $\sum_i v_iv_i^*=x$  -/
-theorem Matrix.posSemidef_iff_col_hMul_conjTranspose_col [DecidableEq n] [DecidableEq 𝕜]
-    (x : Matrix n n 𝕜) : x.PosSemidef ↔ ∃ v : n → n → 𝕜, ∑ i : n, col (v i) ⬝ (col (v i))ᴴ = x :=
+theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col [DecidableEq n] {x : Matrix n n 𝕜} :
+    x.PosSemidef ↔
+      ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
+        x =
+          ∑ i : Fin m, col (v i : n → 𝕜) * (col (v i : n → 𝕜))ᴴ :=
   by
-  simp_rw [conj_transpose_col]
-  constructor
-  · intro hx
-    simp_rw [mul_vec_eq]
-    let a : Matrix n n 𝕜 := fun i j => Real.sqrt (hx.1.Eigenvalues i) • (hx.1.eigenvectorBasis i) j
-    use a
-    intro u
-    ext1 j
-    nth_rw_rhs 1 [← ContinuousLinearMap.one_apply u]
-    rw [← EuclideanSpace.rankOne_of_orthonormalBasis_eq_one hx.1.eigenvectorBasis]
-    simp_rw [ContinuousLinearMap.sum_apply, rankOne_apply, mul_vec_sum, mul_vec_smul,
-      hx.1.apply_eigenvectorBasis]
-    simp only [mul_vec, dot_product, Finset.sum_apply, Finset.sum_mul, Finset.sum_smul,
-      Finset.sum_apply, Pi.smul_apply, mul_apply, col_apply, row_apply, smul_eq_mul, mul_smul_comm,
-      EuclideanSpace.inner_eq]
-    rw [Finset.sum_comm]
-    apply Finset.sum_congr rfl; intros
-    apply Finset.sum_congr rfl; intros
-    simp only [Fintype.univ_punit, Finset.sum_const, Finset.card_singleton, nsmul_eq_mul,
-      algebraMap.coe_one, one_mul]
-    simp_rw [Pi.star_apply, a, IsROrC.real_smul_eq_coe_mul, star_mul', IsROrC.star_def,
-      IsROrC.conj_ofReal, mul_mul_mul_comm, ← IsROrC.ofReal_mul, ←
-      Real.sqrt_mul (nonneg_eigenvalues_of_pos_semidef (hx.1.eigenvalues_hasEigenvalue _) hx), ←
-      pow_two,
-      Real.sqrt_sq (nonneg_eigenvalues_of_pos_semidef (hx.1.eigenvalues_hasEigenvalue _) hx)]
-    ring_nf
-  · rintro ⟨v, hv⟩
-    rw [pos_semidef]
-    have : x.is_hermitian := by
-      simp_rw [is_hermitian, ← hv, conj_transpose_sum, conj_transpose_mul, conj_transpose_row,
-        conj_transpose_col, star_star]
-    · refine' ⟨this, _⟩
-      intro y
-      have : ∀ x, v x ⬝ᵥ star y = star (y ⬝ᵥ star (v x)) := by intros;
-        simp_rw [← star_dot_product_star, star_star]
-      simp_rw [← trace_col_mul_row, row_mul_vec, transpose_mul, transpose_col, ← Matrix.mul_assoc, ←
-        hv, transpose_sum, Matrix.mul_sum, transpose_mul, transpose_col, transpose_row, trace_sum,
-        map_sum, ← Matrix.mul_assoc, trace_mul_comm _ (row (v _)), ← Matrix.mul_assoc, Matrix.trace,
-        diag, Matrix.mul_assoc _ (row y), @mul_apply _ _ _ _ _ _ _ (row (v _) ⬝ col (star y)) _,
-        row_mul_col_apply, this]
-      simp only [Fintype.univ_punit, Finset.sum_const, Finset.card_singleton, nsmul_eq_mul,
-        algebraMap.coe_one, one_mul, IsROrC.star_def, IsROrC.conj_mul]
-      apply Finset.sum_nonneg
-      intros
-      norm_cast
-      exact IsROrC.normSq_nonneg _
+  simp_rw [Matrix.posSemidef_iff_eq_rankOne, rankOne.EuclideanSpace.toMatrix']
+theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col' [DecidableEq n] {x : Matrix n n 𝕜} :
+    x.PosSemidef ↔
+      ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
+        x =
+          ∑ i : m, col (v i : n → 𝕜) * (col (v i : n → 𝕜))ᴴ :=
+by
+simp_rw [Matrix.posSemidef_iff_eq_rankOne'', rankOne.EuclideanSpace.toMatrix']
+rfl
 
-theorem VecMulVec.posSemidef [DecidableEq n] [DecidableEq 𝕜] (x : n → 𝕜) :
+theorem Matrix.posSemidef_iff_vecMulVec [DecidableEq n] {x : Matrix n n 𝕜} :
+  x.PosSemidef ↔ ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
+    x = ∑ i : Fin m, vecMulVec (v i) (star (v i)) :=
+by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col, vecMulVec_eq, conjTranspose_col]
+theorem Matrix.posSemidef_iff_vecMulVec' [DecidableEq n] {x : Matrix n n 𝕜} :
+  x.PosSemidef ↔ ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
+    x = ∑ i : m, vecMulVec (v i) (star (v i)) :=
+by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col', vecMulVec_eq, conjTranspose_col]
+
+theorem VecMulVec.posSemidef [DecidableEq n] (x : n → 𝕜) :
     (vecMulVec x (star x)).PosSemidef :=
   by
-  rw [Matrix.posSemidef_iff_col_hMul_conjTranspose_col]
-  by_cases Nonempty n
-  · let i : n := Nonempty.some h
-    let v : n → n → 𝕜 := fun j k => ite (i = j) (x k) 0
-    use v
-    simp_rw [v, ← Matrix.ext_iff, Matrix.sum_apply, mul_apply, col_apply, conj_transpose_apply,
-      col_apply, star_ite, star_zero, ite_mul, MulZeroClass.zero_mul, mul_ite,
-      MulZeroClass.mul_zero, Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq,
-      Finset.mem_univ, if_true, eq_self_iff_true, if_true, Finset.sum_const]
-    intros
-    simp only [Fintype.univ_punit, Finset.card_singleton, IsROrC.star_def, nsmul_eq_mul,
-      algebraMap.coe_one, one_mul]
-    simp_rw [vec_mul_vec_apply, Pi.star_apply, IsROrC.star_def]
-  · rw [not_nonempty_iff] at h
-    haveI : IsEmpty n := h
-    simp only [eq_iff_true_of_subsingleton, exists_const]
+  rw [vecMulVec_eq, ← conjTranspose_col]
+  exact Matrix.posSemidef_self_mul_conjTranspose _
+
+lemma inner_self_nonneg' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {x : E} :
+  0 ≤ ⟪x, x⟫_𝕜 :=
+by
+simp_rw [@IsROrC.nonneg_def 𝕜, inner_self_nonneg, true_and, inner_self_im]
+
+lemma inner_self_nonpos' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {x : E} :
+  ⟪x, x⟫_𝕜 ≤ 0 ↔ x = 0 :=
+by
+simp_rw [@IsROrC.nonpos_def 𝕜, inner_self_nonpos, inner_self_im, and_true]
 
 variable {M₁ M₂ : Type _} [NormedAddCommGroup M₁] [NormedAddCommGroup M₂] [InnerProductSpace ℂ M₁]
   [InnerProductSpace ℂ M₂]
@@ -337,60 +372,40 @@ theorem LinearMap.PositiveMap.starHom {n₁ : ℕ} [FiniteDimensional ℂ M₁] 
     φ.toAlgHom.toLinearMap.PositiveMap := by
   intro x hx
   rcases(LinearMap.isPositive_iff_exists_adjoint_hMul_self x hn₁).mp hx with ⟨w, rfl⟩
-  have : ∀ h, φ.to_alg_hom.to_linear_map h = φ h := fun h => rfl
+  have : ∀ h, φ.toAlgHom.toLinearMap h = φ h := fun h => rfl
   simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, this, _root_.map_mul, ←
     LinearMap.star_eq_adjoint, map_star, LinearMap.mul_apply, LinearMap.star_eq_adjoint,
-    LinearMap.adjoint_inner_left, LinearMap.adjoint_inner_right, eq_self_iff_true, forall₂_true_iff,
+    LinearMap.adjoint_inner_left, LinearMap.adjoint_inner_right, forall₂_true_iff,
     true_and_iff, inner_self_nonneg, forall_const]
 
 /-- the identity is a positive definite matrix -/
 theorem Matrix.posDefOne [DecidableEq n] : (1 : Matrix n n 𝕜).PosDef :=
   by
-  simp_rw [Matrix.PosDef, Matrix.IsHermitian, Matrix.conjTranspose_one, eq_self_iff_true,
-    true_and_iff, Matrix.one_mulVec, Matrix.dotProduct_eq_inner, ← Matrix.vec_ne_zero, map_sum]
+  simp_rw [Matrix.PosDef, Matrix.IsHermitian, Matrix.conjTranspose_one,
+    true_and_iff, Matrix.one_mulVec, Matrix.dotProduct_eq_inner, ← Matrix.vec_ne_zero]
   intro x h
   apply Finset.sum_pos'
   simp only [Finset.mem_univ, forall_true_left]
   intro i
-  exact inner_self_nonneg
+  exact inner_self_nonneg'
   cases' h with i hi
   use i
   simp_rw [Finset.mem_univ, true_and_iff]
   simp_rw [Ne.def] at hi
   contrapose! hi
-  rw [inner_self_nonpos] at hi
-  exact hi
+  simp_rw [inner_self_eq_norm_sq_to_K, ← IsROrC.ofReal_pow, IsROrC.zero_lt_real] at hi
+  push_neg at hi
+  simp_rw [@norm_sq_eq_inner 𝕜] at hi
+  rw [← @inner_self_nonpos' 𝕜, IsROrC.nonpos_def, inner_self_im]
+  exact ⟨hi, rfl⟩
 
-/-- each eigenvalue of a positive definite matrix is positive -/
-theorem Matrix.PosDef.pos_eigenvalues [DecidableEq 𝕜] [DecidableEq n] {A : Matrix n n 𝕜}
-    (hA : A.PosDef) (i : n) : 0 < hA.IsHermitian.Eigenvalues i :=
-  by
-  letI := hA
-  have :=
-    Matrix.nonneg_eigenvalues_of_posSemidef (Matrix.IsHermitian.eigenvalues_hasEigenvalue hA.1 i)
-      (Matrix.PosDef.posSemidef hA)
-  suffices t1 : 0 ≠ hA.is_hermitian.eigenvalues i
-  · contrapose t1
-    push_neg
-    exact eq_iff_le_not_lt.mpr (And.intro this t1)
-  have : Function.Injective A.to_lin' :=
-    ((Matrix.PosSemidef.invertible_iff_posDef hA.pos_semidef).mpr hA).1
-  have : Function.Injective A.to_euclidean_lin :=
-    by
-    rw [Matrix.toEuclideanLin_eq_piLp_linearEquiv]
-    exact this
-  cases'
-    module.End.has_eigenvector_iff_has_eigenvalue.mpr
-      (Matrix.IsHermitian.eigenvalues_hasEigenvalue hA.1 i) with
-    v hv
-  intro h
-  simp_rw [← h, IsROrC.ofReal_zero, zero_smul] at hv
-  exact ((map_ne_zero_iff _ this).mpr hv.2) hv.1
+-- /-- each eigenvalue of a positive definite matrix is positive -/
+alias Matrix.PosDef.pos_eigenvalues := Matrix.PosDef.eigenvalues_pos
 
 theorem Matrix.PosDef.pos_trace [DecidableEq n] [DecidableEq 𝕜] [Nonempty n] {x : Matrix n n 𝕜}
     (hx : x.PosDef) : 0 < IsROrC.re x.trace :=
   by
-  simp_rw [is_hermitian.trace_eq hx.1, map_sum, IsROrC.ofReal_re]
+  simp_rw [IsHermitian.trace_eq hx.1, IsROrC.ofReal_re]
   apply Finset.sum_pos
   · exact fun _ _ => hx.pos_eigenvalues _
   · exact Finset.univ_nonempty
@@ -399,44 +414,47 @@ theorem Matrix.PosDef.pos_trace [DecidableEq n] [DecidableEq 𝕜] [Nonempty n] 
 theorem Matrix.PosDef.trace_ne_zero [DecidableEq n] [Nonempty n] [DecidableEq 𝕜] {x : Matrix n n 𝕜}
     (hx : x.PosDef) : x.trace ≠ 0 :=
   by
-  rw [Matrix.IsHermitian.trace_eq hx.is_hermitian]
+  rw [Matrix.IsHermitian.trace_eq hx.1]
   norm_num
   rw [← IsROrC.ofReal_sum, IsROrC.ofReal_eq_zero, Finset.sum_eq_zero_iff_of_nonneg _]
   · simp_rw [Finset.mem_univ, true_imp_iff]
     simp only [Classical.not_forall]
-    use _inst_9.some
-    exact NormNum.ne_zero_of_pos _ (Matrix.PosDef.pos_eigenvalues hx _)
+    let i : n := (Nonempty.some (by infer_instance))
+    exact ⟨i,( NeZero.of_pos (Matrix.PosDef.pos_eigenvalues hx i)).out⟩
   · intros
     exact le_of_lt (Matrix.PosDef.pos_eigenvalues hx _)
 
 open scoped ComplexOrder
 
+lemma toEuclideanLin_apply {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) (v : EuclideanSpace 𝕜 n) :
+    toEuclideanLin x v = x.mulVec v := rfl
+
 theorem PosSemidef.complex [DecidableEq n] (x : Matrix n n ℂ) :
     x.PosSemidef ↔ ∀ y : n → ℂ, 0 ≤ star y ⬝ᵥ x.mulVec y :=
   by
-  -- ((star y ⬝ᵥ x.mul_vec y).re : ℂ) = star y ⬝ᵥ x.mul_vec y ∧ 0 ≤ (star y ⬝ᵥ x.mul_vec y).re :=
-  simp_rw [pos_semidef_eq_linear_map_positive x, LinearMap.complex_isPositive, IsROrC.nonneg_def']
+  simp_rw [posSemidef_eq_linearMap_positive x, LinearMap.complex_isPositive,
+    toEuclideanLin_apply, @IsROrC.nonneg_def' ℂ]
   rfl
 
 theorem StdBasisMatrix.sum_eq_one [DecidableEq n] (a : 𝕜) : ∑ k : n, stdBasisMatrix k k a = a • 1 :=
   by
-  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Pi.smul_apply, std_basis_matrix, one_apply, smul_ite,
+  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.smul_apply, stdBasisMatrix, one_apply, smul_ite,
     ite_and, Finset.sum_ite_eq', Finset.mem_univ, if_true, smul_eq_mul, MulZeroClass.mul_zero,
-    mul_one, eq_self_iff_true, forall₂_true_iff]
+    mul_one, forall₂_true_iff]
 
 theorem stdBasisMatrix_hMul [DecidableEq n] (i j k l : n) (a b : 𝕜) :
-    stdBasisMatrix i j a ⬝ stdBasisMatrix k l b =
+    stdBasisMatrix i j a * stdBasisMatrix k l b =
       ite (j = k) (1 : 𝕜) (0 : 𝕜) • stdBasisMatrix i l (a * b) :=
   by
-  ext1
-  simp_rw [mul_apply, std_basis_matrix, ite_mul, MulZeroClass.zero_mul, mul_ite,
-    MulZeroClass.mul_zero, Pi.smul_apply, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
-    Finset.sum_ite_eq, Finset.mem_univ, if_true, ← ite_and, ← and_assoc', ite_smul, zero_smul,
-    one_smul, ← ite_and, ← and_assoc', and_comm' (j = k), eq_comm]
+  ext
+  simp_rw [Matrix.mul_apply, stdBasisMatrix, ite_mul, MulZeroClass.zero_mul, mul_ite,
+    MulZeroClass.mul_zero, Matrix.smul_apply, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
+    Finset.sum_ite_eq, Finset.mem_univ, if_true, ← ite_and, ← and_assoc, ite_smul, zero_smul,
+    smul_eq_mul, one_mul, stdBasisMatrix, ← ite_and, ← and_assoc, @and_comm (j = k), eq_comm]
 
-theorem Matrix.smul_std_basis_matrix' {n R : Type _} [CommSemiring R] [DecidableEq n] (i j : n)
+theorem Matrix.smul_stdBasisMatrix' {n R : Type _} [CommSemiring R] [DecidableEq n] (i j : n)
     (c : R) : stdBasisMatrix i j c = c • stdBasisMatrix i j 1 := by
-  rw [smul_std_basis_matrix, smul_eq_mul, mul_one]
+  rw [smul_stdBasisMatrix, smul_eq_mul, mul_one]
 
 theorem Matrix.trace_iff' (x : Matrix n n 𝕜) : x.trace = ∑ i : n, x i i :=
   rfl
@@ -444,16 +462,16 @@ theorem Matrix.trace_iff' (x : Matrix n n 𝕜) : x.trace = ∑ i : n, x i i :=
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_1 x_2) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_1 x_2) -/
 theorem existsUnique_trace [DecidableEq n] [Nontrivial n] :
-    ∃! φ : Matrix n n 𝕜 →ₗ[𝕜] 𝕜, (∀ a b : Matrix n n 𝕜, φ (a ⬝ b) = φ (b ⬝ a)) ∧ φ 1 = 1 :=
+    ∃! φ : Matrix n n 𝕜 →ₗ[𝕜] 𝕜, (∀ a b : Matrix n n 𝕜, φ (a * b) = φ (b * a)) ∧ φ 1 = 1 :=
   by
-  use(1 / Fintype.card n : 𝕜) • trace_linear_map n 𝕜 𝕜
+  use(1 / Fintype.card n : 𝕜) • traceLinearMap n 𝕜 𝕜
   have trace_functional_iff :
     ∀ φ : Matrix n n 𝕜 →ₗ[𝕜] 𝕜,
-      (∀ a b : Matrix n n 𝕜, φ (a ⬝ b) = φ (b ⬝ a)) ∧ φ 1 = 1 ↔
-        φ = (1 / Fintype.card n : 𝕜) • trace_linear_map n 𝕜 𝕜 :=
+      (∀ a b : Matrix n n 𝕜, φ (a * b) = φ (b * a)) ∧ φ 1 = 1 ↔
+        φ = (1 / Fintype.card n : 𝕜) • traceLinearMap n 𝕜 𝕜 :=
     by
-    intros
-    have : (↑(Fintype.card n) : 𝕜)⁻¹ * ↑finset.univ.card = 1 :=
+    intro φ
+    have : (↑(Fintype.card n) : 𝕜)⁻¹ * ↑Finset.univ.card = 1 :=
       by
       rw [inv_mul_eq_one₀]
       · rfl
@@ -465,23 +483,23 @@ theorem existsUnique_trace [DecidableEq n] [Nontrivial n] :
       intro x
       have :
         ∀ i j : n,
-          φ (std_basis_matrix i j (1 : 𝕜)) =
+          φ (stdBasisMatrix i j (1 : 𝕜)) =
             (1 / (Fintype.card n : 𝕜)) • ite (j = i) (1 : 𝕜) (0 : 𝕜) :=
         by
         intro i j
         calc
-          φ (std_basis_matrix i j (1 : 𝕜)) =
+          φ (stdBasisMatrix i j (1 : 𝕜)) =
               (1 / (Fintype.card n : 𝕜)) •
-                ∑ k, φ (std_basis_matrix i k 1 ⬝ (std_basis_matrix k j 1 : Matrix n n 𝕜)) :=
-            _
+                ∑ k, φ (stdBasisMatrix i k 1 * (stdBasisMatrix k j 1 : Matrix n n 𝕜)) :=
+            ?_
           _ =
               (1 / (Fintype.card n : 𝕜)) •
-                ∑ k, φ (std_basis_matrix k j 1 ⬝ std_basis_matrix i k 1) :=
-            _
-          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) (φ (∑ k, std_basis_matrix k k 1)) 0 := _
-          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) (φ 1) 0 := _
-          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) 1 0 := _
-        · simp_rw [std_basis_matrix.mul_same, one_mul]
+                ∑ k, φ (stdBasisMatrix k j 1 * stdBasisMatrix i k 1) :=
+            ?_
+          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) (φ (∑ k, stdBasisMatrix k k 1)) 0 := ?_
+          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) (φ 1) 0 := ?_
+          _ = (1 / (Fintype.card n : 𝕜)) • ite (j = i) 1 0 := ?_
+        · simp_rw [StdBasisMatrix.mul_same, one_mul]
           simp only [one_div, Finset.sum_const, nsmul_eq_mul, Algebra.id.smul_eq_mul]
           rw [← mul_assoc]
           simp_rw [this, one_mul]
@@ -491,22 +509,22 @@ theorem existsUnique_trace [DecidableEq n] [Nontrivial n] :
             Finset.sum_ite_irrel, Finset.sum_const_zero, map_sum]
         · simp_rw [StdBasisMatrix.sum_eq_one, one_smul]
         · simp_rw [h.2]
-      rw [LinearMap.smul_apply, trace_linear_map_apply]
-      nth_rw_lhs 1 [matrix_eq_sum_std_basis x]
-      simp_rw [Matrix.smul_std_basis_matrix' _ _ (x _ _), map_sum, SMulHomClass.map_smul]
+      rw [LinearMap.smul_apply, Matrix.traceLinearMap_apply]
+      nth_rw 1 [matrix_eq_sum_std_basis x]
+      simp_rw [Matrix.smul_stdBasisMatrix' _ _ (x _ _), map_sum, SMulHomClass.map_smul]
       calc
-        ∑ (x_1) (x_2), x x_1 x_2 • φ (std_basis_matrix x_1 x_2 1) =
-            ∑ (x_1) (x_2), x x_1 x_2 • (1 / (Fintype.card n : 𝕜)) • ite (x_2 = x_1) (1 : 𝕜) 0 :=
-          _
-        _ = ∑ x_1, x x_1 x_1 • (1 / Fintype.card n : 𝕜) := _
-        _ = (1 / Fintype.card n : 𝕜) • x.trace := _
+        ∑ x_1, ∑ x_2, x x_1 x_2 • φ (stdBasisMatrix x_1 x_2 1) =
+            ∑ x_1, ∑ x_2, x x_1 x_2 • (1 / (Fintype.card n : 𝕜)) • ite (x_2 = x_1) (1 : 𝕜) 0 :=
+          ?_
+        _ = ∑ x_1, x x_1 x_1 • (1 / Fintype.card n : 𝕜) := ?_
+        _ = (1 / Fintype.card n : 𝕜) • x.trace := ?_
       · simp_rw [← this]
       ·
         simp_rw [smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, smul_eq_mul,
           mul_one]
       · simp_rw [← Finset.sum_smul, Matrix.trace_iff' x, smul_eq_mul, mul_comm]
     · rintro rfl
-      simp_rw [LinearMap.smul_apply, trace_linear_map_apply, Matrix.trace_iff' 1, one_apply_eq,
+      simp_rw [LinearMap.smul_apply, traceLinearMap_apply, Matrix.trace_iff' 1, one_apply_eq,
         Finset.sum_const, one_div, nsmul_eq_mul, mul_one]
       refine' ⟨fun x y => _, this⟩
       rw [trace_mul_comm]
@@ -514,7 +532,7 @@ theorem existsUnique_trace [DecidableEq n] [Nontrivial n] :
 
 theorem Matrix.stdBasisMatrix.trace [DecidableEq n] (i j : n) (a : 𝕜) :
     (stdBasisMatrix i j a).trace = ite (i = j) a 0 := by
-  simp_rw [Matrix.trace_iff', std_basis_matrix, ite_and, Finset.sum_ite_eq, Finset.mem_univ,
+  simp_rw [Matrix.trace_iff', stdBasisMatrix, ite_and, Finset.sum_ite_eq, Finset.mem_univ,
     if_true, eq_comm]
 
 theorem Matrix.stdBasisMatrix_eq {n : Type _} [DecidableEq n] (i j : n) (a : 𝕜) :
@@ -523,12 +541,13 @@ theorem Matrix.stdBasisMatrix_eq {n : Type _} [DecidableEq n] (i j : n) (a : �
 
 theorem vecMulVec_eq_zero_iff (x : n → 𝕜) : vecMulVec x (star x) = 0 ↔ x = 0 :=
   by
-  simp_rw [← Matrix.ext_iff, vec_mul_vec_apply, DMatrix.zero_apply, Pi.star_apply,
+  simp_rw [← Matrix.ext_iff, vecMulVec_apply, Matrix.zero_apply, Pi.star_apply,
     mul_comm _ (star _), Function.funext_iff, Pi.zero_apply]
   constructor
   · intro h i
     specialize h i i
-    rw [IsROrC.star_def, IsROrC.conj_mul, IsROrC.ofReal_eq_zero, IsROrC.normSq_eq_zero] at h
+    rw [IsROrC.star_def, IsROrC.conj_mul, ← IsROrC.ofReal_pow,
+      IsROrC.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero] at h
     exact h
   · intro h i j
     simp_rw [h, MulZeroClass.mul_zero]
@@ -539,14 +558,14 @@ theorem Matrix.PosDef.diagonal [DecidableEq n] (x : n → 𝕜) :
   constructor
   · intro h i
     have h' := h.2
-    simp only [dot_product, mul_vec, diagonal, ite_mul, of_apply, MulZeroClass.zero_mul,
+    simp only [dotProduct, mulVec, diagonal, ite_mul, of_apply, MulZeroClass.zero_mul,
       Finset.sum_ite_eq, Finset.mem_univ, if_true] at h'
     let g : n → 𝕜 := fun p => ite (i = p) 1 0
     have : g ≠ 0 := by
       rw [Ne.def, Function.funext_iff, Classical.not_forall]
       simp_rw [Pi.zero_apply]
       use i
-      simp_rw [g, eq_self_iff_true, if_true]
+      simp_rw [g, if_true]
       exact one_ne_zero
     specialize h' g this
     simp_rw [mul_rotate', Pi.star_apply, g, star_ite, star_zero, star_one, boole_mul, ← ite_and,
@@ -728,22 +747,6 @@ theorem posSemidefSmulIff {x : Matrix n n 𝕜} (hx : x.PosSemidef) (α : NNReal
     mul_nonneg (NNReal.coe_nonneg _) (hx.2 _)]
 
 end Matrix
-
-open Matrix
-
-open scoped Matrix
-
-theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [IsROrC 𝕜] {n : Type _} [Fintype n]
-    [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
-    (@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
-          EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n).toMatrix' =
-      col (x : n → 𝕜) ⬝ (col (y : n → 𝕜))ᴴ :=
-  by
-  simp_rw [← Matrix.ext_iff, LinearMap.toMatrix'_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
-    Pi.smul_apply, EuclideanSpace.inner_eq, dot_product, mul_boole, Finset.sum_ite_eq',
-    Finset.mem_univ, if_true, mul_apply, conj_transpose_apply, col_apply, smul_eq_mul,
-    Fintype.univ_punit, Finset.sum_const, Finset.card_singleton, nsmul_eq_mul, algebraMap.coe_one,
-    one_mul, mul_comm, Pi.star_apply, eq_self_iff_true, forall₂_true_iff]
 
 namespace Matrix
 
