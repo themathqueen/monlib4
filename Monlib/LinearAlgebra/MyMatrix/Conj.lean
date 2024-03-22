@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Data.Matrix.Basic
-import LinearAlgebra.Matrix.Hermitian
-import Preq.Ites
+import Mathlib.Data.Matrix.Basic
+import Mathlib.LinearAlgebra.Matrix.Hermitian
+import Monlib.Preq.Ites
 
 #align_import linear_algebra.my_matrix.conj
 
@@ -39,11 +39,11 @@ theorem conj_conj [InvolutiveStar α] (x : Matrix n₁ n₂ α) : xᴴᵀᴴᵀ 
     _ = x := transpose_transpose _
 
 theorem conj_add [AddMonoid α] [StarAddMonoid α] (x y : Matrix n₁ n₂ α) : (x + y)ᴴᵀ = xᴴᵀ + yᴴᵀ :=
-  by simp_rw [conj, ← transpose_add, ← conj_transpose_add]
+  by simp_rw [conj, ← transpose_add, ← conjTranspose_add]
 
 theorem conj_smul {R : Type _} [Star R] [Star α] [SMul R α] [StarModule R α] (c : R)
     (x : Matrix n₁ n₂ α) : (c • x)ᴴᵀ = star c • xᴴᵀ := by
-  simp_rw [conj, ← transpose_smul, ← conj_transpose_smul]
+  simp_rw [conj, ← transpose_smul, ← conjTranspose_smul]
 
 theorem conj_conjTranspose [InvolutiveStar α] (x : Matrix n₁ n₂ α) : xᴴᵀᴴ = xᵀ :=
   calc
@@ -59,18 +59,23 @@ theorem transpose_conj_eq_conjTranspose [Star α] (x : Matrix n₁ n₂ α) : x�
   rfl
 
 theorem IsHermitian.conj {α n : Type _} [Star α] {x : Matrix n n α} (hx : x.IsHermitian) :
-    xᴴᵀ = xᵀ := by simp_rw [conj, hx.eq]
+    xᴴᵀ = xᵀ := by simp_rw [Matrix.conj, hx.eq]
 
-theorem conj_hMul {α m n p : Type _} [Fintype n] [CommSemiring α] [StarRing α] (x : Matrix m n α)
-    (y : Matrix n p α) : (x ⬝ y)ᴴᵀ = xᴴᵀ ⬝ yᴴᵀ :=
+theorem conj_mul {α m n p : Type _} [Fintype n] [CommSemiring α] [StarRing α] (x : Matrix m n α)
+    (y : Matrix n p α) : (x * y)ᴴᵀ = xᴴᵀ * yᴴᵀ :=
   by
-  ext1
-  simp_rw [conj_apply, mul_apply, star_sum, StarMul.star_hMul, conj_apply, mul_comm]
+  ext
+  simp_rw [conj_apply, mul_apply, star_sum, StarMul.star_mul, conj_apply, mul_comm]
 
-theorem conj_one {α n : Type _} [DecidableEq n] [CommSemiring α] [StarRing α] :
+theorem conj_one {α n : Type _} [DecidableEq n] [Semiring α] [StarRing α] :
     (1 : Matrix n n α)ᴴᵀ = 1 := by
-  ext1
+  ext
   simp_rw [conj_apply, one_apply, star_ite, star_one, star_zero]
 
-end Matrix
+theorem conj_zero {α n₁ n₂ : Type _} [DecidableEq n₁] [DecidableEq n₂]
+  [AddMonoid α] [StarAddMonoid α] :
+  (0 : Matrix n₁ n₂ α)ᴴᵀ = 0 := by
+  ext
+  simp_rw [conj_apply, zero_apply, star_zero]
 
+end Matrix

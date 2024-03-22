@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Analysis.InnerProductSpace.Projection
+import Mathlib.Analysis.InnerProductSpace.Projection
 
 #align_import linear_algebra.is_proj'
 
@@ -52,7 +52,7 @@ theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpa
 theorem orthogonalProjection_eq_linear_proj'' {K : Submodule 𝕜 E} [CompleteSpace K] (x : E) :
     orthogonalProjection K x =
       Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace x :=
-  by rw [← orthogonalProjection_eq_linear_proj] <;> rfl
+  by rw [← orthogonalProjection_eq_linear_proj]
 
 noncomputable def orthogonalProjection' (U : Submodule 𝕜 E) [CompleteSpace U] : E →L[𝕜] E :=
   U.subtypeL.comp (orthogonalProjection U)
@@ -66,7 +66,7 @@ local notation "P" => orthogonalProjection
 local notation "↥P" => orthogonalProjection'
 
 @[simp]
-theorem ContinuousLinearMap.range_toLinearMap {p : E →L[𝕜] E} : p.range = LinearMap.range p :=
+theorem ContinuousLinearMap.range_toLinearMap {p : E →L[𝕜] E} : LinearMap.range (p.toLinearMap) = LinearMap.range p :=
   rfl
 
 open ContinuousLinearMap
@@ -74,7 +74,7 @@ open ContinuousLinearMap
 @[simp]
 theorem orthogonalProjection.range (U : Submodule 𝕜 E) [CompleteSpace U] :
     LinearMap.range (↥P U) = U := by
-  simp_rw [orthogonalProjection', ← range_to_linear_map, to_linear_map_eq_coe, coe_comp,
+  simp_rw [orthogonalProjection', ← range_toLinearMap, coe_comp,
     orthogonalProjection_eq_linear_proj', Submodule.coe_subtypeL, LinearMap.range_comp,
     Submodule.linearProjOfIsCompl_range, Submodule.map_subtype_top]
 
@@ -85,7 +85,7 @@ theorem orthogonalProjection'_eq (U : Submodule 𝕜 E) [CompleteSpace U] :
 
 theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [CompleteSpace K] :
     (K.subtypeL.comp (orthogonalProjection K) : E →ₗ[𝕜] E) =
-      K.Subtype.comp
+     (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) :=
   by
   ext x
@@ -94,7 +94,6 @@ theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [CompleteSp
 
 theorem orthogonalProjection'_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpace K] (x : E) :
     (orthogonalProjection' K : E →ₗ[𝕜] E) x =
-      K.Subtype.comp
+      (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) x :=
   by rw [← orthogonal_projection'_eq_linear_proj, orthogonalProjection']
-

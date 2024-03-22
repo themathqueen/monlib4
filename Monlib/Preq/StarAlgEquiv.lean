@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Star.StarAlgHom
-import Algebra.Algebra.Equiv
-import Algebra.Ring.Idempotents
+import Mathlib.Algebra.Star.StarAlgHom
+import Mathlib.Algebra.Algebra.Equiv
+import Mathlib.Algebra.Ring.Idempotents
 
 #align_import preq.star_alg_equiv
 
@@ -49,7 +49,6 @@ theorem StarAlgEquiv.coe_toAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring 
     [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) : ⇑f.toAlgEquiv = f :=
   rfl
 
-@[hint_tactic]
 theorem StarAlgEquiv.symm_apply_eq {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
     [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) (x : A) (y : B) :
     f.symm y = x ↔ y = f x :=
@@ -65,7 +64,7 @@ def StarAlgEquiv.ofAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring A] [Semi
   right_inv x := f.right_inv x
   map_add' x y := f.map_add' x y
   map_mul' x y := f.map_mul' x y
-  map_smul' r x := map_smul _ _ _
+  map_smul' _ _ := map_smul _ _ _
   map_star' x := hf x
 
 @[simp]
@@ -131,16 +130,14 @@ theorem StarAlgEquiv.injective {R α β : Type _} [CommSemiring R] [Semiring α]
 
 theorem AlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
     [Algebra R A] [Algebra R B] (f : A ≃ₐ[R] B) {a : B} {b : A} : a = f b ↔ f.symm a = b :=
-  haveI : ∀ e : A ≃ B, a = e b ↔ e.symm a = b :=
+  by
+  have : ∀ e : A ≃ B, a = e b ↔ e.symm a = b :=
     by
     intro e
     rw [← Equiv.apply_eq_iff_eq e, Equiv.apply_symm_apply]
-  -- simp only [iff_self],
-    this
-    f.to_equiv
+  exact this f
 
 theorem StarAlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semiring A]
     [Semiring B] [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) {a : B} {b : A} :
     a = f b ↔ f.symm a = b :=
   AlgEquiv.eq_apply_iff_symm_eq f.toAlgEquiv
-

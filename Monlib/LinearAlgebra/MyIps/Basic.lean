@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyIps.Symm
+import Monlib.LinearAlgebra.MyIps.Symm
 
 #align_import linear_algebra.my_ips.basic
 
@@ -38,7 +38,7 @@ theorem LinearMap.ext_iff_inner_map [InnerProductSpace ℂ E] (p q : E →ₗ[�
   by
   constructor
   · intro h
-    simp_rw [h, eq_self_iff_true, forall_const]
+    simp_rw [h, forall_const]
   · intro h
     rw [← sub_eq_zero, ← inner_map_self_eq_zero]
     simp_rw [LinearMap.sub_apply, inner_sub_left, h, sub_self, forall_const]
@@ -55,7 +55,7 @@ theorem ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map {E 𝕜 : Type _} [I
     (hp : IsSelfAdjoint p) (hq : IsSelfAdjoint q) :
     p = q ↔ ∀ x : E, @inner 𝕜 _ _ (p x) x = @inner 𝕜 _ _ (q x) x :=
   by
-  rw [← sub_eq_zero, ← is_self_adjoint.inner_map_self_eq_zero (IsSelfAdjoint.sub hp hq)]
+  rw [← sub_eq_zero, ← IsSelfAdjoint.inner_map_self_eq_zero (hp.sub hq)]
   simp_rw [sub_apply, inner_sub_left, sub_eq_zero]
 
 section IsROrC
@@ -67,27 +67,27 @@ variable {𝕜 : Type _} [IsROrC 𝕜]
   $\langle a x, x \rangle_\mathbb{C}$ is real for all $x \in E$ -/
 theorem isSelfAdjoint_iff_complex_inner_re_eq [InnerProductSpace ℂ E] [CompleteSpace E]
     {a : E →L[ℂ] E} : IsSelfAdjoint a ↔ ∀ x : E, (re ⟪a x, x⟫_ℂ : ℂ) = ⟪a x, x⟫_ℂ := by
-  simp_rw [re_to_complex, ← Complex.conj_eq_iff_re, inner_conj_symm, is_self_adjoint_iff',
-    ContinuousLinearMap.ext_iff_inner_map a.adjoint a, adjoint_inner_left]
+  simp_rw [re_to_complex, ← Complex.conj_eq_iff_re, inner_conj_symm, isSelfAdjoint_iff',
+    ContinuousLinearMap.ext_iff_inner_map (adjoint a) a, adjoint_inner_left]
 
 local notation "⟪" x "," y "⟫" => @inner 𝕜 _ _ x y
 
 /-- the adjoint of a self-adjoint operator is self-adjoint -/
 theorem IsSelfAdjoint.adjoint [InnerProductSpace 𝕜 E] [CompleteSpace E] {a : E →L[𝕜] E}
-    (ha : IsSelfAdjoint a) : IsSelfAdjoint a.adjoint :=
+    (ha : IsSelfAdjoint a) : IsSelfAdjoint (adjoint a) :=
   congr_arg star ha
 
 /-- for a self-adjoint operator $a$, we have $\langle a x, x \rangle_\mathbb{k}$ is real -/
 theorem IsSelfAdjoint.inner_re_eq {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     [CompleteSpace E] {a : E →L[𝕜] E} (ha : IsSelfAdjoint a) (x : E) : (re ⟪a x,x⟫ : 𝕜) = ⟪a x,x⟫ :=
   by
-  rcases@I_mul_I_ax 𝕜 _ with (h | h)
+  rcases@I_mul_I_ax 𝕜 _ with (h | _)
   · rw [← re_add_im ⟪a x,x⟫]
     simp_rw [h, MulZeroClass.mul_zero, add_zero]
     norm_cast
   · simp_rw [← conj_eq_iff_re, inner_conj_symm]
     have ha' := ha
-    simp_rw [is_self_adjoint_iff',
+    simp_rw [isSelfAdjoint_iff',
       ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map ha.adjoint ha, adjoint_inner_left] at ha'
     exact ha' x
 
@@ -97,27 +97,26 @@ end IsROrC
 theorem ContinuousLinearMap.inner_map_self_eq_zero [InnerProductSpace ℂ E] {p : E →L[ℂ] E} :
     (∀ x : E, ⟪p x, x⟫_ℂ = 0) ↔ p = 0 :=
   by
-  simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe, ←
-    ContinuousLinearMap.toLinearMap_eq_coe, ← LinearMap.ext_iff]
-  exact inner_map_self_eq_zero p.to_linear_map
+  simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe,
+    ← LinearMap.ext_iff, coe_zero]
+  exact @_root_.inner_map_self_eq_zero E _ _ _
 
 theorem ContinuousLinearMap.adjoint_smul {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [CompleteSpace E] (φ : E →L[K] E) (a : K) :
-    (a • φ).adjoint = starRingEnd K a • φ.adjoint := by
+    adjoint (a • φ) = starRingEnd K a • adjoint φ := by
   simp_rw [← ContinuousLinearMap.star_eq_adjoint, star_smul, starRingEnd_apply]
 
 theorem LinearMap.adjoint_smul {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [FiniteDimensional K E] (φ : E →ₗ[K] E) (a : K) :
-    (a • φ).adjoint = starRingEnd K a • φ.adjoint :=
+    adjoint (a • φ) = starRingEnd K a • adjoint φ :=
   by
   have :=
     @ContinuousLinearMap.adjoint_smul K E _ _ _ (FiniteDimensional.complete K E)
-      φ.to_continuous_linear_map a
+      (toContinuousLinearMap φ) a
   simp_rw [← LinearMap.adjoint_toContinuousLinearMap] at this
   rw [LinearMap.adjoint_eq_toCLM_adjoint, SMulHomClass.map_smul, this]
   rfl
 
 theorem LinearMap.adjoint_one {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
-    [InnerProductSpace K E] [FiniteDimensional K E] : (1 : E →ₗ[K] E).adjoint = 1 :=
+    [InnerProductSpace K E] [FiniteDimensional K E] : adjoint (1 : E →ₗ[K] E) = 1 :=
   star_one _
-

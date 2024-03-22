@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Group.Defs
-import Data.Finset.Basic
-import Algebra.BigOperators.Basic
+import Mathlib.Algebra.Group.Defs
+import Mathlib.Data.Finset.Basic
+import Mathlib.Algebra.BigOperators.Basic
 
 #align_import preq.finset
 
@@ -28,7 +28,7 @@ theorem sum_rotate {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t 
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z =
       ∑ z : ζ in u, ∑ x : α in s, ∑ y : γ in t, f x y z :=
   by
-  nth_rw_rhs 1 [Finset.sum_comm]
+  nth_rw 2 [Finset.sum_comm]
   congr
   ext x
   rw [Finset.sum_comm]
@@ -50,7 +50,7 @@ theorem sum_4_rotate {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
       ∑ w : ε in v, ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z w :=
   by
-  nth_rw_rhs 1 [Finset.sum_comm]
+  nth_rw 2 [Finset.sum_comm]
   congr
   ext x
   rw [Finset.sum_rotate]
@@ -65,7 +65,7 @@ theorem sum_sum_comm_sum {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finse
   ext x
   congr
   ext y
-  nth_rw_rhs 1 [Finset.sum_comm]
+  nth_rw 2 [Finset.sum_comm]
 
 @[simp]
 theorem sum_sum_sum {β α γ ζ : Type _} [AddCommMonoid β] {s : Finset γ} {t : Finset α}
@@ -94,7 +94,7 @@ theorem sum_5_rotate {α β γ ζ ε κ : Type _} [AddCommMonoid β] {s : Finset
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, ∑ vz : κ in k, f x y z w vz =
       ∑ vz : κ in k, ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w vz :=
   by
-  nth_rw_rhs 1 [Finset.sum_comm]
+  nth_rw 2 [Finset.sum_comm]
   congr
   ext x
   rw [Finset.sum_4_rotate]
@@ -110,4 +110,3 @@ theorem Forall.rotate {α β γ : Sort _} {p : α → β → γ → Prop} :
 theorem forall_forall_comm {α β γ ζ : Sort _} {p : α → β → γ → ζ → Prop} :
     (∀ (x : α) (y : β) (z : γ) (w : ζ), p x y z w) ↔ ∀ (x : α) (z : γ) (y : β) (w : ζ), p x y z w :=
   ⟨fun h _ _ _ _ => h _ _ _ _, fun h _ _ _ _ => h _ _ _ _⟩
-

@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Analysis.InnerProductSpace.Adjoint
-import LinearAlgebra.MyIps.Basic
-import LinearAlgebra.IsProj'
+import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.IsProj'
 
 #align_import linear_algebra.my_ips.rank_one
 
@@ -23,7 +23,7 @@ section rankOne
 
 variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
-local notation "L(" x ")" => x →L[ℂ] x
+-- local notation "L(" x ")" => x →L[ℂ] x
 
 local notation "⟪" x "," y "⟫_𝕜" => @inner 𝕜 _ _ x y
 
@@ -33,11 +33,12 @@ def rankOne (x y : E) : E →L[𝕜] E where
   toFun z := ⟪y,z⟫_𝕜 • x
   map_add' u v := by simp_rw [inner_add_right, add_smul]
   map_smul' r u := by simp_rw [inner_smul_right, RingHom.id_apply, smul_smul]
+  cont := Continuous.smul (Continuous.inner continuous_const continuous_id') (continuous_const)
 
-local notation "|" x "⟩⟨" y "|" => rankOne x y
+-- local notation "|" x "⟩⟨" y "|" => rankOne x y
 
 @[simp]
-theorem rankOne_apply {x y : E} (z : E) : (|x⟩⟨y| : E →L[𝕜] E) z = ⟪y,z⟫_𝕜 • x :=
+theorem rankOne_apply {x y : E} (z : E) : (rankOne x y : E →L[𝕜] E) z = ⟪y,z⟫_𝕜 • x :=
   rfl
 
 open ContinuousLinearMap
@@ -45,63 +46,63 @@ open ContinuousLinearMap
 /-- $| x \rangle\!\langle \alpha\cdot y | = \bar{\alpha} \cdot | x \rangle\!\langle y |$ -/
 @[simp]
 theorem rankOne.smul_apply {x y : E} {α : 𝕜} :
-    |x⟩⟨α • y| = (starRingEnd 𝕜) α • (|x⟩⟨y| : E →L[𝕜] E) :=
+    rankOne x (α • y) = (starRingEnd 𝕜) α • (rankOne x y : E →L[𝕜] E) :=
   by
   ext
-  simp_rw [smul_apply, rankOne_apply, inner_smul_left, smul_smul]
+  simp_rw [ContinuousLinearMap.smul_apply, rankOne_apply, inner_smul_left, smul_smul]
 
 /-- $| \alpha \cdot x \rangle\!\langle y | = \alpha \cdot | x \rangle\!\langle y |$ -/
 @[simp]
-theorem rankOne.apply_smul {x y : E} {α : 𝕜} : |α • x⟩⟨y| = α • (|x⟩⟨y| : E →L[𝕜] E) :=
+theorem rankOne.apply_smul {x y : E} {α : 𝕜} : rankOne (α • x) y = α • (rankOne x y : E →L[𝕜] E) :=
   by
   ext
-  simp_rw [smul_apply, rankOne_apply, smul_smul, mul_comm]
+  simp_rw [ContinuousLinearMap.smul_apply, rankOne_apply, smul_smul, mul_comm]
 
 @[simp]
 theorem rankOne.smul_real_apply {x y : E} {α : ℝ} :
-    |x⟩⟨(α : 𝕜) • y| = (α : 𝕜) • (|x⟩⟨y| : E →L[𝕜] E) := by
+    rankOne x ((α : 𝕜) • y) = (α : 𝕜) • (rankOne x y : E →L[𝕜] E) := by
   simp_rw [rankOne.smul_apply, IsROrC.conj_ofReal]
 
 /--
 $| x \rangle\!\langle y | | z \rangle\!\langle w | = \langle y, z \rangle \cdot  | x \rangle\!\langle w |$ -/
 @[simp]
 theorem rankOne.apply_rankOne (x y z w : E) :
-    (|x⟩⟨y| : E →L[𝕜] E) ∘L (|z⟩⟨w| : _) = ⟪y,z⟫_𝕜 • (|x⟩⟨w| : _) :=
+    (rankOne x y : E →L[𝕜] E) ∘L (rankOne z w : _) = ⟪y,z⟫_𝕜 • (rankOne x w : _) :=
   by
   ext r
-  simp_rw [smul_apply, comp_apply, rankOne_apply, inner_smul_right, mul_comm, smul_smul]
+  simp_rw [ContinuousLinearMap.smul_apply, comp_apply, rankOne_apply, inner_smul_right, mul_comm, smul_smul]
 
 /-- $u \circ | x \rangle\!\langle y | = | u(x) \rangle\!\langle y |$ -/
-theorem ContinuousLinearMap.comp_rankOne (x y : E) (u : E →L[𝕜] E) : u ∘L |x⟩⟨y| = |u x⟩⟨y| :=
+theorem ContinuousLinearMap.comp_rankOne (x y : E) (u : E →L[𝕜] E) : u ∘L rankOne x y = rankOne (u x) y :=
   by
   ext r
   simp_rw [comp_apply, rankOne_apply, map_smul]
 
 /-- $| x \rangle\!\langle y | \circ u  = | x \rangle\!\langle u^*(y) |$ -/
 theorem ContinuousLinearMap.rankOne_comp [CompleteSpace E] (x y : E) (u : E →L[𝕜] E) :
-    |x⟩⟨y| ∘L (u : E →L[𝕜] E) = |x⟩⟨u.adjoint y| :=
+    rankOne x y ∘L (u : E →L[𝕜] E) = rankOne x (adjoint u y) :=
   by
   ext r
   simp_rw [comp_apply, rankOne_apply, adjoint_inner_left]
 
 /-- rank one operators given by norm one vectors are automatically idempotent -/
 @[simp]
-theorem rankOne.isIdempotentElem (x : E) (h : ‖x‖ = 1) : IsIdempotentElem (|x⟩⟨x| : E →L[𝕜] E) := by
+theorem rankOne.isIdempotentElem (x : E) (h : ‖x‖ = 1) : IsIdempotentElem (rankOne x x : E →L[𝕜] E) := by
   simp_rw [IsIdempotentElem, ContinuousLinearMap.ext_iff, mul_def, rankOne.apply_rankOne,
-    inner_self_eq_norm_sq_to_K, h, IsROrC.ofReal_one, one_pow, one_smul, eq_self_iff_true,
+    inner_self_eq_norm_sq_to_K, h, IsROrC.ofReal_one, one_pow, one_smul,
     forall_const]
 
-theorem rankOne.isSymmetric (x : E) : LinearMap.IsSymmetric ((|x⟩⟨x| : E →L[𝕜] E) : E →ₗ[𝕜] E) := by
+theorem rankOne.isSymmetric (x : E) : LinearMap.IsSymmetric ((rankOne x x : E →L[𝕜] E) : E →ₗ[𝕜] E) := by
   simp_rw [LinearMap.IsSymmetric, ContinuousLinearMap.coe_coe, rankOne_apply, inner_smul_left,
-    inner_smul_right, inner_conj_symm, mul_comm, eq_self_iff_true, forall₂_true_iff]
+    inner_smul_right, inner_conj_symm, mul_comm, forall₂_true_iff]
 
 /-- rank one operators are automatically self-adjoint -/
 @[simp]
-theorem rankOne.isSelfAdjoint [CompleteSpace E] (x : E) : IsSelfAdjoint (|x⟩⟨x| : E →L[𝕜] E) :=
+theorem rankOne.isSelfAdjoint [CompleteSpace E] (x : E) : IsSelfAdjoint (rankOne x x : E →L[𝕜] E) :=
   isSelfAdjoint_iff_isSymmetric.mpr (rankOne.isSymmetric x)
 
 /-- $| x \rangle\!\langle y |^* = | y \rangle\!\langle x |$ -/
-theorem rankOne.adjoint [CompleteSpace E] (x y : E) : |x⟩⟨y|.adjoint = (|y⟩⟨x| : E →L[𝕜] E) :=
+theorem rankOne.adjoint [CompleteSpace E] (x y : E) : adjoint (rankOne x y) = (rankOne y x : E →L[𝕜] E) :=
   by
   ext a
   apply @ext_inner_right 𝕜
@@ -109,10 +110,10 @@ theorem rankOne.adjoint [CompleteSpace E] (x y : E) : |x⟩⟨y|.adjoint = (|y�
   simp_rw [adjoint_inner_left, rankOne_apply, inner_smul_left, inner_smul_right, inner_conj_symm,
     mul_comm]
 
-theorem rankOne_inner_left (x y z w : E) : ⟪(|x⟩⟨y| : E →L[𝕜] E) z,w⟫_𝕜 = ⟪z,y⟫_𝕜 * ⟪x,w⟫_𝕜 := by
+theorem rankOne_inner_left (x y z w : E) : ⟪(rankOne x y : E →L[𝕜] E) z,w⟫_𝕜 = ⟪z,y⟫_𝕜 * ⟪x,w⟫_𝕜 := by
   rw [rankOne_apply, inner_smul_left, inner_conj_symm]
 
-theorem rankOne_inner_right (x y z w : E) : ⟪x,(|y⟩⟨z| : E →L[𝕜] E) w⟫_𝕜 = ⟪z,w⟫_𝕜 * ⟪x,y⟫_𝕜 := by
+theorem rankOne_inner_right (x y z w : E) : ⟪x,(rankOne y z : E →L[𝕜] E) w⟫_𝕜 = ⟪z,w⟫_𝕜 * ⟪x,y⟫_𝕜 := by
   rw [rankOne_apply, inner_smul_right]
 
 theorem ContinuousLinearMap.commutes_with_all_iff [CompleteSpace E] (T : E →L[𝕜] E) :
@@ -120,12 +121,12 @@ theorem ContinuousLinearMap.commutes_with_all_iff [CompleteSpace E] (T : E →L[
   by
   constructor
   · intro h
-    have h' : ∀ x y : E, |x⟩⟨y| ∘L T = T ∘L |x⟩⟨y| := fun x y => h _
+    have h' : ∀ x y : E, rankOne x y ∘L T = T ∘L rankOne x y := fun x y => h _
     simp_rw [ContinuousLinearMap.rankOne_comp, ContinuousLinearMap.comp_rankOne] at h'
-    have h'' : ∀ x y : E, (|T.adjoint y⟩⟨x| : E →L[𝕜] E) = |y⟩⟨T x| :=
+    have h'' : ∀ x y : E, (rankOne (adjoint T y) x : E →L[𝕜] E) = rankOne y (T x) :=
       by
       intro x y
-      nth_rw_lhs 1 [← rankOne.adjoint]
+      nth_rw 1 [← rankOne.adjoint]
       rw [h', rankOne.adjoint]
     simp_rw [ext_iff, rankOne_apply] at h' h''
     by_cases H : ∀ x : E, x = 0
@@ -135,17 +136,17 @@ theorem ContinuousLinearMap.commutes_with_all_iff [CompleteSpace E] (T : E →L[
       rw [H x, zero_smul, map_zero, zero_apply]
     push_neg at H
     obtain ⟨x, hx⟩ := H
-    use⟪x,x⟫_𝕜⁻¹ * ⟪T.adjoint x,x⟫_𝕜
-    simp_rw [ext_iff, smul_apply, one_apply, mul_smul, h', smul_smul]
+    use⟪x,x⟫_𝕜⁻¹ * ⟪adjoint T x,x⟫_𝕜
+    simp_rw [ext_iff, ContinuousLinearMap.smul_apply, one_apply, mul_smul, h', smul_smul]
     rw [inv_mul_cancel]
-    simp_rw [one_smul, eq_self_iff_true, forall_true_iff]
+    simp_rw [one_smul, forall_true_iff]
     · rw [inner_self_ne_zero]
       exact hx
   · rintro ⟨α, hα⟩ S
     simp_rw [Commute, SemiconjBy, mul_def, hα, comp_smul, smul_comp, one_def, comp_id, id_comp]
 
 theorem ContinuousLinearMap.centralizer [CompleteSpace E] :
-    (@Set.univ (E →L[𝕜] E)).centralizer = {x : E →L[𝕜] E | ∃ α : 𝕜, x = α • 1} :=
+    (@Set.univ (E →L[𝕜] E)).centralizer = { x : E →L[𝕜] E | ∃ α : 𝕜, x = α • 1 } :=
   by
   simp_rw [Set.centralizer, Set.mem_univ, true_imp_iff, ← ContinuousLinearMap.commutes_with_all_iff]
   rfl
@@ -155,7 +156,7 @@ theorem ContinuousLinearMap.scalar_centralizer :
   by
   simp_rw [Set.centralizer, Set.ext_iff, Set.mem_setOf, Set.mem_univ, iff_true_iff]
   rintro x y ⟨α, rfl⟩
-  simp_rw [smul_mul_assoc, one_mul, mul_smul_one]
+  simp only [Algebra.smul_mul_assoc, one_mul, Algebra.mul_smul_comm, mul_one]
 
 theorem ContinuousLinearMap.centralizer_centralizer [CompleteSpace E] :
     (@Set.univ (E →L[𝕜] E)).centralizer.centralizer = Set.univ := by
@@ -195,7 +196,7 @@ theorem rankOne.ext_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [
       contradiction
     use Units.mk0 (inner y x / inner x x)
         (div_ne_zero ugh ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx))
-    simp_rw [div_eq_inv_mul, Units.val_mk0, MulAction.hMul_smul, ← h, smul_smul,
+    simp_rw [div_eq_inv_mul, Units.val_mk0, mul_smul, ← h, smul_smul,
       inv_mul_cancel ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx), one_smul]
 
 theorem ContinuousLinearMap.ext_inner_map {F : Type _} [NormedAddCommGroup F]
@@ -210,6 +211,8 @@ theorem ContinuousLinearMap.ext_inner_map {F : Type _} [NormedAddCommGroup F]
     exact h x
 
 open scoped BigOperators
+
+local notation "|" x "⟩⟨" y "|" => rankOne x y
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_1 x_2) -/
 theorem ContinuousLinearMap.exists_sum_rankOne [FiniteDimensional 𝕜 E] (T : E →L[𝕜] E) :
@@ -231,7 +234,8 @@ theorem ContinuousLinearMap.exists_sum_rankOne [FiniteDimensional 𝕜 E] (T : E
   calc
     ∑ x : Fin (FiniteDimensional.finrank 𝕜 E) × Fin (FiniteDimensional.finrank 𝕜 E),
           ⟪u,e x.fst⟫_𝕜 * (⟪T (e x.fst),e x.snd⟫_𝕜 * ⟪e x.snd,v⟫_𝕜) =
-        ∑ (x_1 : Fin (FiniteDimensional.finrank 𝕜 E)) (x_2 : Fin (FiniteDimensional.finrank 𝕜 E)),
+        ∑ x_1 : Fin (FiniteDimensional.finrank 𝕜 E),
+        ∑ x_2 : Fin (FiniteDimensional.finrank 𝕜 E),
           ⟪u,e x_1⟫_𝕜 * (⟪T (e x_1),e x_2⟫_𝕜 * ⟪e x_2,v⟫_𝕜) :=
       by simp_rw [← Finset.sum_product', Finset.univ_product_univ]
     _ = ∑ x_1, ⟪u,e x_1⟫_𝕜 * ⟪T (e x_1),v⟫_𝕜 := by
@@ -242,7 +246,7 @@ theorem LinearMap.exists_sum_rankOne [FiniteDimensional 𝕜 E] (T : E →ₗ[�
     ∃ x y : Fin (FiniteDimensional.finrank 𝕜 E) × Fin (FiniteDimensional.finrank 𝕜 E) → E,
       T = ∑ i, ↑(|x i⟩⟨y i| : E →L[𝕜] E) :=
   by
-  obtain ⟨a, b, h⟩ := ContinuousLinearMap.exists_sum_rankOne T.to_continuous_linear_map
+  obtain ⟨a, b, h⟩ := ContinuousLinearMap.exists_sum_rankOne (toContinuousLinearMap T)
   refine' ⟨a, b, _⟩
   simp_rw [← coe_sum, ← h]
   rfl
@@ -277,7 +281,7 @@ theorem rankOneLm_apply (x y z : E) : (rankOneLm x y : E →ₗ[𝕜] E) z = ⟪
 theorem rankOneLm_comp_rankOneLm (x y z w : E) :
     (rankOneLm x y : E →ₗ[𝕜] E) ∘ₗ rankOneLm z w = ⟪y,z⟫_𝕜 • (rankOneLm x w : _) := by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, rankOneLm_apply, LinearMap.smul_apply,
-    inner_smul_right, mul_smul, rankOneLm_apply, smul_smul, mul_comm, eq_self_iff_true,
+    inner_smul_right, mul_smul, rankOneLm_apply, smul_smul, mul_comm,
     forall_true_iff]
 
 theorem rankOneLm_apply_rank_one (x y z w v : E) :
@@ -286,9 +290,9 @@ theorem rankOneLm_apply_rank_one (x y z w v : E) :
     smul_smul]
 
 theorem rankOneLm_adjoint [FiniteDimensional 𝕜 E] (x y : E) :
-    (rankOneLm x y : E →ₗ[𝕜] E).adjoint = rankOneLm y x :=
+    LinearMap.adjoint (rankOneLm x y : E →ₗ[𝕜] E) = rankOneLm y x :=
   by
-  simp_rw [rankOneLm, LinearMap.adjoint_eq_toCLM_adjoint, ContinuousLinearMap.toLinearMap_eq_coe,
+  simp_rw [rankOneLm, LinearMap.adjoint_eq_toCLM_adjoint,
     ContinuousLinearMap.coe_inj, ← @rankOne.adjoint 𝕜 _ _ _ _ (FiniteDimensional.complete 𝕜 E) x y]
   rfl
 
@@ -309,13 +313,13 @@ theorem rankOne_sum {n : Type _} [Fintype n] (x : E) (y : n → E) :
 theorem sum_rankOneLm {n : Type _} [Fintype n] (x : n → E) (y : E) :
     (rankOneLm (∑ i : n, x i) y : E →ₗ[𝕜] E) = ∑ i : n, rankOneLm (x i) y :=
   by
-  rw [rankOneLm, sum_rankOne, ContinuousLinearMap.toLinearMap_eq_coe, ContinuousLinearMap.coe_sum]
+  rw [rankOneLm, sum_rankOne, ContinuousLinearMap.coe_sum]
   rfl
 
 theorem rankOneLm_sum {n : Type _} [Fintype n] (x : E) (y : n → E) :
     (rankOneLm x (∑ i : n, y i) : E →ₗ[𝕜] E) = ∑ i : n, rankOneLm x (y i) :=
   by
-  rw [rankOneLm, rankOne_sum, ContinuousLinearMap.toLinearMap_eq_coe, ContinuousLinearMap.coe_sum]
+  rw [rankOneLm, rankOne_sum, ContinuousLinearMap.coe_sum]
   rfl
 
 end rankOneLm
@@ -353,7 +357,7 @@ theorem ContinuousLinearMap.coe_eq_zero {𝕜 E₁ E₂ : Type _} [IsROrC 𝕜] 
 theorem rankOne.eq_zero_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) : (rankOne x y : E →L[𝕜] E) = 0 ↔ x = 0 ∨ y = 0 := by
   simp_rw [ContinuousLinearMap.ext_iff, rankOne_apply, ContinuousLinearMap.zero_apply, smul_eq_zero,
-    forall_or_right, forall_inner_eq_zero_iff, or_comm']
+    forall_or_right, forall_inner_eq_zero_iff, or_comm]
 
 theorem rankOne.left_add {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y z : E) : (rankOne (x + y) z : E →L[𝕜] E) = rankOne x z + rankOne y z :=
@@ -381,7 +385,7 @@ theorem rankOne.right_sub {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
 
 theorem LinearMap.rankOne_comp {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (x y : E) (u : E →ₗ[𝕜] E) :
-    ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ u = (rankOne x (u.adjoint y) : E →L[𝕜] E) :=
+    ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ u = (rankOne x (adjoint u y) : E →L[𝕜] E) :=
   by
   ext
   simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
@@ -389,7 +393,7 @@ theorem LinearMap.rankOne_comp {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGro
 
 theorem LinearMap.rankOne_comp' {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (x y : E) (u : E →ₗ[𝕜] E) :
-    ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ u.adjoint = (rankOne x (u y) : E →L[𝕜] E) := by
+    ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ adjoint u = (rankOne x (u y) : E →L[𝕜] E) := by
   rw [LinearMap.rankOne_comp, LinearMap.adjoint_adjoint]
 
 theorem OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne {ι 𝕜 : Type _} [IsROrC 𝕜] {E : Type _}
@@ -398,7 +402,7 @@ theorem OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne {ι 𝕜 : Type _}
     orthogonalProjection' U = ∑ i : ι, rankOne (b i : E) (b i : E) :=
   by
   ext
-  simp_rw [orthogonalProjection'_apply, b.orthogonal_projection_eq_sum,
+  simp_rw [orthogonalProjection'_apply, b.orthogonalProjection_eq_sum,
     ContinuousLinearMap.sum_apply, rankOne_apply, Submodule.coe_sum, Submodule.coe_smul_of_tower]
 
 theorem LinearMap.comp_rankOne {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
@@ -407,4 +411,3 @@ theorem LinearMap.comp_rankOne {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGro
   by
   ext
   simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply, SMulHomClass.map_smul]
-
