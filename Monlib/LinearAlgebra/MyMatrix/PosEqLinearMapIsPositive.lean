@@ -3,14 +3,14 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.Matrix.PosDef
-import LinearAlgebra.MyIps.Pos
-import LinearAlgebra.MyMatrix.Basic
-import LinearAlgebra.End
-import LinearAlgebra.MyIps.RankOne
-import LinearAlgebra.Matrix.NonsingularInverse
-import Preq.Ites
-import Preq.IsROrCLe
+import Mathlib.LinearAlgebra.Matrix.PosDef
+import Monlib.LinearAlgebra.MyIps.Pos
+import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.End
+import Monlib.LinearAlgebra.MyIps.RankOne
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Monlib.Preq.Ites
+import Monlib.Preq.IsROrCLe
 
 #align_import linear_algebra.my_matrix.pos_eq_linear_map_is_positive
 
@@ -38,70 +38,56 @@ open scoped ComplexConjugate
 theorem conjTranspose_eq_adjoint (A : Matrix m n 𝕜) :
     toLin' A.conjTranspose =
       @LinearMap.adjoint 𝕜 (EuclideanSpace 𝕜 n) (EuclideanSpace 𝕜 m) _ _ _ _ _ _ _ (toLin' A) :=
-  by
-  rw [@LinearMap.eq_adjoint_iff _ (EuclideanSpace 𝕜 m) (EuclideanSpace 𝕜 n)]
-  intro x y
-  convert dot_product_assoc (conj ∘ (id x : m → 𝕜)) y A using 1
-  simp [dot_product, mul_vec, RingHom.map_sum, ← starRingEnd_apply, mul_comm]
+Matrix.toEuclideanLin_conjTranspose_eq_adjoint _
 
 end Matrix
 
 -------------------------------
 variable {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n]
 
-open scoped Matrix
+open scoped Matrix ComplexOrder
 
-theorem Matrix.PosSemidef.starMulSelf {n : Type _} [Fintype n] (x : Matrix n n 𝕜) :
-    (xᴴ ⬝ x).PosSemidef := by
-  simp_rw [Matrix.PosSemidef]
-  constructor
-  · exact Matrix.isHermitian_transpose_mul_self _
-  · intro y
-    have :
-      IsROrC.re (star y ⬝ᵥ (xᴴ ⬝ x).mulVec y) = IsROrC.re (star (x.mul_vec y) ⬝ᵥ x.mul_vec y) := by
-      simp only [Matrix.star_mulVec, Matrix.dotProduct_mulVec, Matrix.vecMul_vecMul]
-    rw [this]
-    clear this
-    simp_rw [Matrix.dotProduct, map_sum]
-    apply Finset.sum_nonneg'
-    intro i
-    simp_rw [Pi.star_apply, IsROrC.star_def, ← IsROrC.inner_apply]
-    exact inner_self_nonneg
-
-theorem Matrix.PosSemidef.mulStarSelf (x : Matrix n n 𝕜) : (x ⬝ xᴴ).PosSemidef :=
-  by
-  simp_rw [Matrix.PosSemidef]
-  constructor
-  · exact Matrix.isHermitian_mul_conjTranspose_self _
-  · intro y
-    have :
-      IsROrC.re (star y ⬝ᵥ (x ⬝ xᴴ).mulVec y) = IsROrC.re (star (xᴴ.mulVec y) ⬝ᵥ xᴴ.mulVec y) := by
-      simp_rw [Matrix.star_mulVec, Matrix.dotProduct_mulVec, Matrix.conjTranspose_conjTranspose,
-        Matrix.vecMul_vecMul]
-    rw [this]
-    clear this
-    simp_rw [Matrix.dotProduct, map_sum]
-    apply Finset.sum_nonneg'
-    intro i
-    simp_rw [Pi.star_apply, IsROrC.star_def, ← IsROrC.inner_apply]
-    exact inner_self_nonneg
+alias Matrix.PosSemidef.starMulSelf := Matrix.posSemidef_conjTranspose_mul_self
+alias Matrix.PosSemidef.mulStarSelf := Matrix.posSemidef_self_mul_conjTranspose
 
 theorem Matrix.toEuclideanLin_eq_piLp_linearEquiv [DecidableEq n] (x : Matrix n n 𝕜) :
-    x.toEuclideanLin =
-      ((PiLp.linearEquiv 2 𝕜 fun _ : n => 𝕜).symm.conj x.toLin' : Module.End 𝕜 (PiLp 2 _)) :=
+    Matrix.toEuclideanLin x =
+      (LinearEquiv.conj (WithLp.linearEquiv 2 𝕜 (n → 𝕜)).symm) (toLin' x) :=
   rfl
+
+lemma Matrix.of_isHermitian' [DecidableEq n] {x : Matrix n n 𝕜}
+  (hx : x.IsHermitian) :
+    ∀ x_1 : n → 𝕜, ↑(IsROrC.re (Finset.sum Finset.univ fun i ↦
+      (star x_1 i * Finset.sum Finset.univ fun x_2 ↦ x i x_2 * x_1 x_2))) =
+          Finset.sum Finset.univ fun x_2 ↦ star x_1 x_2 * Finset.sum Finset.univ fun x_3 ↦ x x_2 x_3 * x_1 x_3 :=
+  by
+  simp_rw [← IsROrC.conj_eq_iff_re]
+  have : ∀ (x_1 : n → 𝕜),
+    (Finset.sum Finset.univ fun i ↦ star x_1 i
+      * Finset.sum Finset.univ fun x_2 ↦ x i x_2 * x_1 x_2)
+      = ⟪(EuclideanSpace.equiv n 𝕜).symm x_1,
+      (toEuclideanLin x) ((EuclideanSpace.equiv n 𝕜).symm x_1)⟫_𝕜 := λ x_1 => by
+    calc (Finset.sum Finset.univ fun i ↦ star x_1 i
+      * Finset.sum Finset.univ fun x_2 ↦ x i x_2 * x_1 x_2)
+      = ⟪x_1, x *ᵥ x_1⟫_𝕜 := rfl
+    _ = ⟪(EuclideanSpace.equiv n 𝕜).symm x_1, (EuclideanSpace.equiv n 𝕜).symm (x *ᵥ x_1)⟫_𝕜 := rfl
+    _ = ⟪(EuclideanSpace.equiv n 𝕜).symm x_1,
+      (toEuclideanLin x) ((EuclideanSpace.equiv n 𝕜).symm x_1)⟫_𝕜 := rfl
+  simp_rw [this, inner_conj_symm, ← LinearMap.adjoint_inner_left,
+    ← Matrix.toEuclideanLin_conjTranspose_eq_adjoint, hx.eq, forall_true_iff]
 
 theorem Matrix.posSemidef_eq_linearMap_positive [DecidableEq n] (x : Matrix n n 𝕜) :
     x.PosSemidef ↔ x.toEuclideanLin.IsPositive :=
   by
   simp_rw [LinearMap.IsPositive, ← Matrix.isHermitian_iff_isSymmetric, Matrix.PosSemidef,
     Matrix.toEuclideanLin_eq_piLp_linearEquiv, PiLp.inner_apply, IsROrC.inner_apply, map_sum,
-    LinearEquiv.conj_apply, LinearMap.comp_apply, LinearEquiv.coe_coe, PiLp.linearEquiv_symm_apply,
-    LinearEquiv.symm_symm, PiLp.linearEquiv_apply, Matrix.toLin'_apply, WithLp.equiv_symm_pi_apply,
+    LinearEquiv.conj_apply, LinearMap.comp_apply, LinearEquiv.coe_coe, WithLp.linearEquiv_symm_apply,
+    LinearEquiv.symm_symm, WithLp.linearEquiv_apply, Matrix.toLin'_apply, WithLp.equiv_symm_pi_apply,
     ← IsROrC.star_def, Matrix.mulVec, Matrix.dotProduct, WithLp.equiv_pi_apply, ←
-    Pi.mul_apply (x _) _, ← Matrix.dotProduct, map_sum, Pi.star_apply, Matrix.mulVec,
-    Matrix.dotProduct, Pi.mul_apply]
-  exact ⟨fun h => h, fun h => h⟩
+    Pi.mul_apply (x _) _, Pi.star_apply, Matrix.mulVec,
+    Matrix.dotProduct, Pi.mul_apply, @IsROrC.nonneg_def' 𝕜,
+    map_sum, IsROrC.ofReal_sum]
+  refine ⟨fun h => ⟨h.1, fun y => ?_⟩, fun h => ⟨h.1, fun y => ?_⟩⟩
 
 theorem Matrix.posSemidef_iff [DecidableEq n] (x : Matrix n n 𝕜) :
     x.PosSemidef ↔ ∃ y : Matrix n n 𝕜, x = yᴴ ⬝ y :=
@@ -803,4 +789,3 @@ theorem PosSemidef.mulConjTransposeSelf {𝕜 n₁ n₂ : Type _} [IsROrC 𝕜] 
   exact IsROrC.normSq_nonneg _
 
 end Matrix
-

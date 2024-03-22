@@ -3,10 +3,10 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Star.StarAlgHom
-import Algebra.Star.BigOperators
-import LinearAlgebra.InnerAut
-import Algebra.Algebra.Basic
+import Mathlib.Algebra.Star.StarAlgHom
+import Mathlib.Algebra.Star.BigOperators
+import Monlib.LinearAlgebra.InnerAut
+import Mathlib.Algebra.Algebra.Basic
 
 #align_import linear_algebra.is_real
 
@@ -173,4 +173,3 @@ theorem LinearMap.isRealOne {E K : Type _} [Semiring K] [AddCommMonoid E] [Modul
 theorem LinearMap.real_one {E K : Type _} [Semiring K] [InvolutiveStar K] [AddCommMonoid E]
     [StarAddMonoid E] [Module K E] [StarModule K E] : (1 : E →ₗ[K] E).Real = 1 :=
   (LinearMap.isReal_iff _).mp LinearMap.isRealOne
-

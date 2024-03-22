@@ -3,9 +3,10 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.TensorProductBasis
-import Algebra.Algebra.Bilinear
-import RingTheory.TensorProduct
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.Algebra.Algebra.Bilinear
+import Mathlib.LinearAlgebra.Basis.VectorSpace
+import Mathlib.RingTheory.TensorProduct.Basic
 
 #align_import linear_algebra.my_tensor_product
 
@@ -45,16 +46,16 @@ theorem comm_commutes {g : M ⊗[R] N →ₗ[R] P} {h : M ⊗[R] N →ₗ[R] Q} 
   by
   rw [TensorProduct.ext_iff]
   intro x y
-  simp_rw [LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe, LinearEquiv.coe_coe,
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.comm_tmul, TensorProduct.map_apply, TensorProduct.comm_tmul]
 
 theorem comm_commutes' {g : M →ₗ[R] M} {h : M →ₗ[R] R} :
     (TensorProduct.comm R M R).toLinearMap ∘ₗ TensorProduct.map g h =
       TensorProduct.map h g ∘ₗ (TensorProduct.comm R M M).toLinearMap :=
   by
-  simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe,
+  simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply,
     LinearEquiv.coe_coe, TensorProduct.comm_tmul, TensorProduct.map_apply, TensorProduct.comm_tmul,
-    eq_self_iff_true, forall₂_true_iff]
+    forall₂_true_iff]
 
 theorem assoc_comp_map {R : Type _} [CommSemiring R] {M N M₂ N₂ P Q : Type _} [AddCommMonoid M]
     [AddCommMonoid N] [AddCommMonoid M₂] [AddCommMonoid N₂] [AddCommMonoid P] [AddCommMonoid Q]
@@ -65,7 +66,7 @@ theorem assoc_comp_map {R : Type _} [CommSemiring R] {M N M₂ N₂ P Q : Type _
   by
   apply TensorProduct.ext_threefold
   intro x y z
-  simp_rw [LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe, LinearEquiv.coe_coe,
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.map_apply, TensorProduct.assoc_tmul, TensorProduct.map_apply]
 
 theorem ext_threefold' {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid M]
@@ -89,7 +90,7 @@ theorem assoc_symm_comp_map {R : Type _} [CommSemiring R] {M N M₂ N₂ P Q : T
   by
   apply TensorProduct.ext_threefold'
   intro x y z
-  simp_rw [LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe, LinearEquiv.coe_coe,
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.map_apply, TensorProduct.assoc_symm_tmul, TensorProduct.map_apply]
 
 theorem comm_map {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid M]
@@ -100,7 +101,7 @@ theorem comm_map {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid
   by
   rw [TensorProduct.ext_iff]
   intro x y
-  simp_rw [LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe, LinearEquiv.coe_coe,
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.map_apply, TensorProduct.comm_tmul, TensorProduct.map_apply]
 
 theorem comm_symm_map {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid M]
@@ -111,7 +112,7 @@ theorem comm_symm_map {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommM
   by
   rw [TensorProduct.ext_iff]
   intro x y
-  simp_rw [LinearMap.comp_apply, LinearEquiv.toLinearMap_eq_coe, LinearEquiv.coe_coe,
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.map_apply, TensorProduct.comm_symm_tmul, TensorProduct.map_apply]
 
 protected theorem map_sum {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
@@ -119,28 +120,28 @@ protected theorem map_sum {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : T
     [Module R N₁] [Module R N₂] (x : M₁ →ₗ[R] M₂) {α : Type _} (s : Finset α)
     (n : α → N₁ →ₗ[R] N₂) : map x (∑ a : α in s, n a) = ∑ a : α in s, map x (n a) := by
   simp_rw [TensorProduct.ext_iff, LinearMap.sum_apply, map_apply, LinearMap.coeFn_sum,
-    Finset.sum_apply, tmul_sum, eq_self_iff_true, forall₂_true_iff]
+    Finset.sum_apply, tmul_sum, forall₂_true_iff]
 
 theorem sum_map {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid N₁] [AddCommMonoid N₂] [Module R M₁] [Module R M₂]
     [Module R N₁] [Module R N₂] {α : Type _} (s : Finset α) (n : α → N₁ →ₗ[R] N₂)
     (x : M₁ →ₗ[R] M₂) : map (∑ a : α in s, n a) x = ∑ a : α in s, map (n a) x := by
   simp_rw [TensorProduct.ext_iff, LinearMap.sum_apply, map_apply, LinearMap.coeFn_sum,
-    Finset.sum_apply, sum_tmul, eq_self_iff_true, forall₂_true_iff]
+    Finset.sum_apply, sum_tmul, forall₂_true_iff]
 
 protected theorem map_smul {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid N₁] [AddCommMonoid N₂] [Module R M₁] [Module R M₂]
     [Module R N₁] [Module R N₂] (x : M₁ →ₗ[R] M₂) (y : N₁ →ₗ[R] N₂) (a : R) :
     map x (a • y) = a • map x y := by
   simp_rw [TensorProduct.ext_iff, LinearMap.smul_apply, map_apply, LinearMap.smul_apply, tmul_smul,
-    eq_self_iff_true, forall₂_true_iff]
+    forall₂_true_iff]
 
 theorem smul_map {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid N₁] [AddCommMonoid N₂] [Module R M₁] [Module R M₂]
     [Module R N₁] [Module R N₂] (x : M₁ →ₗ[R] M₂) (y : N₁ →ₗ[R] N₂) (a : R) :
     map (a • x) y = a • map x y := by
   simp_rw [TensorProduct.ext_iff, LinearMap.smul_apply, map_apply, LinearMap.smul_apply, smul_tmul',
-    eq_self_iff_true, forall₂_true_iff]
+    forall₂_true_iff]
 
 -- MOVE:
 theorem add_map {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
@@ -175,12 +176,12 @@ theorem tmul_eq_zero {R : Type _} [Field R] {M N : Type _} [AddCommGroup M] [Add
   let b₂ := Basis.ofVectorSpace R N
   constructor
   · intro h
-    apply_fun (b₁.tensor_product b₂).repr at h
-    simp only [Basis.tensorProduct_repr_tmul_apply, Finsupp.ext_iff, Prod.forall, map_zero,
+    apply_fun (b₁.tensorProduct b₂).repr at h
+    simp only [Basis.tensorProduct_repr_tmul_apply, DFunLike.ext_iff, Prod.forall, map_zero,
       Finsupp.zero_apply, mul_eq_zero] at h
     simp only [Basis.ext_elem_iff b₁, b₂.ext_elem_iff, map_zero, Finsupp.zero_apply, ←
       forall_or_left, ← forall_or_right]
-    exact h
+    exact λ _ _ => h _ _
   · rintro (rfl | rfl)
     exact TensorProduct.zero_tmul _ _
     exact TensorProduct.tmul_zero _ _
@@ -203,7 +204,8 @@ end TensorProduct
 theorem Algebra.TensorProduct.map_toLinearMap {R M N P Q : Type _} [CommSemiring R] [Semiring M]
     [Semiring N] [Semiring P] [Semiring Q] [Algebra R M] [Algebra R N] [Algebra R P] [Algebra R Q]
     (f : M →ₐ[R] N) (g : P →ₐ[R] Q) :
-    (Algebra.TensorProduct.map f g).toLinearMap = TensorProduct.map f.toLinearMap g.toLinearMap :=
+    AlgHom.toLinearMap (Algebra.TensorProduct.map f g)
+      = _root_.TensorProduct.map (AlgHom.toLinearMap f) (AlgHom.toLinearMap g) :=
   rfl
 
 theorem AlgHom.commute_map_mul' {R M N : Type _} [CommSemiring R] [Semiring M] [Semiring N]
@@ -235,4 +237,3 @@ theorem TensorProduct.map_add {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂
   rw [TensorProduct.ext_iff]
   intros
   simp only [TensorProduct.map_tmul, tmul_add, add_tmul, LinearMap.add_apply]
-

@@ -3,8 +3,8 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Algebra.Bilinear
-import LinearAlgebra.MyTensorProduct
+import Mathlib.Algebra.Algebra.Bilinear
+import Monlib.LinearAlgebra.MyTensorProduct
 
 #align_import linear_algebra.lmul_rmul
 
@@ -81,8 +81,9 @@ theorem lmul_eq_alg_lmul {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H
   rfl
 
 theorem lmul_one {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁]
-    [IsScalarTower R H₁ H₁] : (lmul (1 : H₁) : l(R,H₁)) = 1 := by ext;
-  simp_rw [lmul_apply, LinearMap.one_apply, one_mul]
+    [IsScalarTower R H₁ H₁] : (lmul (1 : H₁) : l(R,H₁)) = 1 := by
+    ext
+    simp_rw [lmul_apply, LinearMap.one_apply, one_mul]
 
 def rmul : H₂ →ₗ[R] l(R,H₂) where
   toFun x := LinearMap.mulRight R x
@@ -109,8 +110,11 @@ open scoped TensorProduct
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
-def rmulMapLmul : H₁ ⊗[R] H₂ →ₗ[R] l(R,H₁ ⊗[R] H₂) :=
-  TensorProduct.homTensorHomMap R H₁ H₂ H₁ H₂ ∘ₗ rmul ⊗ₘ lmul
+noncomputable def rmulMapLmul {R H₁ H₂ : Type*} [CommSemiring R]
+  [NonUnitalNonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁] [IsScalarTower R H₁ H₁]
+  [NonUnitalNonAssocSemiring H₂] [Module R H₂] [SMulCommClass R H₂ H₂] [IsScalarTower R H₂ H₂] :
+  H₁ ⊗[R] H₂ →ₗ[R] ((H₁ ⊗[R] H₂) →ₗ[R] (H₁ ⊗[R] H₂)) :=
+(TensorProduct.homTensorHomMap R H₁ H₂ H₁ H₂) ∘ₗ (TensorProduct.map rmul lmul)
 
 theorem rmulMapLmul_apply (x : H₁) (y : H₂) : rmulMapLmul (x ⊗ₜ[R] y) = rmul x ⊗ₘ lmul y :=
   rfl
@@ -130,13 +134,13 @@ theorem LinearMap.mulLeft_sum {R : Type _} {A : Type _} [CommSemiring R]
     [NonUnitalNonAssocSemiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A]
     {n : Type _} {s : Finset n} {x : n → A} :
     ∑ i : n in s, LinearMap.mulLeft R (x i) = LinearMap.mulLeft R (∑ i : n in s, x i) :=
-  (map_sum lmul).symm
+by simp_rw [← lmul_eq_mul, map_sum]
 
 theorem LinearMap.mulRight_sum {R : Type _} {A : Type _} [CommSemiring R]
     [NonUnitalNonAssocSemiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A]
     {n : Type _} {s : Finset n} {x : n → A} :
     ∑ i : n in s, LinearMap.mulRight R (x i) = LinearMap.mulRight R (∑ i : n in s, x i) :=
-  (map_sum rmul).symm
+by simp_rw [← rmul_eq_mul, map_sum]
 
 theorem lmul_eq_zero_iff {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H₁) :
     (lmul x : l(R,H₁)) = 0 ↔ x = 0 :=
@@ -172,11 +176,12 @@ theorem LinearMap.mulRight_eq_one_iff {H₁ : Type _} [NonAssocSemiring H₁] [M
     [SMulCommClass R H₁ H₁] [IsScalarTower R H₁ H₁] (x : H₁) : LinearMap.mulRight R x = 1 ↔ x = 1 :=
   rmul_eq_one_iff _
 
-theorem LinearMap.mulLeft_eq_one_or_zero_iff_mulRight_tFAE {H₁ : Type _} [Semiring H₁]
+theorem LinearMap.mulLeft_eq_one_or_zero_iff_mulRight_tfae {H₁ : Type _} [Semiring H₁]
     [Algebra R H₁] (x : H₁) (p : Prop) [Decidable p] :
-    TFAE [LinearMap.mulLeft R x = ite p 1 0, LinearMap.mulRight R x = ite p 1 0, x = ite p 1 0] :=
+    List.TFAE [LinearMap.mulLeft R x = ite p 1 0,
+      LinearMap.mulRight R x = ite p 1 0, x = ite p 1 0] :=
   by
-  by_cases p
+  by_cases h : p
   · simp_rw [h, if_true, LinearMap.mulLeft_eq_one_iff, LinearMap.mulRight_eq_one_iff]
     tfae_finish
   · simp_rw [h, if_false, LinearMap.mulLeft_eq_zero_iff, LinearMap.mulRight_eq_zero_iff]
@@ -185,7 +190,7 @@ theorem LinearMap.mulLeft_eq_one_or_zero_iff_mulRight_tFAE {H₁ : Type _} [Semi
 theorem LinearMap.mulLeft_eq_one_or_zero_iff_mulRight {H₁ : Type _} [Semiring H₁] [Algebra R H₁]
     (x : H₁) (p : Prop) [Decidable p] :
     LinearMap.mulLeft R x = ite p 1 0 ↔ LinearMap.mulRight R x = ite p 1 0 :=
-  List.TFAE.out (@LinearMap.mulLeft_eq_one_or_zero_iff_mulRight_tFAE R _ H₁ _ _ x p _) 0 1
+  List.TFAE.out (@LinearMap.mulLeft_eq_one_or_zero_iff_mulRight_tfae R _ H₁ _ _ x p _) 0 1
 
 theorem LinearMap.mulRight_smul (x : H₁) (α : R) :
     LinearMap.mulRight R (α • x) = α • LinearMap.mulRight R x :=
@@ -210,4 +215,3 @@ theorem LinearMap.mulLeft_inj {H₁ : Type _} [Semiring H₁] [Module R H₁] [S
     [IsScalarTower R H₁ H₁] (x : H₁) [Invertible x] (y z : H₁) :
     LinearMap.mulLeft R x y = LinearMap.mulLeft R x z ↔ y = z :=
   IsUnit.mul_right_inj (isUnit_of_invertible x)
-

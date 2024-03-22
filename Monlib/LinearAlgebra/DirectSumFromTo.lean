@@ -3,9 +3,10 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Algebra.Pi
-import LinearAlgebra.ProjectiveSpace.Basic
-import Preq.Ites
+import Mathlib.Algebra.Algebra.Pi
+import Mathlib.LinearAlgebra.Pi
+-- import Mathlib.LinearAlgebra.ProjectiveSpace.Basic
+import Monlib.Preq.Ites
 
 #align_import linear_algebra.direct_sum_from_to
 
@@ -41,4 +42,3 @@ theorem directSumFromTo_apply_ne_same {R : Type _} [Semiring R] {ι₁ : Type _}
     LinearMap.coe_proj, Function.eval_apply, Function.update_apply, Pi.zero_apply, ite_apply_lm,
     LinearMap.zero_apply, LinearMap.one_apply]
   simp [h]
-
