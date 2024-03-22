@@ -3,7 +3,8 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.BigOperators.Fin
+import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Data.Nat.Pow
 
 #align_import other.sonia
 
@@ -32,7 +33,7 @@ open scoped BigOperators
 /-- `(∑ i, x i) % a = (∑ i, (x i % a)) % a` -/
 theorem Int.sum_mod {n : ℕ} (x : Fin n → ℤ) (a : ℤ) : (∑ i, x i) % a = (∑ i, x i % a) % a :=
   by
-  induction' n with d hd generalizing x a
+  induction' n with d hd generalizing a
   · rfl
   · let x' : Fin d → ℤ := fun i => x i.succ
     have hx' : ∀ i, x' i = x i.succ := fun i => rfl
@@ -40,7 +41,7 @@ theorem Int.sum_mod {n : ℕ} (x : Fin n → ℤ) (a : ℤ) : (∑ i, x i) % a =
     rw [Int.add_emod]
     simp_rw [← hx', Int.emod_add_cancel_left]
     rw [hd]
-    simp_rw [← hx', Int.emod_emod]
+    simp_rw [Int.emod_emod]
 
 -- `n.succ % n = 1` if `1 < n`
 theorem Fin.succ_mod_self {n : ℕ} (hn : 1 < n) : n.succ % n = 1 :=
@@ -71,14 +72,15 @@ theorem Int.hMul_nat_succ_pow_mod_nat (a : ℤ) {b n : ℕ} (hb : 1 < b) :
 theorem nat_repr_mod_eq_sum_repr_mod {a n : ℕ} (x : Fin n → ℤ) (ha : 1 < a) :
     (∑ i, x i * (a.succ : ℕ) ^ (i : ℕ)) % a = (∑ i, x i) % a :=
   by
-  induction' n with d hd generalizing x
+  induction' n with d hd
   · intros
     rfl
   · simp_rw [Fin.sum_univ_succ, Fin.val_zero, pow_zero, mul_one, Fin.val_succ,
       Int.emod_add_cancel_left]
     let x' : Fin d → ℤ := fun i => x i.succ
     have hx' : ∀ i, x' i = x i.succ := fun i => rfl
-    simp_rw [← Nat.succ_eq_add_one, ← hx', hd x', hx']
+    simp_rw [← Nat.succ_eq_add_one, ← hx']
+    simp only [hd x', hx']
     rw [Int.sum_mod]
     simp_rw [← hx']
     rw [← Int.emod_emod, Int.emod_emod]
@@ -103,10 +105,9 @@ theorem nat_dvd_repr_iff_nat_dvd_sum_repr {a n : ℕ} (x : Fin n → ℤ) (ha : 
  the sum of its digits is divisible by `9`
 -/
 example {n : ℕ} (x : Fin n → ℤ) : 9 ∣ ∑ i, x i * 10 ^ (i : ℕ) ↔ 9 ∣ ∑ i, x i :=
-  nat_dvd_repr_iff_nat_dvd_sum_repr x (by norm_num)
+  nat_dvd_repr_iff_nat_dvd_sum_repr x Nat.one_lt_ofNat
 
 /-- so when the base is `8`, then a number in base `8` is divisible by `7`,
  if and only if the sum of its digits is divisible by `7` -/
 example {n : ℕ} (x : Fin n → ℤ) : 7 ∣ ∑ i, x i * 8 ^ (i : ℕ) ↔ 7 ∣ ∑ i, x i :=
-  nat_dvd_repr_iff_nat_dvd_sum_repr _ (by norm_num)
-
+  nat_dvd_repr_iff_nat_dvd_sum_repr _ Nat.one_lt_ofNat
