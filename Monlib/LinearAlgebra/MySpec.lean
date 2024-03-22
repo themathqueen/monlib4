@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.End
+import Monlib.LinearAlgebra.End
 
 #align_import linear_algebra.my_spec
 
@@ -24,7 +24,7 @@ theorem isUnit_comm (K E : Type _) [DivisionRing K] [AddCommGroup E] [Module K E
     rw [← nonempty_invertible_iff_isUnit] at h ⊢
     refine' Nonempty.intro _
     obtain ⟨z, hz1, hz2⟩ := Nonempty.some h
-    apply invertibleMul _ _
+    apply @invertibleMul _ _ _ _ ?_ ?_
     rw [mul_assoc, LinearMap.mul_eq_one_comm, mul_assoc] at hz2
     rw [← mul_assoc] at hz1
   any_goals apply Invertible.mk (z * x) hz1 hz2
@@ -32,8 +32,8 @@ theorem isUnit_comm (K E : Type _) [DivisionRing K] [AddCommGroup E] [Module K E
   all_goals
     rw [LinearMap.mul_eq_one_comm, mul_assoc] at hz1
     rw [mul_assoc, LinearMap.mul_eq_one_comm] at hz2
-  any_goals exact Invertible.mk (y * z) hz2 hz1
-  any_goals exact Invertible.mk (x * z) hz2 hz1
+  exact Invertible.mk (y * z) hz2 hz1
+  exact Invertible.mk (x * z) hz2 hz1
 
 theorem isUnit_neg {α : Type _} [Monoid α] [HasDistribNeg α] (x : α) : IsUnit (-x) ↔ IsUnit x :=
   by
@@ -70,5 +70,3 @@ theorem spectrum.comm {K E : Type _} [Field K] [AddCommGroup E] [Module K E] [Fi
     intro H
     rw [H, map_zero, eq_comm, smul_eq_zero] at h
     simp_rw [Hu, hv, false_or_iff] at h
-    exact h
-

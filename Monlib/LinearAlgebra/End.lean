@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.Eigenspace.Basic
+import Mathlib.LinearAlgebra.Eigenspace.Basic
 
 #align_import linear_algebra.End
 
@@ -28,13 +28,13 @@ theorem LinearMap.comp_sum {R M M₂ M₃ : Type _} [Semiring R] [AddCommMonoid 
     [AddCommMonoid M₃] [Module R M] [Module R M₂] [Module R M₃] (g : M₃ →ₗ[R] M₂) {α : Type _}
     (s : Finset α) (f : α → M →ₗ[R] M₃) : g ∘ₗ ∑ a : α in s, f a = ∑ a : α in s, g ∘ₗ f a := by
   simp_rw [LinearMap.ext_iff, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.sum_apply,
-    map_sum, eq_self_iff_true, forall_true_iff]
+    map_sum, forall_true_iff]
 
 theorem LinearMap.sum_comp {R M M₂ M₃ : Type _} [Semiring R] [AddCommMonoid M] [AddCommMonoid M₂]
     [AddCommMonoid M₃] [Module R M] [Module R M₂] [Module R M₃] (f : M →ₗ[R] M₃) {α : Type _}
     (s : Finset α) (g : α → M₃ →ₗ[R] M₂) : (∑ a : α in s, g a) ∘ₗ f = ∑ a : α in s, g a ∘ₗ f := by
   simp_rw [LinearMap.ext_iff, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.sum_apply,
-    eq_self_iff_true, forall_true_iff]
+    forall_true_iff]
 
 theorem Module.End.has_eigenvector_iff_hasEigenvalue {R M : Type _} [CommRing R] [AddCommGroup M]
     [Module R M] {T : Module.End R M} {α : R} :
@@ -52,4 +52,3 @@ theorem Module.End.has_eigenvector_iff_hasEigenvalue {R M : Type _} [CommRing R]
     use x
     rw [← Module.End.mem_eigenspace_iff]
     exact ⟨Hx, hx⟩
-

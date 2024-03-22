@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyMatrix.Conj
+import Monlib.LinearAlgebra.MyMatrix.Conj
 
 #align_import linear_algebra.my_matrix.reshape
 
@@ -27,7 +27,7 @@ variable {R I J : Type _} [Semiring R]
 def reshape : Matrix I J R ≃ₗ[R] I × J → R :=
   (LinearEquiv.curry R _ _).symm
 
-theorem reshape_apply (x : Matrix I J R) (ij : I × J) : x.reshape ij = x ij.1 ij.2 :=
+theorem reshape_apply (x : Matrix I J R) (ij : I × J) : reshape x ij = x ij.1 ij.2 :=
   rfl
 
 theorem reshape_symm_apply (x : I × J → R) (i : I) (j : J) :
@@ -39,14 +39,13 @@ theorem reshape_symm_apply' (x : I × J → R) (ij : I × J) :
   rw [reshape_symm_apply x ij.1 ij.2, Prod.mk.eta]
 
 theorem reshape_one [DecidableEq I] (x y : I) :
-    (1 : Matrix I I R).reshape (x, y) = ite (x = y) 1 0 := by
+    reshape (1 : Matrix I I R) (x, y) = ite (x = y) 1 0 := by
   simp_rw [Matrix.reshape_apply, Matrix.one_apply]
 
 /-- ${\varrho(x)}^*=\varrho(\bar{x})$ -/
-theorem reshape_aux_star [Star R] (x : Matrix I J R) : star x.reshape = xᴴᵀ.reshape :=
+theorem reshape_aux_star [Star R] (x : Matrix I J R) : star (reshape x) = reshape xᴴᵀ :=
   by
   ext1
   simp_rw [Pi.star_apply, Matrix.reshape_apply, Matrix.conj_apply]
 
 end Matrix
-

@@ -1,5 +1,5 @@
-import LinearAlgebra.MyMatrix.Basic
-import LinearAlgebra.InnerAut
+import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.InnerAut
 
 #align_import linear_algebra.my_matrix.spectra
 
@@ -125,4 +125,3 @@ def IsAlmostHermitian.HasAlmostEqualSpectraTo {x y : Matrix n n 𝕜} (hx : x.Is
   ∃ β : 𝕜ˣ, hx.spectra = (hy.smul β).spectra
 
 end Matrix
-
