@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.TensorProduct
-import Algebra.Algebra.Basic
-import Algebra.Module.Opposites
+import Mathlib.LinearAlgebra.TensorProduct.Basic
+import Mathlib.Algebra.Algebra.Basic
+import Mathlib.Algebra.Module.Opposites
 
 #align_import linear_algebra.my_ips.op_unop
 
@@ -56,7 +56,7 @@ theorem unop_star_apply [Star A] (a : Aᵐᵒᵖ) :
 
 open scoped TensorProduct
 
-def tenSwap : A ⊗[R] Aᵐᵒᵖ →ₗ[R] A ⊗[R] Aᵐᵒᵖ :=
+noncomputable def tenSwap : A ⊗[R] Aᵐᵒᵖ →ₗ[R] A ⊗[R] Aᵐᵒᵖ :=
   TensorProduct.map (unop : Aᵐᵒᵖ →ₗ[R] A) (op : A →ₗ[R] Aᵐᵒᵖ) ∘ₗ
     (TensorProduct.comm R A Aᵐᵒᵖ).toLinearMap
 
@@ -81,4 +81,3 @@ def tenSwap_injective : Function.Injective (tenSwap : A ⊗[R] Aᵐᵒᵖ →ₗ
   by
   intro a b h
   rw [← tenSwap_apply_tenSwap a, h, tenSwap_apply_tenSwap]
-
