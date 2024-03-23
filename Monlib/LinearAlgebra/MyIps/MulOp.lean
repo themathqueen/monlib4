@@ -3,11 +3,11 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Module.Opposites
-import LinearAlgebra.Basis
-import LinearAlgebra.FiniteDimensional
-import Analysis.InnerProductSpace.Basic
-import Analysis.InnerProductSpace.PiL2
+import Mathlib.Algebra.Module.Opposites
+import Mathlib.LinearAlgebra.Basis
+import Mathlib.LinearAlgebra.FiniteDimensional
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Analysis.InnerProductSpace.PiL2
 
 #align_import linear_algebra.my_ips.mul_op
 
@@ -26,29 +26,29 @@ noncomputable def Basis.mulOpposite (b : Basis ι R H) : Basis ι R Hᵐᵒᵖ :
   by
   refine' Basis.mk _ _
   · exact fun i => MulOpposite.op (b i)
-  · have := b.linear_independent
+  · have := b.linearIndependent
     simp_rw [linearIndependent_iff', ← MulOpposite.op_smul, ← Finset.op_sum,
       MulOpposite.op_eq_zero_iff] at this ⊢
     exact this
   · simp_rw [top_le_iff]
-    ext
+    ext x
     simp_rw [Submodule.mem_top, iff_true_iff, mem_span_range_iff_exists_fun, ← MulOpposite.op_smul,
       ← Finset.op_sum]
     use b.repr (MulOpposite.unop x)
     rw [Basis.sum_repr, MulOpposite.op_unop]
 
 theorem Basis.mulOpposite_apply (b : Basis ι R H) (i : ι) :
-    b.MulOpposite i = MulOpposite.op (b i) := by rw [Basis.mulOpposite, Basis.coe_mk]
+    b.mulOpposite i = MulOpposite.op (b i) := by rw [Basis.mulOpposite, Basis.coe_mk]
 
 theorem Basis.mulOpposite_repr_eq (b : Basis ι R H) :
-    b.MulOpposite.repr = (MulOpposite.opLinearEquiv R).symm.trans b.repr :=
+    b.mulOpposite.repr = (MulOpposite.opLinearEquiv R).symm.trans b.repr :=
   by
   simp_rw [Basis.repr_eq_iff', LinearEquiv.trans_apply, MulOpposite.coe_opLinearEquiv_symm,
     Basis.mulOpposite_apply, MulOpposite.unop_op]
   exact Basis.repr_self _
 
 theorem Basis.mulOpposite_repr_apply (b : Basis ι R H) (x : Hᵐᵒᵖ) :
-    b.MulOpposite.repr x = b.repr (MulOpposite.unop x) :=
+    b.mulOpposite.repr x = b.repr (MulOpposite.unop x) :=
   by
   rw [Basis.mulOpposite_repr_eq]
   rfl
@@ -58,7 +58,7 @@ theorem mulOpposite_finiteDimensional {R H : Type _} [DivisionRing R] [AddCommGr
     [FiniteDimensional R H] : FiniteDimensional R Hᵐᵒᵖ :=
   by
   let b := Basis.ofVectorSpace R H
-  let bm := b.mul_opposite
+  let bm := b.mulOpposite
   apply FiniteDimensional.of_finite_basis bm
   exact (Basis.ofVectorSpaceIndex R H).toFinite
 
@@ -87,19 +87,18 @@ theorem MulOpposite.inner_eq' {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGrou
 
 theorem Basis.mulOpposite_is_orthonormal_iff {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] {ι : Type _} [Fintype ι] (b : Basis ι 𝕜 H) :
-    Orthonormal 𝕜 b ↔ Orthonormal 𝕜 b.MulOpposite := by
+    Orthonormal 𝕜 b ↔ Orthonormal 𝕜 b.mulOpposite := by
   simp only [Orthonormal, Basis.mulOpposite_apply, MulOpposite.inner_eq', MulOpposite.norm_op]
 
 noncomputable def OrthonormalBasis.mulOpposite {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] {ι : Type _} [Fintype ι] (b : OrthonormalBasis ι 𝕜 H) :
     OrthonormalBasis ι 𝕜 Hᵐᵒᵖ :=
   by
-  refine' @Basis.toOrthonormalBasis ι _ _ _ _ _ _ _ _
-  · exact Basis.mulOpposite b.to_basis
+  refine' Basis.toOrthonormalBasis _ _
+  · exact b.toBasis.mulOpposite
   · rw [← Basis.mulOpposite_is_orthonormal_iff]
     exact b.orthonormal
 
 instance MulOpposite.starModule {R H : Type _} [Star R] [SMul R H] [Star H] [StarModule R H] :
     StarModule R Hᵐᵒᵖ
     where star_smul r a := by simp_rw [star, MulOpposite.unop_smul, star_smul, MulOpposite.op_smul]
-
