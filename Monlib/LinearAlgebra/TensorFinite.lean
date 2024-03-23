@@ -3,12 +3,12 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.TensorProductBasis
-import LinearAlgebra.FiniteDimensional
-import Data.IsROrC.Basic
-import LinearAlgebra.IsReal
-import LinearAlgebra.MyIps.OpUnop
-import LinearAlgebra.MyIps.MulOp
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.LinearAlgebra.FiniteDimensional
+import Mathlib.Data.IsROrC.Basic
+import Monlib.LinearAlgebra.IsReal
+import Monlib.LinearAlgebra.MyIps.OpUnop
+import Monlib.LinearAlgebra.MyIps.MulOp
 
 #align_import linear_algebra.tensor_finite
 
@@ -156,4 +156,3 @@ theorem tenSwap_star (x : E ⊗[𝕜] Eᵐᵒᵖ) : star (tenSwap x) = tenSwap (
     simp only [map_add, StarAddMonoid.star_add, hz, hw]
 
 end
-

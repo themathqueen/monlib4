@@ -3,13 +3,12 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyMatrix.PosDefRpow
-import LinearAlgebra.PiStarOrderedRing
-import LinearAlgebra.MyMatrix.PosDefRpow
-import LinearAlgebra.MyIps.Functional
-import LinearAlgebra.MyIps.QuantumSet
-import LinearAlgebra.PiDirectSum
-import LinearAlgebra.KroneckerToTensor
+import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
+import Monlib.LinearAlgebra.PiStarOrderedRing
+import Monlib.LinearAlgebra.MyIps.Functional
+import Monlib.LinearAlgebra.MyIps.QuantumSet
+import Momnlib.LinearAlgebra.PiDirectSum
+import Monlib.LinearAlgebra.KroneckerToTensor
 
 #align_import linear_algebra.my_matrix.star_ordered_ring
 
