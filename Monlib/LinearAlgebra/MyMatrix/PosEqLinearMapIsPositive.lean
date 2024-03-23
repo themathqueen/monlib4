@@ -548,8 +548,9 @@ theorem Matrix.stdBasisMatrix.trace [Fintype n] [DecidableEq n] (i j : n) (a : �
   simp_rw [Matrix.trace_iff', stdBasisMatrix, ite_and, Finset.sum_ite_eq, Finset.mem_univ,
     if_true, eq_comm]
 
-theorem Matrix.stdBasisMatrix_eq {n : Type _} [DecidableEq n] (i j : n) (a : 𝕜) :
-    stdBasisMatrix i j a = fun i' j' : n => ite (i = i' ∧ j = j') a 0 :=
+theorem Matrix.stdBasisMatrix_eq {R n m : Type _} [Semiring R]
+  [DecidableEq n] [DecidableEq m] (i : n) (j : m) (a : R) :
+    stdBasisMatrix i j a = fun i' j' => ite (i = i' ∧ j = j') a 0 :=
   rfl
 
 theorem vecMulVec_eq_zero_iff (x : n → 𝕜) : vecMulVec x (star x) = 0 ↔ x = 0 :=
