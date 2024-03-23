@@ -55,25 +55,24 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
         exact h
       · rw [H, norm_zero, zero_pow (two_ne_zero), eq_comm, sq_eq_zero_iff, norm_eq_zero] at h
         exact h
-    have this1 : ∀ i j : n, x i j = 0 ↔ xᴴ i j = 0 := by
-      simp_rw [conjTranspose_apply, star_eq_zero, this, forall₂_true_iff]
+    -- have this1 : ∀ i j : n, x i j = 0 ↔ xᴴ i j = 0 := by
+    --   simp_rw [conjTranspose_apply, star_eq_zero, this, forall₂_true_iff]
     by_cases h' : x = 0
     · rw [h']
       use 0; use 0
       simp_rw [zero_smul, isHermitian_zero, true_and_iff]
-    have hα_pre :
-      ∀ i j k l : n, x i j ≠ 0 → x k l ≠ 0 → x i j / star (x j i) = x k l / star (x l k) :=
-      by
-      intro m₁ m₂ m₃ m₄ hx₁ hx₂
-      rw [Ne.def, this] at hx₁ hx₂
-      simp_rw [div_eq_div_iff (star_ne_zero.mpr hx₁) (star_ne_zero.mpr hx₂), mul_comm _ (star _),
-        IsROrC.star_def]
-      exact h (_, _) (_, _)
+    -- have hα_pre :
+    --   ∀ i j k l : n, x i j ≠ 0 → x k l ≠ 0 → x i j / star (x j i) = x k l / star (x l k) :=
+    --   by
+    --   intro m₁ m₂ m₃ m₄ hx₁ hx₂
+    --   rw [Ne.def, this] at hx₁ hx₂
+    --   simp_rw [div_eq_div_iff (star_ne_zero.mpr hx₁) (star_ne_zero.mpr hx₂), mul_comm _ (star _),
+    --     IsROrC.star_def]
+    --   exact h (_, _) (_, _)
     have nonzero_ : ∃ i j : n, x i j ≠ 0 :=
       by
       simp_rw [Ne.def, ← Classical.not_forall, eq_zero]
       exact h'
-    have nonzero_' := nonzero_
     rcases nonzero_ with ⟨i, k, hik⟩
     let α := x i k / star (x k i)
     have hα' : α ≠ 0 :=
@@ -92,7 +91,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
         inv_mul_cancel hα', IsROrC.one_re]
     have another_hα : ∀ p q : n, x p q ≠ 0 → x p q = α * conj (x q p) :=
       by
-      intro p q hpq
+      intro p q _
       simp_rw [α, div_mul_eq_mul_div, mul_comm (x i k), ← IsROrC.star_def, h (p, _) (_, _), ←
         div_mul_eq_mul_div, ← star_div', div_self ((not_iff_not.mpr (this i k)).mp hik), star_one,
         one_mul]

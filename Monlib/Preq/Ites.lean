@@ -30,22 +30,9 @@ theorem star_ite {α : Type _} [InvolutiveStar α] (P : Prop) [Decidable P] (a b
     · simp_rw [(Ne.ite_eq_left_iff h).mpr h', (Ne.ite_eq_left_iff this).mpr h']
     · simp_rw [(Ne.ite_eq_right_iff h).mpr h', (Ne.ite_eq_right_iff this).mpr h']
 
-theorem coe_ite {α β : Type _} [Coe α β] (P : Prop) [Decidable P] (a b : α) :
+theorem coe_ite {α β : Type _} [CoeTC α β] (P : Prop) [Decidable P] (a b : α) :
     (↑(ite P a b) : β) = ite P (a : β) (b : β) :=
-  by
-  by_cases h : a = b
-  · simp_rw [h, ite_self]
-  · by_cases h' : P
-    · rw [(Ne.ite_eq_left_iff h).mpr h']
-      symm
-      rw [ite_eq_left_iff]
-      intro g
-      contradiction
-    · rw [(Ne.ite_eq_right_iff h).mpr h']
-      symm
-      rw [ite_eq_right_iff]
-      intro g
-      contradiction
+by split_ifs <;> rfl
 
 theorem ite_apply_lm {R A B : Type _} [Semiring R] [AddCommMonoid A] [AddCommMonoid B] [Module R A]
     [Module R B] (f g : A →ₗ[R] B) (x : A) (P : Prop) [Decidable P] :

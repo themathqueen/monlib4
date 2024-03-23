@@ -47,8 +47,8 @@ variable {n 𝕜 : Type _} [IsROrC 𝕜]
 
 open scoped Matrix ComplexOrder
 
-alias Matrix.PosSemidef.starMulSelf := Matrix.posSemidef_conjTranspose_mul_self
-alias Matrix.PosSemidef.mulStarSelf := Matrix.posSemidef_self_mul_conjTranspose
+alias Matrix.posSemidef_star_mul_self := Matrix.posSemidef_conjTranspose_mul_self
+alias Matrix.posSemidef_mul_star_self := Matrix.posSemidef_self_mul_conjTranspose
 
 theorem Matrix.toEuclideanLin_eq_piLp_linearEquiv [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) :
     Matrix.toEuclideanLin x =
