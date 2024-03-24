@@ -3,22 +3,22 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.Matrix.Block
-import LinearAlgebra.Matrix.Trace
-import Data.Matrix.Basis
-import Preq.Dite
-import LinearAlgebra.Matrix.Hermitian
-import LinearAlgebra.MyTensorProduct
-import Data.Matrix.Kronecker
-import LinearAlgebra.ToMatrixOfEquiv
+import Mathlib.LinearAlgebra.Matrix.Block
+import Mathlib.LinearAlgebra.Matrix.Trace
+import Mathlib.Data.Matrix.Basis
+import Monlib.Preq.Dite
+import Mathlib.LinearAlgebra.Matrix.Hermitian
+import Monlib.LinearAlgebra.MyTensorProduct
+import Mathlib.Data.Matrix.Kronecker
+import Monlib.LinearAlgebra.ToMatrixOfEquiv
 
-#align_import linear_algebra.my_matrix.include_block
+#align_import linear_algebra.my_matrix.includeBlock
 
 /-!
 
 # Include block
 
- This file defines `matrix.include_block` which immitates `direct_sum.component_of` but for `pi` instead of `direct_sum` :TODO:
+ This file defines `matrix.includeBlock` which immitates `direct_sum.component_of` but for `pi` instead of `direct_sum` :TODO:
 
  The direct sum in these files are sort of misleading.
 
@@ -44,7 +44,7 @@ def blockDiagonal'AlgHom {o : Type _} {m' : o → Type _} {α : Type _} [Fintype
   map_zero' := blockDiagonal'_zero
   map_add' a b := blockDiagonal'_add _ _
   commutes' a := by
-    simp_rw [Algebra.algebraMap_eq_smul_one, block_diagonal'_smul, block_diagonal'_one]
+    simp_rw [Algebra.algebraMap_eq_smul_one, blockDiagonal'_smul, blockDiagonal'_one]
 
 theorem blockDiagonal'AlgHom_apply {o : Type _} {m' : o → Type _} {α : Type _} [Fintype o]
     [DecidableEq o] [∀ i, Fintype (m' i)] [∀ i, DecidableEq (m' i)] [CommSemiring α]
@@ -69,67 +69,48 @@ theorem blockDiag'LinearMap_blockDiagonal'AlgHom {o : Type _} {m' : o → Type _
     Matrix.blockDiag'LinearMap (Matrix.blockDiagonal'AlgHom x) = x :=
   blockDiag'_blockDiagonal' x
 
-theorem block_diagonal'_ext {R : Type _} {k : Type _} {s : k → Type _}
+theorem blockDiagonal'_ext {R : Type _} {k : Type _} {s : k → Type _}
     (x y : Matrix (Σ i, s i) (Σ i, s i) R) : x = y ↔ ∀ i j k l, x ⟨i, j⟩ ⟨k, l⟩ = y ⟨i, j⟩ ⟨k, l⟩ :=
-  by simp only [Function.funext_iff, Sigma.forall]
+  by
+  simp only [← Matrix.ext_iff, Sigma.forall]
 
 def IsBlockDiagonal {o : Type _} {m' n' : o → Type _} {α : Type _} [DecidableEq o] [Zero α]
     (x : Matrix (Σ i, m' i) (Σ i, n' i) α) : Prop :=
   blockDiagonal' (blockDiag' x) = x
 
-def includeBlock {o : Type _} [DecidableEq o] {m' : o → Type _} {α : Type _} [CommSemiring α]
-    {i : o} : Matrix (m' i) (m' i) α →ₗ[α] ∀ j : o, Matrix (m' j) (m' j) α :=
-  LinearMap.single i
+def includeBlock {o : Type _} [DecidableEq o] {m' : o → Type _} {α : Type _} [Semiring α]
+  {i : o} : Matrix (m' i) (m' i) α →ₗ[α] (Π j : o, Matrix (m' j) (m' j) α) :=
+@LinearMap.single α o _ (fun j => Matrix (m' j) (m' j) α) _ _ _ i
 
--- { to_fun := λ x j, dite (i = j) (λ h, eq.mp (by rw [h]) x) (λ _, 0),
---   map_add' := λ x y,
---     by { ext,
---     simp only [dite_apply, dite_eq_iff', pi.add_apply],
---     split,
---     { rintros rfl,
---       simp only [eq_self_iff_true, dif_pos], refl, },
---     { intros h,
---       simp only [h, pi.zero_apply, dif_neg, not_false_iff, add_zero], }, },
---   map_smul' := λ r x,
---     by { ext,
---     simp only [dite_apply, dite_eq_iff', pi.smul_apply],
---     split,
---     { rintros rfl,
---       simp only [eq_self_iff_true, dif_pos], refl, },
---     { intros h,
---       simp only [h, pi.zero_apply, dif_neg, not_false_iff, smul_zero], }, } }
 theorem includeBlock_apply {o : Type _} [DecidableEq o] {m' : o → Type _} {α : Type _}
     [CommSemiring α] {i : o} (x : Matrix (m' i) (m' i) α) :
     (includeBlock : Matrix (m' i) (m' i) α →ₗ[α] ∀ j, Matrix (m' j) (m' j) α) x = fun j : o =>
       dite (i = j) (fun h => Eq.mp (by rw [h]) x) fun _ => 0 :=
   by
-  ext
-  simp only [include_block, LinearMap.coe_single, Pi.single, Function.update, eq_comm,
+  ext j₁ j₂ j₃
+  simp only [includeBlock, LinearMap.coe_single, Pi.single, Function.update, eq_comm,
     Pi.zero_apply]
-  split_ifs <;> finish
+  split_ifs with h <;> aesop
 
 theorem includeBlock_hMul_same {o : Type _} [Fintype o] [DecidableEq o] {m' : o → Type _}
     {α : Type _} [∀ i, Fintype (m' i)] [∀ i, DecidableEq (m' i)] [CommSemiring α] {i : o}
     (x y : Matrix (m' i) (m' i) α) : includeBlock x * includeBlock y = includeBlock (x * y) :=
   by
-  ext
-  simp_rw [include_block_apply, Pi.mul_apply, hMul_dite, dite_hMul, MulZeroClass.mul_zero,
-    MulZeroClass.zero_mul, dite_apply, Pi.zero_apply]
-  simp only [eq_mp_eq_cast, mul_eq_mul, dite_eq_ite, if_t_t]
-  congr
-  ext
-  simp only [x_2, eq_self_iff_true, eq_mp_eq_cast, mul_eq_mul, dif_pos, mul_apply, cast]
-  finish
+  ext i x_1 x_2
+  simp_rw [includeBlock_apply, Pi.mul_apply, hMul_dite, dite_hMul, MulZeroClass.mul_zero,
+    MulZeroClass.zero_mul]
+  simp only [eq_mp_eq_cast, dite_eq_ite, ite_self]
+  aesop
 
 theorem includeBlock_hMul_ne_same {o : Type _} [Fintype o] [DecidableEq o] {m' : o → Type _}
     {α : Type _} [∀ i, Fintype (m' i)] [∀ i, DecidableEq (m' i)] [CommSemiring α] {i j : o}
     (h : i ≠ j) (x : Matrix (m' i) (m' i) α) (y : Matrix (m' j) (m' j) α) :
     includeBlock x * includeBlock y = 0 := by
   ext
-  simp_rw [include_block_apply, Pi.mul_apply, hMul_dite, dite_hMul, MulZeroClass.mul_zero,
-    MulZeroClass.zero_mul, dite_apply, Pi.zero_apply]
-  simp only [eq_mp_eq_cast, mul_eq_mul, dite_eq_ite, if_t_t]
-  finish
+  simp_rw [includeBlock_apply, Pi.mul_apply, hMul_dite, dite_hMul, MulZeroClass.mul_zero,
+    MulZeroClass.zero_mul, Pi.zero_apply]
+  simp only [eq_mp_eq_cast, dite_eq_ite, ite_self]
+  aesop
 
 theorem includeBlock_hMul {o : Type _} [Fintype o] [DecidableEq o] {m' : o → Type _} {α : Type _}
     [∀ i, Fintype (m' i)] [∀ i, DecidableEq (m' i)] [CommSemiring α] {i : o}
@@ -137,10 +118,9 @@ theorem includeBlock_hMul {o : Type _} [Fintype o] [DecidableEq o] {m' : o → T
     includeBlock x * y = includeBlock (x * y i) :=
   by
   ext
-  simp only [include_block_apply, Pi.mul_apply, dite_hMul, MulZeroClass.zero_mul, dite_apply,
+  simp only [includeBlock_apply, Pi.mul_apply, dite_hMul, MulZeroClass.zero_mul, dite_apply,
     Pi.zero_apply]
-  split_ifs <;> simp
-  finish
+  split_ifs <;> aesop
 
 theorem hMul_includeBlock {o : Type _} [Fintype o] [DecidableEq o] {m' : o → Type _} {α : Type _}
     [∀ i, Fintype (m' i)] [∀ i, DecidableEq (m' i)] [CommSemiring α] {i : o}
@@ -148,10 +128,9 @@ theorem hMul_includeBlock {o : Type _} [Fintype o] [DecidableEq o] {m' : o → T
     x * includeBlock y = includeBlock (x i * y) :=
   by
   ext
-  simp only [include_block_apply, Pi.mul_apply, dite_hMul, MulZeroClass.zero_mul, dite_apply,
+  simp only [includeBlock_apply, Pi.mul_apply, dite_hMul, MulZeroClass.zero_mul, dite_apply,
     Pi.zero_apply]
-  split_ifs <;> simp
-  finish
+  split_ifs <;> aesop
 
 open scoped BigOperators
 
@@ -159,7 +138,7 @@ theorem sum_includeBlock {R k : Type _} [CommSemiring R] [Fintype k] [DecidableE
     {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] (x : ∀ i, Matrix (s i) (s i) R) :
     ∑ i, includeBlock (x i) = x := by
   ext
-  simp only [Finset.sum_apply, include_block_apply, dite_apply, Pi.zero_apply, Finset.sum_dite_eq',
+  simp only [Finset.sum_apply, includeBlock_apply, dite_apply, Pi.zero_apply, Finset.sum_dite_eq',
     Finset.mem_univ, if_true]
   rfl
 
@@ -169,31 +148,37 @@ theorem blockDiagonal'_includeBlock_trace {R k : Type _} [CommSemiring R] [Finty
     (blockDiagonal' (includeBlock (x j))).trace = (x j).trace :=
   by
   calc
-    (block_diagonal' (include_block (x j))).trace = ∑ i, (include_block (x j) i).trace := _
-    _ = (x j).trace := _
-  · simp_rw [Matrix.trace, Matrix.diag, block_diagonal'_apply, eq_self_iff_true, dif_pos,
-      Finset.sum_sigma']
-    rfl
-  · simp only [include_block_apply, Matrix.trace, Matrix.diag, Finset.sum_dite_irrel,
-      Finset.sum_const_zero, dite_apply, Finset.sum_dite_eq, Finset.mem_univ, if_true,
-      Pi.zero_apply]
-    rfl
+    (blockDiagonal' (includeBlock (x j))).trace
+      = ∑ i, (includeBlock (x j) i).trace :=
+      by simp_rw [Matrix.trace, Matrix.diag, blockDiagonal'_apply, dif_pos,
+      Finset.sum_sigma']; rfl
+    _ = ∑ i, ∑ a, includeBlock (x j) i a a := rfl
+    _ = ∑ i, ∑ a, dite (j = i) (fun h => by rw [← h]; exact (x j))
+      (fun _ => (0 : Matrix (s i) (s i) R)) a a :=
+      by simp_rw [includeBlock_apply]; rfl
+    _ = ∑ i, ∑ a, dite (j = i) (fun h =>
+        (by rw [← h]; exact x j : Matrix (s i) (s i) R) a a)
+      (fun _ => (0 : R)) := by congr; ext; congr; ext; aesop
+    _ = (x j).trace := by
+        simp_rw [Finset.sum_dite_irrel, Finset.sum_const_zero,
+          Finset.sum_dite_eq, Finset.mem_univ, if_true]
+        rfl
 
 open scoped Matrix
 
 theorem stdBasisMatrix_hMul_trace {R n p : Type _} [Semiring R] [Fintype p] [DecidableEq p]
     [Fintype n] [DecidableEq n] (i : n) (j : p) (x : Matrix p n R) :
-    (stdBasisMatrix i j 1 ⬝ x).trace = x j i := by
-  simp_rw [Matrix.trace, Matrix.diag, mul_apply, std_basis_matrix, boole_mul, ite_and,
+    Matrix.trace (stdBasisMatrix i j (1 : R) * x) = x j i := by
+  simp_rw [Matrix.trace, Matrix.diag, mul_apply, stdBasisMatrix, boole_mul, ite_and,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 theorem ext_iff_trace {R n p : Type _} [Fintype n] [Fintype p] [DecidableEq n] [DecidableEq p]
-    [CommSemiring R] (x y : Matrix n p R) : x = y ↔ ∀ a, (x ⬝ a).trace = (y ⬝ a).trace :=
+    [CommSemiring R] (x y : Matrix n p R) : x = y ↔ ∀ a, (x * a).trace = (y * a).trace :=
   by
   refine' ⟨fun h a => by rw [h], fun h => _⟩
-  ext
-  specialize h (std_basis_matrix j i 1)
-  simp_rw [trace_mul_comm _ (std_basis_matrix _ _ _), Matrix.stdBasisMatrix_hMul_trace j i] at h
+  ext i j
+  specialize h (stdBasisMatrix j i 1)
+  simp_rw [trace_mul_comm _ (stdBasisMatrix _ _ _), Matrix.stdBasisMatrix_hMul_trace j i] at h
   exact h
 
 variable {R : Type _} [CommSemiring R]
@@ -206,25 +191,15 @@ theorem IsBlockDiagonal.eq {k : Type _} [DecidableEq k] {s : k → Type _}
 theorem IsBlockDiagonal.add {k : Type _} [DecidableEq k] {s : k → Type _}
     {x y : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) (hy : y.IsBlockDiagonal) :
     (x + y).IsBlockDiagonal := by
-  simp only [Matrix.IsBlockDiagonal, block_diag'_add, block_diagonal'_add, hx.eq, hy.eq]
+  simp only [Matrix.IsBlockDiagonal, blockDiag'_add, blockDiagonal'_add, hx.eq, hy.eq]
 
 theorem IsBlockDiagonal.zero {k : Type _} [DecidableEq k] {s : k → Type _} :
     (0 : Matrix (Σ i, s i) (Σ i, s i) R).IsBlockDiagonal := by
-  simp only [Matrix.IsBlockDiagonal, block_diag'_zero, block_diagonal'_zero]
+  simp only [Matrix.IsBlockDiagonal, blockDiag'_zero, blockDiagonal'_zero]
 
-instance addCommMonoidBlockDiagonal {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
-    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
-    AddCommMonoid { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }
-    where
-  add x y := ⟨↑x + ↑y, Matrix.IsBlockDiagonal.add (Subtype.mem x) (Subtype.mem y)⟩
-  add_assoc x y z := by simp only [Subtype.eta, add_assoc, Subtype.coe_mk]
-  zero := ⟨(0 : Matrix (Σ i, s i) (Σ i, s i) R), Matrix.IsBlockDiagonal.zero⟩
-  zero_add a := by simp only [Subtype.eta, Subtype.coe_mk, zero_add, Subtype.coe_eta]
-  add_zero a := by simp only [Subtype.coe_eta, Subtype.coe_mk, add_zero]
-  add_comm a b := by
-    ext
-    unfold_coes
-    simp only [Subtype.val, add_comm]
+instance IsBlockDiagonal.HAdd {k : Type _} [DecidableEq k] {s : k → Type _} :
+    Add ({ x : Matrix (Σ i, s i) (Σ i, s i) R // IsBlockDiagonal x }) where
+  add x y := ⟨↑x + ↑y, Matrix.IsBlockDiagonal.add x.property y.property⟩
 
 theorem IsBlockDiagonal.coe_add {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
@@ -234,7 +209,37 @@ theorem IsBlockDiagonal.coe_add {k : Type _} [Fintype k] [DecidableEq k] {s : k 
       x + y :=
   rfl
 
-private theorem is_block_diagonal.coe_sum_aux {k : Type _} [Fintype k] [DecidableEq k]
+instance IsBlockDiagonal.Zero {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
+    Zero ({ x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }) where zero := ⟨0, IsBlockDiagonal.zero⟩
+
+theorem IsBlockDiagonal.coe_zero {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
+    ((0 : { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }) :
+        Matrix (Σ i, s i) (Σ i, s i) R) =
+      0 :=
+  rfl
+
+instance addCommMonoidBlockDiagonal {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
+    AddCommMonoid { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }
+    where
+  add_assoc x y z := by
+    ext
+    simp only [IsBlockDiagonal.coe_add, add_assoc]
+  zero_add a := by
+    ext
+    simp only [IsBlockDiagonal.coe_add, IsBlockDiagonal.coe_zero, zero_add]
+  add_zero a := by
+    ext
+    simp only [IsBlockDiagonal.coe_zero, IsBlockDiagonal.coe_add, add_zero]
+  add_comm a b := by
+    ext
+    simp only [IsBlockDiagonal.coe_add, add_comm]
+  nsmul n x := by
+
+
+private theorem is_blockDiagonal.coe_sum_aux {k : Type _} [Fintype k] [DecidableEq k]
     {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {n : ℕ}
     {x : Fin n → { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }} :
     ((∑ i, x i : { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }) :
@@ -265,19 +270,12 @@ theorem IsBlockDiagonal.coe_sum {k : Type _} [Fintype k] [DecidableEq k] {s : k 
     intro i
     simp only [Equiv.apply_symm_apply]
   rw [this]
-  exact is_block_diagonal.coe_sum_aux
-
-theorem IsBlockDiagonal.coe_zero {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
-    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
-    ((0 : { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }) :
-        Matrix (Σ i, s i) (Σ i, s i) R) =
-      0 :=
-  rfl
+  exact is_blockDiagonal.coe_sum_aux
 
 theorem IsBlockDiagonal.smul {k : Type _} [DecidableEq k] {s : k → Type _}
     {x : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) (α : R) :
     (α • x).IsBlockDiagonal := by
-  simp only [Matrix.IsBlockDiagonal, block_diag'_smul, block_diagonal'_smul, hx.eq]
+  simp only [Matrix.IsBlockDiagonal, blockDiag'_smul, blockDiagonal'_smul, hx.eq]
 
 instance hasSmulBlockDiagonal {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
@@ -323,7 +321,7 @@ instance moduleBlockDiagonal {k : Type _} [Fintype k] [DecidableEq k] {s : k →
 
 theorem IsBlockDiagonal.blockDiagonal' {k : Type _} [DecidableEq k] {s : k → Type _}
     (x : ∀ i, Matrix (s i) (s i) R) : (blockDiagonal' x).IsBlockDiagonal := by
-  rw [Matrix.IsBlockDiagonal, block_diag'_block_diagonal']
+  rw [Matrix.IsBlockDiagonal, blockDiag'_blockDiagonal']
 
 theorem isBlockDiagonal_iff {k : Type _} [DecidableEq k] {s : k → Type _}
     (x : Matrix (Σ i, s i) (Σ i, s i) R) :
@@ -336,8 +334,8 @@ def stdBasisMatrixBlockDiagonal {k : Type _} [DecidableEq k] {s : k → Type _}
     { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal } :=
   ⟨stdBasisMatrix ⟨i, j⟩ ⟨i, l⟩ α,
     by
-    simp only [Matrix.IsBlockDiagonal, block_diag'_apply, block_diagonal'_apply,
-      Matrix.block_diagonal'_ext, dite_eq_iff', cast_hEq]
+    simp only [Matrix.IsBlockDiagonal, blockDiag'_apply, blockDiagonal'_apply,
+      Matrix.blockDiagonal'_ext, dite_eq_iff', cast_hEq]
     intro a b c d
     constructor
     · intro h
@@ -346,7 +344,7 @@ def stdBasisMatrixBlockDiagonal {k : Type _} [DecidableEq k] {s : k → Type _}
       simp only [cast_hEq]
     · intro h
       symm
-      apply std_basis_matrix.apply_of_ne
+      apply stdBasisMatrix.apply_of_ne
       simp only
       rintro ⟨⟨rfl, h2⟩, ⟨rfl, h4⟩⟩
       contradiction⟩
@@ -356,7 +354,7 @@ theorem includeBlock_conjTranspose {R k : Type _} [CommSemiring R] [StarRing R] 
     {x : Matrix (s i) (s i) R} : star x.includeBlock = xᴴ.includeBlock :=
   by
   ext
-  simp only [Pi.star_apply, include_block_apply, star_apply, dite_apply, Pi.zero_apply, star_dite,
+  simp only [Pi.star_apply, includeBlock_apply, star_apply, dite_apply, Pi.zero_apply, star_dite,
     star_zero, conj_transpose_apply]
   split_ifs <;> finish
 
@@ -364,7 +362,7 @@ theorem includeBlock_inj {k : Type _} [Fintype k] [DecidableEq k] {s : k → Typ
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i : k} {x y : Matrix (s i) (s i) R} :
     x.includeBlock = y.includeBlock ↔ x = y :=
   by
-  simp only [include_block_apply]
+  simp only [includeBlock_apply]
   refine' ⟨fun h => _, fun h => by rw [h]⟩
   simp_rw [Function.funext_iff, dite_apply, Pi.zero_apply, dite_eq_iff'] at h
   ext1 j k
@@ -379,14 +377,14 @@ theorem blockDiagonal'_includeBlock_isHermitian_iff {R k : Type _} [CommSemiring
     {i : k} (x : Matrix (s i) (s i) R) :
     (blockDiagonal' x.includeBlock).IsHermitian ↔ x.IsHermitian := by
   calc
-    (block_diagonal' x.include_block).IsHermitian ↔
-        (block_diagonal' x.include_block)ᴴ = block_diagonal' x.include_block :=
+    (blockDiagonal' x.includeBlock).IsHermitian ↔
+        (blockDiagonal' x.includeBlock)ᴴ = blockDiagonal' x.includeBlock :=
       by simp only [is_hermitian]
-    _ ↔ block_diagonal' (star x.include_block) = block_diagonal' x.include_block := by
-      simp only [block_diagonal'_conj_transpose] <;> rfl
-    _ ↔ star x.include_block = x.include_block := block_diagonal'_inj
-    _ ↔ xᴴ.includeBlock = x.include_block := by simp only [include_block_conj_transpose]
-    _ ↔ xᴴ = x := include_block_inj
+    _ ↔ blockDiagonal' (star x.includeBlock) = blockDiagonal' x.includeBlock := by
+      simp only [blockDiagonal'_conj_transpose] <;> rfl
+    _ ↔ star x.includeBlock = x.includeBlock := blockDiagonal'_inj
+    _ ↔ xᴴ.includeBlock = x.includeBlock := by simp only [includeBlock_conj_transpose]
+    _ ↔ xᴴ = x := includeBlock_inj
     _ ↔ x.is_hermitian := by simp only [is_hermitian]
 
 theorem matrix_eq_sum_includeBlock {R k : Type _} [CommSemiring R] [Fintype k] [DecidableEq k]
@@ -396,12 +394,12 @@ theorem matrix_eq_sum_includeBlock {R k : Type _} [CommSemiring R] [Fintype k] [
 
 theorem includeBlock_apply_same {R k : Type _} [CommSemiring R] [Fintype k] [DecidableEq k]
     {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i : k}
-    (x : Matrix (s i) (s i) R) : includeBlock x i = x := by rw [include_block_apply] <;> finish
+    (x : Matrix (s i) (s i) R) : includeBlock x i = x := by rw [includeBlock_apply] <;> finish
 
 theorem includeBlock_apply_ne_same {R k : Type _} [CommSemiring R] [Fintype k] [DecidableEq k]
     {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i j : k}
     (x : Matrix (s i) (s i) R) (h : i ≠ j) : includeBlock x j = 0 := by
-  simp only [include_block_apply, h, dif_neg, not_false_iff]
+  simp only [includeBlock_apply, h, dif_neg, not_false_iff]
 
 theorem includeBlock_apply_stdBasisMatrix {R k : Type _} [CommSemiring R] [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i : k}
@@ -411,14 +409,14 @@ theorem includeBlock_apply_stdBasisMatrix {R k : Type _} [CommSemiring R] [Finty
   by
   ext1 c
   ext1 d e
-  simp_rw [include_block_apply, dite_apply, Pi.zero_apply, block_diag'_apply, dite_eq_iff']
+  simp_rw [includeBlock_apply, dite_apply, Pi.zero_apply, blockDiag'_apply, dite_eq_iff']
   constructor
   · rintro rfl
-    simp only [eq_mp_eq_cast, cast_eq, std_basis_matrix]
+    simp only [eq_mp_eq_cast, cast_eq, stdBasisMatrix]
     congr <;> · simp only [eq_self_iff_true, heq_iff_eq, true_and_iff]
   · intro h
     symm
-    apply std_basis_matrix.apply_of_ne
+    apply stdBasisMatrix.apply_of_ne
     simp only [h, false_and_iff, not_false_iff]
 
 theorem includeBlock_hMul_includeBlock {R k : Type _} [CommSemiring R] [Fintype k] [DecidableEq k]
@@ -428,7 +426,7 @@ theorem includeBlock_hMul_includeBlock {R k : Type _} [CommSemiring R] [Fintype 
       dite (j = i) (fun h => includeBlock (x * by rw [← h]; exact y)) fun h => 0 :=
   by
   ext1
-  simp [include_block_apply, dite_hMul, hMul_dite, MulZeroClass.mul_zero, MulZeroClass.zero_mul,
+  simp [includeBlock_apply, dite_hMul, hMul_dite, MulZeroClass.mul_zero, MulZeroClass.zero_mul,
     dite_apply, Pi.zero_apply]
   split_ifs <;> finish
 
@@ -437,7 +435,7 @@ theorem IsBlockDiagonal.hMul {k : Type _} [Fintype k] [DecidableEq k] {s : k →
     (hy : y.IsBlockDiagonal) : (x ⬝ y).IsBlockDiagonal :=
   by
   simp only [Matrix.IsBlockDiagonal]
-  rw [← hx.eq, ← hy.eq, ← block_diagonal'_mul, block_diag'_block_diagonal']
+  rw [← hx.eq, ← hy.eq, ← blockDiagonal'_mul, blockDiag'_blockDiagonal']
 
 @[instance]
 def IsBlockDiagonal.hasMul {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
@@ -455,7 +453,7 @@ theorem IsBlockDiagonal.coe_hMul {k : Type _} [Fintype k] [DecidableEq k] {s : k
 
 theorem IsBlockDiagonal.one {k : Type _} [DecidableEq k] {s : k → Type _} [∀ i, DecidableEq (s i)] :
     (1 : Matrix (Σ i, s i) (Σ i, s i) R).IsBlockDiagonal := by
-  simp only [Matrix.IsBlockDiagonal, block_diag'_one, block_diagonal'_one]
+  simp only [Matrix.IsBlockDiagonal, blockDiag'_one, blockDiagonal'_one]
 
 @[instance]
 def IsBlockDiagonal.hasOne {k : Type _} [DecidableEq k] {s : k → Type _} [∀ i, DecidableEq (s i)] :
@@ -475,16 +473,16 @@ theorem IsBlockDiagonal.coe_nsmul {k : Type _} [Fintype k] [DecidableEq k] {s : 
     ((n • x : { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }) :
         Matrix (Σ i, s i) (Σ i, s i) R) =
       n • ↑x :=
-  by simp_rw [nsmul_eq_smul_cast R n, ← is_block_diagonal.coe_smul]
+  by simp_rw [nsmul_eq_smul_cast R n, ← is_blockDiagonal.coe_smul]
 
 theorem IsBlockDiagonal.npow {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] (n : ℕ) {x : Matrix (Σ i, s i) (Σ i, s i) R}
     (hx : x.IsBlockDiagonal) : (x ^ n).IsBlockDiagonal :=
   by
   induction' n with d hd
-  · simp only [pow_zero]; exact is_block_diagonal.one
-  · simp only [pow_succ, is_block_diagonal.mul, hd]
-    exact is_block_diagonal.mul hx hd
+  · simp only [pow_zero]; exact is_blockDiagonal.one
+  · simp only [pow_succ, is_blockDiagonal.mul, hd]
+    exact is_blockDiagonal.mul hx hd
 
 @[instance]
 def IsBlockDiagonal.hasNpow {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
@@ -514,33 +512,33 @@ def IsBlockDiagonal.semiring {k : Type _} [Fintype k] [DecidableEq k] {s : k →
   nsmul_zero x := by simp only [zero_nsmul] <;> rfl
   nsmul_succ n x := by
     ext
-    simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_add, Nat.succ_eq_add_one,
+    simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_add, Nat.succ_eq_add_one,
       add_smul, one_smul, add_comm]
   add_comm := add_comm
   mul := (· * ·)
   left_distrib x y z := by ext;
-    simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_add, mul_add]
+    simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_add, mul_add]
   right_distrib x y z := by ext;
-    simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_add, add_mul]
+    simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_add, add_mul]
   zero_mul x := by ext;
-    simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_zero, MulZeroClass.zero_mul]
+    simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_zero, MulZeroClass.zero_mul]
   mul_zero x := by ext;
-    simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_zero, MulZeroClass.mul_zero]
-  mul_assoc x y z := by ext; simp only [is_block_diagonal.coe_mul, mul_assoc]
+    simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_zero, MulZeroClass.mul_zero]
+  mul_assoc x y z := by ext; simp only [is_blockDiagonal.coe_mul, mul_assoc]
   one := 1
-  one_mul x := by ext; simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_one, one_mul]
-  mul_one x := by ext; simp only [is_block_diagonal.coe_mul, is_block_diagonal.coe_one, mul_one]
+  one_mul x := by ext; simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_one, one_mul]
+  mul_one x := by ext; simp only [is_blockDiagonal.coe_mul, is_blockDiagonal.coe_one, mul_one]
   natCast n := n • 1
   natCast_zero := by ext;
-    simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_zero, zero_smul]
+    simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_zero, zero_smul]
   natCast_succ a := by ext;
-    simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_one, is_block_diagonal.coe_add,
+    simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_one, is_blockDiagonal.coe_add,
       Nat.succ_eq_add_one, add_smul, one_smul, add_comm]
   npow n x := IsBlockDiagonal.hasNpow.pow x n
-  npow_zero x := by ext; simp only [is_block_diagonal.coe_npow, is_block_diagonal.coe_one, pow_zero]
+  npow_zero x := by ext; simp only [is_blockDiagonal.coe_npow, is_blockDiagonal.coe_one, pow_zero]
   npow_succ n x := by ext;
-    simp_rw [is_block_diagonal.coe_npow, Nat.succ_eq_one_add, pow_add, is_block_diagonal.coe_mul,
-      pow_one, is_block_diagonal.coe_npow]
+    simp_rw [is_blockDiagonal.coe_npow, Nat.succ_eq_one_add, pow_add, is_blockDiagonal.coe_mul,
+      pow_one, is_blockDiagonal.coe_npow]
 
 @[instance]
 def IsBlockDiagonal.algebra {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
@@ -548,20 +546,20 @@ def IsBlockDiagonal.algebra {k : Type _} [Fintype k] [DecidableEq k] {s : k → 
     Algebra R { x : Matrix (Σ i, s i) (Σ i, s i) R // x.IsBlockDiagonal }
     where
   toFun r := r • 1
-  map_one' := by ext; simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_one, one_smul]
+  map_one' := by ext; simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_one, one_smul]
   map_zero' := by ext;
-    simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_zero, zero_smul]
+    simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_zero, zero_smul]
   map_add' x y := by ext;
-    simp only [is_block_diagonal.coe_nsmul, is_block_diagonal.coe_add, add_smul, add_comm]
+    simp only [is_blockDiagonal.coe_nsmul, is_blockDiagonal.coe_add, add_smul, add_comm]
   map_mul' x y := by
-    ext; simp only [is_block_diagonal.coe_smul, is_block_diagonal.coe_mul, smul_mul_assoc]
+    ext; simp only [is_blockDiagonal.coe_smul, is_blockDiagonal.coe_mul, smul_mul_assoc]
     simp only [Pi.smul_apply, Algebra.id.smul_eq_mul, mul_eq_mul, mul_smul,
-      is_block_diagonal.coe_one, Matrix.one_mul, mul_assoc]
+      is_blockDiagonal.coe_one, Matrix.one_mul, mul_assoc]
   commutes' r x := by ext;
-    simp only [is_block_diagonal.coe_smul, is_block_diagonal.coe_mul, smul_eq_mul, mul_smul_comm,
-      smul_mul_assoc, is_block_diagonal.coe_one, one_mul, mul_one]
+    simp only [is_blockDiagonal.coe_smul, is_blockDiagonal.coe_mul, smul_eq_mul, mul_smul_comm,
+      smul_mul_assoc, is_blockDiagonal.coe_one, one_mul, mul_one]
   smul_def' r x := by ext;
-    simp only [is_block_diagonal.coe_smul, is_block_diagonal.coe_mul, is_block_diagonal.coe_one,
+    simp only [is_blockDiagonal.coe_smul, is_blockDiagonal.coe_mul, is_blockDiagonal.coe_one,
       smul_mul_assoc, one_mul]
 
 theorem IsBlockDiagonal.coe_blockDiagonal'_blockDiag' {k : Type _} [DecidableEq k] {s : k → Type _}
@@ -577,29 +575,29 @@ def isBlockDiagonalPiAlgEquiv {k : Type _} [Fintype k] [DecidableEq k] {s : k �
   toFun x := blockDiag' (x : Matrix (Σ i, s i) (Σ i, s i) R)
   invFun x := ⟨blockDiagonal' x, Matrix.IsBlockDiagonal.blockDiagonal' x⟩
   left_inv x := by ext;
-    simp only [is_block_diagonal.coe_block_diagonal'_block_diag', block_diag'_block_diagonal',
+    simp only [is_blockDiagonal.coe_blockDiagonal'_blockDiag', blockDiag'_blockDiagonal',
       Subtype.coe_mk]
   right_inv x := by ext;
-    simp only [is_block_diagonal.coe_block_diagonal'_block_diag', block_diag'_block_diagonal',
+    simp only [is_blockDiagonal.coe_blockDiagonal'_blockDiag', blockDiag'_blockDiagonal',
       Subtype.coe_mk]
-  map_add' x y := by ext; simp only [is_block_diagonal.coe_add, Pi.add_apply, block_diag'_add]
+  map_add' x y := by ext; simp only [is_blockDiagonal.coe_add, Pi.add_apply, blockDiag'_add]
   commutes' r := by
-    simp only [Algebra.algebraMap_eq_smul_one, Pi.smul_apply, is_block_diagonal.coe_smul,
-      is_block_diagonal.coe_one, block_diag'_smul, block_diag'_one]
+    simp only [Algebra.algebraMap_eq_smul_one, Pi.smul_apply, is_blockDiagonal.coe_smul,
+      is_blockDiagonal.coe_one, blockDiag'_smul, blockDiag'_one]
   map_mul' x y := by
-    rw [← block_diagonal'_inj]
-    simp_rw [Pi.mul_def, mul_eq_mul, block_diagonal'_mul,
-      is_block_diagonal.coe_block_diagonal'_block_diag' x,
-      is_block_diagonal.coe_block_diagonal'_block_diag' y,
-      is_block_diagonal.coe_block_diagonal'_block_diag' (x * y), is_block_diagonal.coe_mul,
+    rw [← blockDiagonal'_inj]
+    simp_rw [Pi.mul_def, mul_eq_mul, blockDiagonal'_mul,
+      is_blockDiagonal.coe_blockDiagonal'_blockDiag' x,
+      is_blockDiagonal.coe_blockDiagonal'_blockDiag' y,
+      is_blockDiagonal.coe_blockDiagonal'_blockDiag' (x * y), is_blockDiagonal.coe_mul,
       mul_eq_mul]
 
 theorem IsBlockDiagonal.star {R : Type _} [CommSemiring R] [StarAddMonoid R] {k : Type _}
     [DecidableEq k] {s : k → Type _} {x : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) :
     xᴴ.IsBlockDiagonal := by
-  rw [is_block_diagonal]
+  rw [is_blockDiagonal]
   nth_rw 2 [← hx.eq]
-  simp_rw [block_diagonal'_conj_transpose, ← block_diag'_conj_transpose]
+  simp_rw [blockDiagonal'_conj_transpose, ← blockDiag'_conj_transpose]
 
 @[instance]
 def IsBlockDiagonal.hasStar {R : Type _} [CommSemiring R] [StarAddMonoid R] {k : Type _} [Fintype k]
@@ -621,8 +619,8 @@ theorem isBlockDiagonalPiAlgEquiv.map_star {R : Type _} [CommSemiring R] [StarAd
     isBlockDiagonalPiAlgEquiv (star x) = star (isBlockDiagonalPiAlgEquiv x) :=
   by
   ext1
-  simp_rw [Pi.star_apply, is_block_diagonal_pi_alg_equiv_apply, is_block_diagonal.coe_star,
-    block_diag'_conj_transpose]
+  simp_rw [Pi.star_apply, is_blockDiagonal_pi_alg_equiv_apply, is_blockDiagonal.coe_star,
+    blockDiag'_conj_transpose]
   rfl
 
 theorem isBlockDiagonalPiAlgEquiv.symm_map_star {R : Type _} [CommSemiring R] [StarAddMonoid R]
@@ -631,8 +629,8 @@ theorem isBlockDiagonalPiAlgEquiv.symm_map_star {R : Type _} [CommSemiring R] [S
     isBlockDiagonalPiAlgEquiv.symm (star x) = star (isBlockDiagonalPiAlgEquiv.symm x) :=
   by
   ext1
-  simp_rw [is_block_diagonal.coe_star, is_block_diagonal_pi_alg_equiv_symm_apply_coe,
-    block_diagonal'_conj_transpose]
+  simp_rw [is_blockDiagonal.coe_star, is_blockDiagonal_pi_alg_equiv_symm_apply_coe,
+    blockDiagonal'_conj_transpose]
   rfl
 
 @[simps]
@@ -672,7 +670,7 @@ theorem IsBlockDiagonal.apply_of_ne {R : Type _} [CommSemiring R] {k : Type _} [
     {s : k → Type _} {x : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) (i j : Σ i, s i)
     (h : i.1 ≠ j.1) : x i j = 0 := by
   rw [← hx.eq]
-  simp_rw [block_diagonal'_apply, block_diag'_apply, dif_neg h]
+  simp_rw [blockDiagonal'_apply, blockDiag'_apply, dif_neg h]
 
 theorem IsBlockDiagonal.apply_of_ne_coe {R : Type _} [CommSemiring R] {k : Type _} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
@@ -687,9 +685,9 @@ theorem IsBlockDiagonal.kronecker_hMul {R : Type _} [CommSemiring R] {k : Type _
     {x y : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) :
     IsBlockDiagonal fun i j => (x ⊗ₖ y) (sigmaProdSigma.symm i) (sigmaProdSigma.symm j) :=
   by
-  rw [Matrix.IsBlockDiagonal, block_diagonal'_ext]
+  rw [Matrix.IsBlockDiagonal, blockDiagonal'_ext]
   intro a b c d
-  simp only [block_diagonal'_apply', block_diag'_apply, kronecker_map_apply,
+  simp only [blockDiagonal'_apply', blockDiag'_apply, kronecker_map_apply,
     sigma_prod_sigma_symm_apply, dite_hMul, MulZeroClass.zero_mul, hMul_dite, MulZeroClass.mul_zero]
   split_ifs
   · dsimp [h]
@@ -735,4 +733,3 @@ theorem TensorProduct.assoc_includeBlock {k : Type _} [DecidableEq k] {s : k →
   intro x y z
   simp only [LinearMap.comp_apply, LinearEquiv.coe_coe, TensorProduct.assoc_symm_tmul,
     TensorProduct.map_tmul]
-
