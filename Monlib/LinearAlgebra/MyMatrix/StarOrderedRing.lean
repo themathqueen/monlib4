@@ -3,11 +3,11 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
+-- import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
 import Monlib.LinearAlgebra.PiStarOrderedRing
-import Monlib.LinearAlgebra.MyIps.Functional
-import Monlib.LinearAlgebra.MyIps.QuantumSet
-import Momnlib.LinearAlgebra.PiDirectSum
+-- import Monlib.LinearAlgebra.MyIps.Functional
+-- import Monlib.LinearAlgebra.MyIps.QuantumSet
+import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.KroneckerToTensor
 
 #align_import linear_algebra.my_matrix.star_ordered_ring
@@ -28,38 +28,34 @@ You need to `open_locale matrix_order` to use these instances.
 
 -/
 
+namespace Matrix
 
-#print Matrix.PosSemidef.zero /-
-theorem Matrix.PosSemidef.zero {n : Type _} [Fintype n] : (0 : Matrix n n ℂ).PosSemidef := by
-  simp_rw [Matrix.PosSemidef, Matrix.isHermitian_zero, true_and_iff, Matrix.zero_mulVec,
-    Matrix.dotProduct_zero, map_zero, le_refl, imp_true_iff]
--/
+open scoped ComplexOrder
 
-theorem Matrix.PosSemidef.add {n : Type _} [Fintype n] {x y : Matrix n n ℂ} (hx : x.PosSemidef)
-    (hy : y.PosSemidef) : (x + y).PosSemidef :=
+theorem PosSemidef.add {n : Type _} [Fintype n] {x y : Matrix n n ℂ} (hx : PosSemidef x)
+    (hy : PosSemidef y) : PosSemidef (x + y) :=
   by
-  simp_rw [Matrix.PosSemidef, Matrix.IsHermitian.add hx.1 hy.1, true_and_iff, Matrix.add_mulVec,
-    Matrix.dotProduct_add, map_add]
+  simp_rw [PosSemidef, Matrix.IsHermitian.add hx.1 hy.1, true_and_iff, Matrix.add_mulVec,
+    Matrix.dotProduct_add]
   exact fun a => add_nonneg (hx.2 a) (hy.2 a)
 
 open scoped Matrix
 
-theorem Matrix.eq_zero_iff {n : Type _} [Fintype n] [DecidableEq n] {x : Matrix n n ℂ} :
+theorem eq_zero_iff {n : Type _} [Fintype n] [DecidableEq n] {x : Matrix n n ℂ} :
     x = 0 ↔ ∀ a : n → ℂ, star a ⬝ᵥ x.mulVec a = 0 := by
   calc
-    x = 0 ↔ x.to_euclidean_lin = 0 := by simp only [LinearEquiv.map_eq_zero_iff]
-    _ ↔ ∀ a : EuclideanSpace ℂ n, ⟪a, x.to_euclidean_lin a⟫_ℂ = 0 := by
+    x = 0 ↔ toEuclideanLin x = 0 := by simp only [LinearEquiv.map_eq_zero_iff]
+    _ ↔ ∀ a : EuclideanSpace ℂ n, ⟪a, toEuclideanLin x a⟫_ℂ = 0 := by
       simp_rw [← inner_map_self_eq_zero, inner_eq_zero_symm]
-    _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x.mul_vec a = 0 := by rfl
-    _ ↔ ∀ a : n → ℂ, star a ⬝ᵥ x.mul_vec a = 0 := by rfl
+    _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x *ᵥ a = 0 := by rfl
+    _ ↔ ∀ a : n → ℂ, star a ⬝ᵥ x *ᵥ a = 0 := by rfl
 
-theorem Matrix.toEuclideanLin_apply {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ)
-    (a : n → ℂ) : x.toEuclideanLin a = x.mulVec a :=
+theorem toEuclideanLin_apply {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ)
+    (a : n → ℂ) : toEuclideanLin x a = x.mulVec a :=
   rfl
 
-open scoped ComplexOrder
-
-def Matrix.partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix n n ℂ)
+@[reducible]
+def partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix n n ℂ)
     where
   le x y := (y - x).PosSemidef
   le_refl x := by simp only [sub_self, Matrix.PosSemidef.zero]
@@ -71,19 +67,17 @@ def Matrix.partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder 
     rw [← sub_eq_zero, Matrix.eq_zero_iff]
     intro a
     have := hx.2 a
-    rw [← neg_sub, Matrix.neg_mulVec, Matrix.dotProduct_neg, map_neg, ← Complex.zero_le_real,
-      Complex.ofReal_neg, le_neg, neg_zero] at this
-    ext
-    exact le_antisymm this (complex.zero_le_real.mpr (hy.2 a))
-    simp_rw [Complex.zero_im, ← Complex.conj_eq_iff_im, ← EuclideanSpace.inner_eq, ←
-      Matrix.toEuclideanLin_apply, inner_conj_symm, ← LinearMap.adjoint_inner_left, ←
-      Matrix.toEuclideanLin_conjTranspose_eq_adjoint, hy.1.Eq]
+    rw [← neg_sub, Matrix.neg_mulVec, Matrix.dotProduct_neg,
+      le_neg, neg_zero] at this
+    exact le_antisymm this (hy.2 a)
 
 scoped[-- lt := λ x y, (y - x).pos_def,
 -- lt_iff_le_not_le := λ x y, by {  } }
 MatrixOrder] attribute [instance] Matrix.partialOrder
 
-theorem Matrix.le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n ℂ} :
+open scoped MatrixOrder
+
+theorem le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n ℂ} :
     x ≤ y ↔ (y - x).PosSemidef :=
   Iff.rfl
 
@@ -101,52 +95,46 @@ theorem Matrix.le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n
 -- begin
 --   simp_rw [matrix.pos_semidef.mem_add_submonoid, matrix.pos_semidef.star_mul_self],
 -- end
-noncomputable def Matrix.starOrderedRing {n : Type _} [Fintype n] [DecidableEq n] :
+@[reducible]
+noncomputable def starOrderedRing {n : Type _} [Fintype n] [DecidableEq n] :
     StarOrderedRing (Matrix n n ℂ) :=
-  by
-  apply StarOrderedRing.ofLEIff
-  · intro a b hab c
-    simp_rw [Matrix.le_iff, add_sub_add_left_eq_sub]
-    exact hab
-  · intro x y
-    simp_rw [Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add', Matrix.star_eq_conjTranspose,
-      Matrix.hMul_eq_hMul]
+StarOrderedRing.ofLEIff (fun a b => by
+  constructor
+  · intro hab
+    simp_rw [Matrix.le_iff] at hab
+    simp_rw [← sub_eq_iff_eq_add']
+    exact (posSemidef_iff _).mp hab
+  · rintro ⟨s, rfl⟩
+    simp_rw [Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add', Matrix.star_eq_conjTranspose]
+    exact ⟨_, rfl⟩)
 
 scoped[MatrixOrder] attribute [instance] Matrix.starOrderedRing
 
 open scoped MatrixOrder
 
-theorem Matrix.Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι → Type _}
+theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι → Type _}
     [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : ∀ i, Matrix (n i) (n i) ℂ) :
     x ≤ y ↔ ∃ z : ∀ i, Matrix (n i) (n i) ℂ, y = x + star z * z :=
   by
-  simp_rw [@Function.funext_iff _ _ _ (_ + star _ * _), Pi.add_apply, Pi.mul_apply, Pi.star_apply,
+  simp_rw [Function.funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
     Pi.le_def, Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add',
-    Matrix.star_eq_conjTranspose, Matrix.hMul_eq_hMul]
+    Matrix.star_eq_conjTranspose]
   exact
-    ⟨fun hx => ⟨fun i => (hx i).some, fun i => (hx i).choose_spec⟩, fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩
+    ⟨fun hx => ⟨fun i => (hx i).choose, fun i => (hx i).choose_spec⟩, fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩
 
-noncomputable def Matrix.Pi.starOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
+@[reducible]
+noncomputable def PiStarOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
     {n : ι → Type _} [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] :
     StarOrderedRing (∀ i, Matrix (n i) (n i) ℂ) :=
-  by
-  refine'
-    StarOrderedRing.ofLEIff
-      (fun a b hab c i => by
-        simp_rw [Pi.add_apply]
-        exact add_le_add_left (hab _) _)
-      _
-  intro a b
-  simp_rw [Pi.le_def, Matrix.le_iff]
-  rw [← Matrix.Pi.le_iff_sub_nonneg]
-  rfl
+StarOrderedRing.ofLEIff
+  (fun a b => by simp_rw [Pi.le_iff_sub_nonneg])
 
-scoped[MatrixOrder] attribute [instance] Matrix.Pi.starOrderedRing
+scoped[MatrixOrder] attribute [instance] Matrix.PiStarOrderedRing
 
-def Matrix.NegSemidef {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) : Prop :=
-  x.IsHermitian ∧ ∀ a : n → ℂ, IsROrC.re (Matrix.dotProduct (Star.star a) (x.mulVec a)) ≤ 0
+def NegSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) : Prop :=
+  x.IsHermitian ∧ ∀ a : n → 𝕜, IsROrC.re (Matrix.dotProduct (Star.star a) (x *ᵥ a)) ≤ 0
 
-theorem Matrix.IsHermitian.neg_iff {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
+theorem IsHermitian.neg_iff {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
     (-x).IsHermitian ↔ x.IsHermitian := by
   constructor
   · intro h
@@ -154,20 +142,23 @@ theorem Matrix.IsHermitian.neg_iff {n : Type _} [Fintype n] [DecidableEq n] (x :
     exact Matrix.IsHermitian.neg h
   · exact Matrix.IsHermitian.neg
 
-theorem Matrix.negSemidef_iff_neg_posSemidef {n : Type _} [Fintype n] [DecidableEq n]
+theorem negSemidef_iff_neg_posSemidef {n : Type _} [Fintype n] [DecidableEq n]
     (x : Matrix n n ℂ) : x.NegSemidef ↔ (-x).PosSemidef := by
   simp_rw [Matrix.NegSemidef, Matrix.PosSemidef, Matrix.IsHermitian.neg_iff, Matrix.neg_mulVec,
-    Matrix.dotProduct_neg, map_neg, @le_neg _ _ _ _ _ (0 : ℝ), neg_zero]
+    Matrix.dotProduct_neg, le_neg, neg_zero, @IsROrC.nonpos_def ℂ,
+    ← IsROrC.conj_eq_iff_im, starRingEnd_apply, ← star_dotProduct,
+    star_mulVec, ← dotProduct_mulVec]
+  exact ⟨fun ⟨h, hx⟩ => ⟨h, fun a => ⟨hx _, by rw [h.eq]⟩⟩, fun ⟨h, hx⟩ => ⟨h, fun a => (hx _).1⟩⟩
 
-theorem Matrix.negSemidef_iff_nonpos {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
+theorem negSemidef_iff_nonpos {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
     x.NegSemidef ↔ x ≤ 0 := by rw [Matrix.negSemidef_iff_neg_posSemidef, Matrix.le_iff, zero_sub]
 
 open scoped ComplexOrder
 
-theorem Matrix.posSemidef_and_negSemidef_iff_eq_zero {n : Type _} [Fintype n] [DecidableEq n]
+theorem posSemidef_and_negSemidef_iff_eq_zero {n : Type _} [Fintype n] [DecidableEq n]
     {x : Matrix n n ℂ} : x.PosSemidef ∧ x.NegSemidef ↔ x = 0 := by
   simp_rw [Matrix.negSemidef_iff_neg_posSemidef, Matrix.eq_zero_iff, PosSemidef.complex,
-    Matrix.neg_mulVec, Matrix.dotProduct_neg, neg_nonneg, le_antisymm_iff, forall_and, and_comm']
+    Matrix.neg_mulVec, Matrix.dotProduct_neg, neg_nonneg, le_antisymm_iff, forall_and, and_comm]
 
 -- lemma matrix.pos_semidef_and_not_neg_semidef_iff_pos_def
 --   {n : Type*} [fintype n] [decidable_eq n] (x : matrix n n ℂ) :
