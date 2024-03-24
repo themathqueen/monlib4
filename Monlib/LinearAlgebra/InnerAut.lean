@@ -303,7 +303,7 @@ theorem innerAut.is_injective (U : unitaryGroup n 𝕜) : Function.Injective (in
   rw [← innerAut_inv_apply_innerAut_self U u, huv, innerAut_inv_apply_innerAut_self]
 
 /-- $x$ is Hermitian if and only if $f_U(x)$ is Hermitian -/
-theorem IsHermitianinnerAut_iff (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
+theorem innerAut_isHermitian_iff (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     x.IsHermitian ↔ (innerAut U x).IsHermitian := by
   simp_rw [IsHermitian, innerAut_conjTranspose,
     Function.Injective.eq_iff (innerAut.is_injective U)]
@@ -345,7 +345,7 @@ theorem innerAut_posDef_iff (U : unitaryGroup n 𝕜) {x : Matrix n n 𝕜} :
   have hD' := hD
   rw [innerAut_eq_iff] at hD'
   rw [hD', innerAut_inv_apply_innerAut_self]
-  simp_rw [PosDef, ← IsHermitianinnerAut_iff U]
+  simp_rw [PosDef, ← innerAut_isHermitian_iff U]
   have ugh' : ∀ (hi : unitaryGroup n 𝕜) (u : n → 𝕜), mulVec (hi : Matrix n n 𝕜) u ≠ 0 ↔ u ≠ 0 :=
     by
     intro hi u
