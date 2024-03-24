@@ -3,10 +3,10 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Algebra.Algebra.Bilinear
-import LinearAlgebra.KroneckerToTensor
-import LinearAlgebra.MyTensorProduct
-import LinearAlgebra.Nacgor
+import Mathlib.Algebra.Algebra.Bilinear
+import Monlib.LinearAlgebra.KroneckerToTensor
+import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.Nacgor
 
 #align_import linear_algebra.mul''
 
@@ -63,19 +63,19 @@ private def mul_map_aux (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRin
       map_smul' := map_smul _ }
   map_add' x y := by
     ext;
-    simp_rw [map_add, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, LinearMap.add_apply,
+    simp_rw [map_add, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk, LinearMap.add_apply,
       ContinuousLinearMap.add_apply]
     rfl
   map_smul' r x := by
     ext
-    simp_rw [SMulHomClass.map_smul, ContinuousLinearMap.coe_mk', LinearMap.coe_mk,
+    simp_rw [SMulHomClass.map_smul, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk,
       LinearMap.smul_apply, ContinuousLinearMap.smul_apply]
     rfl
 
 def LinearMap.mulToClm (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
     [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X] : X →L[𝕜] X →L[𝕜] X
     where
-  toFun := mulMapAux 𝕜 X
+  toFun := mul_map_aux 𝕜 X
   map_add' := map_add _
   map_smul' := SMulHomClass.map_smul _
   cont := by
@@ -86,4 +86,3 @@ theorem LinearMap.mulToClm_apply {𝕜 X : Type _} [IsROrC 𝕜] [NormedAddCommG
     [NormedSpace 𝕜 X] [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X]
     (x y : X) : LinearMap.mulToClm 𝕜 X x y = x * y :=
   rfl
-
