@@ -3,12 +3,12 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.InvariantSubmodule
-import LinearAlgebra.MyIps.Basic
-import LinearAlgebra.MyIps.Ips
-import Analysis.VonNeumannAlgebra.Basic
-import LinearAlgebra.MyIps.MinimalProj
-import LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.InvariantSubmodule
+import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.MyIps.Ips
+import Mathlib.Analysis.VonNeumannAlgebra.Basic
+import Monlib.LinearAlgebra.MyIps.MinimalProj
+import Monlib.LinearAlgebra.MyIps.RankOne
 
 #align_import linear_algebra.my_ips.vn
 
@@ -25,14 +25,30 @@ namespace VonNeumannAlgebra
 
 variable {H : Type _} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 
+lemma star_commutant_iff {M : VonNeumannAlgebra H} {e : H →L[ℂ] H} :
+  star e ∈ M.commutant ↔ e ∈ M.commutant :=
+by
+  simp only [mem_commutant_iff]
+  constructor
+  . rintro h g hg
+    have : star g ∈ M := by aesop
+    specialize h (star g) this
+    simp_rw [← star_mul, star_inj] at h
+    exact h.symm
+  . rintro h g hg
+    have : star g ∈ M := by aesop
+    specialize h (star g) this
+    rw [← star_star g]
+    simp_rw [← star_mul, h]
+
 /-- a continuous linear map `e` is in the von Neumann algebra `M`
 if and only if `e.ker` and `e.range` are `M'`
 (i.e., the commutant of `M` or `M.centralizer`) invariant subspaces -/
-theorem has_idempotent_iff_ker_and_range_are_invariantUnder_commutant (M : VonNeumannAlgebra H)
+theorem elem_idempotent_iff_ker_and_range_invariantUnder_commutant (M : VonNeumannAlgebra H)
     (e : H →L[ℂ] H) (h : IsIdempotentElem e) :
     e ∈ M ↔ ∀ y : H →L[ℂ] H, y ∈ M.commutant → e.ker.InvariantUnder y ∧ e.range.InvariantUnder y :=
   by
-  simp_rw [Submodule.invariantUnder_iff, Set.subset_def, ContinuousLinearMap.toLinearMap_eq_coe,
+  simp_rw [Submodule.invariantUnder_iff, Set.subset_def,
     ContinuousLinearMap.coe_coe, Set.mem_image, SetLike.mem_coe, LinearMap.mem_ker,
     LinearMap.mem_range, ContinuousLinearMap.coe_coe, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂]
@@ -47,24 +63,31 @@ theorem has_idempotent_iff_ker_and_range_are_invariantUnder_commutant (M : VonNe
       ⟨fun x hx => by rw [ContinuousLinearMap.comp_apply, hx, map_zero], fun u ⟨v, hv⟩ => by
         simp_rw [← hv, ← ContinuousLinearMap.comp_apply, ← this, ContinuousLinearMap.comp_apply,
           exists_apply_eq_apply]⟩
-  · intro H
+  · intro H'
     rw [← VonNeumannAlgebra.commutant_commutant M]
     intro m hm; ext x
-    have h' : IsIdempotentElem e.to_linear_map :=
-      by
-      rw [IsIdempotentElem] at h ⊢; ext y
-      rw [LinearMap.mul_apply, ContinuousLinearMap.toLinearMap_eq_coe, ContinuousLinearMap.coe_coe,
-        ← ContinuousLinearMap.mul_apply, h]
-    obtain ⟨v, w, hvw, hunique⟩ :=
-      Submodule.existsUnique_add_of_isCompl (LinearMap.IsIdempotent.isCompl_range_ker (↑e) h') x
+    obtain ⟨v, w, hvw, _⟩ :=
+      Submodule.existsUnique_add_of_isCompl (LinearMap.IsIdempotent.isCompl_range_ker e.toLinearMap (IsIdempotentElem.clm_to_lm.mp h)) x
     obtain ⟨y, hy⟩ := SetLike.coe_mem w
-    have hg := linear_map.mem_ker.mp (SetLike.coe_mem v)
-    simp_rw [ContinuousLinearMap.toLinearMap_eq_coe, ContinuousLinearMap.coe_coe] at hy hg
-    rw [SetLike.mem_coe] at hm
-    simp_rw [← hvw, ContinuousLinearMap.mul_apply, map_add, hg, map_zero, zero_add]
-    obtain ⟨p, hp⟩ := (H m hm).2 w (SetLike.coe_mem w)
-    rw [(H m hm).1 v hg, zero_add, ← hp, ← ContinuousLinearMap.mul_apply e e, IsIdempotentElem.eq h,
-      hp, ← hy, ← ContinuousLinearMap.mul_apply e e, IsIdempotentElem.eq h]
+    -- let hvv := SetLike.coe_mem v
+    -- let hvv : H := (@Subtype.val H (fun x ↦ x ∈ ↑(LinearMap.ker ↑e)) v : H)
+    -- have hv' : e v = 0 := by
+    --   simp only [LinearMap.map_coe_ker]
+
+-- rw [LinearMap.mem_ker] at hv'
+    simp_rw [ContinuousLinearMap.coe_coe] at hy
+    -- simp only [coe_commutant, Set.instInvolutiveStarSet, Set.mem_union, Set.mem_star] at hm
+    simp_rw [Set.mem_union, Set.mem_star, SetLike.mem_coe,
+      star_commutant_iff, or_self] at hm
+    simp_rw [← hvw, ContinuousLinearMap.mul_apply, map_add, LinearMap.map_coe_ker, map_zero, zero_add]
+    obtain ⟨p, hp⟩ := (H' _ hm).2 (e y) (LinearMap.mem_range.mpr ⟨y, rfl⟩)
+    -- have := hm e
+    . rw [(H' m hm).1 v (LinearMap.map_coe_ker _ v), zero_add, ← hy, ← ContinuousLinearMap.mul_apply e e,
+      IsIdempotentElem.eq h, ← hp, ← ContinuousLinearMap.mul_apply e e, IsIdempotentElem.eq h]
+    -- . have hm'' := star_commutant_iff.mpr hm
+      -- rw [(H' m hm'').1 v hg, zero_add, ← hy, ← ContinuousLinearMap.mul_apply e e,
+      -- IsIdempotentElem.eq h,
+      -- ← hp, ← ContinuousLinearMap.mul_apply e e, IsIdempotentElem.eq h]
 
 /-- By definition, the bounded linear operators on a Hilbert space `H` form a von Neumann algebra.
 
@@ -72,11 +95,10 @@ theorem has_idempotent_iff_ker_and_range_are_invariantUnder_commutant (M : VonNe
 def ofHilbertSpace : VonNeumannAlgebra H
     where
   carrier := Set.univ
-  hMul_mem' x y hx hy := Set.mem_univ _
-  add_mem' x y hx hy := Set.mem_univ _
-  star_mem' x hx := Set.mem_univ _
-  algebraMap_mem' x := Set.mem_univ _
+  mul_mem' _ _ := Set.mem_univ _
+  add_mem' _ _ := Set.mem_univ _
+  star_mem' _ := Set.mem_univ _
+  algebraMap_mem' _ := Set.mem_univ _
   centralizer_centralizer' := ContinuousLinearMap.centralizer_centralizer
 
 end VonNeumannAlgebra
-
