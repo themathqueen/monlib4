@@ -160,9 +160,14 @@ def Module.Dual.IsUnital {A : Type _} [AddCommMonoid A] [Module R A] [One A] (φ
   φ (1 : A) = 1
 
 /-- A linear functional is called a state if it is positive and unital -/
-def Module.Dual.IsState {A : Type _} [Semiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) :
+class Module.Dual.IsState {A : Type _} [Semiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) :
     Prop :=
-  φ.IsPosMap ∧ φ.IsUnital
+toIsPosMap : φ.IsPosMap
+toIsUnital : φ.IsUnital
+
+lemma Module.Dual.IsState_iff {A : Type _} [Semiring A] [StarRing A] [Module 𝕜 A]
+  (φ : Module.Dual 𝕜 A) : φ.IsState ↔ φ.IsPosMap ∧ φ.IsUnital :=
+⟨fun h => ⟨h.toIsPosMap, h.toIsUnital⟩, fun h => ⟨h.1, h.2⟩⟩
 
 theorem Module.Dual.isPosMap_of_matrix (φ : Module.Dual 𝕜 (Matrix n n 𝕜)) :
     φ.IsPosMap ↔ ∀ a : Matrix n n 𝕜, a.PosSemidef → 0 ≤ φ a := by
@@ -206,7 +211,7 @@ theorem Module.Dual.isPosMap_iff_of_matrix (φ : Module.Dual ℂ (Matrix n n ℂ
 A linear functional $f$ is a state if and only if there exists a unique positive semi-definite matrix $Q\in M_n$ such that its trace equals $1$ and $f(x)=\operatorname{Tr}(Qx)$ for all $x\in M_n$. -/
 theorem Module.Dual.isState_iff_of_matrix (φ : Module.Dual ℂ (Matrix n n ℂ)) :
     φ.IsState ↔ φ.matrix.PosSemidef ∧ φ.matrix.trace = 1 := by
-  rw [Module.Dual.IsState, Module.Dual.isPosMap_iff_of_matrix, Module.Dual.IsUnital,
+  simp_rw [Module.Dual.IsState_iff, Module.Dual.isPosMap_iff_of_matrix, Module.Dual.IsUnital,
     Module.Dual.apply, Matrix.mul_one]
 
 /--
@@ -243,9 +248,17 @@ theorem Module.Dual.IsPosMap.isFaithful_iff_of_matrix {φ : Module.Dual ℂ (Mat
       Nontracial.trace_conjTranspose_hMul_self_eq_zero hQ] at h
     rw [h, Matrix.mul_zero]
 
-def Module.Dual.IsFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
-    (φ : Module.Dual 𝕜 A) : Prop :=
-  φ.IsPosMap ∧ φ.IsFaithful
+-- def Module.Dual.IsFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
+--     (φ : Module.Dual 𝕜 A) : Prop :=
+--   φ.IsPosMap ∧ φ.IsFaithful
+@[class]
+structure Module.Dual.IsFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) : Prop :=
+toIsPosMap : φ.IsPosMap
+toIsFaithful : φ.IsFaithful
+
+lemma Module.Dual.IsFaithfulPosMap_iff {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
+  (φ : Module.Dual 𝕜 A) : φ.IsFaithfulPosMap ↔ φ.IsPosMap ∧ φ.IsFaithful :=
+⟨fun h => ⟨h.toIsPosMap, h.toIsFaithful⟩, fun h => ⟨h.1, h.2⟩⟩
 
 /--
 A linear functional $φ$ is a faithful and positive if and only if there exists a unique positive definite matrix $Q$ such that $φ(x)=\operatorname{Tr}(Qx)$ for all $x\in M_n$. -/
@@ -254,7 +267,7 @@ theorem Module.Dual.isFaithfulPosMap_iff_of_matrix (φ : Module.Dual ℂ (Matrix
   by
   refine' ⟨fun h => h.1.isFaithful_iff_of_matrix.mp h.2, _⟩
   intro hQ
-  simp_rw [Module.Dual.IsFaithfulPosMap, Module.Dual.IsFaithful, Module.Dual.isPosMap_iff_of_matrix,
+  simp_rw [Module.Dual.IsFaithfulPosMap_iff, Module.Dual.IsFaithful, Module.Dual.isPosMap_iff_of_matrix,
     hQ.posSemidef, true_and_iff, Module.Dual.apply, star_eq_conjTranspose,
     ← Matrix.mul_assoc, Nontracial.trace_conjTranspose_hMul_self_eq_zero hQ,
     forall_const]
@@ -427,7 +440,7 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
     φ.IsFaithfulPosMap ∧ φ.IsTracial ↔
       ∃! α : { x : NNReal // 0 < x }, φ.matrix = (((α : NNReal) : ℝ) : ℂ) • 1 :=
   by
-  rw [Module.Dual.IsFaithfulPosMap, @and_comm φ.IsPosMap, and_assoc,
+  rw [Module.Dual.IsFaithfulPosMap_iff, @and_comm φ.IsPosMap, and_assoc,
     Module.Dual.isTracial_pos_map_iff'_of_matrix]
   constructor
   · rintro ⟨h1, ⟨α, hα, h⟩⟩
@@ -604,34 +617,22 @@ theorem Module.Dual.isFaithfulPosMap_of_matrix_tfae (φ : Module.Dual ℂ (Matri
   · exact φ.isFaithfulPosMap_iff_isInner_of_matrix
   tfae_finish
 
-
-@[class]
-structure Module.Dual.FaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) :=
-toIsPosMap : φ.IsPosMap
-toIsFaithful : φ.IsFaithful
-
-@[simp, instance]
-lemma Module.Dual.FaithfulPosMap.isFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
-  (φ : Module.Dual 𝕜 A) [hφ : φ.FaithfulPosMap] :
-  φ.IsFaithfulPosMap :=
-⟨hφ.toIsPosMap, hφ.toIsFaithful⟩
 end
 section
 
-variable {n : Type _} [Fintype n] [DecidableEq n]
-  {φ : Module.Dual ℂ (Matrix n n ℂ)} (hφ : φ.IsFaithfulPosMap)
+variable {n : Type _} [Fintype n] [DecidableEq n] (φ : Module.Dual ℂ (Matrix n n ℂ))
 
 @[reducible]
-noncomputable def Module.Dual.IsFaithfulPosMap.NormedAddCommGroup :
+noncomputable def Module.Dual.NormedAddCommGroup [hφ : φ.IsFaithfulPosMap] :
   _root_.NormedAddCommGroup (Matrix n n ℂ) :=
-  have := φ.isFaithfulPosMap_iff_isInner_of_matrix.mp (hφ)
+  -- have := φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ
   @InnerProductSpace.Core.toNormedAddCommGroup ℂ (Matrix n n ℂ) _ _ _
     { inner := fun x y => φ (xᴴ * y)
-      conj_symm := fun _ _ => (this.1 _ _).symm
-      nonneg_re := fun _ => this.2.1 _
-      definite := fun _ hx => (this.2.2.1 _).mp hx
-      add_left := fun _ _ _ => this.2.2.2.1 _ _ _
-      smul_left := fun _ _ _ => this.2.2.2.2 _ _ _ }
+      conj_symm := fun _ _ => ((φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).1 _ _).symm
+      nonneg_re := fun _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.1 _
+      definite := fun _ hx => ((φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.1 _).mp hx
+      add_left := fun _ _ _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.2.1 _ _ _
+      smul_left := fun _ _ _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.2.2 _ _ _ }
 
 
 -- set_option trace.Meta.synthInstance true
@@ -641,34 +642,38 @@ noncomputable def Module.Dual.IsFaithfulPosMap.NormedAddCommGroup :
 -- set_option synthInstance.maxHeartbeats 100000
 -- set_option synthInstance.maxSize 100000
 
-scoped[Functional] attribute [instance default+1] Module.Dual.IsFaithfulPosMap.NormedAddCommGroup
-open Functional
+set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Module.Dual.NormedAddCommGroup
+open scoped Functional
+
+variable [hφ : φ.IsFaithfulPosMap]
 
 -- #synth _root_.NormedAddCommGroup (Matrix n n ℂ)
 -- #check inferInstanceAs (NormedAddCommGroup (Matrix n n ℂ))
--- #check @inferInstance _ (hφ j)
+-- #check @inferInstance _ (hφ)
 
 @[reducible]
-noncomputable def Module.Dual.IsFaithfulPosMap.InnerProductSpace :
-    letI := hφ.NormedAddCommGroup
+noncomputable def Module.Dual.InnerProductSpace :
+    -- letI := hφ.NormedAddCommGroup
   _root_.InnerProductSpace ℂ (Matrix n n ℂ) :=
 InnerProductSpace.ofCore _
 
-scoped[Functional] attribute [instance default+1] Module.Dual.IsFaithfulPosMap.InnerProductSpace
+scoped[Functional] attribute [instance] Module.Dual.InnerProductSpace
 
 end
 
 open scoped Functional
 
 variable {k : Type _} [Fintype k] {s : k → Type _}
-    [Π i, Fintype (s i)] [Π i, DecidableEq (s i)] {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    (hφ : Π i, (φ i).IsFaithfulPosMap) {j : k}
+    [Π i, Fintype (s i)] [Π i, DecidableEq (s i)]
 
 @[reducible]
-noncomputable def Module.Dual.pi.NormedAddCommGroup :
-    _root_.NormedAddCommGroup (Π i, Matrix (s i) (s i) ℂ) :=
+noncomputable def Module.Dual.PiNormedAddCommGroup
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+  [Π i, (φ i).IsFaithfulPosMap] :
+  _root_.NormedAddCommGroup (Π i, Matrix (s i) (s i) ℂ) :=
 -- by
-  letI := fun i => (hφ i).NormedAddCommGroup
+  -- letI := fun i => (hφ i).NormedAddCommGroup
   PiLp.normedAddCommGroup 2 _
   -- letI := fun i => (hφ i).InnerProductSpace
   -- @InnerProductSpace.Core.toNormedAddCommGroup ℂ (Π i, Matrix (s i) (s i) ℂ) _ _ _
@@ -695,17 +700,18 @@ noncomputable def Module.Dual.pi.NormedAddCommGroup :
   --       simp_rw [inner, Pi.add_apply, inner_add_left, Finset.sum_add_distrib]
   --     smul_left := fun x y r => by simp_rw [inner, Pi.smul_apply, inner_smul_left, Finset.mul_sum] }
 
+set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Module.Dual.PiNormedAddCommGroup
+
 @[reducible]
-noncomputable def Module.Dual.pi.InnerProductSpace {k : Type _} [Fintype k] [DecidableEq k]
-    {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
-    {φ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    (hφ : Π i, (φ i).IsFaithfulPosMap) :
-    letI := Module.Dual.pi.NormedAddCommGroup hφ
-    InnerProductSpace ℂ (Π i, Matrix (s i) (s i) ℂ) :=
-letI := fun i => (hφ i).NormedAddCommGroup
-letI := fun i => (hφ i).InnerProductSpace
+noncomputable def Module.Dual.pi.InnerProductSpace
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+  [Π i, (φ i).IsFaithfulPosMap] :
+    -- letI := Module.Dual.PiNormedAddCommGroup hφ
+  _root_.InnerProductSpace ℂ (Π i, Matrix (s i) (s i) ℂ) :=
+-- letI := fun i => (hφ i).NormedAddCommGroup
+-- letI := fun i => (hφ i).InnerProductSpace
 PiLp.innerProductSpace _
   -- InnerProductSpace.ofCore _
 
-scoped[Functional] attribute [instance] Module.Dual.pi.NormedAddCommGroup
 scoped[Functional] attribute [instance] Module.Dual.pi.InnerProductSpace

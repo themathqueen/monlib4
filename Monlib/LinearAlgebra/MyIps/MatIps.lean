@@ -3,12 +3,12 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyIps.Functional
-import LinearAlgebra.MyMatrix.PosDefRpow
-import LinearAlgebra.Mul''
-import LinearAlgebra.MyIps.Basic
-import LinearAlgebra.PiDirectSum
-import LinearAlgebra.ToMatrixOfEquiv
+import Monlib.LinearAlgebra.MyIps.Functional
+import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
+import Monlib.LinearAlgebra.Mul''
+import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.PiDirectSum
+import Monlib.LinearAlgebra.ToMatrixOfEquiv
 
 #align_import linear_algebra.my_ips.mat_ips
 
@@ -26,12 +26,12 @@ open scoped TensorProduct Functional
 /-- A lemma that states the right multiplication property of a linear functional. -/
 theorem linear_functional_right_hMul {R A : Type _} [CommSemiring R] [Semiring A] [Algebra R A]
     [StarMul A] {φ : A →ₗ[R] R} (x y z : A) : φ (star (x * y) * z) = φ (star y * (star x * z)) := by
-  rw [StarMul.star_hMul, mul_assoc]
+  rw [StarMul.star_mul, mul_assoc]
 
 /-- A lemma that states the left multiplication property of a linear functional. -/
 theorem linear_functional_left_hMul {R A : Type _} [CommSemiring R] [Semiring A] [Algebra R A]
     [StarMul A] {φ : A →ₗ[R] R} (x y z : A) : φ (star x * (y * z)) = φ (star (star y * x) * z) := by
-  rw [StarMul.star_hMul, star_star, mul_assoc]
+  rw [StarMul.star_mul, star_star, mul_assoc]
 
 variable {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)]
   [∀ i, DecidableEq (s i)] {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
@@ -42,24 +42,24 @@ open Matrix
 open scoped Matrix BigOperators
 
 /-- A function that returns the direct sum of matrices for each index of type 'i'. -/
-def Module.Dual.pi.matrixBlock (ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)) :
-    ∀ i, Matrix (s i) (s i) ℂ :=
-  ∑ i, (ψ i).Matrix.includeBlock
+noncomputable def Module.Dual.pi.matrixBlock (ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)) :
+  ∀ i, Matrix (s i) (s i) ℂ :=
+∑ i, includeBlock (ψ i).matrix
 
 /-- A function that returns a direct sum matrix. -/
-def Module.Dual.pi.matrix (ψ : ∀ i, Matrix (s i) (s i) ℂ →ₗ[ℂ] ℂ) :
-    Matrix (Σ i, s i) (Σ i, s i) ℂ :=
-  blockDiagonal' (Module.Dual.pi.matrixBlock ψ)
+noncomputable def Module.Dual.pi.matrix (ψ : ∀ i, Matrix (s i) (s i) ℂ →ₗ[ℂ] ℂ) :
+  Matrix (Σ i, s i) (Σ i, s i) ℂ :=
+blockDiagonal' (Module.Dual.pi.matrixBlock ψ)
 
 /--
 A lemma that states the inner product of two direct sum matrices is the sum of the inner products of their components. -/
-theorem inner_pi_eq_sum [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (x y : ∀ i, Matrix (s i) (s i) ℂ) :
+theorem inner_pi_eq_sum [∀ i, (ψ i).IsFaithfulPosMap] (x y : ∀ i, Matrix (s i) (s i) ℂ) :
     ⟪x, y⟫_ℂ = ∑ i, ⟪x i, y i⟫_ℂ :=
   rfl
 
-theorem Module.Dual.pi.matrixBlock_apply {i : k} : Module.Dual.pi.matrixBlock ψ i = (ψ i).Matrix :=
+theorem Module.Dual.pi.matrixBlock_apply {i : k} : Module.Dual.pi.matrixBlock ψ i = (ψ i).matrix :=
   by
-  simp only [Module.Dual.pi.matrixBlock, Finset.sum_apply, include_block_apply, Finset.sum_dite_eq',
+  simp only [Module.Dual.pi.matrixBlock, Finset.sum_apply, includeBlock_apply, Finset.sum_dite_eq',
     Finset.mem_univ, if_true]
   rfl
 
@@ -96,12 +96,12 @@ theorem StarAlgEquiv.pi_apply {𝕜 : Type _} [IsROrC 𝕜] {k : Type u_1} [Fint
 noncomputable def StarAlgEquiv.pi.unitary {𝕜 : Type _} [IsROrC 𝕜] {k : Type u_1} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) : ∀ i, unitaryGroup (s i) 𝕜 :=
-  fun i => (f i).unitary
+  fun i => (f i).of_matrix_unitary
 
 theorem StarAlgEquiv.pi.unitary_apply {𝕜 : Type _} [IsROrC 𝕜] {k : Type u_1} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) (a : k) :
-    (StarAlgEquiv.pi.unitary f) a = (f a).unitary :=
+    (StarAlgEquiv.pi.unitary f) a = (f a).of_matrix_unitary :=
   rfl
 
 /-- any $^*$-isomorphism on $\bigoplus_i M_{n_i}$ is an inner automorphism -/
@@ -113,13 +113,13 @@ theorem StarAlgEquiv.of_pi_is_inner {𝕜 : Type _} [IsROrC 𝕜] {k : Type u_1}
   simp_rw [StarAlgEquiv.ext_iff, unitary.innerAutStarAlg_apply, Function.funext_iff, Pi.mul_apply,
     unitary.pi_apply, unitary.coe_star, Pi.star_apply, unitary.pi_apply, StarAlgEquiv.pi_apply,
     StarAlgEquiv.pi.unitary_apply]
-  intros
-  rw [← unitary.coe_star, ← @unitary.innerAutStarAlg_apply 𝕜 _ _ _ _ _ (f a_1).unitary (a a_1)]
+  intros a_1 i
+  rw [← unitary.coe_star, ← @unitary.innerAutStarAlg_apply 𝕜 _ _ _ _ _ (f _).of_matrix_unitary (a_1 _)]
   congr
-  exact star_alg_equiv.eq_inner_aut _
+  exact StarAlgEquiv.eq_innerAut _
 
 def inclPi {i : k} (x : s i → ℂ) : (Σ j, s j) → ℂ := fun j =>
-  dite (i = j.1) (fun h => x (by rw [h]; exact j.2)) fun h => 0
+  dite (i = j.1) (fun h => x (by rw [h]; exact j.2)) fun _ => 0
 
 def exclPi (x : (Σ j, s j) → ℂ) (i : k) : s i → ℂ := fun j => x ⟨i, j⟩
 
@@ -137,17 +137,17 @@ theorem Module.Dual.pi.apply'' (ψ : ∀ i, Matrix (s i) (s i) ℂ →ₗ[ℂ] �
     (x : ∀ i, Matrix (s i) (s i) ℂ) :
     Module.Dual.pi ψ x = (blockDiagonal' (Module.Dual.pi.matrixBlock ψ) * blockDiagonal' x).trace :=
   by
-  simp_rw [Module.Dual.pi.apply', Module.Dual.pi.matrixBlock, ← block_diagonal'_alg_hom_apply,
-    map_sum, Finset.sum_mul, trace_sum, mul_eq_mul]
+  simp_rw [Module.Dual.pi.apply', Module.Dual.pi.matrixBlock, ← blockDiagonal'AlgHom_apply,
+    map_sum, Finset.sum_mul, trace_sum]
 
 theorem StarAlgEquiv.pi_is_trace_preserving
     (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ) (x : ∀ i, Matrix (s i) (s i) ℂ) :
     (blockDiagonal'AlgHom ((StarAlgEquiv.pi f) x)).trace = (blockDiagonal'AlgHom x).trace :=
   by
-  rw [matrix_eq_sum_include_block ((StarAlgEquiv.pi f) x)]
-  nth_rw_rhs 1 [matrix_eq_sum_include_block x]
+  rw [matrix_eq_sum_includeBlock ((StarAlgEquiv.pi f) x)]
+  nth_rw 2 [matrix_eq_sum_includeBlock x]
   simp only [map_sum, trace_sum]
-  simp only [block_diagonal'_alg_hom_apply, block_diagonal'_include_block_trace,
+  simp_rw [blockDiagonal'AlgHom_apply, blockDiagonal'_includeBlock_trace,
     StarAlgEquiv.pi_apply, StarAlgEquiv.trace_preserving]
 
 theorem StarAlgEquiv.pi_symm_apply_apply (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ)
@@ -161,16 +161,16 @@ theorem Module.Dual.pi.apply_eq_of (ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s
     (x : ∀ i, Matrix (s i) (s i) ℂ)
     (h : ∀ a, Module.Dual.pi ψ a = (blockDiagonal' x * blockDiagonal' a).trace) :
     x = Module.Dual.pi.matrixBlock ψ := by
-  ext1
+  ext1 x_1
   simp only [Module.Dual.pi.matrixBlock_apply]
   apply Module.Dual.apply_eq_of
   intro a
-  let a' := include_block a
-  have ha' : a = a' x_1 := by simp only [a', include_block_apply_same]
+  let a' := includeBlock a
+  have ha' : a = a' x_1 := by simp only [a', includeBlock_apply_same]
   specialize h a'
-  simp_rw [ha', ← Module.Dual.pi.apply_single_block, ← mul_eq_mul, ← Pi.mul_apply, ←
-    block_diagonal'_include_block_trace, ← ha', Pi.mul_apply, ← ha']
-  simp only [← block_diagonal'_alg_hom_apply, ← _root_.map_mul, a', mul_include_block] at h
+  simp_rw [ha', ← Module.Dual.pi.apply_single_block, ← Pi.mul_apply, ←
+    blockDiagonal'_includeBlock_trace, ← ha', Pi.mul_apply, ← ha']
+  simp only [← blockDiagonal'AlgHom_apply, ← _root_.map_mul, a', hMul_includeBlock] at h
   exact h
 
 theorem StarAlgEquiv.pi_symm_apply_eq (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ)
@@ -184,8 +184,8 @@ theorem StarAlgEquiv.pi_symm_apply_eq (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆�
 theorem unitary.inj_hMul {A : Type _} [Monoid A] [StarMul A] (U : unitary A) (x y : A) :
     x = y ↔ x * U = y * U := by
   rw [IsUnit.mul_left_inj]
-  · rw [← unitary.coe_toUnits_apply]
-    exact (unitary.toUnits U).IsUnit
+  · rw [← unitary.val_toUnits_apply]
+    exact (unitary.toUnits U).isUnit
 
 section SingleBlock
 
@@ -195,95 +195,95 @@ section SingleBlock
 
 
 variable {n : Type _} [DecidableEq n] [Fintype n] {φ : Module.Dual ℂ (Matrix n n ℂ)}
-  [hφ : Fact φ.IsFaithfulPosMap]
 
 namespace Module.Dual.IsFaithfulPosMap
 
-theorem inner_eq [hφ : Fact φ.IsFaithfulPosMap] (x y : Matrix n n ℂ) : ⟪x, y⟫_ℂ = φ (xᴴ ⬝ y) :=
-  rfl
+open scoped ComplexOrder
 
-theorem inner_eq' [hφ : Fact φ.IsFaithfulPosMap] (x y : Matrix n n ℂ) :
-    ⟪x, y⟫_ℂ = (φ.Matrix ⬝ xᴴ ⬝ y).trace := by rw [inner_eq, φ.apply, Matrix.mul_assoc]
+theorem inner_eq  [φ.IsFaithfulPosMap] (x y : Matrix n n ℂ) :
+  ⟪x, y⟫_ℂ = φ (xᴴ * y) :=
+rfl
 
-def matrixIsPosDef (hφ : φ.IsFaithfulPosMap) : φ.Matrix.PosDef :=
-  φ.isFaithfulPosMap_iff_of_matrix.mp hφ
+theorem inner_eq' (hφ : φ.IsFaithfulPosMap) (x y : Matrix n n ℂ) :
+  ⟪x, y⟫_ℂ = (φ.matrix * xᴴ * y).trace := by
+rw [inner_eq, φ.apply, Matrix.mul_assoc]
+
+def matrixIsPosDef (hφ : φ.IsFaithfulPosMap) : PosDef φ.matrix :=
+φ.isFaithfulPosMap_iff_of_matrix.mp hφ
 
 theorem hMul_right (hφ : φ.IsFaithfulPosMap) (x y z : Matrix n n ℂ) :
-    φ (xᴴ ⬝ (y ⬝ z)) = φ ((x ⬝ (φ.Matrix ⬝ zᴴ ⬝ φ.Matrix⁻¹))ᴴ ⬝ y) :=
+    φ (xᴴ * (y * z)) = φ ((x * (φ.matrix * zᴴ * φ.matrix⁻¹))ᴴ * y) :=
   by
-  haveI := hφ.matrix_is_pos_def.invertible
+  haveI := (hφ.matrixIsPosDef).invertible
   simp_rw [φ.apply, Matrix.conjTranspose_mul, Matrix.conjTranspose_conjTranspose,
-    hφ.matrix_is_pos_def.1.Eq, hφ.matrix_is_pos_def.inv.1.Eq, ← Matrix.mul_assoc, Matrix.mul_assoc,
+    hφ.matrixIsPosDef.1.eq, hφ.matrixIsPosDef.inv.1.eq, ← Matrix.mul_assoc, Matrix.mul_assoc,
     Matrix.mul_inv_cancel_left_of_invertible]
   rw [Matrix.trace_mul_cycle', Matrix.mul_assoc, ← Matrix.trace_mul_cycle', Matrix.mul_assoc]
 
-theorem inner_left_hMul [hφ : Fact φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
-    ⟪x ⬝ y, z⟫_ℂ = ⟪y, xᴴ ⬝ z⟫_ℂ :=
-  linear_functional_right_hMul _ _ _
+theorem inner_left_hMul [φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
+  ⟪x * y, z⟫_ℂ = ⟪y, xᴴ * z⟫_ℂ :=
+linear_functional_right_hMul _ _ _
 
-theorem inner_right_hMul [hφ : Fact φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
-    ⟪x, y ⬝ z⟫_ℂ = ⟪yᴴ ⬝ x, z⟫_ℂ :=
-  linear_functional_left_hMul _ _ _
+theorem inner_right_hMul [φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
+  ⟪x, y * z⟫_ℂ = ⟪yᴴ * x, z⟫_ℂ :=
+linear_functional_left_hMul _ _ _
 
-theorem inner_left_conj [hφ : Fact φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
-    ⟪x, y ⬝ z⟫_ℂ = ⟪x ⬝ (φ.Matrix ⬝ zᴴ ⬝ φ.Matrix⁻¹), y⟫_ℂ :=
-  hφ.elim.mul_right _ _ _
+theorem inner_left_conj (hφ : φ.IsFaithfulPosMap) (x y z : Matrix n n ℂ) :
+  ⟪x, y * z⟫_ℂ = ⟪x * (φ.matrix * zᴴ * φ.matrix⁻¹), y⟫_ℂ :=
+hφ.hMul_right _ _ _
 
 theorem hMul_left (hφ : φ.IsFaithfulPosMap) (x y z : Matrix n n ℂ) :
-    φ ((x ⬝ y)ᴴ ⬝ z) = φ (xᴴ ⬝ (z ⬝ (φ.Matrix ⬝ yᴴ ⬝ φ.Matrix⁻¹))) :=
-  by
-  letI := Fact.mk hφ
-  rw [← inner_eq, ← InnerProductSpace.Core.inner_conj_symm, inner_left_conj,
-    InnerProductSpace.Core.inner_conj_symm]
-  rfl
+    φ ((x * y)ᴴ * z) = φ (xᴴ * (z * (φ.matrix * yᴴ * φ.matrix⁻¹))) :=
+by rw [← inner_eq, ← inner_conj_symm, inner_left_conj, inner_conj_symm]; rfl
 
-theorem inner_right_conj [hφ : Fact φ.IsFaithfulPosMap] (x y z : Matrix n n ℂ) :
-    ⟪x ⬝ y, z⟫_ℂ = ⟪x, z ⬝ (φ.Matrix ⬝ yᴴ ⬝ φ.Matrix⁻¹)⟫_ℂ :=
-  hφ.elim.mul_left _ _ _
+theorem inner_right_conj (hφ : φ.IsFaithfulPosMap) (x y z : Matrix n n ℂ) :
+  ⟪x * y, z⟫_ℂ = ⟪x, z * (φ.matrix * yᴴ * φ.matrix⁻¹)⟫_ℂ :=
+hφ.hMul_left _ _ _
 
-theorem adjoint_eq [hφ : Fact φ.IsFaithfulPosMap] :
-    φ.adjoint = (Algebra.linearMap ℂ (Matrix n n ℂ) : ℂ →ₗ[ℂ] Matrix n n ℂ) :=
-  by
+theorem adjoint_eq (hφ : φ.IsFaithfulPosMap) :
+  LinearMap.adjoint φ = (Algebra.linearMap ℂ (Matrix n n ℂ) : ℂ →ₗ[ℂ] Matrix n n ℂ) :=
+by
   rw [LinearMap.ext_iff]
   intro x
   apply @ext_inner_right ℂ
   intro y
   rw [LinearMap.adjoint_inner_left, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
-    InnerProductSpace.Core.inner_smul_left, inner_eq, conj_transpose_one, Matrix.one_mul]
+    inner_smul_left, inner_eq, conjTranspose_one, Matrix.one_mul]
   rfl
 
 /-- The adjoint of a star-algebraic equivalence $f$ on matrix algebras is given by
   $$f^*\colon x \mapsto f^{-1}(x Q) Q^{-1},$$
   where $Q$ is `hφ.matrix`. -/
-theorem starAlgEquiv_adjoint_eq [hφ : Fact φ.IsFaithfulPosMap]
-    (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) (x : Matrix n n ℂ) :
-    ((f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
-            Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ).adjoint
-        x =
-      (f.symm (x ⬝ φ.Matrix) : Matrix n n ℂ) ⬝ φ.Matrix⁻¹ :=
-  by
-  haveI := hφ.elim.matrix_is_pos_def.invertible
+theorem starAlgEquiv_adjoint_eq (hφ : φ.IsFaithfulPosMap)
+  (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) (x : Matrix n n ℂ) :
+  (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
+          Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
+      x =
+    (f.symm (x * φ.matrix) : Matrix n n ℂ) * φ.matrix⁻¹ :=
+by
+  haveI := hφ.matrixIsPosDef.invertible
   apply @ext_inner_left ℂ
   intro a
   simp_rw [LinearMap.adjoint_inner_right, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv]
   obtain ⟨U, rfl⟩ := f.of_matrix_is_inner
-  simp_rw [inner_aut_star_alg_apply, inner_aut_star_alg_symm_apply, Matrix.mul_assoc]
-  nth_rw_rhs 1 [← Matrix.mul_assoc φ.matrix]
-  nth_rw_rhs 1 [← Matrix.mul_assoc]
-  rw [inner_left_conj, inner_right_mul]
-  simp_rw [conj_transpose_mul, hφ.elim.matrix_is_pos_def.1.Eq, hφ.elim.matrix_is_pos_def.inv.1.Eq, ←
-    star_eq_conj_transpose, ← unitary_group.star_coe_eq_coe_star, star_star,
+  simp_rw [innerAutStarAlg_apply, innerAutStarAlg_symm_apply, Matrix.mul_assoc]
+  nth_rw 1 [← Matrix.mul_assoc φ.matrix]
+  nth_rw 2 [← Matrix.mul_assoc]
+  rw [inner_left_conj, inner_right_hMul]
+  simp_rw [conjTranspose_mul, hφ.matrixIsPosDef.1.eq, hφ.matrixIsPosDef.inv.1.eq, ←
+    star_eq_conjTranspose, ← unitaryGroup.star_coe_eq_coe_star, star_star,
     Matrix.mul_inv_cancel_left_of_invertible, Matrix.mul_assoc, mul_inv_of_invertible,
     Matrix.mul_one]
 
-theorem starAlgEquiv_unitary_commute_iff [hφ : Fact φ.IsFaithfulPosMap]
-    (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) : Commute φ.Matrix f.unitary ↔ f φ.Matrix = φ.Matrix :=
+theorem starAlgEquiv_unitary_commute_iff [φ.IsFaithfulPosMap]
+    (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) :
+    Commute φ.matrix f.of_matrix_unitary ↔ f φ.matrix = φ.matrix :=
   by
   rw [Commute, SemiconjBy]
-  nth_rw 3 [← star_alg_equiv.eq_inner_aut f]
-  rw [inner_aut_star_alg_apply, ← unitary_group.star_coe_eq_coe_star]
-  nth_rw 2 [unitary_group.injective_mul f.unitary]
-  simp_rw [Matrix.mul_assoc, unitary_group.star_mul_self, Matrix.mul_one, mul_eq_mul, eq_comm]
+  nth_rw 3 [← StarAlgEquiv.eq_innerAut f]
+  rw [innerAutStarAlg_apply, ← unitaryGroup.star_coe_eq_coe_star]
+  nth_rw 2 [unitaryGroup.injective_hMul f.of_matrix_unitary]
+  simp_rw [Matrix.mul_assoc, UnitaryGroup.star_mul_self, Matrix.mul_one, eq_comm]
 
 /-- Let `f` be a  star-algebraic equivalence on matrix algebras. Then tfae:
 
@@ -294,21 +294,20 @@ theorem starAlgEquiv_unitary_commute_iff [hφ : Fact φ.IsFaithfulPosMap]
 * `∀ x, ‖f x‖ = ‖x‖`,
 * `φ.matrix` commutes with `f.unitary`.
 -/
-theorem starAlgEquiv_is_isometry_tFAE [hφ : Fact φ.IsFaithfulPosMap] [Nontrivial n]
+theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) :
-    TFAE
-      [f φ.Matrix = φ.Matrix,
-        ((f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
-              Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ).adjoint =
+    List.TFAE
+      [f φ.matrix = φ.matrix,
+        (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
+              Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) =
           f.symm.toAlgEquiv.toLinearMap,
         φ ∘ₗ f.toAlgEquiv.toLinearMap = φ, ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
-        ∀ x : Matrix n n ℂ, ‖f x‖ = ‖x‖, Commute φ.Matrix f.unitary] :=
+        ∀ x : Matrix n n ℂ, ‖f x‖ = ‖x‖, Commute φ.matrix f.of_matrix_unitary] :=
   by
   tfae_have 5 ↔ 2
   · simp_rw [InnerProductSpace.Core.norm_eq_sqrt_inner,
-      Real.sqrt_inj InnerProductSpace.Core.inner_self_nonneg
-        InnerProductSpace.Core.inner_self_nonneg,
-      ← Complex.ofReal_inj, inner_self_re, ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
+      Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
+      ← Complex.ofReal_inj, inner_self_ofReal_re, ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
     have :
       ∀ x y,
         ⟪f x, f y⟫_ℂ - ⟪x, y⟫_ℂ =
@@ -321,15 +320,15 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : Fact φ.IsFaithfulPosMap] [Nontrivi
       LinearMap.one_comp]
   rw [tfae_5_iff_2]
   tfae_have 4 ↔ 3
-  · simp_rw [inner_eq, ← star_eq_conj_transpose, ← map_star f, ← mul_eq_mul, ← _root_.map_mul f,
+  · simp_rw [inner_eq, ← star_eq_conjTranspose, ← map_star f, ← _root_.map_mul f,
       LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
       StarAlgEquiv.coe_toAlgEquiv]
     refine' ⟨fun h x => _, fun h x y => h _⟩
-    rw [← Matrix.one_mul x, ← star_one, ← mul_eq_mul]
+    rw [← Matrix.one_mul x, ← star_one]
     exact h _ _
   rw [tfae_4_iff_3]
-  haveI := hφ.elim.matrix_is_pos_def.invertible
-  simp_rw [LinearMap.ext_iff, star_alg_equiv_adjoint_eq f, LinearMap.comp_apply,
+  haveI :=  hφ.matrixIsPosDef.invertible
+  simp_rw [LinearMap.ext_iff, starAlgEquiv_adjoint_eq f, LinearMap.comp_apply,
     AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, mul_inv_eq_iff_eq_mul_of_invertible,
     φ.apply, StarAlgEquiv.symm_apply_eq, ← mul_eq_mul, _root_.map_mul,
     StarAlgEquiv.apply_symm_apply, ← forall_left_hMul φ.matrix, @eq_comm _ φ.matrix]
@@ -346,17 +345,17 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : Fact φ.IsFaithfulPosMap] [Nontrivi
     obtain ⟨Q, hQ, h⟩ := Module.Dual.eq_trace_unique φ
     have := h _ i
     rw [StarAlgEquiv.symm_apply_eq] at this
-    nth_rw_rhs 1 [this]
+    nth_rw 1 [this]
     congr
     exact h _ φ.apply
-  rw [star_alg_equiv_unitary_commute_iff]
+  rw [starAlgEquiv_unitary_commute_iff]
   tfae_finish
 
 protected noncomputable def basis (hφ : φ.IsFaithfulPosMap) : Basis (n × n) ℂ (Matrix n n ℂ) :=
   by
-  let hQ := hφ.matrix_is_pos_def
+  let hQ := hφ.matrixIsPosDef
   refine' Basis.mk _ _
-  · exact fun ij => std_basis_matrix ij.1 ij.2 1 ⬝ hφ.matrix_is_pos_def.rpow (-(1 / 2))
+  · exact fun ij => std_basis_matrix ij.1 ij.2 1 * hφ.matrixIsPosDef.rpow (-(1 / 2))
   · have := (std_basis ℂ n n).LinearIndependent
     simp_rw [LinearIndependent, LinearMap.ker_eq_bot, injective_iff_map_eq_zero,
       Finsupp.total_apply, Finsupp.sum] at this ⊢
@@ -391,12 +390,12 @@ protected noncomputable def basis (hφ : φ.IsFaithfulPosMap) : Basis (n × n) �
       mul_eq_mul, ← Finset.sum_mul, ← Matrix.ext_iff, mul_eq_mul, mul_apply, Matrix.sum_apply,
       Pi.smul_apply, std_basis_matrix, smul_ite, smul_zero, ← Prod.mk.inj_iff, Prod.mk.eta,
       Finset.sum_ite_eq', Finset.mem_univ, if_true, smul_mul_assoc, one_mul]
-    exists fun ij : n × n => (x ⬝ hQ.rpow (1 / 2) : Matrix n n ℂ) ij.1 ij.2
+    exists fun ij : n × n => (x * hQ.rpow (1 / 2) : Matrix n n ℂ) ij.1 ij.2
     simp_rw [smul_eq_mul, ← mul_apply, Matrix.mul_assoc, Matrix.PosDef.rpow_hMul_rpow, add_neg_self,
       Matrix.PosDef.rpow_zero, Matrix.mul_one, eq_self_iff_true, forall₂_true_iff]
 
 protected theorem basis_apply (hφ : φ.IsFaithfulPosMap) (ij : n × n) :
-    hφ.Basis ij = stdBasisMatrix ij.1 ij.2 (1 : ℂ) ⬝ hφ.matrixIsPosDef.rpow (-(1 / 2 : ℝ)) := by
+    hφ.Basis ij = stdBasisMatrix ij.1 ij.2 (1 : ℂ) * hφ.matrixIsPosDef.rpow (-(1 / 2 : ℝ)) := by
   rw [is_faithful_pos_map.basis, Basis.mk_apply]
 
 local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
@@ -405,24 +404,24 @@ protected noncomputable def toMatrix (hφ : φ.IsFaithfulPosMap) :
     (Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) ≃ₐ[ℂ] Matrix (n × n) (n × n) ℂ :=
   LinearMap.toMatrixAlgEquiv hφ.Basis
 
-theorem basis_is_orthonormal [hφ : Fact φ.IsFaithfulPosMap] : Orthonormal ℂ hφ.elim.Basis :=
+theorem basis_is_orthonormal [hφ : Fact φ.IsFaithfulPosMap] : Orthonormal ℂ  hφ.Basis :=
   by
   rw [orthonormal_iff_ite]
   simp_rw [Module.Dual.IsFaithfulPosMap.basis_apply]
-  simp_rw [inner_eq', conj_transpose_mul, (pos_def.rpow.is_hermitian _ _).Eq,
+  simp_rw [inner_eq', conjTranspose_mul, (pos_def.rpow.is_hermitian _ _).Eq,
     std_basis_matrix.star_one, Matrix.mul_assoc, ← Matrix.mul_assoc _ (std_basis_matrix _ _ _),
     stdBasisMatrix_hMul, one_mul, Matrix.smul_mul, Matrix.mul_smul, trace_smul, smul_eq_mul,
     boole_mul]
   let Q := φ.matrix
-  let hQ := hφ.elim.matrix_is_pos_def
+  let hQ :=  hφ.matrixIsPosDef
   have :
     ∀ i j : n,
-      (Q ⬝ (hQ.rpow (-(1 / 2) : ℝ) ⬝ (std_basis_matrix i j 1 ⬝ hQ.rpow (-(1 / 2) : ℝ)))).trace =
+      (Q * (hQ.rpow (-(1 / 2) : ℝ) * (std_basis_matrix i j 1 * hQ.rpow (-(1 / 2) : ℝ)))).trace =
         ite (i = j) (1 : ℂ) (0 : ℂ) :=
     fun i j =>
     calc
-      (Q ⬝ (hQ.rpow (-(1 / 2) : ℝ) ⬝ (std_basis_matrix i j 1 ⬝ hQ.rpow (-(1 / 2) : ℝ)))).trace =
-          (hQ.rpow (-(1 / 2) : ℝ) ⬝ hQ.rpow 1 ⬝ hQ.rpow (-(1 / 2) : ℝ) ⬝
+      (Q * (hQ.rpow (-(1 / 2) : ℝ) * (std_basis_matrix i j 1 * hQ.rpow (-(1 / 2) : ℝ)))).trace =
+          (hQ.rpow (-(1 / 2) : ℝ) * hQ.rpow 1 * hQ.rpow (-(1 / 2) : ℝ) *
               std_basis_matrix i j 1).trace :=
         by
         simp_rw [pos_def.rpow_one_eq_self, Matrix.mul_assoc]
@@ -430,35 +429,35 @@ theorem basis_is_orthonormal [hφ : Fact φ.IsFaithfulPosMap] : Orthonormal ℂ 
         simp_rw [Matrix.mul_assoc]
         rw [trace_mul_comm]
         simp_rw [Matrix.mul_assoc]
-      _ = (hQ.rpow (-(1 / 2) + 1 + -(1 / 2) : ℝ) ⬝ std_basis_matrix i j 1).trace := by
+      _ = (hQ.rpow (-(1 / 2) + 1 + -(1 / 2) : ℝ) * std_basis_matrix i j 1).trace := by
         simp_rw [pos_def.rpow_mul_rpow]
-      _ = (hQ.rpow 0 ⬝ std_basis_matrix i j 1).trace := by norm_num
+      _ = (hQ.rpow 0 * std_basis_matrix i j 1).trace := by norm_num
       _ = ite (i = j) 1 0 := by simp_rw [pos_def.rpow_zero, Matrix.one_mul, std_basis_matrix.trace]
   simp_rw [this, ← ite_and, ← Prod.eq_iff_fst_eq_snd_eq, eq_self_iff_true, forall₂_true_iff]
 
 protected noncomputable def orthonormalBasis [hφ : Fact φ.IsFaithfulPosMap] :
     OrthonormalBasis (n × n) ℂ (Matrix n n ℂ) :=
-  hφ.elim.Basis.toOrthonormalBasis basis_is_orthonormal
+   hφ.Basis.toOrthonormalBasis basis_is_orthonormal
 
 protected theorem orthonormalBasis_apply [hφ : Fact φ.IsFaithfulPosMap] (ij : n × n) :
     (IsFaithfulPosMap.orthonormalBasis : OrthonormalBasis (n × n) ℂ (Matrix n n ℂ)) ij =
-      stdBasisMatrix ij.1 ij.2 (1 : ℂ) ⬝ hφ.elim.matrixIsPosDef.rpow (-(1 / 2 : ℝ)) :=
+      stdBasisMatrix ij.1 ij.2 (1 : ℂ) *  hφ.matrixIsPosDef.rpow (-(1 / 2 : ℝ)) :=
   by
   rw [← is_faithful_pos_map.basis_apply, is_faithful_pos_map.orthonormal_basis,
     Basis.coe_toOrthonormalBasis]
 
 theorem inner_coord [hφ : Fact φ.IsFaithfulPosMap] (ij : n × n) (y : Matrix n n ℂ) :
     ⟪(IsFaithfulPosMap.orthonormalBasis : OrthonormalBasis _ _ _) ij, y⟫_ℂ =
-      (y ⬝ hφ.elim.matrixIsPosDef.rpow (1 / 2)) ij.1 ij.2 :=
+      (y *  hφ.matrixIsPosDef.rpow (1 / 2)) ij.1 ij.2 :=
   by
   let Q := φ.matrix
-  let hQ := hφ.elim.matrix_is_pos_def
-  simp_rw [inner_eq', is_faithful_pos_map.orthonormal_basis_apply, conj_transpose_mul,
-    (Matrix.PosDef.rpow.isHermitian hQ _).Eq, ← Matrix.mul_assoc, std_basis_matrix_conj_transpose,
+  let hQ :=  hφ.matrixIsPosDef
+  simp_rw [inner_eq', is_faithful_pos_map.orthonormal_basis_apply, conjTranspose_mul,
+    (Matrix.PosDef.rpow.isHermitian hQ _).Eq, ← Matrix.mul_assoc, std_basis_matrix_conjTranspose,
     star_one]
   have :=
     calc
-      Q ⬝ hQ.rpow (-(1 / 2)) = hQ.rpow 1 ⬝ hQ.rpow (-(1 / 2)) := by
+      Q * hQ.rpow (-(1 / 2)) = hQ.rpow 1 * hQ.rpow (-(1 / 2)) := by
         rw [Matrix.PosDef.rpow_one_eq_self]
       _ = hQ.rpow (1 + -(1 / 2)) := by rw [Matrix.PosDef.rpow_hMul_rpow]
       _ = hQ.rpow (1 / 2) := by norm_num
@@ -468,7 +467,7 @@ theorem inner_coord [hφ : Fact φ.IsFaithfulPosMap] (ij : n × n) (y : Matrix n
   simp_rw [mul_comm]
 
 protected theorem basis_repr_apply [hφ : Fact φ.IsFaithfulPosMap] (x : Matrix n n ℂ) (ij : n × n) :
-    hφ.elim.Basis.repr x ij = ⟪hφ.elim.Basis ij, x⟫_ℂ :=
+     hφ.Basis.repr x ij = ⟪ hφ.Basis ij, x⟫_ℂ :=
   by
   rw [is_faithful_pos_map.basis_apply, ← is_faithful_pos_map.orthonormal_basis_apply, ←
     OrthonormalBasis.repr_apply_apply]
@@ -477,9 +476,9 @@ protected theorem basis_repr_apply [hφ : Fact φ.IsFaithfulPosMap] (x : Matrix 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 protected theorem toMatrix_symm_apply [hφ : Fact φ.IsFaithfulPosMap]
     (x : Matrix (n × n) (n × n) ℂ) :
-    hφ.elim.toMatrix.symm x =
+     hφ.toMatrix.symm x =
       ∑ (i : n) (j : n) (k : n) (l : n),
-        (x (i, j) (k, l) : ℂ) • |hφ.elim.Basis (i, j)⟩⟨hφ.elim.Basis (k, l)| :=
+        (x (i, j) (k, l) : ℂ) • | hφ.Basis (i, j)⟩⟨ hφ.Basis (k, l)| :=
   by
   rw [is_faithful_pos_map.to_matrix, LinearMap.toMatrixAlgEquiv_symm, LinearMap.ext_iff]
   intro a
@@ -502,7 +501,7 @@ theorem Module.Dual.eq_rankOne_of_faithful_pos_map [hφ : Fact φ.IsFaithfulPosM
     (x : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) :
     x =
       ∑ (i : n) (j : n) (k : n) (l : n),
-        hφ.elim.toMatrix x (i, j) (k, l) • |hφ.elim.Basis (i, j)⟩⟨hφ.elim.Basis (k, l)| :=
+         hφ.toMatrix x (i, j) (k, l) • | hφ.Basis (i, j)⟩⟨ hφ.Basis (k, l)| :=
   by rw [← Module.Dual.IsFaithfulPosMap.toMatrix_symm_apply, AlgEquiv.symm_apply_apply]
 
 end SingleBlock
@@ -545,7 +544,7 @@ theorem inner_eq [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (x y : ∀ i, Matri
   rfl
 
 theorem inner_eq' [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (x y : ∀ i, Matrix (s i) (s i) ℂ) :
-    ⟪x, y⟫_ℂ = ∑ i, ((ψ i).Matrix ⬝ (x i)ᴴ ⬝ y i).trace := by
+    ⟪x, y⟫_ℂ = ∑ i, ((ψ i).Matrix * (x i)ᴴ * y i).trace := by
   simp only [inner_eq, Module.Dual.pi.apply, Pi.mul_apply, Matrix.hMul_eq_hMul,
     Matrix.star_eq_conjTranspose, Pi.star_apply, Matrix.mul_assoc]
 
@@ -587,7 +586,7 @@ theorem adjoint_eq [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] :
   rw [LinearMap.adjoint_inner_left, Algebra.linearMap_apply]
   simp_rw [inner_pi_eq_sum, Pi.algebraMap_apply, algebra_map_eq_smul,
     InnerProductSpace.Core.inner_smul_left, Module.Dual.IsFaithfulPosMap.inner_eq,
-    conj_transpose_one, Matrix.one_mul, ← Finset.mul_sum]
+    conjTranspose_one, Matrix.one_mul, ← Finset.mul_sum]
   rfl
 
 protected noncomputable def basis (hψ : ∀ i, (ψ i).IsFaithfulPosMap) :
@@ -597,11 +596,11 @@ protected noncomputable def basis (hψ : ∀ i, (ψ i).IsFaithfulPosMap) :
 protected theorem basis_apply (hψ : ∀ i, (ψ i).IsFaithfulPosMap) (ijk : Σ i, s i × s i) :
     Module.Dual.pi.IsFaithfulPosMap.basis hψ ijk =
       includeBlock
-        (stdBasisMatrix ijk.2.1 ijk.2.2 1 ⬝ (hψ ijk.1).matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
+        (stdBasisMatrix ijk.2.1 ijk.2.2 1 * (hψ ijk.1).matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
   by
   simp only [Module.Dual.pi.IsFaithfulPosMap.basis, Pi.basis_apply, Function.funext_iff]
   intro i j k
-  simp only [LinearMap.stdBasis_apply, Pi.mul_apply, include_block_apply, mul_eq_mul, mul_apply,
+  simp only [LinearMap.stdBasis_apply, Pi.mul_apply, includeBlock_apply, mul_eq_mul, mul_apply,
     dite_apply, hMul_dite, MulZeroClass.mul_zero, Pi.zero_apply, Function.update]
   rw [dite_eq_iff']
   constructor
@@ -614,15 +613,15 @@ protected theorem basis_apply (hψ : ∀ i, (ψ i).IsFaithfulPosMap) (ijk : Σ i
 
 protected theorem basis_apply' (hψ : ∀ i, (ψ i).IsFaithfulPosMap) (i : k) (j l : s i) :
     Module.Dual.pi.IsFaithfulPosMap.basis hψ ⟨i, (j, l)⟩ =
-      includeBlock (stdBasisMatrix j l 1 ⬝ (hψ i).matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
+      includeBlock (stdBasisMatrix j l 1 * (hψ i).matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
   Module.Dual.pi.IsFaithfulPosMap.basis_apply hψ _
 
 theorem includeBlock_left_inner [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i : k}
     (x : Matrix (s i) (s i) ℂ) (y : ∀ j, Matrix (s j) (s j) ℂ) :
     ⟪includeBlock x, y⟫_ℂ = ⟪x, y i⟫_ℂ :=
   by
-  simp only [inner_pi_eq_sum, include_block_apply, Module.Dual.IsFaithfulPosMap.inner_eq', ←
-    mul_eq_mul, ← star_eq_conj_transpose, star_dite, star_zero, hMul_dite, MulZeroClass.mul_zero,
+  simp only [inner_pi_eq_sum, includeBlock_apply, Module.Dual.IsFaithfulPosMap.inner_eq', ←
+    mul_eq_mul, ← star_eq_conjTranspose, star_dite, star_zero, hMul_dite, MulZeroClass.mul_zero,
     dite_hMul, MulZeroClass.zero_mul]
   simp_rw [trace_iff, dite_apply, Pi.zero_apply, Finset.sum_dite_irrel, Finset.sum_const_zero,
     Finset.sum_dite_eq, Finset.mem_univ, if_true]
@@ -630,19 +629,19 @@ theorem includeBlock_left_inner [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i :
 
 theorem includeBlock_inner_same [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i : k}
     {x y : Matrix (s i) (s i) ℂ} : ⟪includeBlock x, includeBlock y⟫_ℂ = ⟪x, y⟫_ℂ := by
-  rw [include_block_left_inner, include_block_apply_same]
+  rw [includeBlock_left_inner, includeBlock_apply_same]
 
 theorem includeBlock_inner_same' [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i j : k}
     {x : Matrix (s i) (s i) ℂ} {y : Matrix (s j) (s j) ℂ} (h : i = j) :
     ⟪includeBlock x, includeBlock y⟫_ℂ = ⟪x, by rw [h]; exact y⟫_ℂ :=
   by
-  simp_rw [include_block_left_inner, include_block_apply, h, eq_self_iff_true, dif_pos]
+  simp_rw [includeBlock_left_inner, includeBlock_apply, h, eq_self_iff_true, dif_pos]
   rfl
 
 theorem includeBlock_inner_ne_same [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i j : k}
     {x : Matrix (s i) (s i) ℂ} {y : Matrix (s j) (s j) ℂ} (h : i ≠ j) :
     ⟪includeBlock x, includeBlock y⟫_ℂ = 0 := by
-  simp only [include_block_left_inner, include_block_apply_ne_same _ h.symm, inner_zero_right]
+  simp only [includeBlock_left_inner, includeBlock_apply_ne_same _ h.symm, inner_zero_right]
 
 protected theorem basis.apply_cast_eq_mpr (hψ : ∀ i, (ψ i).IsFaithfulPosMap) {i j : k}
     {a : s j × s j} (h : i = j) :
@@ -659,7 +658,7 @@ protected theorem basis_is_orthonormal [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMa
   rw [eq_comm, ite_eq_iff']
   constructor
   · rintro rfl
-    simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, include_block_inner_same', cast_eq,
+    simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, includeBlock_inner_same', cast_eq,
       eq_mpr_eq_cast, ← Module.Dual.IsFaithfulPosMap.basis_apply,
       orthonormal_iff_ite.mp Module.Dual.IsFaithfulPosMap.basis_is_orthonormal i.snd,
       eq_self_iff_true, if_true]
@@ -669,7 +668,7 @@ protected theorem basis_is_orthonormal [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMa
       cases' h with h1 h2
       · contradiction
       · rw [← Sigma.eta i, ← Sigma.eta j]
-        simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, include_block_inner_same' h', ←
+        simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, includeBlock_inner_same' h', ←
           Module.Dual.IsFaithfulPosMap.basis_apply, ← basis.apply_cast_eq_mpr fun i => (hψ i).elim,
           Sigma.eta, orthonormal_iff_ite.mp Module.Dual.IsFaithfulPosMap.basis_is_orthonormal i.snd]
         rw [eq_comm, ite_eq_right_iff]
@@ -677,7 +676,7 @@ protected theorem basis_is_orthonormal [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMa
         rw [hh] at h2
         simp only [eq_mpr_eq_cast, cast_hEq, not_true] at h2
         contradiction
-    · simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, include_block_inner_ne_same h']
+    · simp only [Module.Dual.pi.IsFaithfulPosMap.basis_apply, includeBlock_inner_ne_same h']
 
 protected noncomputable def orthonormalBasis [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] :
     OrthonormalBasis (Σ i, s i × s i) ℂ (∀ i, Matrix (s i) (s i) ℂ) :=
@@ -688,7 +687,7 @@ protected theorem orthonormalBasis_apply [hψ : ∀ i, Fact (ψ i).IsFaithfulPos
     {ijk : Σ i, s i × s i} :
     (Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis : OrthonormalBasis _ _ _) ijk =
       includeBlock
-        (stdBasisMatrix ijk.2.1 ijk.2.2 1 ⬝ (hψ ijk.1).elim.matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
+        (stdBasisMatrix ijk.2.1 ijk.2.2 1 * (hψ ijk.1).elim.matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
   by
   rw [← Module.Dual.pi.IsFaithfulPosMap.basis_apply _]
   simp only [Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis, Basis.coe_toOrthonormalBasis]
@@ -696,17 +695,17 @@ protected theorem orthonormalBasis_apply [hψ : ∀ i, Fact (ψ i).IsFaithfulPos
 protected theorem orthonormalBasis_apply' [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] {i : k}
     {j l : s i} :
     (Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis : OrthonormalBasis _ _ _) ⟨i, (j, l)⟩ =
-      includeBlock (stdBasisMatrix j l 1 ⬝ (hψ i).elim.matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
+      includeBlock (stdBasisMatrix j l 1 * (hψ i).elim.matrixIsPosDef.rpow (-(1 / 2 : ℝ))) :=
   Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis_apply
 
 protected theorem inner_coord [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (ijk : Σ i, s i × s i)
     (y : ∀ i, Matrix (s i) (s i) ℂ) :
     ⟪Module.Dual.pi.IsFaithfulPosMap.basis (fun i => (hψ i).elim) ijk, y⟫_ℂ =
-      (y ijk.1 ⬝ (hψ ijk.1).elim.matrixIsPosDef.rpow (1 / 2)) ijk.2.1 ijk.2.2 :=
+      (y ijk.1 * (hψ ijk.1).elim.matrixIsPosDef.rpow (1 / 2)) ijk.2.1 ijk.2.2 :=
   by
   let Q := (ψ ijk.1).Matrix
   let hQ := (hψ ijk.1).elim.matrixIsPosDef
-  simp_rw [Module.Dual.pi.IsFaithfulPosMap.basis_apply, include_block_left_inner, ←
+  simp_rw [Module.Dual.pi.IsFaithfulPosMap.basis_apply, includeBlock_left_inner, ←
     Module.Dual.IsFaithfulPosMap.orthonormalBasis_apply, Module.Dual.IsFaithfulPosMap.inner_coord]
 
 protected theorem basis_repr_apply [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
@@ -722,7 +721,7 @@ theorem MatrixBlock.isSelfAdjoint [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] :
     IsSelfAdjoint (Module.Dual.pi.matrixBlock ψ) :=
   by
   ext1
-  simp only [Pi.star_apply, Module.Dual.pi.matrixBlock_apply, star_eq_conj_transpose,
+  simp only [Pi.star_apply, Module.Dual.pi.matrixBlock_apply, star_eq_conjTranspose,
     (hψ x).elim.matrixIsPosDef.1.Eq]
 
 noncomputable def matrixBlockInvertible [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] :
@@ -766,7 +765,7 @@ noncomputable def isBlockDiagonalBasis (hψ : ∀ i, (ψ i).IsFaithfulPosMap) :
 theorem toMatrix_apply' [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
     (f : (∀ i, Matrix (s i) (s i) ℂ) →ₗ[ℂ] ∀ i, Matrix (s i) (s i) ℂ) (r l : Σ r, s r × s r) :
     (toMatrix fun i => (hψ i).elim) f r l =
-      (f (includeBlock ((hψ l.1).elim.Basis l.2)) r.1 ⬝ (hψ r.1).elim.matrixIsPosDef.rpow (1 / 2))
+      (f (includeBlock ((hψ l.1).elim.Basis l.2)) r.1 * (hψ r.1).elim.matrixIsPosDef.rpow (1 / 2))
         r.2.1 r.2.2 :=
   by
   simp_rw [to_matrix, LinearMap.toMatrixAlgEquiv_apply, is_faithful_pos_map.basis_repr_apply, ←
@@ -802,7 +801,7 @@ theorem starAlgEquiv_adjoint_eq [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
         by
         congr
         simp only [Pi.inv_def, Pi.star_def, Module.Dual.pi.matrixBlock_apply,
-          star_eq_conj_transpose, (hψ _).elim.matrixIsPosDef.1.Eq,
+          star_eq_conjTranspose, (hψ _).elim.matrixIsPosDef.1.Eq,
           (hψ _).elim.matrixIsPosDef.inv.1.Eq]
       _ = 1 := t1
   simp_rw [t1, ← mul_assoc (Module.Dual.pi.matrixBlock ψ), t2, mul_one, one_mul, unitary.coe_star,
@@ -868,11 +867,11 @@ theorem starAlgEquiv_is_isometry_tFAE [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap
     exact h _ _
   rw [tfae_4_iff_3]
   letI := @matrix_block_invertible _ _ _ _ _ _ ψ _
-  simp_rw [LinearMap.ext_iff, star_alg_equiv_adjoint_eq f, LinearMap.comp_apply,
+  simp_rw [LinearMap.ext_iff, starAlgEquiv_adjoint_eq f, LinearMap.comp_apply,
     AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, mul_inv_eq_iff_eq_mul_aux,
     Module.Dual.pi.apply'', StarAlgEquiv.symm_apply_eq, _root_.map_mul,
     StarAlgEquiv.apply_symm_apply, pi.forall_left_mul, @eq_comm _ (Module.Dual.pi.matrixBlock ψ), ←
-    block_diagonal'_alg_hom_apply, ← _root_.map_mul]
+    blockDiagonal'_alg_hom_apply, ← _root_.map_mul]
   tfae_have 1 ↔ 2
   · rw [iff_self_iff]; trivial
   tfae_have 1 → 3
@@ -884,16 +883,15 @@ theorem starAlgEquiv_is_isometry_tFAE [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap
     simp_rw [←
       StarAlgEquiv.pi_is_trace_preserving (fun i => (f i).symm)
         (Module.Dual.pi.matrixBlock ψ * (StarAlgEquiv.pi f) _),
-      _root_.map_mul, StarAlgEquiv.pi_symm_apply_apply, block_diagonal'_alg_hom_apply, ←
+      _root_.map_mul, StarAlgEquiv.pi_symm_apply_apply, blockDiagonal'_alg_hom_apply, ←
       Module.Dual.pi.apply'', @eq_comm _ _ (Module.Dual.pi ψ _)] at i
     have := Module.Dual.pi.apply_eq_of ψ _ i
     rw [StarAlgEquiv.pi_symm_apply_eq] at this
     exact this.symm
   tfae_have 5 ↔ 6
-  · rw [star_alg_equiv_commute_iff]
+  · rw [starAlgEquiv_commute_iff]
   tfae_finish
 
 end Module.Dual.pi.IsFaithfulPosMap
 
 end DirectSum
-
