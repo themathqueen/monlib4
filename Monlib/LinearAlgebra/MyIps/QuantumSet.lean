@@ -3,9 +3,9 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyIps.RankOne
-import LinearAlgebra.MyIps.Functional
-import LinearAlgebra.Nacgor
+import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.MyIps.Functional
+import Monlib.LinearAlgebra.Nacgor
 
 #align_import linear_algebra.my_ips.quantum_set
 
@@ -31,45 +31,49 @@ The quantum set is also equipped with a `trace` functional on `A` such that `φ 
 -/
 
 
--- def star_ordered_ring.pos_add_submonoid (A : Type*) [semiring A]
---   [partial_order A] [star_ordered_ring A] : submonoid A :=
--- { carrier := { x | 0 < x },
---   add_mem' := λ x y hx hy,
---   by { simp only [set.mem_set_of_eq, add_nonneg hx hy], }
---    }
+-- def star_ordered_ring.pos_add_submonoid (A : Type*) [Semiring A]
+--   [PartialOrder A] [StarOrderedRing A] : Submonoid A where
+--   carrier := { x | 0 < x }
+--   mul_mem' := λ a b =>
+--     by
+--     simp_rw [Set.mem_setOf_eq] at a b ⊢
+--     exact mul_pos a b
+
+
 -- local attribute [instance] algebra.of_is_scalar_tower_smul_comm_class
 class QuantumSet (A : Type _) where
-  toNormedAddCommGroupOfRing : NormedAddCommGroupOfRing A
-  toInnerProductSpace : InnerProductSpace ℂ A
-  toPartialOrder : PartialOrder A
-  toStarOrderedRing : StarOrderedRing A
-  toHasSmul_comm_class : SMulCommClass ℂ A A
-  to_isScalarTower : IsScalarTower ℂ A A
-  to_finiteDimensional : FiniteDimensional ℂ A
-  toHasInv : Inv A
-  φ : Module.Dual ℂ A
-  hφ : φ.IsFaithfulPosMap
-  inner_eq : ∀ x y : A, ⟪x, y⟫_ℂ = φ (star x * y)
-  functional_adjoint_eq :
-    let _inst : Algebra ℂ A := Algebra.ofIsScalarTowerSmulCommClass
-    LinearMap.adjoint φ = Algebra.linearMap ℂ A
-  APos := { x : A // 0 < x }
-  -- (A_pos_has_one : has_one A_pos)
-  aPosHasPow : Pow A_pos ℝ
-  aPosHasInv : Inv A_pos
-  A_pos_pow_hMul :
-    ∀ (x : A_pos) (t s : ℝ), ((x ^ t : A_pos) : A) * ((x ^ s : A_pos) : A) = ↑(x ^ (t + s))
-  A_pos_pow_zero : ∀ x : A_pos, ↑(x ^ (0 : ℝ)) = (1 : A)
-  A_pos_pow_one : ∀ x : A_pos, x ^ (1 : ℝ) = x
-  A_pos_pow_neg : ∀ (x : A_pos) (t : ℝ), x ^ (-t : ℝ) = (x ^ t)⁻¹
-  A_pos_inv_coe : ∀ x : A_pos, (x : A)⁻¹ = (x⁻¹ : A_pos)
-  q : A_pos
-  -- (Q_is_pos : ∃ x : A, (Q : A) = star x * x)
-  -- (has_lt : has_lt A)
-  -- (Q_is_pos_def : 0 < Q)
-  trace : Module.Dual ℂ A
-  traceIsTracial : trace.IsTracial
-  functional_eq : ∀ x : A, φ x = trace (Q * x)
+toNormedAddCommGroupOfRing : NormedAddCommGroupOfRing A
+toInnerProductSpace : InnerProductSpace ℂ A
+toPartialOrder : PartialOrder A
+toStarOrderedRing : StarOrderedRing A
+toHasSmul_comm_class : SMulCommClass ℂ A A
+to_isScalarTower : IsScalarTower ℂ A A
+to_finiteDimensional : FiniteDimensional ℂ A
+toHasInv : Inv A
+φ : Module.Dual ℂ A
+hφ : φ.IsFaithfulPosMap
+inner_eq : ∀ x y : A, ⟪x, y⟫_ℂ = φ (star x * y)
+functional_adjoint_eq :
+  let _inst : Algebra ℂ A := Algebra.ofIsScalarTowerSmulCommClass
+  LinearMap.adjoint φ = Algebra.linearMap ℂ A
+APos := { x : A // 0 < x }
+APos_coe := CoeFun APos (fun _ => A)
+-- (A_pos_has_one : has_one A_pos)
+aPosHasPow : Pow APos ℝ
+aPosHasInv : Inv APos
+A_pos_pow_hMul :
+  ∀ (x : APos) (t s : ℝ), ((x ^ t : APos) : A) * ((x ^ s : APos) : A) = ((x ^ (t + s))
+A_pos_pow_zero : ∀ x : APos, ((x ^ (0 : ℝ) : APos) : A) = (1 : A)
+A_pos_pow_one : ∀ x : APos, ((x ^ (1 : ℝ) : APos) : A) = (x : A)
+A_pos_pow_neg : ∀ (x : APos) (t : ℝ), x ^ (-t : ℝ) = (x ^ t)⁻¹
+A_pos_inv_coe : ∀ x : A_pos, (x : A)⁻¹ = (x⁻¹ : A_pos)
+q : A_pos
+-- (Q_is_pos : ∃ x : A, (Q : A) = star x * x)
+-- (has_lt : has_lt A)
+-- (Q_is_pos_def : 0 < Q)
+trace : Module.Dual ℂ A
+traceIsTracial : trace.IsTracial
+functional_eq : ∀ x : A, φ x = trace (Q * x)
 
 attribute [instance] QuantumSet.toNormedAddCommGroupOfRing
 
@@ -140,4 +144,3 @@ theorem modAut_neg (t : ℝ) : modAut A (-t) = (modAut A t).symm :=
   simp_rw [mod_aut_apply, mod_aut_symm_apply, neg_neg]
 
 end QuantumSet
-
