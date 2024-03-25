@@ -218,17 +218,6 @@ theorem schurIdempotent_one_right_rankOne {B : Type _} [NormedAddCommGroupOfRing
     schur_idempotent_one_right_aux hψ, inner_conj_symm, OrthonormalBasis.sum_inner_mul_inner,
     lmul_adjoint hψ, lmul_apply]
 
-theorem Matrix.cast_apply {i j : n} (x : Matrix (s i) (s i) ℂ) (h : i = j) (p q : s j) :
-    (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp x p q =
-      x (by rw [h] <;> exact p) (by rw [h] <;> exact q) :=
-  by tidy
-
-theorem Matrix.cast_hMul {i j : n} (x y : Matrix (s i) (s i) ℂ) (h : i = j) :
-    (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp (x * y) =
-      (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp x *
-        (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp y :=
-  by tidy
-
 theorem Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp
     {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
     {i j : n} (h : i = j) (p : s i × s i) :

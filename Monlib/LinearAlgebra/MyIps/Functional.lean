@@ -145,6 +145,16 @@ theorem Module.Dual.pi.apply_single_block {k : Type _} [Fintype k] [DecidableEq 
     Finset.mem_univ, if_true]
   rfl
 
+theorem Module.Dual.pi.apply_single_block' {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+  [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] (φ : Π i, Matrix (s i) (s i) R →ₗ[R] R)
+  {i : k} (x : Matrix (s i) (s i) R) :
+  (Module.Dual.pi φ) (includeBlock x) = φ i x :=
+by
+  let x' := includeBlock x
+  have hx : includeBlock x = includeBlock (x' i) := by simp_rw [x', includeBlock_apply_same]
+  rw [hx, apply_single_block]
+  simp_rw [x', includeBlock_apply_same]
+
 open scoped ComplexOrder
 
 open scoped DirectSum
