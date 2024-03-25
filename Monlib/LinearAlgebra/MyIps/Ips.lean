@@ -278,7 +278,7 @@ theorem ContinuousLinearMap.IsIdempotentElem.toLinearMap {E R : Type _} [Ring R]
     LinearMap.ext_iff, ContinuousLinearMap.coe_coe]
   rfl
 
-theorem ContinuousLinearMap.IsIdempotent.isSelfAdjoint_iff_ker_is_ortho_to_range
+theorem ContinuousLinearMap.IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_range
     [InnerProductSpace ℂ V] [CompleteSpace V] (T : V →L[ℂ] V) (h : IsIdempotentElem T) :
     IsSelfAdjoint T ↔ ker T = (range T)ᗮ := by
   constructor
