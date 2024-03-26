@@ -1264,7 +1264,7 @@ theorem norm_hMul_norm_eq_norm_tmul {𝕜 B C : Type _} [IsROrC 𝕜] [NormedAdd
 
 -- instance Pi.matrix.continuousSMul : ContinuousSMul ℂ PiMat k s := by infer_instance
 
-theorem Pi.rankOneLM_real_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat k s) :
+theorem Pi.rankOneLm_real_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat k s) :
     LinearMap.real (rankOneLm x y : (PiMat k s) →ₗ[ℂ] (PiMat k s)) =
       (rankOneLm (star x) (Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star y))) :=
   by

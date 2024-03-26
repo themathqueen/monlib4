@@ -3,15 +3,15 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import LinearAlgebra.MyIps.Nontracial
-import LinearAlgebra.MyIps.MatIps
-import LinearAlgebra.MyIps.TensorHilbert
-import LinearAlgebra.IsReal
-import LinearAlgebra.MyIps.Frob
-import LinearAlgebra.TensorFinite
-import LinearAlgebra.MyIps.OpUnop
-import LinearAlgebra.LmulRmul
-import LinearAlgebra.Nacgor
+import Monlib.LinearAlgebra.MyIps.Nontracial
+import Monlib.LinearAlgebra.MyIps.MatIps
+import Monlib.LinearAlgebra.MyIps.TensorHilbert
+import Monlib.LinearAlgebra.IsReal
+import Monlib.LinearAlgebra.MyIps.Frob
+import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.MyIps.OpUnop
+import Monlib.LinearAlgebra.LmulRmul
+import Monlib.LinearAlgebra.Nacgor
 
 #align_import quantum_graph.schur_idempotent
 
@@ -27,7 +27,7 @@ variable {n : Type _} [Fintype n] [DecidableEq n] {s : n → Type _} [∀ i, Fin
 
 open scoped TensorProduct BigOperators Kronecker
 
-local notation "𝔹" => ∀ i, Matrix (s i) (s i) ℂ
+local notation "𝔹" => PiMat n s
 
 local notation "l(" x ")" => x →ₗ[ℂ] x
 
@@ -55,19 +55,22 @@ local notation x " ⊗ₘ " y => TensorProduct.map x y
 -- local notation `id` x := (1 : x →ₗ[ℂ] x)
 open scoped Functional
 
+
+set_option synthInstance.checkSynthOrder false in
 noncomputable instance Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fintype n]
-    [DecidableEq n] {ψ : Module.Dual ℂ (Matrix n n ℂ)} [hψ : Fact ψ.IsFaithfulPosMap] :
+    [DecidableEq n] (ψ : Module.Dual ℂ (Matrix n n ℂ)) [ψ.IsFaithfulPosMap] :
     NormedAddCommGroupOfRing (Matrix n n ℂ)
     where
-  toHasNorm := NormedAddCommGroup.toHasNorm
+  toNorm := NormedAddCommGroup.toNorm
   toMetricSpace := NormedAddCommGroup.toMetricSpace
   dist_eq := NormedAddCommGroup.dist_eq
 
+set_option synthInstance.checkSynthOrder false in
 noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
-    {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] :
+    {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [∀ i, (ψ i).IsFaithfulPosMap] :
     NormedAddCommGroupOfRing 𝔹
     where
-  toHasNorm := NormedAddCommGroup.toHasNorm
+  toNorm := NormedAddCommGroup.toNorm
   toMetricSpace := NormedAddCommGroup.toMetricSpace
   dist_eq := NormedAddCommGroup.dist_eq
 
@@ -75,7 +78,7 @@ noncomputable def schurIdempotent {B : Type _} [NormedAddCommGroupOfRing B] [Inn
     [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] : l(B) →ₗ[ℂ] l(B) →ₗ[ℂ] l(B)
     where
   toFun x :=
-    { toFun := fun y => (m B) ∘ₗ (x ⊗ₘ y) ∘ₗ (m B).adjoint
+    { toFun := fun y => (m B) ∘ₗ (x ⊗ₘ y) ∘ₗ LinearMap.adjoint (m B)
       map_add' := fun x y => by
         simp only [TensorProduct.map_apply, TensorProduct.map_add_right, LinearMap.add_comp,
           LinearMap.comp_add]
@@ -99,8 +102,9 @@ theorem schurIdempotent.apply_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
   by
   rw [schurIdempotent, LinearMap.ext_iff_inner_map]
   intro x
-  simp only [ContinuousLinearMap.coe_coe, LinearMap.coe_mk, rankOne_apply, LinearMap.comp_apply]
-  obtain ⟨α, β, h⟩ := TensorProduct.eq_span ((LinearMap.mul' ℂ B).adjoint x)
+  simp only [ContinuousLinearMap.coe_coe, LinearMap.coe_mk, AddHom.coe_mk,
+    rankOne_apply, LinearMap.comp_apply]
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span ((LinearMap.adjoint (LinearMap.mul' ℂ B)) x)
   rw [← h]
   simp_rw [map_sum, TensorProduct.map_tmul, ContinuousLinearMap.coe_coe, rankOne_apply,
     LinearMap.mul'_apply, smul_mul_smul, ← TensorProduct.inner_tmul, ← Finset.sum_smul, ← inner_sum,
@@ -144,20 +148,20 @@ theorem schurIdempotent_one_one_left {B : Type _} [NormedAddCommGroupOfRing B]
 private theorem schur_idempotent_one_right_aux {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
     [StarMul B] {ψ : Module.Dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b)) (a b c : B) :
-    ⟪a * b, c⟫_ℂ = ⟪b, star a * c⟫_ℂ := by simp_rw [hψ, StarMul.star_hMul, ← mul_assoc]
+    ⟪a * b, c⟫_ℂ = ⟪b, star a * c⟫_ℂ := by simp_rw [hψ, StarMul.star_mul, ← mul_assoc]
 
 theorem lmul_adjoint {B : Type _} [NormedAddCommGroupOfRing B] [InnerProductSpace ℂ B]
     [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] [StarMul B]
     {ψ : Module.Dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b)) (a : B) :
-    (lmul a : l(B)).adjoint = lmul (star a) :=
+    LinearMap.adjoint (lmul a : l(B)) = lmul (star a) :=
   by
   rw [LinearMap.ext_iff_inner_map]
   intro u
   simp_rw [LinearMap.adjoint_inner_left, lmul_apply, schur_idempotent_one_right_aux hψ, star_star]
 
 theorem rmul_adjoint {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (a : 𝔹) :
-    (rmul a : l(𝔹)).adjoint = rmul (Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star a)) :=
+    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (a : 𝔹) :
+    LinearMap.adjoint (rmul a : l(𝔹)) = rmul (Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star a)) :=
   by
   rw [LinearMap.ext_iff_inner_map]
   intro u
@@ -167,14 +171,14 @@ theorem rmul_adjoint {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
 theorem ContinuousLinearMap.linearMap_adjoint {𝕜 B C : Type _} [IsROrC 𝕜] [NormedAddCommGroup B]
     [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
     [FiniteDimensional 𝕜 C] (x : B →L[𝕜] C) :
-    (x : B →ₗ[𝕜] C).adjoint =
+    LinearMap.adjoint (x : B →ₗ[𝕜] C) =
       @ContinuousLinearMap.adjoint 𝕜 _ _ _ _ _ _ _ (FiniteDimensional.complete 𝕜 B)
         (FiniteDimensional.complete 𝕜 C) x :=
   rfl
 
 theorem schurIdempotent_adjoint {B : Type _} [NormedAddCommGroupOfRing B] [InnerProductSpace ℂ B]
     [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] (x y : l(B)) :
-    (schurIdempotent x y).adjoint = schurIdempotent x.adjoint y.adjoint :=
+    LinearMap.adjoint (schurIdempotent x y) = schurIdempotent (LinearMap.adjoint x) (LinearMap.adjoint y) :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
   obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne y
@@ -194,20 +198,20 @@ theorem schurIdempotent_real
     --   [star_module ℂ B]
     -- {ψ : module.dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b))
     {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (x y : l(𝔹)) :
-    (schurIdempotent x y : l(𝔹)).Real = schurIdempotent y.Real x.Real :=
+    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : l(𝔹)) :
+    LinearMap.real (schurIdempotent x y : l(𝔹)) = schurIdempotent (LinearMap.real y) (LinearMap.real x) :=
   by
-  obtain ⟨α, β, rfl⟩ := x.exists_sum_rank_one
-  obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rank_one
+  obtain ⟨α, β, rfl⟩ := x.exists_sum_rankOne
+  obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rankOne
   simp only [map_sum, LinearMap.real_sum, LinearMap.sum_apply, schurIdempotent.apply_rankOne]
   simp_rw [← rankOneLm_eq_rankOne, Pi.rankOneLm_real_apply, rankOneLm_eq_rankOne,
-    schurIdempotent.apply_rankOne, ← _root_.map_mul, ← StarMul.star_hMul]
+    schurIdempotent.apply_rankOne, ← _root_.map_mul, ← StarMul.star_mul]
   rw [Finset.sum_comm]
 
 theorem schurIdempotent_one_right_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
     [StarMul B] {ψ : Module.Dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b)) (a b : B) :
-    schurIdempotent (↑|a⟩⟨b|) 1 = lmul a * (lmul b : l(B)).adjoint :=
+    schurIdempotent (↑|a⟩⟨b|) 1 = lmul a * (LinearMap.adjoint (lmul b : l(B))) :=
   by
   simp_rw [LinearMap.ext_iff_inner_map]
   intro u
@@ -219,31 +223,55 @@ theorem schurIdempotent_one_right_rankOne {B : Type _} [NormedAddCommGroupOfRing
     lmul_adjoint hψ, lmul_apply]
 
 theorem Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp
-    {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
+    {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     {i j : n} (h : i = j) (p : s i × s i) :
-    (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp ((hψ i).elim.Basis p) =
-      (hψ j).elim.Basis (by rw [← h] <;> exact p) :=
-  by tidy
+    (by rw [h] : Matrix (s i) (s i) ℂ = Matrix (s j) (s j) ℂ).mp ((hψ i).basis p) =
+      (hψ j).basis (by rw [← h]; exact p) :=
+  by aesop
 
 theorem pi_lmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap] (x : 𝔹) :
-    (Module.Dual.pi.IsFaithfulPosMap.toMatrix (fun i => (hψ i).elim) (lmul x : l(𝔹)) :
+    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x : 𝔹) :
+    (Module.Dual.pi.IsFaithfulPosMap.toMatrix (fun i => (hψ i)) (lmul x : l(𝔹)) :
         Matrix (Σ i, s i × s i) (Σ i, s i × s i) ℂ) =
-      blockDiagonal' fun i => x i ⊗ₖ 1 :=
+      blockDiagonal' fun i => (x i ⊗ₖ 1) :=
   by
-  ext1 r l
-  simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', lmul_apply, mul_include_block,
-    include_block_apply, mul_apply, dite_apply, dite_hMul, Pi.zero_apply, MulZeroClass.zero_mul,
-    Finset.sum_dite_irrel, ← mul_apply, block_diagonal'_apply, kronecker_map, of_apply,
+  ext r l
+  simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', lmul_apply, hMul_includeBlock]
+  rw [blockDiagonal'_apply]
+  -- simp_rw [@eq_comm _ l.fst]
+  split_ifs with h
+  . simp only [kroneckerMap_apply, ← h, cast_eq, one_apply,
+      mul_boole, includeBlock_apply, dif_pos, Matrix.cast_hMul]
+    -- simp only [e]
+    split_ifs with h'
+    . rw [Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp h.symm, mul_assoc,
+        Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, PosDef.rpow_mul_rpow, neg_add_self,
+        PosDef.rpow_zero, Matrix.mul_one, stdBasisMatrix_eq]
+      -- simp only [eq_mp_eq_cast, eq_mpr_eq_cast,
+      simp only [Matrix.mul_apply,
+        mul_boole]
+      simp only [ite_and, Finset.sum_ite_eq, Finset.mem_univ, if_true,
+        ↓reduceIte, h, h', Matrix.cast_apply]
+      simp only [eq_mpr_eq_cast, ↓reduceIte]
+      congr 1; exact h.symm; aesop; aesop
+    . simp only [eq_mp_eq_cast, one_div, h, h']
+
+
+  -- . calc (includeBlock (x l.fst * ((hψ l.fst).basis l.snd)) r.fst * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) r.snd.1 r.snd.2
+  --       = (includeBlock (x l.fst * ((hψ l.1).basis l.snd)) l.fst * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) r.snd.1 r.snd.2 := ?_
+  --     _ = ((by rw [h]; exact (x l.fst * (hψ.basis l.snd))) * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) := ?_
+  --     _ =
+  simp_rw [includeBlock_apply, mul_apply, dite_apply', dite_hMul, Pi.zero_apply, MulZeroClass.zero_mul,
+    Finset.sum_dite_irrel, ← mul_apply, blockDiagonal'_apply, kroneckerMap, of_apply,
     @eq_comm _ r.fst, one_apply, mul_boole, Matrix.cast_hMul,
-    Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp, mul_eq_mul, Matrix.mul_assoc,
+    Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp, Matrix.mul_assoc,
     Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, pos_def.rpow_mul_rpow, neg_add_self,
     pos_def.rpow_zero, Matrix.mul_one, mul_apply, std_basis_matrix, mul_boole, ite_and,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, @eq_comm _ r.snd.snd, Finset.sum_const_zero,
     eq_mpr_eq_cast]
   congr 2
   ext1 h
-  tidy
+  aesop
 
 example {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
     (x : 𝔹) :
