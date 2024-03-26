@@ -74,6 +74,7 @@ noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
   toMetricSpace := NormedAddCommGroup.toMetricSpace
   dist_eq := NormedAddCommGroup.dist_eq
 
+@[simps]
 noncomputable def schurIdempotent {B : Type _} [NormedAddCommGroupOfRing B] [InnerProductSpace ℂ B]
     [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] : l(B) →ₗ[ℂ] l(B) →ₗ[ℂ] l(B)
     where
