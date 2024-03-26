@@ -249,53 +249,22 @@ theorem pi_lmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   have hx' : x' l.fst = x l.fst * (hψ l.fst).basis l.snd := by aesop
   rw [← hx', includeBlock_apply', ite_mul, zero_mul]
   rw [ite_apply, Pi.zero_apply, ite_apply, Pi.zero_apply]
-  simp_rw [kroneckerMap_apply, one_apply, mul_boole]
-  have : x' r.fst * (hψ r.fst).matrixIsPosDef.rpow (1 / 2)
-      = ite (r.fst = l.fst) (x r.fst * stdBasisMatrix r.snd.1 r.snd.2 1) (0) :=
-  by
-    simp_rw [x']
-    rw [dite_hMul, zero_mul, stdBasisMatrix_eq]
-    simp_rw [Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, PosDef.rpow_mul_rpow, neg_add_self,
-        PosDef.rpow_zero, Matrix.mul_one, stdBasisMatrix_eq]
-    simp only [eq_mpr_eq_cast, ite_and]
-    split_ifs with h
-    . ext; simp only [mul_apply, mul_ite, mul_zero, ite_mul, zero_mul,
-        Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_one, ← h]
-
-  -- simp_rw [@eq_comm _ l.fst]
-  split_ifs with h
-  . simp only [kroneckerMap_apply, ← h, cast_eq, one_apply,
-      mul_boole, includeBlock_apply, dif_pos, Matrix.cast_hMul]
-    -- simp only [e]
-    split_ifs with h'
-    . rw [Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp h.symm, mul_assoc,
-        Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, PosDef.rpow_mul_rpow, neg_add_self,
-        PosDef.rpow_zero, Matrix.mul_one, stdBasisMatrix_eq]
-      -- simp only [eq_mp_eq_cast, eq_mpr_eq_cast,
-      simp only [Matrix.mul_apply,
-        mul_boole]
-      simp only [ite_and, Finset.sum_ite_eq, Finset.mem_univ, if_true,
-        ↓reduceIte, h, h', Matrix.cast_apply]
-      simp only [eq_mpr_eq_cast, ↓reduceIte]
-      congr 1; exact h.symm; aesop; aesop
-    . simp only [eq_mp_eq_cast, one_div, h, h']
-
-
-  -- . calc (includeBlock (x l.fst * ((hψ l.fst).basis l.snd)) r.fst * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) r.snd.1 r.snd.2
-  --       = (includeBlock (x l.fst * ((hψ l.1).basis l.snd)) l.fst * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) r.snd.1 r.snd.2 := ?_
-  --     _ = ((by rw [h]; exact (x l.fst * (hψ.basis l.snd))) * (hψ r.1).matrixIsPosDef.rpow (1 / 2)) := ?_
-  --     _ =
-  simp_rw [includeBlock_apply, mul_apply, dite_apply', dite_hMul, Pi.zero_apply, MulZeroClass.zero_mul,
-    Finset.sum_dite_irrel, ← mul_apply, blockDiagonal'_apply, kroneckerMap, of_apply,
-    @eq_comm _ r.fst, one_apply, mul_boole, Matrix.cast_hMul,
-    Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp, Matrix.mul_assoc,
-    Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, pos_def.rpow_mul_rpow, neg_add_self,
-    pos_def.rpow_zero, Matrix.mul_one, mul_apply, std_basis_matrix, mul_boole, ite_and,
-    Finset.sum_ite_eq, Finset.mem_univ, if_true, @eq_comm _ r.snd.snd, Finset.sum_const_zero,
-    eq_mpr_eq_cast]
-  congr 2
-  ext1 h
-  aesop
+  simp_rw [kroneckerMap_apply, one_apply, mul_boole, @eq_comm _ r.fst]
+  simp_rw [x', Module.Dual.IsFaithfulPosMap.basis_apply, dite_hMul,
+    zero_mul, Matrix.mul_assoc, PosDef.rpow_mul_rpow, neg_add_self,
+    PosDef.rpow_zero, Matrix.mul_one, stdBasisMatrix_eq]
+  split_ifs with h hh hhh
+  . simp only [mul_apply, mul_ite, mul_zero, ite_mul, zero_mul,
+      Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_one, ← h, ite_and, hh]
+    split_ifs with hhhh; rfl; rw [eq_comm] at hhh; contradiction
+  . rw [eq_comm] at h
+    simp [h, hh, hhh, ite_and, mul_apply]
+    intro ha
+    rw [eq_comm] at ha
+    contradiction
+  . rw [eq_comm] at h; contradiction
+  . rfl
+  . rfl
 
 example {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i, Fact (ψ i).IsFaithfulPosMap]
     (x : 𝔹) :
@@ -308,22 +277,33 @@ theorem pi_rmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x : 𝔹) :
     (Module.Dual.pi.IsFaithfulPosMap.toMatrix hψ (rmul x : l(𝔹)) :
         Matrix (Σ i, s i × s i) (Σ i, s i × s i) ℂ) =
-      blockDiagonal' fun i => 1 ⊗ₖ ((hψ i).sig (1 / 2) (x i))ᵀ :=
+      blockDiagonal' fun i => (1 ⊗ₖ ((hψ i).sig (1 / 2) (x i))ᵀ) :=
   by
   ext r l
-  simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', rmul_apply, includeBlock_hMul,
-    includeBlock_apply, mul_apply, dite_apply, dite_hMul, Pi.zero_apply, MulZeroClass.zero_mul,
-    Finset.sum_dite_irrel, ← mul_apply, blockDiagonal'_apply, kroneckerMap, of_apply,
-    @eq_comm _ r.fst, one_apply, mul_boole, Matrix.cast_hMul,
-    Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp, Matrix.mul_assoc,
-    Module.Dual.IsFaithfulPosMap.basis_apply, Matrix.mul_assoc, ←
-    Matrix.mul_assoc (PosDef.rpow _ _) _ (pos_def.rpow _ (1 / 2 : ℝ)), ←
-    Module.Dual.IsFaithfulPosMap.sig_apply, mul_apply, std_basis_matrix, boole_mul, ite_and,
-    Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true,
-    transpose_apply, Finset.sum_const_zero, eq_mpr_eq_cast, @eq_comm _ r.snd.1]
-  congr 2
-  ext1 h
-  aesop
+  simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', rmul_apply, includeBlock_hMul]
+  rw [blockDiagonal'_apply]
+  let x' : PiMat n s := fun a =>
+    if h : a = l.fst then (((hψ a).basis) (by rw [h]; exact l.snd) * x a) else 0
+  have hx' : x' l.fst = (hψ l.fst).basis l.snd * x l.fst := by aesop
+  rw [← hx', includeBlock_apply', ite_mul, zero_mul]
+  rw [ite_apply, Pi.zero_apply, ite_apply, Pi.zero_apply]
+  simp_rw [kroneckerMap_apply, one_apply, boole_mul, @eq_comm _ r.fst]
+  simp_rw [x', Module.Dual.IsFaithfulPosMap.basis_apply, dite_hMul,
+    zero_mul, Matrix.mul_assoc, ← Matrix.mul_assoc (PosDef.rpow _ (- (1 / 2))),
+    ← Module.Dual.IsFaithfulPosMap.sig_apply, stdBasisMatrix_eq, Matrix.transpose_apply]
+  split_ifs with h hh hhh
+  . simp only [mul_apply, mul_ite, mul_zero, ite_mul, zero_mul,
+      Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_one, ← h, ite_and, hh, one_mul,
+      Finset.sum_ite_irrel, Finset.sum_const_zero]
+    split_ifs with hhhh; rfl; rw [eq_comm] at hhh; contradiction
+  . rw [eq_comm] at h
+    simp [h, hh, hhh, ite_and, mul_apply]
+    intro ha
+    rw [eq_comm] at ha
+    contradiction
+  . rw [eq_comm] at h; contradiction
+  . rfl
+  . rfl
 
 theorem unitary.coe_pi (U : ∀ i, unitaryGroup (s i) ℂ) :
     (unitary.pi U : ∀ i, Matrix (s i) (s i) ℂ) = ↑U :=
