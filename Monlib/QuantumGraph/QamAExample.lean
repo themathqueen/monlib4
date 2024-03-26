@@ -3,12 +3,12 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import QuantumGraph.Nontracial
-import QuantumGraph.Iso
-import LinearAlgebra.ToMatrixOfEquiv
-import LinearAlgebra.MyIps.MatIps
-import QuantumGraph.QamA
-import LinearAlgebra.MyMatrix.Spectra
+import Monlib.QuantumGraph.Nontracial
+import Monlib.QuantumGraph.Iso
+import Monlib.LinearAlgebra.ToMatrixOfEquiv
+import Monlib.LinearAlgebra.MyIps.MatIps
+import Monlib.QuantumGraph.QamA
+import Monlib.LinearAlgebra.MyMatrix.Spectra
 
 #align_import quantum_graph.qam_A_example
 
@@ -36,85 +36,86 @@ def traceModuleDual {𝕜 n : Type _} [Fintype n] [IsROrC 𝕜] : Module.Dual �
 
 @[instance]
 def trace_isFaithfulPosMap {n : Type _} [Fintype n] {𝕜 : Type _} [IsROrC 𝕜] :
-    Fact (traceModuleDual : Module.Dual 𝕜 (Matrix n n 𝕜)).IsFaithfulPosMap :=
+   (traceModuleDual : Module.Dual 𝕜 (Matrix n n 𝕜)).IsFaithfulPosMap :=
   by
-  apply Fact.mk
-  simp_rw [Module.Dual.IsFaithfulPosMap, Module.Dual.IsFaithful, Module.Dual.IsPosMap,
-    traceModuleDual, trace_linear_map_apply, IsROrC.nonneg_def', ← IsROrC.conj_eq_iff_re,
-    starRingEnd_apply, trace_star, mul_eq_mul, star_eq_conj_transpose, conj_transpose_mul,
-    conj_transpose_conj_transpose, trace_conj_transpose_mul_self_eq_zero,
-    trace_conj_transpose_mul_self_re_nonneg, eq_self_iff_true, iff_self_iff, imp_true_iff,
-    and_true_iff, forall_true_iff]
+  simp_rw [Module.Dual.IsFaithfulPosMap_iff, Module.Dual.IsFaithful, Module.Dual.IsPosMap,
+    traceModuleDual, traceLinearMap_apply,
+    star_eq_conjTranspose, trace_conjTranspose_hMul_self_nonneg,
+    trace_conjTranspose_hMul_self_eq_zero, imp_true_iff, and_true_iff]
 
 theorem traceModuleDual_matrix {n : Type _} [Fintype n] [DecidableEq n] :
-    (traceModuleDual : Module.Dual ℂ (Matrix n n ℂ)).Matrix = 1 :=
+    (traceModuleDual : Module.Dual ℂ (Matrix n n ℂ)).matrix = 1 :=
   by
-  ext1
+  ext i j
   have :=
     (traceModuleDual : Module.Dual ℂ (Matrix n n ℂ)).apply fun k l =>
       ite (j = k) (ite (i = l) 1 0) 0
-  simp only [traceModuleDual, trace_linear_map_apply, trace_iff, mul_apply, mul_ite,
+  simp only [traceModuleDual, traceLinearMap_apply, trace_iff, mul_apply, mul_ite,
     MulZeroClass.mul_zero, mul_one, Finset.sum_ite_eq, Finset.mem_univ, if_true] at this
   rw [traceModuleDual, ← this]
   rfl
 
 open scoped BigOperators
 
+open scoped ComplexOrder
 theorem posDefOne_rpow (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
     (posDefOne : PosDef (1 : Matrix n n ℂ)).rpow r = 1 :=
   by
-  rw [pos_def.rpow, inner_aut_eq_iff, inner_aut_apply_one, ← coe_diagonal_eq_diagonal_coe]
-  nth_rw_rhs 1 [← diagonal_one]
+  rw [PosDef.rpow, innerAut_eq_iff, innerAut_apply_one]
+  symm
+  nth_rw 1 [← diagonal_one]
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, is_hermitian.eigenvalues_eq, one_mul_vec]
-  simp_rw [dot_product, Pi.star_apply, transpose_apply, ← conj_transpose_apply, ←
-    is_hermitian.conj_transpose_eigenvector_matrix_inv, ← mul_apply, ←
-    is_hermitian.conj_transpose_eigenvector_matrix, conj_transpose_conj_transpose, ←
-    star_eq_conj_transpose, ← mul_eq_mul,
-    mem_unitary_group_iff'.mp (is_hermitian.eigenvector_matrix_mem_unitary_group _), one_apply_eq,
+  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, IsHermitian.eigenvalues_eq, one_mulVec]
+  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply, ←
+    IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
+    IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
+    star_eq_conjTranspose,
+    mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
     IsROrC.one_re]
-  exact Real.one_rpow _
+  exact (Real.one_rpow _).symm
 
-private theorem pos_def_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
+private theorem PosDef_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
     (posDefOne : PosDef (1 : Matrix n n ℂ)).rpow r =
-      (trace_isFaithfulPosMap.elim :
+      (trace_isFaithfulPosMap :
               (traceModuleDual : Module.Dual ℂ ℍ).IsFaithfulPosMap).matrixIsPosDef.rpow
         r :=
   by
-  rw [eq_comm, posDefOne_rpow, pos_def.rpow, inner_aut_eq_iff, inner_aut_apply_one, ←
-    coe_diagonal_eq_diagonal_coe]
-  nth_rw_rhs 1 [← diagonal_one]
+  rw [eq_comm, posDefOne_rpow, PosDef.rpow, innerAut_eq_iff, innerAut_apply_one]
+  symm
+  nth_rw 1 [← diagonal_one]
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, is_hermitian.eigenvalues_eq]
-  simp_rw [traceModuleDual_matrix, one_mul_vec, dot_product, Pi.star_apply, transpose_apply, ←
-    conj_transpose_apply, ← is_hermitian.conj_transpose_eigenvector_matrix_inv, ← mul_apply, ←
-    is_hermitian.conj_transpose_eigenvector_matrix, conj_transpose_conj_transpose, ←
-    star_eq_conj_transpose, ← mul_eq_mul,
-    mem_unitary_group_iff'.mp (is_hermitian.eigenvector_matrix_mem_unitary_group _), one_apply_eq,
+  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, IsHermitian.eigenvalues_eq]
+  simp_rw [traceModuleDual_matrix, one_mulVec, dotProduct, Pi.star_apply, transpose_apply, ←
+    conjTranspose_apply, ← IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
+    IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
+    star_eq_conjTranspose,
+    mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
     IsROrC.one_re]
-  exact Real.one_rpow _
+  exact (Real.one_rpow _).symm
 
 private theorem aux.ug :
-    (trace_isFaithfulPosMap.elim :
+    (trace_isFaithfulPosMap :
             (traceModuleDual : Module.Dual ℂ ℍ).IsFaithfulPosMap).toMatrix.symm =
       toLinOfAlgEquiv :=
   by
-  ext1
-  letI := Fact.mk (@trace_isFaithfulPosMap n _ ℂ _)
+  rw [AlgEquiv.ext_iff]; intro x
   simp_rw [Module.Dual.IsFaithfulPosMap.toMatrix_symm_apply]
-  simp_rw [to_lin_of_alg_equiv_eq, rank_one_std_basis, one_smul, LinearMap.ext_iff,
+  simp_rw [toLinOfAlgEquiv_eq, rankOneStdBasis, one_smul, LinearMap.ext_iff,
+    ContinuousLinearMap.coe_sum, ContinuousLinearMap.coe_smul,
     LinearMap.sum_apply, LinearMap.smul_apply, LinearMap.coe_mk, ContinuousLinearMap.coe_coe,
     rankOne_apply, Module.Dual.IsFaithfulPosMap.inner_coord', ←
-    pos_def_one_rpow_eq_trace_matrix_rpow, posDefOne_rpow, Matrix.mul_one, smul_std_basis_matrix,
-    smul_eq_mul, Module.Dual.IsFaithfulPosMap.basis_apply, traceModuleDual_matrix, posDefOne_rpow,
-    Matrix.mul_one, smul_std_basis_matrix, smul_eq_mul, mul_one]
+    PosDef_one_rpow_eq_trace_matrix_rpow, posDefOne_rpow, Matrix.mul_one, AddHom.coe_mk, smul_stdBasisMatrix,
+    smul_eq_mul, Module.Dual.IsFaithfulPosMap.basis_apply,
+    ← PosDef_one_rpow_eq_trace_matrix_rpow,
+    posDefOne_rpow,
+    Matrix.mul_one, smul_stdBasisMatrix, smul_eq_mul, mul_one]
   intro x
   repeat'
-    nth_rw_lhs 1 [← Finset.sum_product']
+    nth_rw 1 [← Finset.sum_product']
     simp_rw [Prod.mk.eta]
     apply Finset.sum_congr rfl
     intro _ _
@@ -123,8 +124,8 @@ private theorem aux.ug :
 theorem Matrix.stdBasisMatrix.transpose {R n m : Type _} [DecidableEq n] [DecidableEq m]
     [Semiring R] (i : n) (j : m) : (stdBasisMatrix i j (1 : R))ᵀ = stdBasisMatrix j i (1 : R) :=
   by
-  ext1
-  simp_rw [transpose_apply, std_basis_matrix, and_comm']
+  ext
+  simp_rw [transpose_apply, stdBasisMatrix, and_comm]
 
 section Move
 
@@ -134,9 +135,7 @@ def piProdUnitEquivPi {R n : Type _} [Semiring R] : (n × Unit → R) ≃ₗ[R] 
   toFun x i := x (i, PUnit.unit)
   invFun x i := x i.1
   left_inv x := by
-    ext1; simp_rw [col_apply]
-    have : PUnit.unit = x_1.2 := by simp only [eq_iff_true_of_subsingleton]
-    rw [this, Prod.mk.eta]
+    ext; simp
   right_inv x := by ext1; simp only [col_apply]
   map_add' x y := by simp only [Pi.add_apply]; rfl
   map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
@@ -151,28 +150,23 @@ def matrixProdUnitRight {R n m : Type _} [Semiring R] : Matrix n (m × Unit) R �
   toFun x i j := x i (j, PUnit.unit)
   invFun x i j := x i j.1
   left_inv x := by
-    ext1; simp_rw [col_apply]
-    have : (j.1, PUnit.unit) = j := by
-      rw [← @Prod.mk.eta _ _ j]
-      ext
-      simp only [eq_iff_true_of_subsingleton]
-    rw [this]
+    ext; simp
   right_inv x := by ext1; simp only [col_apply]
   map_add' x y := by simp only [Pi.add_apply]; rfl
   map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
 
-/-- `vec_mul_vec (reshape x) (star (reshape y))` written as a kronecker product of their
+/-- `vec_mulVec (reshape x) (star (reshape y))` written as a kronecker product of their
   corresponding vectors (via `reshape`). -/
 theorem col_hMul_col_conjTranspose_is_kronecker_of_vectors {R m n p q : Type _} [Semiring R]
     [Star R] (x : Matrix m n R) (y : Matrix p q R) :
-    col (reshape x) ⬝ (col (reshape y))ᴴ =
+    col (reshape x) * (col (reshape y))ᴴ =
       (reshape : Matrix _ _ R ≃ₗ[R] _ × _ → R).symm
         (Matrix.ofCol (matrixProdUnitRight (col (reshape x) ⊗ₖ col (reshape yᴴᵀ)))) :=
   by
-  ext1
+  ext
   simp_rw [reshape_symm_apply, Matrix.ofCol, matrixProdUnitRight, piProdUnitEquivPi,
     LinearEquiv.trans_apply, LinearEquiv.coe_mk, reshape_apply, kronecker_apply, col_apply,
-    conj_transpose_col, ← vec_mul_vec_eq, vec_mul_vec_apply, Pi.star_apply, reshape_apply,
+    conjTranspose_col, ← vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply,
     conj_apply]
 
 end Move
@@ -183,18 +177,18 @@ open scoped ComplexConjugate
 
 private theorem linear_map.rsmul_adjoint {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (A : E →ₗ[𝕜] E) (r : ℝ) :
-    ((r : 𝕜) • A).adjoint = (r : 𝕜) • A.adjoint := by
+    LinearMap.adjoint ((r : 𝕜) • A) = (r : 𝕜) • LinearMap.adjoint A := by
   simp_rw [← @LinearMap.star_eq_adjoint 𝕜 E, star_smul, IsROrC.star_def, IsROrC.conj_ofReal]
 
 /-- when a matrix $x$ is non-zero, then for any unitary $U$, we also have $f_U(x)$ is non-zero -/
 private noncomputable def inner_aut_inv.of_ne_zero (U : unitaryGroup n ℂ)
     (x : { x : Matrix n n ℂ // x ≠ 0 }) : { x : Matrix n n ℂ // x ≠ 0 } :=
-  haveI : inner_aut U⁻¹ (x : Matrix n n ℂ) ≠ 0 ↔ (x : ℍ) ≠ 0 := by
-    simp_rw [Ne.def, inner_aut_eq_iff, inner_aut_apply_zero, iff_self_iff]
-  (⟨inner_aut U⁻¹ x, this.mpr (set.mem_set_of.mp (Subtype.mem x))⟩ : { x : Matrix n n ℂ // x ≠ 0 })
+  haveI : innerAut U⁻¹ (x : Matrix n n ℂ) ≠ 0 ↔ (x : ℍ) ≠ 0 := by
+    simp_rw [Ne.def, innerAut_eq_iff, innerAut_apply_zero]
+  (⟨innerAut U⁻¹ x, this.mpr (x.property)⟩ : { x : Matrix n n ℂ // x ≠ 0 })
 
 private theorem inner_aut_inv.of_ne_zero_eq (U : unitaryGroup n ℂ) (x : { x : ℍ // x ≠ 0 }) :
-    (InnerAutInv.ofNeZero U x : ℍ) = innerAut U⁻¹ x :=
+    (inner_aut_inv.of_ne_zero U x : ℍ) = innerAut U⁻¹ x :=
   rfl
 
 theorem StarAlgEquiv.eq_comp_iff {R E₁ E₂ E₃ : Type _} [_inst_1 : CommSemiring R]
@@ -235,16 +229,15 @@ theorem StarAlgEquiv.symm_comp_self {R U V : Type _} [CommSemiring R] [Semiring 
     eq_self_iff_true, forall_true_iff]
 
 theorem Qam.iso_preserves_ir_reflexive [Nontrivial n] {φ : Module.Dual ℂ ℍ}
-    [hφ : Fact φ.IsFaithfulPosMap] {x y : ℍ →ₗ[ℂ] ℍ} (hxhy : @Qam.Iso n _ _ φ x y)
+    [hφ : φ.IsFaithfulPosMap] {x y : ℍ →ₗ[ℂ] ℍ} (hxhy : @Qam.Iso n _ _ φ x y)
     (ir_reflexive : Prop) [Decidable ir_reflexive] :
-    Qam.reflIdempotent hφ.elim x 1 = ite ir_reflexive 1 0 ↔
-      Qam.reflIdempotent hφ.elim y 1 = ite ir_reflexive 1 0 :=
+    Qam.reflIdempotent hφ x 1 = ite ir_reflexive 1 0 ↔
+      Qam.reflIdempotent hφ y 1 = ite ir_reflexive 1 0 :=
   by
   obtain ⟨f, hf, h⟩ := hxhy
   rw [StarAlgEquiv.comp_eq_iff, LinearMap.comp_assoc] at hf
-  rw [List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 0
-      4] at
-    h
+  have := List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 0 4
+  rw [this, ← isometry_iff_norm_aux] at h
   rw [hf, qam_ir_reflexive_starAlgEquiv_conj h, ← LinearMap.comp_assoc, StarAlgEquiv.comp_eq_iff,
     StarAlgEquiv.symm_symm, StarAlgEquiv.eq_comp_iff]
   simp only [ite_comp, comp_ite, LinearMap.zero_comp, LinearMap.one_comp, LinearMap.comp_zero,
@@ -259,67 +252,71 @@ def Function.IsAlmostInjective {A B : Type _} (f : A → B) [SMul ℂˣ A] : Pro
 open scoped BigOperators ComplexConjugate
 
 private theorem nontracial_basis_apply {Q : ℍ} (hQ : Q.PosDef) (i j k l : n) :
-    (stdBasisMatrix i j 1 ⬝ hQ.rpow (-(1 / 2))) k l = ite (i = k) (hQ.rpow (-(1 / 2)) j l) 0 := by
-  simp_rw [mul_apply, std_basis_matrix, boole_mul, ite_and, Finset.sum_ite_irrel,
-    Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  (Matrix.stdBasisMatrix i j (1 : ℂ) * hQ.rpow (-(1 / 2))) k l
+    = ite (i = k) (hQ.rpow (-(1 / 2)) j l) 0 := by
+simp_rw [Matrix.mul_apply, stdBasisMatrix, boole_mul, ite_and, Finset.sum_ite_irrel,
+  Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 private theorem prod.eq' {α β : Type _} {p r : α} {q s : β} : (p, q) = (r, s) ↔ p = r ∧ q = s :=
   Prod.eq_iff_fst_eq_snd_eq
 
 theorem Matrix.IsAlmostHermitian.spectrum {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
-    spectrum ℂ x.toLin' = {x_1 : ℂ | ∃ i : n, hx.Eigenvalues i = x_1} :=
+    _root_.spectrum ℂ (toLin' x) = {x_1 : ℂ | ∃ i : n, hx.eigenvalues i = x_1} :=
   by
-  nth_rw_lhs 1 [Matrix.IsAlmostHermitian.eq_smul_matrix hx]
-  nth_rw_lhs 1 [hx.matrix_is_hermitian.spectral_theorem']
-  simp_rw [← SMulHomClass.map_smul, inner_aut.spectrum_eq, ← diagonal_smul, diagonal.spectrum,
+  nth_rw 1 [Matrix.IsAlmostHermitian.eq_smul_matrix hx]
+  nth_rw 1 [(hx.matrix_isHermitian).spectral_theorem'']
+  simp_rw [← SMulHomClass.map_smul, innerAut.spectrum_eq, ← diagonal_smul, diagonal.spectrum,
     Pi.smul_apply, Function.comp_apply, Matrix.IsAlmostHermitian.eigenvalues]
 
 theorem Matrix.IsHermitian.eigenvalues_eq_zero_iff {x : ℍ} (hx : x.IsHermitian) :
-    coe ∘ hx.Eigenvalues = (0 : n → ℂ) ↔ x = 0 :=
+    (@IsROrC.ofReal ℂ _) ∘ hx.eigenvalues = (0 : n → ℂ) ↔ x = 0 :=
   by
   constructor
   · intro h
-    rw [hx.spectral_theorem', h, Pi.zero_def, diagonal_zero, map_zero]
+    rw [hx.spectral_theorem', h, Pi.zero_def, diagonal_zero, mul_zero, zero_mul]
   · rintro rfl
-    ext1
-    simp only [Function.comp_apply, hx.eigenvalues_eq, zero_mul_vec, dot_product_zero, map_zero,
+    ext
+    simp only [Function.comp_apply, hx.eigenvalues_eq, zero_mulVec, dotProduct_zero, map_zero,
       Pi.zero_apply, Complex.ofReal_zero]
+    rfl
 
-private theorem matrix.is_almost_hermitian.matrix_is_hermitian.eigenvalues_ne_zero
+private theorem matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero
     {x : { x : ℍ // x ≠ 0 }} (hx : (x : ℍ).IsAlmostHermitian) :
-    (coe ∘ hx.matrix_isHermitian.Eigenvalues : n → ℂ) ≠ 0 :=
+    ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) ≠ 0 :=
   by
   rw [Ne.def, Matrix.IsHermitian.eigenvalues_eq_zero_iff]
   have := hx.eq_smul_matrix
   intro hh
   rw [hh, smul_zero] at this
-  exact set.mem_set_of.mp (Subtype.mem x) this
+  exact x.property this
 
 private theorem example_aux {x : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 }}
     (hx : (x : Matrix (Fin 2) (Fin 2) ℂ).IsAlmostHermitian)
-    (hh : (hx.matrix_isHermitian.Eigenvalues 0 : ℂ) = -(hx.matrix_isHermitian.Eigenvalues 1 : ℂ))
-    (i : Fin 2) : (hx.matrix_isHermitian.Eigenvalues i : ℂ) ≠ 0 :=
+    (hh : (hx.matrix_isHermitian.eigenvalues 0 : ℂ) = -(hx.matrix_isHermitian.eigenvalues 1 : ℂ))
+    (i : Fin 2) : (hx.matrix_isHermitian.eigenvalues i : ℂ) ≠ 0 :=
   by
-  have h := matrix.is_almost_hermitian.matrix_is_hermitian.eigenvalues_ne_zero hx
+  have h := matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero hx
   simp only [Ne.def, Function.funext_iff, Function.comp_apply, Pi.zero_apply] at h
+  simp only [Complex.ofReal'_eq_isROrC_ofReal] at *
   revert i
   simp_rw [Fin.forall_fin_two, Ne.def, hh, neg_eq_zero, and_self_iff] at h ⊢
   exact h
 
 theorem spectra_fin_two {x : Matrix (Fin 2) (Fin 2) ℂ}
     (hx : (x : Matrix (Fin 2) (Fin 2) ℂ).IsAlmostHermitian) :
-    hx.spectra = {(hx 0 : ℂ), (hx.Eigenvalues 1 : ℂ)} :=
+    hx.spectra = {(hx.eigenvalues 0 : ℂ), (hx.eigenvalues 1 : ℂ)} :=
   rfl
 
 theorem spectra_fin_two' {x : Matrix (Fin 2) (Fin 2) ℂ}
     (hx : (x : Matrix (Fin 2) (Fin 2) ℂ).IsAlmostHermitian) :
-    hx.spectra = [(hx.Eigenvalues 0 : ℂ), (hx.Eigenvalues 1 : ℂ)] :=
+    hx.spectra = [(hx.eigenvalues 0 : ℂ), (hx.eigenvalues 1 : ℂ)] :=
   rfl
 
 theorem spectra_fin_two'' {α : Type _} (a : Fin 2 → α) :
     Multiset.map (a : Fin 2 → α) Finset.univ.val = {a 0, a 1} :=
   rfl
 
+open scoped List
 theorem List.coe_inj {α : Type _} (l₁ l₂ : List α) : (l₁ : Multiset α) = l₂ ↔ l₁ ~ l₂ :=
   Multiset.coe_eq_coe
 
@@ -330,7 +327,7 @@ theorem spectra_fin_two_ext_aux {A : Type _} (α β γ : A) :
   constructor
   · intro h
     simp_rw [Multiset.cons_eq_cons, Multiset.singleton_inj, Multiset.singleton_eq_cons_iff] at h
-    rcases h with (h1 | ⟨h, cs, ⟨hcs₁, hcs₂⟩, ⟨hcs₃, hcs₄⟩⟩)
+    rcases h with (h1 | ⟨_, cs, ⟨hcs₁, _⟩, ⟨hcs₃, _⟩⟩)
     · exact h1
     · exact ⟨hcs₁, hcs₃.symm⟩
   · rintro ⟨rfl, rfl⟩
@@ -349,22 +346,21 @@ theorem spectra_fin_two_ext {α : Type _} (α₁ α₂ β₁ β₂ : α) :
       · exact ⟨h1, h2⟩
       · exact ⟨h2, h1⟩
   by_cases h' : α₁ = β₁
-  · simp_rw [h', eq_self_iff_true, true_and_iff, Multiset.insert_eq_cons, Multiset.cons_inj_right,
+  · simp_rw [h', true_and_iff, Multiset.insert_eq_cons, Multiset.cons_inj_right,
       Multiset.singleton_inj]
     constructor
     · intro hi
       left
       exact hi
-    rintro (h | ⟨h1, h2⟩)
+    rintro (h | ⟨_, h2⟩)
     · exact h
     · rw [← h', eq_comm] at h2
       contradiction
   simp_rw [Multiset.insert_eq_cons, Multiset.cons_eq_cons, Multiset.singleton_inj,
     Multiset.singleton_eq_cons_iff, Ne.def, h', false_and_iff, false_or_iff, not_false_iff,
     true_and_iff]
-  simp only [exists_eq_right_right, eq_self_iff_true, and_true_iff, and_congr_right_iff, eq_comm,
-    iff_self_iff]
-  simp_rw [and_comm', iff_self_iff]
+  simp only [exists_eq_right_right, and_true_iff, and_congr_right_iff, eq_comm]
+  simp_rw [and_comm]
 
 @[instance]
 def Multiset.hasSmul {α : Type _} [SMul ℂ α] : SMul ℂ (Multiset α)
@@ -375,7 +371,7 @@ theorem Multiset.smul_fin_two {α : Type _} [SMul ℂ α] (a b : α) (c : ℂ) :
   rfl
 
 theorem IsAlmostHermitian.smul_eq {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) (c : ℂ) :
-    (hx.smul c).scalar • (hx.smul c).Matrix = c • x := by rw [← (hx.smul c).eq_smul_matrix]
+    (hx.smul c).scalar • (hx.smul c).matrix = c • x := by rw [← (hx.smul c).eq_smul_matrix]
 
 theorem spectra_fin_two_ext_of_traceless {α₁ α₂ β₁ β₂ : ℂ} (hα₂ : α₂ ≠ 0) (hβ₂ : β₂ ≠ 0)
     (h₁ : α₁ = -α₂) (h₂ : β₁ = -β₂) : ∃ c : ℂˣ, ({α₁, α₂} : Multiset ℂ) = (c : ℂ) • {β₁, β₂} :=
@@ -385,11 +381,11 @@ theorem spectra_fin_two_ext_of_traceless {α₁ α₂ β₁ β₂ : ℂ} (hα₂
   simp_rw [Units.val_mk0, smul_eq_mul, mul_assoc, inv_mul_cancel hβ₂, mul_one]
 
 theorem Matrix.IsAlmostHermitian.trace {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
-    x.trace = ∑ i, hx.Eigenvalues i :=
+    x.trace = ∑ i, hx.eigenvalues i :=
   by
-  simp_rw [is_almost_hermitian.eigenvalues, ← Finset.smul_sum, ← is_hermitian.trace_eq, ←
-    trace_smul]
-  rw [← is_almost_hermitian.eq_smul_matrix hx]
+  simp_rw [IsAlmostHermitian.eigenvalues, ← Finset.smul_sum, ← IsROrC.ofReal_sum,
+    ← IsHermitian.trace_eq, ← trace_smul]
+  rw [← IsAlmostHermitian.eq_smul_matrix hx]
 
 noncomputable def Matrix.IsAlmostHermitian.eigenvectorMatrix {x : Matrix n n ℂ}
     (hx : x.IsAlmostHermitian) : Matrix n n ℂ :=
@@ -409,57 +405,54 @@ theorem Matrix.IsAlmostHermitian.spectral_theorem' {x : Matrix n n ℂ} (hx : x.
         innerAut
           ⟨hx.matrix_isHermitian.eigenvectorMatrix,
             IsHermitian.eigenvectorMatrix_mem_unitaryGroup _⟩
-          (diagonal (coe ∘ hx.matrix_isHermitian.Eigenvalues)) :=
-  by rw [← is_hermitian.spectral_theorem', ← hx.eq_smul_matrix]
+          (diagonal ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues)) :=
+  by rw [← Matrix.IsHermitian.spectral_theorem'', ← hx.eq_smul_matrix]
 
 theorem Matrix.IsAlmostHermitian.eigenvalues_eq {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
-    hx.Eigenvalues = hx.scalar • (coe ∘ hx.matrix_isHermitian.Eigenvalues : n → ℂ) :=
+    hx.eigenvalues = hx.scalar • ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) :=
   rfl
 
 theorem Matrix.IsAlmostHermitian.spectral_theorem {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
     x =
       innerAut ⟨hx.eigenvectorMatrix, hx.eigenvectorMatrix_mem_unitaryGroup⟩
-        (diagonal hx.Eigenvalues) :=
+        (diagonal hx.eigenvalues) :=
   by
-  simp_rw [hx.eigenvalues_eq, diagonal_smul, SMulHomClass.map_smul, hx.eigenvector_matrix_eq]
+  simp_rw [hx.eigenvalues_eq, diagonal_smul, SMulHomClass.map_smul, hx.eigenvectorMatrix_eq]
   exact Matrix.IsAlmostHermitian.spectral_theorem' _
 
 theorem Matrix.IsAlmostHermitian.eigenvalues_eq_zero_iff {x : Matrix n n ℂ}
-    (hx : x.IsAlmostHermitian) : hx.Eigenvalues = 0 ↔ x = 0 :=
+    (hx : x.IsAlmostHermitian) : hx.eigenvalues = 0 ↔ x = 0 :=
   by
   simp_rw [Matrix.IsAlmostHermitian.eigenvalues_eq, smul_eq_zero,
     Matrix.IsHermitian.eigenvalues_eq_zero_iff, ← smul_eq_zero]
   rw [← hx.eq_smul_matrix]
-  simp only [iff_self_iff]
 
 private theorem matrix.is_almost_hermitian.eigenvalues_eq_zero_iff_aux
     {x : Matrix (Fin 2) (Fin 2) ℂ} (hx : x.IsAlmostHermitian) :
-    hx.Eigenvalues 0 = 0 ∧ hx.Eigenvalues 1 = 0 ↔ x = 0 :=
+    hx.eigenvalues 0 = 0 ∧ hx.eigenvalues 1 = 0 ↔ x = 0 :=
   by
   rw [← hx.eigenvalues_eq_zero_iff, Function.funext_iff]
-  simp_rw [Fin.forall_fin_two, Pi.zero_apply, iff_self_iff]
+  simp_rw [Fin.forall_fin_two, Pi.zero_apply]
 
 theorem Matrix.diagonal_eq_zero_iff {x : n → ℂ} : diagonal x = 0 ↔ x = 0 := by
-  simp_rw [← diagonal_zero, diagonal_eq_diagonal_iff, Function.funext_iff, Pi.zero_apply,
-    iff_self_iff]
+  simp_rw [← diagonal_zero, diagonal_eq_diagonal_iff, Function.funext_iff, Pi.zero_apply]
 
 theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
-    (hx1 : IsSelfAdjoint (qamA trace_isFaithfulPosMap.elim x))
+    (hx1 : IsSelfAdjoint (qamA trace_isFaithfulPosMap x))
     (hx2 :
-      Qam.reflIdempotent trace_isFaithfulPosMap.elim (qamA trace_isFaithfulPosMap.elim x) 1 = 0)
-    (hy1 : IsSelfAdjoint (qamA trace_isFaithfulPosMap.elim y))
+      Qam.reflIdempotent trace_isFaithfulPosMap (qamA trace_isFaithfulPosMap x) 1 = 0)
+    (hy1 : IsSelfAdjoint (qamA trace_isFaithfulPosMap y))
     (hy2 :
-      Qam.reflIdempotent trace_isFaithfulPosMap.elim (qamA trace_isFaithfulPosMap.elim y) 1 = 0) :
-    @Qam.Iso (Fin 2) _ _ traceModuleDual (qamA trace_isFaithfulPosMap.elim x)
-      (qamA trace_isFaithfulPosMap.elim y) :=
+      Qam.reflIdempotent trace_isFaithfulPosMap (qamA trace_isFaithfulPosMap y) 1 = 0) :
+    @Qam.Iso (Fin 2) _ _ traceModuleDual (qamA trace_isFaithfulPosMap x)
+      (qamA trace_isFaithfulPosMap y) :=
   by
   simp_rw [qamA.iso_iff, traceModuleDual_matrix, Commute.one_left, and_true_iff,
     SMulHomClass.map_smul]
   rw [exists_comm]
-  obtain ⟨Hx, hxq⟩ := (qamA.is_self_adjoint_iff x).mp hx1
-  obtain ⟨Hy, hyq⟩ := (qamA.is_self_adjoint_iff y).mp hy1
-  simp_rw [qamA.is_irreflexive_iff, Hx.trace, Hy.trace, Fin.sum_univ_two, add_eq_zero_iff_eq_neg] at
-    hx2 hy2
+  obtain ⟨Hx, _⟩ := (qamA.is_self_adjoint_iff x).mp hx1
+  obtain ⟨Hy, _⟩ := (qamA.is_self_adjoint_iff y).mp hy1
+  simp_rw [qamA.is_irreflexive_iff, Hx.trace, Hy.trace, Fin.sum_univ_two, add_eq_zero_iff_eq_neg] at hx2 hy2
   rw [Matrix.IsAlmostHermitian.spectral_theorem Hx, Matrix.IsAlmostHermitian.spectral_theorem Hy]
   have HX : diagonal Hx.eigenvalues = of ![![-Hx.eigenvalues 1, 0], ![0, Hx.eigenvalues 1]] :=
     by
@@ -473,7 +466,7 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
     simp only [Fin.forall_fin_two, diagonal_apply, of_apply, eq_self_iff_true, if_true, one_ne_zero,
       if_false, zero_ne_one, if_false]
     simp only [cons_val_zero, eq_self_iff_true, cons_val_one, head_cons, and_self_iff]
-  simp_rw [HY, HX, inner_aut_apply_inner_aut]
+  simp_rw [HY, HX, innerAut_apply_innerAut]
   have hx₁ : Hx.eigenvalues 1 ≠ 0 := by
     intro hx₁
     have : diagonal Hx.eigenvalues = 0 :=
@@ -482,6 +475,7 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
       simp_rw [Fin.forall_fin_two]
       simp only [of_apply, Pi.zero_apply]
       simp only [cons_val_zero, cons_val_one, head_cons, and_self_iff]
+      aesop
     rw [Matrix.diagonal_eq_zero_iff, Matrix.IsAlmostHermitian.eigenvalues_eq_zero_iff] at this
     exact (Subtype.mem x) this
   have hy₁ : Hy.eigenvalues 1 ≠ 0 := by
@@ -492,12 +486,13 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
       simp_rw [Fin.forall_fin_two]
       simp only [of_apply, Pi.zero_apply]
       simp only [cons_val_zero, cons_val_one, head_cons, and_self_iff]
+      aesop
     rw [Matrix.diagonal_eq_zero_iff, Matrix.IsAlmostHermitian.eigenvalues_eq_zero_iff] at this
     exact (Subtype.mem y) this
   refine'
     ⟨Units.mk0 (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) (mul_ne_zero hx₁ (inv_ne_zero hy₁)),
-      ⟨Hx.eigenvector_matrix, Hx.eigenvector_matrix_mem_unitary_group⟩ *
-        ⟨Hy.eigenvector_matrix, Hy.eigenvector_matrix_mem_unitary_group⟩⁻¹,
+      ⟨Hx.eigenvectorMatrix, Hx.eigenvectorMatrix_mem_unitaryGroup⟩ *
+        ⟨Hy.eigenvectorMatrix, Hy.eigenvectorMatrix_mem_unitaryGroup⟩⁻¹,
       _⟩
   have :
     (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) • diagonal Hy.eigenvalues = diagonal Hx.eigenvalues :=
@@ -509,10 +504,10 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
   simp_rw [inv_mul_cancel_right, Units.val_mk0, ← SMulHomClass.map_smul, ← HY, ← HX, this]
 
 theorem Qam.finTwoIsoOfSingleEdge {A B : Matrix (Fin 2) (Fin 2) ℂ →ₗ[ℂ] Matrix (Fin 2) (Fin 2) ℂ}
-    (hx0 : RealQam trace_isFaithfulPosMap.elim A) (hy0 : RealQam trace_isFaithfulPosMap.elim B)
-    (hx : hx0.edges = 1) (hy : hy0.edges = 1) (hx1 : IsSelfAdjoint A)
-    (hx2 : Qam.reflIdempotent trace_isFaithfulPosMap.elim A 1 = 0) (hy1 : IsSelfAdjoint B)
-    (hy2 : Qam.reflIdempotent trace_isFaithfulPosMap.elim B 1 = 0) :
+    (hx0 : RealQam trace_isFaithfulPosMap A) (hy0 : RealQam trace_isFaithfulPosMap B)
+    (hx : hx0.edges = 1) (hy : hy0.edges = 1) (hx1 : _root_.IsSelfAdjoint A)
+    (hx2 : Qam.reflIdempotent trace_isFaithfulPosMap A 1 = 0) (hy1 : _root_.IsSelfAdjoint B)
+    (hy2 : Qam.reflIdempotent trace_isFaithfulPosMap B 1 = 0) :
     @Qam.Iso (Fin 2) _ _ traceModuleDual A B :=
   by
   rw [RealQam.edges_eq_one_iff] at hx hy
@@ -521,4 +516,3 @@ theorem Qam.finTwoIsoOfSingleEdge {A B : Matrix (Fin 2) (Fin 2) ℂ →ₗ[ℂ] 
   exact qamA.finTwoIso x y hx1 hx2 hy1 hy2
 
 end
-
