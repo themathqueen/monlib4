@@ -606,6 +606,7 @@ lemma Complex.ofReal'_eq_isROrC_ofReal (a : ℝ) :
   Complex.ofReal' a = IsROrC.ofReal a :=
 rfl
 
+-- set_option pp.explicit true in
 theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : RealQam hφ A) :
     hA.edges = 1 ↔
       ∃ x : { x : ℍ // x ≠ 0 },
@@ -616,31 +617,32 @@ theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
   by
   constructor
   · intro h
-    have h' := h
+    let h' := h
     rw [← @Nat.cast_inj ℂ, RealQam.edges_eq hA] at h'
     rw [RealQam.edges] at h
+    let this : (edges.proof_1 hA : ((Qam.reflIdempotent hφ) A) A = A) = hA.toIdempotent := rfl
+    rw [this] at h
+    let this' : (edges.proof_2 hA : (LinearMap.IsReal A)) = hA.toIsReal := rfl
+    rw [this'] at h
     obtain ⟨u, hu⟩ := orthogonal_projection_of_dim_one h
-    have hu' : (u : ℍ) ≠ 0 := by
-      simp only [Ne.def, Submodule.coe_eq_zero]
+    let hu' : (u : ℍ) ≠ 0 := by
       exact u.property
+      -- simp_rw [Ne.def, Submodule.coe_eq_zero]
     use⟨u, hu'⟩
-    have t1 := Qam.orthogonalProjection'_eq hA.1 hA.2
+    let t1 := Qam.orthogonalProjection'_eq hA.toIdempotent hA.toIsReal
     simp_rw [← rankOne_toMatrix_transpose_psi_symm, ← LinearEquiv.map_smul,
       ← LinearMap.map_smul, ← SMulHomClass.map_smul,
       ← ContinuousLinearMap.coe_smul,
       Complex.ofReal'_eq_isROrC_ofReal, ← hu]
     simp_rw [LinearEquiv.eq_symm_apply, ← oneMapTranspose_symm_eq, StarAlgEquiv.eq_apply_iff_symm_eq,
       StarAlgEquiv.symm_symm, AlgEquiv.eq_apply_iff_symm_eq, oneMapTranspose_eq]
-    have : (edges.proof_1 hA : ((Qam.reflIdempotent hφ) A) A = A) = hA.toIdempotent := rfl
-    rw [this]
-    have : (edges.proof_2 hA : (LinearMap.IsReal A)) = hA.toIsReal := rfl
-    rw [this]
     rw [← t1]
   · rintro ⟨x, rfl⟩
     letI := hφ.matrixIsPosDef.invertible
     have ugh : ((x : ℍ) * φ.matrix * (x : ℍ)ᴴ).trace = ‖(x : ℍ)‖ ^ 2 := by
       rw [← trace_mul_cycle, ← Module.Dual.IsFaithfulPosMap.inner_eq', inner_self_eq_norm_sq_to_K]; rfl
     have := RealQam.edges_eq hA
+    rw [← @Nat.cast_inj ℂ, this]
     simp only [LinearMap.smul_apply, trace_smul, LinearMap.mul_apply,
       LinearMap.matrix.mulRight_adjoint, LinearMap.mulLeft_apply, LinearMap.mulRight_apply,
       conjTranspose_mul, hφ.matrixIsPosDef.1.eq, sig_apply_matrix_hMul_posDef',
@@ -648,12 +650,9 @@ theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
     have this' : ((‖(x : ℍ)‖ : ℝ) ^ 2 : ℂ) ≠ (0 : ℂ) :=
       by
       simp_rw [Ne.def, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero']
-      exact Subtype.mem x
+      exact x.property
     -- exact set.mem_set_of.mp (subtype.mem x),
     --},
-    rw [inv_mul_cancel this'] at this
-    rw [← @Nat.cast_inj ℂ]
-    rw [RealQam.edges_eq] at this ⊢
-    rw [this, Nat.cast_one]
+    rw [inv_mul_cancel this', Nat.cast_one]
 
 -- },
