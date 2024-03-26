@@ -189,7 +189,7 @@ by
   . intro h x y
     exact h _
 
-private lemma isometry_iff_norm_aux [hφ : φ.IsFaithfulPosMap]
+lemma isometry_iff_norm_aux [hφ : φ.IsFaithfulPosMap]
   (f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)) :
   Isometry f ↔ ∀ x, ‖f x‖ = ‖x‖ :=
 @isometry_iff_norm (Matrix n n ℂ) (Matrix n n ℂ) (by infer_instance) (by infer_instance) f
