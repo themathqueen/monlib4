@@ -683,7 +683,7 @@ theorem Finset.sum_abs_eq_zero_iff' {s : Type _} [Fintype s] {x : s → 𝕜} :
   · intro h
     simp_rw [h, Finset.sum_const_zero]
 
-theorem trace_conjTranspose_hMul_self_eq_zero [Fintype n] [Fintype m]
+theorem trace_conjTranspose_hMul_self_eq_zero {m : Type*} [Fintype n] [Fintype m]
   (x : Matrix n m 𝕜) : (xᴴ * x).trace = 0 ↔ x = 0 :=
   by
   simp_rw [← Matrix.ext_iff, Matrix.zero_apply, Matrix.trace, Matrix.diag, Matrix.mul_apply,
