@@ -404,7 +404,7 @@ theorem Psi.reflIdempotent [hφ : φ.IsFaithfulPosMap] (A B : l(ℍ)) (t s : ℝ
   simp_rw [map_sum, LinearMap.sum_apply, map_sum, Psi.idempotent_rank_one, Finset.mul_sum,
     Finset.sum_mul]
 
-theorem tenSwap_sig (x y : ℝ) :
+theorem tenSwap_sig [hφ : φ.IsFaithfulPosMap] (x y : ℝ) :
     (tenSwap : l(ℍ ⊗[ℂ] ℍᵐᵒᵖ)) ∘ₗ
         TensorProduct.map ((hφ.sig x).toLinearMap : l(ℍ)) (sigop hφ y : l(ℍᵐᵒᵖ)) =
       (((hφ.sig y).toLinearMap : l(ℍ)) ⊗ₘ sigop hφ x : l(ℍ ⊗[ℂ] ℍᵐᵒᵖ)) ∘ₗ tenSwap :=
@@ -473,7 +473,7 @@ theorem Qam.reflexive'_eq_rankOne [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem map_sig_star (t s : ℝ) (x : ℍ ⊗[ℂ] ℍᵐᵒᵖ) :
+theorem map_sig_star [hφ : φ.IsFaithfulPosMap] (t s : ℝ) (x : ℍ ⊗[ℂ] ℍᵐᵒᵖ) :
     star (((hφ.sig t).toLinearMap ⊗ₘ sigop hφ s) x) =
       ((hφ.sig (-t)).toLinearMap ⊗ₘ sigop hφ (-s)) (star x) :=
 x.induction_on

@@ -247,8 +247,9 @@ theorem rankOne_map_rankOne_eq [hφ : φ.IsFaithfulPosMap] (x y z w : ℍ) :
   simp_rw [TensorProduct.map_tmul, ContinuousLinearMap.coe_coe, rankOne_apply,
     TensorProduct.inner_tmul, TensorProduct.smul_tmul_smul]
 
+set_option maxHeartbeats 400000 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem phiMap_eq : phiMap hφ = (rmulMapLmul : ℍ ⊗[ℂ] ℍ →ₗ[ℂ] l(ℍ ⊗[ℂ] ℍ)) ∘ₗ ιMap hφ :=
+theorem phiMap_eq [hφ : φ.IsFaithfulPosMap] : phiMap hφ = (rmulMapLmul : ℍ ⊗[ℂ] ℍ →ₗ[ℂ] l(ℍ ⊗[ℂ] ℍ)) ∘ₗ ιMap hφ :=
   by
   apply LinearMap.ext_of_rank_one'
   intro x y
