@@ -735,8 +735,8 @@ theorem Pi.PosDef.rpow_zero {a : PiMat k s} (ha : ∀ i, (a i).PosDef) : Pi.PosD
   ext x i j
   simp only [Pi.PosDef.rpow, Matrix.PosDef.rpow_zero, Pi.one_apply]
 
-theorem Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner {k : Type u_1} [Fintype k]
-    [DecidableEq k] {s : k → Type u_2} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
+theorem Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner {k : Type _} [Fintype k]
+    [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     {ψ : ∀ i : k, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i : k, (ψ i).IsFaithfulPosMap]
     {i : k} (y : ∀ j : k, Matrix (s j) (s j) ℂ) (x : Matrix (s i) (s i) ℂ) :
     ⟪y, includeBlock x⟫_ℂ = ⟪y i, x⟫_ℂ := by
@@ -889,7 +889,7 @@ theorem Module.Dual.pi.IsFaithfulPosMap.toMatrix_symm_apply' [hψ : ∀ i, (ψ i
     pi.IsFaithfulPosMap.includeBlock_left_inner, Finset.sum_product_univ, Finset.sum_smul,
     smul_smul]
 
-theorem TensorProduct.of_basis_eq_span {𝕜 : Type u_1} {E : Type u_2} {F : Type u_3} [IsROrC 𝕜]
+theorem TensorProduct.of_basis_eq_span {𝕜 : Type _} {E : Type _} {F : Type _} [IsROrC 𝕜]
     [AddCommGroup E] [Module 𝕜 E] [AddCommGroup F] [Module 𝕜 F] (x : TensorProduct 𝕜 E F)
     {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (b₁ : Basis ι₁ 𝕜 E) (b₂ : Basis ι₂ 𝕜 F) :
     x = ∑ i : ι₁, ∑ j : ι₂, (b₁.tensorProduct b₂).repr x (i, j) • b₁ i ⊗ₜ[𝕜] b₂ j :=

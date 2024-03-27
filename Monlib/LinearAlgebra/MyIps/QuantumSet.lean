@@ -77,7 +77,7 @@ q : APos
 -- (Q_is_pos_def : 0 < Q)
 trace : Module.Dual ℂ A
 traceIsTracial : trace.IsTracial
-functional_eq : ∀ x : A, φ x = trace (Q * x)
+functional_eq : ∀ x : A, φ x = trace (q * x)
 
 attribute [instance] QuantumSet.toNormedAddCommGroupOfRing
 attribute [instance] QuantumSet.toInnerProductSpace
