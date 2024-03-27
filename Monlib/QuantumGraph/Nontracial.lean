@@ -666,7 +666,7 @@ theorem Qam.self_adjoint_symm_real_tfae [hφ : φ.IsFaithfulPosMap] (A : ℍ →
     exact ⟨Qam.self_adjoint_of_symm_real A h.1 h.2, h.1⟩
   tfae_finish
 
-set_option maxHeartbeats 0 in
+set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Psi.real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (t s : ℝ) :
     hφ.psi t s A.real =
@@ -680,7 +680,8 @@ theorem Psi.real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (t s : �
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, sigop, LinearMap.comp_apply,
     AlgEquiv.toLinearMap_apply, star_eq_conjTranspose]
   simp only [neg_add_rev, neg_neg, two_mul, add_assoc, add_neg_cancel_right]
-  simp_rw [sub_add, add_sub_cancel, sub_eq_add_neg, add_neg_self, add_zero]
+  simp_rw [sub_add, sub_eq_add_neg, add_neg_self, add_zero,
+    add_assoc, add_neg_self, add_zero]
 
 theorem sigop_zero [hφ : φ.IsFaithfulPosMap] : sigop hφ 0 = 1 := by
   rw [sigop, Module.Dual.IsFaithfulPosMap.sig_zero', AlgEquiv.one_toLinearMap, LinearMap.one_comp,

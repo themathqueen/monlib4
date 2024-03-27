@@ -994,8 +994,7 @@ theorem Pi.IsFaithfulPosMap.ToMatrix.rankOne_apply [hψ : ∀ i, (ψ i).IsFaithf
           (col (reshape (y j.fst * (hψ j.1).matrixIsPosDef.rpow (1 / 2))))ᴴ)
         i.2 j.2 :=
   by
-  ext1
-  ext1
+  ext
   simp_rw [pi.IsFaithfulPosMap.toMatrix_apply', ContinuousLinearMap.coe_coe, _root_.rankOne_apply,
     Pi.smul_apply, Matrix.smul_mul, Matrix.smul_apply,
     Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner, ← inner_conj_symm (y _),

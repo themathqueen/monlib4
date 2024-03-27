@@ -550,7 +550,7 @@ theorem Pi.Qam.trivialGraph_reflexiveComplement_eq_completeGraph [Nonempty p]
     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
     Pi.Qam.reflexiveComplement hφ hφ₂ (Pi.Qam.trivialGraph hφ hφ₂) = Qam.completeGraph ℍ :=
-  add_sub_cancel _ _
+by simp_rw [reflexiveComplement, add_sub_cancel_right]
 
 theorem Pi.Qam.completeGraph_reflexiveComplement_eq_trivialGraph [Nonempty p]
     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]

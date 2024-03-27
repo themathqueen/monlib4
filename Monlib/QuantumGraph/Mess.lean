@@ -337,7 +337,7 @@ theorem grad_apply [hφ : φ.IsFaithfulPosMap] (x : l(ℍ)) :
   let g := fun a => (phiMap hφ) (LinearMap.real |(α a)⟩⟨(β a)|) ∘ₗ tensorOneMap
   have hg : ∀ a, g a = (phiMap hφ) (LinearMap.real |(α a)⟩⟨(β a)|) ∘ₗ tensorOneMap := fun a => rfl
   simp_rw [← hf, ← hg]
-  exact @Finset.sum_sub_distrib (ℍ →ₗ[ℂ] (ℍ ⊗[ℂ] ℍ)) _ _ g f (by infer_instance)
+  exact @Finset.sum_sub_distrib _ (ℍ →ₗ[ℂ] (ℍ ⊗[ℂ] ℍ)) _ g f (by infer_instance)
 
 
 theorem oneTensorMap_adjoint [hφ : φ.IsFaithfulPosMap] :
