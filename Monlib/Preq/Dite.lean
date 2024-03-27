@@ -28,20 +28,6 @@ theorem dite_add_dite {α : Type _} [Add α] (P : Prop) [Decidable P] (a b : P �
   · intro h
     simp only [h, dif_neg, not_false_iff]
 
-#print smul_dite /-
-theorem smul_dite {α : Type _} (P : Prop) [Decidable P] (a : P → α) (c : ¬P → α) {β : Type _}
-    (r : β) [SMul β α] :
-    (r • dite P (fun x => a x) fun x => c x) = dite P (fun x => r • a x) fun x => r • c x :=
-  by
-  rw [eq_comm]
-  simp only [dite_eq_iff']
-  constructor
-  · intro h
-    simp only [h, dif_pos]
-  · intro h
-    simp only [h, dif_neg, not_false_iff]
--/
-
 theorem hMul_dite {α : Type _} [Mul α] (P : Prop) [Decidable P] (a : α) (b : P → α) (c : ¬P → α) :
     (a * dite P (fun x => b x) fun x => c x) = dite P (fun x => a * b x) fun x => a * c x :=
   by
@@ -65,13 +51,13 @@ theorem dite_hMul {α : Type _} [Mul α] (P : Prop) [Decidable P] (a : α) (b : 
     simp only [h, dif_neg, not_false_iff]
 
 theorem dite_boole_add {α : Type _} [AddZeroClass α] (P : Prop) [Decidable P] (a b : P → α) :
-    (dite P (fun x => a x + b x) fun x => 0) =
-      (dite P (fun x => a x) fun x => 0) + dite P (fun x => b x) fun x => 0 :=
+    (dite P (fun x => a x + b x) fun _ => 0) =
+      (dite P (fun x => a x) fun _ => 0) + dite P (fun x => b x) fun _ => 0 :=
   by rw [dite_add_dite, add_zero]
 
 theorem dite_boole_smul {α β : Type _} [Zero α] [SMulZeroClass β α] (P : Prop) [Decidable P]
     (a : P → α) (r : β) :
-    (dite P (fun x => r • a x) fun x => 0) = r • dite P (fun x => a x) fun x => 0 := by
+    (dite P (fun x => r • a x) fun _ => 0) = r • dite P (fun x => a x) fun _ => 0 := by
   rw [smul_dite, smul_zero]
 
 theorem star_dite (P : Prop) [Decidable P] {α : Type _} [InvolutiveStar α] (a : P → α)
@@ -87,12 +73,12 @@ theorem star_dite (P : Prop) [Decidable P] {α : Type _} [InvolutiveStar α] (a 
 
 theorem dite_tmul {R N₁ N₂ : Type _} [CommSemiring R] [AddCommGroup N₁] [AddCommGroup N₂]
     [Module R N₁] [Module R N₂] (P : Prop) [Decidable P] (x₁ : P → N₁) (x₂ : N₂) :
-    (dite P (fun h => x₁ h) fun h => 0) ⊗ₜ[R] x₂ = dite P (fun h => x₁ h ⊗ₜ[R] x₂) fun h => 0 := by
+    (dite P (fun h => x₁ h) fun _ => 0) ⊗ₜ[R] x₂ = dite P (fun h => x₁ h ⊗ₜ[R] x₂) fun _ => 0 := by
   split_ifs <;> simp
 
 theorem tmul_dite {R N₁ N₂ : Type _} [CommSemiring R] [AddCommGroup N₁] [AddCommGroup N₂]
     [Module R N₁] [Module R N₂] (P : Prop) [Decidable P] (x₁ : N₁) (x₂ : P → N₂) :
-    (x₁ ⊗ₜ[R] dite P (fun h => x₂ h) fun h => 0) = dite P (fun h => x₁ ⊗ₜ[R] x₂ h) fun h => 0 := by
+    (x₁ ⊗ₜ[R] dite P (fun h => x₂ h) fun _ => 0) = dite P (fun h => x₁ ⊗ₜ[R] x₂ h) fun _ => 0 := by
   split_ifs <;> simp
 
 theorem LinearMap.apply_dite {R H₁ H₂ : Type _} [Semiring R] [AddCommMonoid H₁] [AddCommMonoid H₂]

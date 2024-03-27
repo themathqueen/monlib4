@@ -286,7 +286,7 @@ def LinearMap.piPiProd (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι
     simp only [LinearMap.coe_comp, LinearMap.coe_mk, Function.comp_apply, LinearMap.id_coe, id.def]
     rfl
 
-@[simps]
+@[simps!]
 def LinearMap.piProdSwap (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι₁ → Type _)
     (ψ : ι₂ → Type _) [∀ i, AddCommMonoid (φ i)] [∀ i, Module R (φ i)] [∀ i, AddCommMonoid (ψ i)]
     [∀ i, Module R (ψ i)] (S : Type _) [Semiring S] [∀ i, Module S (ψ i)]

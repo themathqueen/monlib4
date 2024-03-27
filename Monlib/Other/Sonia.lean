@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Algebra.BigOperators.Fin
-import Mathlib.Data.Nat.Pow
+import Init.Data.Nat.Lemmas
 
 #align_import other.sonia
 

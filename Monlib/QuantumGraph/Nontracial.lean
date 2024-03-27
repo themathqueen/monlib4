@@ -404,7 +404,7 @@ theorem Psi.reflIdempotent [hφ : φ.IsFaithfulPosMap] (A B : l(ℍ)) (t s : ℝ
   simp_rw [map_sum, LinearMap.sum_apply, map_sum, Psi.idempotent_rank_one, Finset.mul_sum,
     Finset.sum_mul]
 
-theorem tenSwap_sig (x y : ℝ) :
+theorem tenSwap_sig [hφ : φ.IsFaithfulPosMap] (x y : ℝ) :
     (tenSwap : l(ℍ ⊗[ℂ] ℍᵐᵒᵖ)) ∘ₗ
         TensorProduct.map ((hφ.sig x).toLinearMap : l(ℍ)) (sigop hφ y : l(ℍᵐᵒᵖ)) =
       (((hφ.sig y).toLinearMap : l(ℍ)) ⊗ₘ sigop hφ x : l(ℍ ⊗[ℂ] ℍᵐᵒᵖ)) ∘ₗ tenSwap :=
@@ -473,7 +473,7 @@ theorem Qam.reflexive'_eq_rankOne [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem map_sig_star (t s : ℝ) (x : ℍ ⊗[ℂ] ℍᵐᵒᵖ) :
+theorem map_sig_star [hφ : φ.IsFaithfulPosMap] (t s : ℝ) (x : ℍ ⊗[ℂ] ℍᵐᵒᵖ) :
     star (((hφ.sig t).toLinearMap ⊗ₘ sigop hφ s) x) =
       ((hφ.sig (-t)).toLinearMap ⊗ₘ sigop hφ (-s)) (star x) :=
 x.induction_on
@@ -666,7 +666,7 @@ theorem Qam.self_adjoint_symm_real_tfae [hφ : φ.IsFaithfulPosMap] (A : ℍ →
     exact ⟨Qam.self_adjoint_of_symm_real A h.1 h.2, h.1⟩
   tfae_finish
 
-set_option maxHeartbeats 0 in
+set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Psi.real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (t s : ℝ) :
     hφ.psi t s A.real =
@@ -680,7 +680,8 @@ theorem Psi.real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (t s : �
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, sigop, LinearMap.comp_apply,
     AlgEquiv.toLinearMap_apply, star_eq_conjTranspose]
   simp only [neg_add_rev, neg_neg, two_mul, add_assoc, add_neg_cancel_right]
-  simp_rw [sub_add, add_sub_cancel, sub_eq_add_neg, add_neg_self, add_zero]
+  simp_rw [sub_add, sub_eq_add_neg, add_neg_self, add_zero,
+    add_assoc, add_neg_self, add_zero]
 
 theorem sigop_zero [hφ : φ.IsFaithfulPosMap] : sigop hφ 0 = 1 := by
   rw [sigop, Module.Dual.IsFaithfulPosMap.sig_zero', AlgEquiv.one_toLinearMap, LinearMap.one_comp,

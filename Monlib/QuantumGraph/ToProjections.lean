@@ -426,11 +426,11 @@ theorem Qam.zero_reflIdempotent [hφ : φ.IsFaithfulPosMap] (a : l(ℍ)) : Qam.r
   simp_rw [LinearMap.map_zero, LinearMap.zero_apply]
 
 @[reducible]
-noncomputable def RealQam.edges {x : l(ℍ)} (hx : RealQam hφ x) : ℕ :=
+noncomputable def RealQam.edges [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx : RealQam hφ x) : ℕ :=
   FiniteDimensional.finrank ℂ (Qam.submoduleOfIdempotentAndReal hx.1 hx.2)
 
 @[reducible]
-noncomputable def RealQam.edges' : { x : ℍ →ₗ[ℂ] ℍ // RealQam hφ x } → ℕ := fun x =>
+noncomputable def RealQam.edges' [hφ : φ.IsFaithfulPosMap] : { x : ℍ →ₗ[ℂ] ℍ // RealQam hφ x } → ℕ := fun x =>
   FiniteDimensional.finrank ℂ
     (Qam.submoduleOfIdempotentAndReal (Set.mem_setOf.mp (Subtype.mem x)).1
       (Set.mem_setOf.mp (Subtype.mem x)).2)
