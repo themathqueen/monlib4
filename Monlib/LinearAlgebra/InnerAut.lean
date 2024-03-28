@@ -534,7 +534,7 @@ lemma _root_.StarAlgEquiv.eq_innerAut (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matri
     innerAutStarAlg f.of_matrix_unitary = f :=
 StarAlgEquiv.of_matrix_unitary.proof_2 _
 
-theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [IsROrC 𝕜] [DecidableEq 𝕜] {x : Matrix n n 𝕜}
+theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [IsROrC 𝕜] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) :
     x = innerAut ⟨_, hx.eigenvectorMatrix_mem_unitaryGroup⟩ (diagonal (IsROrC.ofReal ∘ hx.eigenvalues)) :=
   by

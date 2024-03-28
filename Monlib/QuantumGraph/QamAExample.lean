@@ -268,18 +268,6 @@ theorem Matrix.IsAlmostHermitian.spectrum {x : Matrix n n ℂ} (hx : x.IsAlmostH
   simp_rw [← SMulHomClass.map_smul, innerAut.spectrum_eq, ← diagonal_smul, diagonal.spectrum,
     Pi.smul_apply, Function.comp_apply, Matrix.IsAlmostHermitian.eigenvalues]
 
-theorem Matrix.IsHermitian.eigenvalues_eq_zero_iff {x : ℍ} (hx : x.IsHermitian) :
-    (@IsROrC.ofReal ℂ _) ∘ hx.eigenvalues = (0 : n → ℂ) ↔ x = 0 :=
-  by
-  constructor
-  · intro h
-    rw [hx.spectral_theorem', h, Pi.zero_def, diagonal_zero, mul_zero, zero_mul]
-  · rintro rfl
-    ext
-    simp only [Function.comp_apply, hx.eigenvalues_eq, zero_mulVec, dotProduct_zero, map_zero,
-      Pi.zero_apply, Complex.ofReal_zero]
-    rfl
-
 private theorem matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero
     {x : { x : ℍ // x ≠ 0 }} (hx : (x : ℍ).IsAlmostHermitian) :
     ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) ≠ 0 :=
