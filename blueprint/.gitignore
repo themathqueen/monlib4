@@ -1,0 +1,16 @@
+__pycache__
+print
+build
+web
+*.aux
+*.pdf
+*.paux
+*.log
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.xdv
+*.maf
+*.mtc
+*.mtc0
