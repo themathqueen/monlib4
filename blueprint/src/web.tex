@@ -5,6 +5,52 @@
 \usepackage{tikz}
 \usepackage[showmore, dep_graph, coverage, project=../../]{blueprint}
 
+\usetikzlibrary{decorations}
+\usepackage{graphicx}
+% \usepackage[intoc]{imakeidx}
+\DeclareGraphicsExtensions{.svg,.png,.jpg}
+
+\usepackage[UKenglish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{bbm}
+\usepackage{wrapfig}
+\usepackage{bm}
+\usepackage{gensymb}
+\usepackage{mathtools}
+\mathtoolsset{mathic}
+\usepackage{centernot}
+\usepackage{relsize}
+\usepackage{mathrsfs}
+\usepackage{booktabs}
+\usepackage[ruled,vlined]{algorithm2e}
+% \usepackage{array}
+\usepackage{multirow}
+% \usepackage[parfill]{parskip}
+\usepackage{etoolbox}
+\usepackage{minitoc}
+\usepackage{scalerel}
+\usepackage{microtype}
+\usepackage[pdfa]{hyperref}
+\hypersetup{
+ colorlinks=true,
+	linktoc=all,
+	linkcolor=green!40!black,
+ }
+ \newcommand{\tableofcontentsnewpage}{\tableofcontents\newpage}
+ \makeatletter
+ \renewcommand{\l@subsection}{\@dottedtocline{2}{1.8em}{3.2em}}
+ \makeatother
+ \newcommand{\st}{\text{ s.t.
+	}}
+ \newcommand{\contradiction}{\(\#\)}
+
+ \input{preamble/web.tex}
+ \input{preamble/macros.tex}
+
+
 \dochome{https://themathqueen.github.io/Monlib4/docs}
 \title{Monlib4}
 
@@ -12,5 +58,7 @@
 
 \maketitle
 
+\section{Setting the scene}
+\input{chapters/scene.tex}
 
 \end{document}
