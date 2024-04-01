@@ -23,6 +23,7 @@ namespace Submodule
 variable {E R : Type _} [Ring R] [AddCommGroup E] [Module R E]
 
 /-- `U` is `T` invariant (ver 1): `U ≤ U.comap` -/
+@[pp_dot]
 def InvariantUnder (U : Submodule R E) (T : E →ₗ[R] E) : Prop :=
   U ≤ U.comap T
 

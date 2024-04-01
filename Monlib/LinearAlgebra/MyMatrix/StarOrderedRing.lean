@@ -60,83 +60,6 @@ protected def LE {n : Type _} [Fintype n] [DecidableEq n] :
   LE (Matrix n n ℂ) :=
 ⟨fun x y => (y - x).PosSemidef⟩
 
-@[reducible]
-def partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix n n ℂ)
-    where
-  toLE := Matrix.LE
-  le_refl x := by simp only [LE.le, sub_self, Matrix.PosSemidef.zero]
-  le_trans x y z hx hy := by
-    have := Matrix.PosSemidef.add hx hy
-    simp only [sub_add_sub_cancel'] at this
-    exact this
-  le_antisymm x y hx hy := by
-    rw [← sub_eq_zero, Matrix.eq_zero_iff]
-    intro a
-    have := hx.2 a
-    rw [← neg_sub, Matrix.neg_mulVec, Matrix.dotProduct_neg,
-      le_neg, neg_zero] at this
-    exact le_antisymm this (hy.2 a)
-
-scoped[-- lt := λ x y, (y - x).pos_def,
--- lt_iff_le_not_le := λ x y, by {  } }
-MatrixOrder] attribute [instance] Matrix.partialOrder
-
-open scoped MatrixOrder
-
-theorem le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n ℂ} :
-    x ≤ y ↔ (y - x).PosSemidef :=
-  Iff.rfl
-
--- def matrix.pos_semidef.add_submonoid (n : Type*) [fintype n] [decidable_eq n] :
---   add_submonoid (matrix n n ℂ) :=
--- { carrier := {x : matrix n n ℂ | x.pos_semidef},
---   zero_mem' := matrix.pos_semidef.zero,
---   add_mem' := λ x y hx hy, matrix.pos_semidef.add hx hy }
--- lemma matrix.pos_semidef.mem_add_submonoid {n : Type*} [fintype n] [decidable_eq n] (x : matrix n n ℂ) :
---   x ∈ (matrix.pos_semidef.add_submonoid n : add_submonoid (matrix n n ℂ)) ↔ x.pos_semidef :=
--- iff.rfl
--- lemma matrix.pos_semidef.star_mul_self_mem_add_submonoid {n : Type*} [fintype n] [decidable_eq n]
---   (x : matrix n n ℂ) :
---   xᴴ ⬝ x ∈ matrix.pos_semidef.add_submonoid n :=
--- begin
---   simp_rw [matrix.pos_semidef.mem_add_submonoid, matrix.pos_semidef.star_mul_self],
--- end
-@[reducible]
-noncomputable def starOrderedRing {n : Type _} [Fintype n] [DecidableEq n] :
-    StarOrderedRing (Matrix n n ℂ) :=
-StarOrderedRing.ofLEIff (fun a b => by
-  constructor
-  · intro hab
-    simp_rw [Matrix.le_iff] at hab
-    simp_rw [← sub_eq_iff_eq_add']
-    exact (posSemidef_iff _).mp hab
-  · rintro ⟨s, rfl⟩
-    simp_rw [Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add', Matrix.star_eq_conjTranspose]
-    exact ⟨_, rfl⟩)
-
-scoped[MatrixOrder] attribute [instance] Matrix.starOrderedRing
-
-open scoped MatrixOrder
-
-theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι → Type _}
-    [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : PiMat ℂ ι n) :
-    x ≤ y ↔ ∃ z : PiMat ℂ ι n, y = x + star z * z :=
-  by
-  simp_rw [Function.funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
-    Pi.le_def, Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add',
-    Matrix.star_eq_conjTranspose]
-  exact
-    ⟨fun hx => ⟨fun i => (hx i).choose, fun i => (hx i).choose_spec⟩, fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩
-
-@[reducible]
-noncomputable def PiStarOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
-    {n : ι → Type _} [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] :
-    StarOrderedRing (PiMat ℂ ι n) :=
-StarOrderedRing.ofLEIff
-  (fun a b => by simp_rw [Pi.le_iff_sub_nonneg])
-
-scoped[MatrixOrder] attribute [instance] Matrix.PiStarOrderedRing
-
 def NegSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] (x : Matrix n n 𝕜) : Prop :=
   x.IsHermitian ∧ ∀ a : n → 𝕜, Matrix.dotProduct (Star.star a) (x *ᵥ a) ≤ 0
 
@@ -159,9 +82,6 @@ theorem negDef_iff_neg_posDef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] (x : M
     x.NegDef ↔ (-x).PosDef := by
   simp_rw [Matrix.NegDef, Matrix.PosDef, Matrix.IsHermitian.neg_iff, Matrix.neg_mulVec,
     Matrix.dotProduct_neg, lt_neg, neg_zero]
-
-theorem negSemidef_iff_nonpos {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
-    x.NegSemidef ↔ x ≤ 0 := by rw [Matrix.negSemidef_iff_neg_posSemidef, Matrix.le_iff, zero_sub]
 
 open scoped ComplexOrder
 
@@ -329,23 +249,127 @@ theorem innerAut_negDef_iff {𝕜 n : Type _} [IsROrC 𝕜]
   by
   simp_rw [negDef_iff_neg_posDef, ← map_neg, innerAut_posDef_iff]
 
+theorem negSemidef_iff_of_isHermitian {𝕜 n : Type _}
+  [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
+    (hx : x.IsHermitian) :
+    x.NegSemidef ↔ hx.eigenvalues ≤ 0 := by
+  nth_rw 1 [IsHermitian.spectral_theorem'' hx, innerAut_negSemidef_iff, diagonal_negSemidef_iff]
+  simp_rw [Pi.le_def, Function.comp_apply, Pi.zero_apply, ← @IsROrC.ofReal_zero 𝕜,
+    IsROrC.real_le_real]
+
 theorem negDef_iff_of_isHermitian {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) :
     x.NegDef ↔ ∀ i, hx.eigenvalues i < 0 := by
   nth_rw 1 [IsHermitian.spectral_theorem'' hx, innerAut_negDef_iff, diagonal_negDef_iff]
   simp_rw [Function.comp_apply, IsROrC.neg_ofReal]
 
-theorem posDef_of_posSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜)
+theorem posDef_of_posSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
     (hx : x.PosSemidef) :
     x.PosDef ↔ ∀ i, hx.1.eigenvalues i ≠ 0 := by
   rw [posDef_iff_of_isHermitian hx.1]
   simp_rw [lt_iff_le_and_ne, Ne.def, IsHermitian.nonneg_eigenvalues_of_posSemidef hx, true_and, eq_comm]
 
-theorem negDef_of_negSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜)
+theorem negDef_of_negSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
     (hx : x.NegSemidef) :
     x.NegDef ↔ ∀ i, hx.1.eigenvalues i ≠ 0 := by
   rw [negDef_iff_of_isHermitian hx.1]
   simp_rw [lt_iff_le_and_ne, Ne.def, NegSemidef.nonpos_eigenvalues hx, true_and]
+
+@[reducible]
+def partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix n n ℂ)
+    where
+  toLE := Matrix.LE
+  le_refl x := by simp only [LE.le, sub_self, Matrix.PosSemidef.zero]
+  le_trans x y z hx hy := by
+    have := Matrix.PosSemidef.add hx hy
+    simp only [sub_add_sub_cancel'] at this
+    exact this
+  le_antisymm x y hx hy := by
+    rw [← sub_eq_zero, Matrix.eq_zero_iff]
+    intro a
+    have := hx.2 a
+    rw [← neg_sub, Matrix.neg_mulVec, Matrix.dotProduct_neg,
+      le_neg, neg_zero] at this
+    exact le_antisymm this (hy.2 a)
+
+scoped[-- lt := λ x y, (y - x).pos_def,
+-- lt_iff_le_not_le := λ x y, by {  } }
+MatrixOrder] attribute [instance] Matrix.partialOrder
+
+open scoped MatrixOrder
+
+theorem le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n ℂ} :
+    x ≤ y ↔ (y - x).PosSemidef :=
+  Iff.rfl
+
+-- def matrix.pos_semidef.add_submonoid (n : Type*) [fintype n] [decidable_eq n] :
+--   add_submonoid (matrix n n ℂ) :=
+-- { carrier := {x : matrix n n ℂ | x.pos_semidef},
+--   zero_mem' := matrix.pos_semidef.zero,
+--   add_mem' := λ x y hx hy, matrix.pos_semidef.add hx hy }
+-- lemma matrix.pos_semidef.mem_add_submonoid {n : Type*} [fintype n] [decidable_eq n] (x : matrix n n ℂ) :
+--   x ∈ (matrix.pos_semidef.add_submonoid n : add_submonoid (matrix n n ℂ)) ↔ x.pos_semidef :=
+-- iff.rfl
+-- lemma matrix.pos_semidef.star_mul_self_mem_add_submonoid {n : Type*} [fintype n] [decidable_eq n]
+--   (x : matrix n n ℂ) :
+--   xᴴ ⬝ x ∈ matrix.pos_semidef.add_submonoid n :=
+-- begin
+--   simp_rw [matrix.pos_semidef.mem_add_submonoid, matrix.pos_semidef.star_mul_self],
+-- end
+@[reducible]
+noncomputable def starOrderedRing {n : Type _} [Fintype n] [DecidableEq n] :
+    StarOrderedRing (Matrix n n ℂ) :=
+StarOrderedRing.ofLEIff (fun a b => by
+  constructor
+  · intro hab
+    simp_rw [Matrix.le_iff] at hab
+    simp_rw [← sub_eq_iff_eq_add']
+    exact (posSemidef_iff _).mp hab
+  · rintro ⟨s, rfl⟩
+    simp_rw [Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add', Matrix.star_eq_conjTranspose]
+    exact ⟨_, rfl⟩)
+
+scoped[MatrixOrder] attribute [instance] Matrix.starOrderedRing
+
+open scoped MatrixOrder
+
+theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι → Type _}
+    [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : PiMat ℂ ι n) :
+    x ≤ y ↔ ∃ z : PiMat ℂ ι n, y = x + star z * z :=
+  by
+  simp_rw [Function.funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
+    Pi.le_def, Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add',
+    Matrix.star_eq_conjTranspose]
+  exact
+    ⟨fun hx => ⟨fun i => (hx i).choose, fun i => (hx i).choose_spec⟩, fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩
+
+@[reducible]
+noncomputable def PiStarOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
+    {n : ι → Type _} [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] :
+    StarOrderedRing (PiMat ℂ ι n) :=
+StarOrderedRing.ofLEIff
+  (fun a b => by simp_rw [Pi.le_iff_sub_nonneg])
+
+scoped[MatrixOrder] attribute [instance] Matrix.PiStarOrderedRing
+
+theorem negSemidef_iff_nonpos {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
+    x.NegSemidef ↔ x ≤ 0 := by rw [Matrix.negSemidef_iff_neg_posSemidef, Matrix.le_iff, zero_sub]
+
+theorem PosSemidef.conj_by_isHermitian_posSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x y : Matrix n n 𝕜}
+  (hx : x.PosSemidef) (hy : y.IsHermitian) :
+  PosSemidef (y * x * y) :=
+by
+  nth_rw 1 [← hy.eq]
+  exact PosSemidef.conjTranspose_mul_mul_same hx _
+
+theorem IsHermitian.conj_by_isHermitian_posSemidef {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] {x y : Matrix n n 𝕜}
+  (hx : x.IsHermitian) (hy : y.PosSemidef) :
+  PosSemidef (x * y * x) :=
+by
+  nth_rw 1 [← hx.eq]
+  exact PosSemidef.conjTranspose_mul_mul_same hy _
+
+alias isHermitian_mul_iff := Matrix.commute_iff
 
 -- def matrix.pos_def.has_pow {n : Type*} [fintype n] [decidable_eq n] :
 --   has_pow ({x : matrix n n ℂ // 0 < x}) ℝ :=

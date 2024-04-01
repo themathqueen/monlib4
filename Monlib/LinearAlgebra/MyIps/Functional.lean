@@ -246,6 +246,31 @@ def Module.Dual.IsPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module
     (φ : Module.Dual 𝕜 A) : Prop :=
   ∀ a : A, 0 ≤ φ (star a * a)
 
+lemma Module.Dual.piIsPosMap_iff {k : Type _} [Fintype k]
+  [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  (φ : Module.Dual 𝕜 (PiMat 𝕜 k s)) :
+  φ.IsPosMap ↔ ∀ i, (pi_of φ i).IsPosMap :=
+by
+  constructor
+  . intro h i x
+    specialize h (includeBlock x)
+    simp_rw [includeBlock_conjTranspose, includeBlock_hMul_same] at h
+    exact h
+  . intro h x
+    simp_rw [IsPosMap, pi_of_apply] at h
+    nth_rw 1 [← sum_includeBlock x]
+    simp_rw [star_sum, Finset.sum_mul, includeBlock_conjTranspose,
+      includeBlock_hMul, map_sum]
+    exact Finset.sum_nonneg (fun _ _ => h _ _)
+
+lemma Module.Dual.pi_isPosMap_iff {k : Type _} [Fintype k]
+  [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  (φ : Π i, Module.Dual 𝕜 (Matrix (s i) (s i) 𝕜)) :
+  (pi φ).IsPosMap ↔ ∀ i, (φ i).IsPosMap :=
+by
+  rw [Module.Dual.piIsPosMap_iff]
+  simp_rw [← eq_pi_of_pi]
+
 /-- A linear functional $φ$ on $M_n$ is unital if $φ(1) = 1$. -/
 def Module.Dual.IsUnital {A : Type _} [AddCommMonoid A] [Module R A] [One A] (φ : Module.Dual R A) :
     Prop :=
@@ -271,6 +296,42 @@ A linear functional $f$ on $M_n$ is said to be faithful if $f(x^*x)=0$ if and on
 def Module.Dual.IsFaithful {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
     (φ : Module.Dual 𝕜 A) : Prop :=
   ∀ a : A, φ (star a * a) = 0 ↔ a = 0
+
+lemma Matrix.includeBlock_eq_zero {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+  [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i : k}
+  {x : Matrix (s i) (s i) R} :
+  includeBlock x = 0 ↔ x = 0 :=
+by
+  simp_rw [Function.funext_iff, Pi.zero_apply, includeBlock_apply,
+    dite_eq_right_iff, eq_mp_eq_cast]
+  exact ⟨λ h => (h i rfl), by rintro rfl a rfl; rfl⟩
+
+lemma Module.Dual.piIsFaithful_iff {k : Type _} [Fintype k]
+  [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  {φ : Module.Dual 𝕜 (PiMat 𝕜 k s)} (hφ : φ.IsPosMap) :
+  φ.IsFaithful ↔ ∀ i, (pi_of φ i).IsFaithful :=
+by
+  constructor
+  . intro h i x
+    specialize h (includeBlock x)
+    simp_rw [includeBlock_conjTranspose, includeBlock_hMul_same,
+      includeBlock_eq_zero] at h
+    exact h
+  . intro h x
+    simp_rw [IsFaithful, pi_of_apply] at h
+    nth_rw 1 [← sum_includeBlock x]
+    simp_rw [star_sum, Finset.sum_mul, includeBlock_conjTranspose,
+      includeBlock_hMul, map_sum]
+    refine ⟨λ h1 => ?_, λ h => by simp_rw [h, Pi.zero_apply, mul_zero, map_zero,
+      Finset.sum_const_zero]⟩
+    ext1 i
+    rw [Pi.zero_apply]
+    rw [Finset.sum_eq_zero_iff_of_nonneg] at h1
+    simp only [Finset.mem_univ, forall_true_left, ← star_eq_conjTranspose, h] at h1
+    exact h1 i
+    . intro i hi
+      rw [piIsPosMap_iff] at hφ
+      exact hφ _ _
 
 theorem Module.Dual.isFaithful_of_matrix (φ : Module.Dual 𝕜 (Matrix n n 𝕜)) :
     φ.IsFaithful ↔ ∀ a : Matrix n n 𝕜, a.PosSemidef → (φ a = 0 ↔ a = 0) := by
@@ -763,7 +824,7 @@ variable {k : Type _} [Fintype k] {s : k → Type _}
 noncomputable def Module.Dual.PiNormedAddCommGroup
   {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   [Π i, (φ i).IsFaithfulPosMap] :
-  _root_.NormedAddCommGroup (Π i, Matrix (s i) (s i) ℂ) :=
+  _root_.NormedAddCommGroup (PiMat ℂ k s) :=
 -- by
   -- letI := fun i => (hφ i).NormedAddCommGroup
   PiLp.normedAddCommGroup 2 _
@@ -800,7 +861,7 @@ noncomputable def Module.Dual.pi.InnerProductSpace
   {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   [Π i, (φ i).IsFaithfulPosMap] :
     -- letI := Module.Dual.PiNormedAddCommGroup hφ
-  _root_.InnerProductSpace ℂ (Π i, Matrix (s i) (s i) ℂ) :=
+  _root_.InnerProductSpace ℂ (PiMat ℂ k s) :=
 -- letI := fun i => (hφ i).NormedAddCommGroup
 -- letI := fun i => (hφ i).InnerProductSpace
 PiLp.innerProductSpace _
