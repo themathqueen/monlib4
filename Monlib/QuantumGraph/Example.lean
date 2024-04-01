@@ -23,7 +23,7 @@ open scoped TensorProduct BigOperators Kronecker Matrix Functional
 variable {p : Type _} [Fintype p] [DecidableEq p] {n : p → Type _} [∀ i, Fintype (n i)]
   [∀ i, DecidableEq (n i)]
 
-local notation "ℍ" => PiMat p n
+local notation "ℍ" => PiMat ℂ p n
 
 -- local notation `⊗K` := matrix (n × n) (n × n) ℂ
 local notation "l(" x ")" => x →ₗ[ℂ] x
@@ -79,8 +79,8 @@ theorem Qam.completeGraph_eq' {φ : Module.Dual ℂ (Matrix p p ℂ)} [hφ : φ.
 
 theorem Pi.Qam.completeGraph_eq'
   [hφ : Π i, (φ i).IsFaithfulPosMap] :
-  Qam.completeGraph (Π i, Matrix (n i) (n i) ℂ)
-    = (Algebra.linearMap ℂ (Π i, Matrix (n i) (n i) ℂ)) ∘ₗ (LinearMap.adjoint (Algebra.linearMap ℂ (Π i, Matrix (n i) (n i) ℂ))) :=
+  Qam.completeGraph (PiMat ℂ p n)
+    = (Algebra.linearMap ℂ (PiMat ℂ p n)) ∘ₗ (LinearMap.adjoint (Algebra.linearMap ℂ (PiMat ℂ p n))) :=
   by
   rw [LinearMap.ext_iff]
   intro x
@@ -365,7 +365,7 @@ theorem Pi.Qam.Nontracial.Complement'.Qam.isReal [hφ : ∀ i, (φ i).IsFaithful
     (x : l(ℍ)) : x.IsReal ↔ (Qam.complement' x).IsReal :=
   by
   simp only [Qam.complement', LinearMap.isReal_iff, LinearMap.real_sub,
-    (LinearMap.isReal_iff _).mp (@Pi.Qam.Nontracial.CompleteGraph.isReal p _ _ n _ _ φ _)]
+    (LinearMap.isReal_iff _).mp (@Pi.Qam.Nontracial.CompleteGraph.isReal p _ n _ _ φ _)]
   simp only [sub_right_inj]
 
 theorem Qam.complement'_complement' {E : Type _} [NormedAddCommGroupOfRing E]

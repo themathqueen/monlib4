@@ -32,7 +32,7 @@ open scoped TensorProduct Kronecker Matrix Functional
 variable {n : Type _} [Fintype n] [DecidableEq n] {s : n → Type _} [∀ i, Fintype (s i)]
   [∀ i, DecidableEq (s i)] {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
 
-local notation "𝔹" => PiMat n s
+local notation "𝔹" => PiMat ℂ n s
 
 local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
 
@@ -83,8 +83,8 @@ open TensorProduct
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Pi.symmMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
-    (f : (∀ i, Matrix (s i) (s i) ℂ) →ₗ[ℂ] ∀ i, Matrix (s i) (s i) ℂ) :
-    (LinearEquiv.symmMap ℂ (∀ i, Matrix (s i) (s i) ℂ)) f =
+    (f : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
+    (LinearEquiv.symmMap ℂ (PiMat ℂ n s)) f =
       (τ 𝔹) ∘ₗ
         (𝔹 ϰ ℂ) ∘ₗ
           ((id 𝔹) ⊗ₘ LinearMap.adjoint (Algebra.linearMap ℂ 𝔹) ∘ₗ m 𝔹) ∘ₗ
@@ -130,7 +130,7 @@ theorem Pi.symmMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Pi.symmMap_symm_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
-    (f : (∀ i, Matrix (s i) (s i) ℂ) →ₗ[ℂ] ∀ i, Matrix (s i) (s i) ℂ) :
+    (f : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
     (LinearEquiv.symmMap ℂ _).symm f =
       (τ 𝔹) ∘ₗ
         ((LinearMap.adjoint (η 𝔹) ∘ₗ m 𝔹) ⊗ₘ id 𝔹) ∘ₗ
@@ -230,7 +230,7 @@ theorem Pi.commute_sig_pos_neg [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r : ℝ) 
 
 theorem Pi.symmMap_apply_eq_symmMap_symm_apply_iff [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    LinearEquiv.symmMap ℂ (∀ i, Matrix (s i) (s i) ℂ) A = (LinearEquiv.symmMap ℂ _).symm A ↔
+    LinearEquiv.symmMap ℂ (PiMat ℂ n s) A = (LinearEquiv.symmMap ℂ _).symm A ↔
       Commute A (Module.Dual.pi.IsFaithfulPosMap.sig hψ 1).toLinearMap :=
   by
   rw [LinearEquiv.symmMap_apply, LinearEquiv.symmMap_symm_apply, LinearMap.pi.adjoint_real_eq, ←

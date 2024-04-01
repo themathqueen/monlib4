@@ -27,7 +27,7 @@ variable {n : Type _} [Fintype n] [DecidableEq n] {s : n → Type _} [∀ i, Fin
 
 open scoped TensorProduct BigOperators Kronecker
 
-local notation "𝔹" => PiMat n s
+local notation "𝔹" => PiMat ℂ n s
 
 local notation "l(" x ")" => x →ₗ[ℂ] x
 
@@ -232,7 +232,7 @@ theorem Module.Dual.pi.IsFaithfulPosMap.basis.apply_cast_eq_mp
 
 lemma Matrix.includeBlock_apply' {k : Type*} [Fintype k] [DecidableEq k]
   {s : k → Type*} [Π i, Fintype (s i)] [Π i, DecidableEq (s i)]
-  (x : PiMat k s) (i j : k) :
+  (x : PiMat ℂ k s) (i j : k) :
   (includeBlock (x i)) j = ite (i = j) (x j) 0 :=
 by simp [includeBlock_apply]; aesop
 
@@ -245,7 +245,7 @@ theorem pi_lmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   ext r l
   simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', lmul_apply, hMul_includeBlock]
   rw [blockDiagonal'_apply]
-  let x' : PiMat n s := fun a =>
+  let x' : PiMat ℂ n s := fun a =>
     if h : a = l.fst then (x a * ((hψ a).basis) (by rw [h]; exact l.snd)) else 0
   have hx' : x' l.fst = x l.fst * (hψ l.fst).basis l.snd := by aesop
   rw [← hx', includeBlock_apply', ite_mul, zero_mul]
@@ -283,7 +283,7 @@ theorem pi_rmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   ext r l
   simp_rw [Module.Dual.pi.IsFaithfulPosMap.toMatrix_apply', rmul_apply, includeBlock_hMul]
   rw [blockDiagonal'_apply]
-  let x' : PiMat n s := fun a =>
+  let x' : PiMat ℂ n s := fun a =>
     if h : a = l.fst then (((hψ a).basis) (by rw [h]; exact l.snd) * x a) else 0
   have hx' : x' l.fst = (hψ l.fst).basis l.snd * x l.fst := by aesop
   rw [← hx', includeBlock_apply', ite_mul, zero_mul]
@@ -307,11 +307,11 @@ theorem pi_rmul_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   . rfl
 
 theorem unitary.coe_pi (U : ∀ i, unitaryGroup (s i) ℂ) :
-    (unitary.pi U : ∀ i, Matrix (s i) (s i) ℂ) = ↑U :=
+    (unitary.pi U : PiMat ℂ n s) = ↑U :=
   rfl
 
 theorem unitary.coe_pi_apply (U : ∀ i, unitaryGroup (s i) ℂ) (i : n) :
-    (↑U : ∀ i, Matrix (s i) (s i) ℂ) i = U i :=
+    (↑U : PiMat ℂ n s) i = U i :=
   rfl
 
 theorem pi_inner_aut_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
@@ -356,7 +356,7 @@ set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Psi.symm_map {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ)
-    (f g : (∀ i, Matrix (s i) (s i) ℂ) →ₗ[ℂ] ∀ i, Matrix (s i) (s i) ℂ) :
+    (f g : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
     Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (schurIdempotent f g) =
       Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ f *
         Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ g :=

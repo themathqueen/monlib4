@@ -9,6 +9,7 @@ import Monlib.LinearAlgebra.MyIps.Functional
 import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Monlib.Preq.Complex
+import Monlib.LinearAlgebra.MyMatrix.PiMat
 
 #align_import linear_algebra.my_matrix.star_ordered_ring
 
@@ -118,8 +119,8 @@ scoped[MatrixOrder] attribute [instance] Matrix.starOrderedRing
 open scoped MatrixOrder
 
 theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι → Type _}
-    [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : ∀ i, Matrix (n i) (n i) ℂ) :
-    x ≤ y ↔ ∃ z : ∀ i, Matrix (n i) (n i) ℂ, y = x + star z * z :=
+    [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : PiMat ℂ ι n) :
+    x ≤ y ↔ ∃ z : PiMat ℂ ι n, y = x + star z * z :=
   by
   simp_rw [Function.funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
     Pi.le_def, Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add',
@@ -130,7 +131,7 @@ theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι
 @[reducible]
 noncomputable def PiStarOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
     {n : ι → Type _} [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] :
-    StarOrderedRing (∀ i, Matrix (n i) (n i) ℂ) :=
+    StarOrderedRing (PiMat ℂ ι n) :=
 StarOrderedRing.ofLEIff
   (fun a b => by simp_rw [Pi.le_iff_sub_nonneg])
 

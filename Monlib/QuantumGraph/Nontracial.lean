@@ -97,7 +97,7 @@ theorem rankOne_real_apply [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
     (|a⟩⟨b| : ℍ →ₗ[ℂ] ℍ).real = |aᴴ⟩⟨hφ.sig (-1) bᴴ| :=
   by
   have :=
-    @Pi.rankOneLm_real_apply _ _ _ _ _ _ (fun _ : Fin 1 => φ) (fun _ => hφ) (fun _ : Fin 1 => a)
+    @Pi.rankOneLm_real_apply _ _ _ _ _ (fun _ : Fin 1 => φ) (fun _ => hφ) (fun _ : Fin 1 => a)
       fun _ : Fin 1 => b
   simp only [LinearMap.ext_iff, Function.funext_iff, Fin.forall_fin_one, ← rankOneLm_eq_rankOne,
     rankOneLm_apply, LinearMap.real_apply] at this ⊢

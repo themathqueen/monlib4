@@ -406,7 +406,7 @@ example
     [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [NormedSpace 𝕜 Z] [CompleteSpace X] [CompleteSpace Y]
     [CompleteSpace Z] (β : X →L[𝕜] Y →L[𝕜] Z) : ∃ M : ℝ, ∀ x y, ‖β x y‖ ≤ M * ‖x‖ * ‖y‖ :=
   by
-  use‖β‖
+  use ‖β‖
   intro x y
   apply ContinuousLinearMap.le_of_opNorm_le
   exact ContinuousLinearMap.le_opNorm _ _

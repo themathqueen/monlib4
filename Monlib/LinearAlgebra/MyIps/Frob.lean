@@ -147,7 +147,7 @@ theorem Matrix.kroneckerToTensorProduct_comp_toKronecker :
 
 local notation "ℍ" => Matrix n n ℂ
 
--- local notation "(PiMat k s)" => ∀ i, Matrix (s i) (s i) ℂ
+-- local notation "(PiMat ℂ k s)" => ∀ i, Matrix (s i) (s i) ℂ
 
 local notation "ℍ_" i => Matrix (s i) (s i) ℂ
 
@@ -221,10 +221,10 @@ theorem matrixDirectSumFromTo_same (i : k) :
 -- set_option maxHeartbeats 0 in
 -- set_option synthInstance.maxHeartbeats 0 in
 theorem LinearMap.pi_mul'_apply_includeBlock' {i j : k} :
-    (LinearMap.mul' ℂ (PiMat k s)) ∘ₗ
-        (TensorProduct.map (includeBlock : (ℍ_ i) →ₗ[ℂ] (PiMat k s)) (includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat k s))) =
+    (LinearMap.mul' ℂ (PiMat ℂ k s)) ∘ₗ
+        (TensorProduct.map (includeBlock : (ℍ_ i) →ₗ[ℂ] (PiMat ℂ k s)) (includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat ℂ k s))) =
       if i = j then
-        (includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat k s)) ∘ₗ
+        (includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat ℂ k s)) ∘ₗ
           (LinearMap.mul' ℂ (ℍ_ j)) ∘ₗ
             (TensorProduct.map (matrixDirectSumFromTo i j) (1 : (ℍ_ j) →ₗ[ℂ] ℍ_ j))
       else 0 :=
@@ -245,7 +245,7 @@ theorem LinearMap.pi_mul'_apply_includeBlock' {i j : k} :
   · simp [h]
 
 noncomputable def directSumTensorMatrix :
-    ((∀ i, Matrix (s i) (s i) ℂ) ⊗[ℂ] ∀ i, Matrix (s i) (s i) ℂ) ≃ₗ[ℂ]
+    ((PiMat ℂ k s) ⊗[ℂ] PiMat ℂ k s) ≃ₗ[ℂ]
       ∀ i : k × k, (ℍ_ i.1) ⊗[ℂ] ℍ_ i.2 :=
   @directSumTensor ℂ _ k k _ _ _ _ (fun i => Matrix (s i) (s i) ℂ) (fun i => Matrix (s i) (s i) ℂ) _
     _ (fun _ => Matrix.module) fun _ => Matrix.module
@@ -253,7 +253,8 @@ noncomputable def directSumTensorMatrix :
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
 noncomputable def directSumTensorToKronecker :
-    (PiMat k s) ⊗[ℂ] (PiMat k s) ≃ₗ[ℂ] ∀ i : k × k, Matrix (s i.fst × s i.snd) (s i.fst × s i.snd) ℂ
+    (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) ≃ₗ[ℂ] PiMat ℂ (k × k) (fun i : k × k => s i.1 × s i.2)
+    -- ∀ i : k × k, Matrix (s i.fst × s i.snd) (s i.fst × s i.snd) ℂ
     where
   toFun x i := TensorProduct.toKronecker (directSumTensorMatrix x i)
   invFun x := directSumTensorMatrix.symm fun i => kroneckerToTensorProduct (x i)
@@ -269,11 +270,11 @@ noncomputable def directSumTensorToKronecker :
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem frobenius_equation_direct_sum_aux [hθ : ∀ i, (θ i).IsFaithfulPosMap] (x y : (PiMat k s))
+theorem frobenius_equation_direct_sum_aux [hθ : ∀ i, (θ i).IsFaithfulPosMap] (x y : (PiMat ℂ k s))
     (i j : k) :
-    ((LinearMap.mul' ℂ (PiMat k s) ⊗ₘ (1 : l((PiMat k s)))) ∘ₗ
-          ↑(TensorProduct.assoc ℂ (PiMat k s) (PiMat k s) (PiMat k s)).symm ∘ₗ
-            (1 : l((PiMat k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat k s)) : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s)))
+    ((LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s)))) ∘ₗ
+          ↑(TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm ∘ₗ
+            (1 : l((PiMat ℂ k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat ℂ k s)) : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))
         (includeBlock (x i) ⊗ₜ[ℂ] includeBlock (y j)) =
       if i = j then
         ((includeBlock ⊗ₘ includeBlock) ∘ₗ
@@ -283,24 +284,24 @@ theorem frobenius_equation_direct_sum_aux [hθ : ∀ i, (θ i).IsFaithfulPosMap]
   by
   have :=
     calc
-      ((LinearMap.mul' ℂ (PiMat k s) ⊗ₘ (1 : l((PiMat k s)))) ∘ₗ
-              ↑(TensorProduct.assoc ℂ (PiMat k s) (PiMat k s) (PiMat k s)).symm ∘ₗ
-                (1 : l((PiMat k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat k s)) : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s)))
+      ((LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s)))) ∘ₗ
+              ↑(TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm ∘ₗ
+                (1 : l((PiMat ℂ k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat ℂ k s)) : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))
             (includeBlock (x i) ⊗ₜ[ℂ] includeBlock (y j)) =
-          (LinearMap.mul' ℂ (PiMat k s) ⊗ₘ (1 : l((PiMat k s))))
-            ((TensorProduct.assoc ℂ (PiMat k s) (PiMat k s) (PiMat k s)).symm
+          (LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
+            ((TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
               ((includeBlock ⊗ₘ includeBlock ⊗ₘ includeBlock)
                 (x i ⊗ₜ[ℂ] LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) (y j)))) :=
         ?_
       _ =
-          (LinearMap.mul' ℂ (PiMat k s) ⊗ₘ (1 : l((PiMat k s))))
+          (LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
             (((includeBlock ⊗ₘ includeBlock) ⊗ₘ includeBlock)
               ((TensorProduct.assoc ℂ (ℍ_ i) (ℍ_ j) (ℍ_ j)).symm
                 (x i ⊗ₜ[ℂ] LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) (y j)))) :=
         ?_
       _ =
           if i = j then
-            (((includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat k s)) ⊗ₘ includeBlock) ∘ₗ
+            (((includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat ℂ k s)) ⊗ₘ includeBlock) ∘ₗ
                 (LinearMap.mul' ℂ (ℍ_ j) ⊗ₘ (1 : l(ℍ_ j))) ∘ₗ
                   (TensorProduct.assoc ℂ (ℍ_ j) (ℍ_ j) (ℍ_ j)).symm ∘ₗ
                     (1 : l(ℍ_ j)) ⊗ₘ LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)))
@@ -327,24 +328,24 @@ theorem frobenius_equation_direct_sum_aux [hθ : ∀ i, (θ i).IsFaithfulPosMap]
       rw [h, matrixDirectSumFromTo, directSumFromTo_apply_same, LinearMap.one_apply]
     · rfl
 
-theorem directSumTensorToKronecker_apply (x y : (PiMat k s)) (r : k × k) (a b : s r.1 × s r.2) :
+theorem directSumTensorToKronecker_apply (x y : (PiMat ℂ k s)) (r : k × k) (a b : s r.1 × s r.2) :
     (directSumTensorToKronecker (x ⊗ₜ[ℂ] y)) r a b = x r.1 a.1 b.1 * y r.2 a.2 b.2 := by
   simp_rw [directSumTensorToKronecker, LinearEquiv.coe_mk, directSumTensorMatrix,
     directSumTensor_apply, TensorProduct.toKronecker_apply, kroneckerMap, of_apply]
 
 -- lemma pi_frobenius_equation [hθ : Π i, fact (θ i).is_faithful_pos_map] :
---   ((linear_map.mul' ℂ (PiMat k s)  ⊗ₘ (1 : l((PiMat k s))))
---     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat k s) (PiMat k s) (PiMat k s)).symm
---       ∘ₗ ((1 : l((PiMat k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] ((PiMat k s) ⊗[ℂ] (PiMat k s)))))
---     = (((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s)) ∘ₗ (linear_map.mul' ℂ (PiMat k s) : (PiMat k s) ⊗[ℂ] (PiMat k s) →ₗ[ℂ] (PiMat k s))) :=
+--   ((linear_map.mul' ℂ (PiMat ℂ k s)  ⊗ₘ (1 : l((PiMat ℂ k s))))
+--     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
+--       ∘ₗ ((1 : l((PiMat ℂ k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] ((PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))))
+--     = (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ (linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s))) :=
 -- begin
 --   apply tensor_product.ext',
 --   intros x y,
 --   rw [← sum_includeBlock x, ← sum_includeBlock y],
 --   calc
---   ((linear_map.mul' ℂ (PiMat k s) ⊗ₘ (1 : l((PiMat k s))))
---     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat k s) (PiMat k s) (PiMat k s)).symm
---       ∘ₗ ((1 : l((PiMat k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] ((PiMat k s) ⊗[ℂ] (PiMat k s)))))
+--   ((linear_map.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
+--     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
+--       ∘ₗ ((1 : l((PiMat ℂ k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] ((PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))))
 --         ((∑ i, includeBlock (x i)) ⊗ₜ[ℂ] (∑ j, includeBlock (y j)))
 --   =
 --   ∑ i j, if (i = j) then (
@@ -362,13 +363,13 @@ theorem directSumTensorToKronecker_apply (x y : (PiMat k s)) (r : k × k) (a b :
 --   by { simp_rw [finset.sum_ite_eq, finset.mem_univ, if_true,
 --     linear_map.comp_apply], }
 --   .. =
---   ∑ j, (((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s))
+--   ∑ j, (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s))
 --     ∘ₗ (includeBlock ∘ₗ (linear_map.mul' ℂ (ℍ_ j))))
 --       ((x j) ⊗ₜ[ℂ] (y j)) :
 --   by { simp_rw [linear_map.comp_apply, linear_map.pi_mul'_adjoint_single_block], }
 --   .. =
 --   ∑ i j, ite (i = j)
---   ((((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s)) ∘ₗ
+--   ((((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ
 --   (includeBlock.comp ((linear_map.mul' ℂ (matrix (s j) (s j) ℂ)).comp (matrix_direct_sum_from_to i j ⊗ₘ 1))))
 --      (x i ⊗ₜ[ℂ] y j)
 --   )
@@ -376,12 +377,12 @@ theorem directSumTensorToKronecker_apply (x y : (PiMat k s)) (r : k × k) (a b :
 --   by { simp_rw [finset.sum_ite_eq, finset.mem_univ, if_true,
 --     matrix_direct_sum_from_to_same, tensor_product.map_one, linear_map.comp_one], }
 --   .. =
---   ∑ j, (((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s))
---     ((linear_map.mul' ℂ (PiMat k s) : (PiMat k s) ⊗[ℂ] (PiMat k s) →ₗ[ℂ] (PiMat k s))
+--   ∑ j, (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s))
+--     ((linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s))
 --      (includeBlock (x j) ⊗ₜ[ℂ] includeBlock (y j)))) :
 --   by { simp_rw [← linear_map.pi_mul'_apply_includeBlock'], }
 --   .. =
---   (((linear_map.mul' ℂ (PiMat k s)).adjoint : (PiMat k s) →ₗ[ℂ] (PiMat k s) ⊗[ℂ] (PiMat k s)) ∘ₗ (linear_map.mul' ℂ (PiMat k s) : (PiMat k s) ⊗[ℂ] (PiMat k s) →ₗ[ℂ] (PiMat k s)))
+--   (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ (linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s)))
 --   ((∑ i, includeBlock (x i)) ⊗ₜ[ℂ] (∑ j, includeBlock (y j))) :
 --   by {  },
 -- end

@@ -29,6 +29,47 @@ This file contains results for linear functionals on the set of $n \times n$ mat
 open scoped Matrix BigOperators
 
 section
+
+variable {R k : Type _} {s : k → Type _}
+
+theorem Matrix.cast_apply {i j : k} (x : Matrix (s i) (s i) R) (h : i = j) (p q : s j) :
+  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp x p q =
+    x (by rw [h]; exact p) (by rw [h]; exact q) :=
+by aesop
+theorem Matrix.cast_apply' {i j : k} (x : Matrix (s j) (s j) R) (h : j = i) (p q : s i) :
+  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mpr x p q =
+    x (by rw [h]; exact p) (by rw [h]; exact q) :=
+by aesop
+
+theorem Matrix.cast_hMul [Semiring R] [Π i, Fintype (s i)]
+  {i j : k} (x y : Matrix (s i) (s i) R) (h : i = j) :
+  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp (x * y) =
+    (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp x *
+      (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp y :=
+by aesop
+
+open Matrix in
+lemma includeBlock_apply_mul [CommSemiring R] [DecidableEq k] [Π i, Fintype (s i)] {i j : k} (x : Matrix (s i) (s i) R)
+  (y : Matrix (s j) (s j) R) (p q : s j) :
+  (includeBlock x j * y) p q
+    = if i = j then (includeBlock x j * y) p q else 0 :=
+by simp_rw [includeBlock_apply, dite_hMul, zero_mul]; aesop
+open Matrix in
+lemma includeBlock_mul_apply [CommSemiring R] [DecidableEq k]
+  [Π i, Fintype (s i)] {i j : k} (x : Matrix (s j) (s j) R)
+  (y : Matrix (s i) (s i) R) (p q : s j) :
+  (x * includeBlock y j) p q
+    = if i = j then (x * includeBlock y j) p q else 0 :=
+by simp_rw [includeBlock_apply, hMul_dite, mul_zero]; aesop
+
+lemma dite_apply' {i β : Type*} {α : i → Type*} (P : Prop) [Decidable P]
+  {j : i} (f : P → (β → α j)) [Zero (α j)] (a : β) :
+  (if h : P then (f h) else 0) a = if h : P then f h a else 0 :=
+by aesop
+
+end
+
+section
 variable {n : Type _} [Fintype n] [DecidableEq n]
 variable {𝕜 R : Type _} [IsROrC 𝕜] [CommSemiring R]
 
@@ -60,22 +101,56 @@ theorem Module.Dual.apply (φ : Module.Dual R (Matrix n n R)) (a : Matrix n n R)
 we linear maps `φ_i : M_[n_i] →ₗ[R] R`, we define its direct sum as the linear map `(Π i, M_[n_i]) →ₗ[R] R`. -/
 @[simps]
 def Module.Dual.pi {k : Type _} [Fintype k] {s : k → Type _}
-    (φ : ∀ i, Module.Dual R (Matrix (s i) (s i) R)) : Module.Dual R (∀ i, Matrix (s i) (s i) R)
+    (φ : ∀ i, Module.Dual R (Matrix (s i) (s i) R)) : Module.Dual R (PiMat R k s)
     where
   toFun a := ∑ i : k, φ i (a i)
   map_add' x y := by simp only [map_add, Pi.add_apply, Finset.sum_add_distrib]
   map_smul' r x := by
     simp only [SMulHomClass.map_smul, Pi.smul_apply, Finset.smul_sum, RingHom.id_apply]
 
+@[simps!]
+def Module.Dual.pi_of {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+    (φ : Module.Dual R (PiMat R k s)) :
+    Π i, Module.Dual R (Matrix (s i) (s i) R) :=
+λ _ => φ ∘ₗ includeBlock
+
 /-- for direct sums, we get `φ x = ∑ i, ((φ i).matrix ⬝ x i).trace` -/
 theorem Module.Dual.pi.apply {k : Type _} [Fintype k] {s : k → Type _} [∀ i, Fintype (s i)]
     [∀ i, DecidableEq (s i)] (φ : ∀ i, Module.Dual R (Matrix (s i) (s i) R))
-    (x : ∀ i, Matrix (s i) (s i) R) : Module.Dual.pi φ x = ∑ i, ((φ i).matrix * x i).trace := by
+    (x : PiMat R k s) : Module.Dual.pi φ x = ∑ i, ((φ i).matrix * x i).trace := by
   simp_rw [Module.Dual.pi_apply, Module.Dual.apply]
+
+lemma Module.Dual.eq_pi_of_pi {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+  [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  (φ : Π i, Module.Dual R (Matrix (s i) (s i) R)) :
+  φ = pi_of (pi φ) :=
+  by
+  ext i y
+  simp_rw [Module.Dual.pi_of_apply, pi_apply,
+    Module.Dual.apply]
+  symm
+  calc ∑ j : k, trace (matrix (φ j) * includeBlock y j)
+    = ∑ j : k, trace (if i = j then (matrix (φ j) * includeBlock y j) else 0) :=
+      by congr; ext; congr; simp only [includeBlock_apply, hMul_dite, mul_zero]; aesop
+    _ = ∑ j : k, if i = j then trace (matrix (φ j) * includeBlock y j) else 0 :=
+      by congr; ext; aesop
+    _ = trace (matrix (φ i) * includeBlock y i) :=
+      by simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
+    _ = trace (matrix (φ i) * y) := by simp only [includeBlock_apply_same]
+
+lemma Module.Dual.eq_pi_pi_of {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+  [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  (φ : Module.Dual R (PiMat R k s) ) :
+  φ = pi (pi_of φ) :=
+  by
+  rw [LinearMap.ext_iff]
+  intro x
+  simp_rw [Module.Dual.pi_apply, Module.Dual.pi_of_apply, ← map_sum,
+    sum_includeBlock]
 
 theorem Module.Dual.pi.apply' {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] (φ : ∀ i, Module.Dual R (Matrix (s i) (s i) R))
-    (x : ∀ i, Matrix (s i) (s i) R) :
+    (x : PiMat R k s) :
     Module.Dual.pi φ x
       = ∑ i, (blockDiagonal' (includeBlock (φ i).matrix) * blockDiagonal' x).trace :=
   by
@@ -103,6 +178,13 @@ theorem Module.Dual.pi.apply' {k : Type _} [Fintype k] [DecidableEq k] {s : k �
       ext i
       rw [blockDiagonal'_includeBlock_trace (fun i => (φ i).matrix * x i) i]
     _ = pi φ x := (Module.Dual.pi.apply _ _).symm
+
+theorem Module.Dual.pi_apply'' {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
+    [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+    (φ : Module.Dual R (PiMat R k s))
+    (x : PiMat R k s) :
+    φ x = ∑ i, ((pi_of φ i).matrix * x i).trace :=
+by simp_rw [← Module.Dual.apply, ← pi_apply, ← eq_pi_pi_of]
 
 theorem Module.Dual.apply_eq_of (φ : Module.Dual R (Matrix n n R)) (x : Matrix n n R)
     (h : ∀ a, φ a = (x * a).trace) : x = φ.matrix :=
