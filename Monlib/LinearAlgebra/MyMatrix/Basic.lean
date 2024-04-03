@@ -92,13 +92,13 @@ theorem one_eq_sum_std_matrix {n R : Type _} [CommSemiring R] [Fintype n] [Decid
 
 open scoped Matrix ComplexConjugate
 
-open IsROrC Matrix
+open RCLike Matrix
 
 end Matrix
 
 section trace
 
-variable {ℍ ℍ₂ 𝕜 : Type _} [NormedAddCommGroup ℍ] [NormedAddCommGroup ℍ₂] [IsROrC 𝕜]
+variable {ℍ ℍ₂ 𝕜 : Type _} [NormedAddCommGroup ℍ] [NormedAddCommGroup ℍ₂] [RCLike 𝕜]
   [InnerProductSpace 𝕜 ℍ] [InnerProductSpace 𝕜 ℍ₂] [FiniteDimensional 𝕜 ℍ] [FiniteDimensional 𝕜 ℍ₂]
   {n : Type _} [Fintype n]
 
@@ -138,19 +138,19 @@ theorem Matrix.IsHermitian.trace_eq [DecidableEq n] [DecidableEq 𝕜] {A : 𝕂
   have :=
     calc
       ∑ y : n, ∑ x : n, ∑ i : n,
-            IsROrC.re (A y i * (hA.eigenvectorMatrix i x * hA.eigenvectorMatrixInv x y)) =
+            RCLike.re (A y i * (hA.eigenvectorMatrix i x * hA.eigenvectorMatrixInv x y)) =
           ∑ i : n, ∑ y : n,
-            IsROrC.re
+            RCLike.re
               (A y i * ∑ x : n, hA.eigenvectorMatrix i x * hA.eigenvectorMatrixInv x y) :=
         by simp_rw [Finset.mul_sum, _root_.map_sum]; rw [Finset.sum_sum_sum]
-      _ = ∑ i : n, ∑ y : n, IsROrC.re (A y i * (1 : 𝕂 n) i y) := by
+      _ = ∑ i : n, ∑ y : n, RCLike.re (A y i * (1 : 𝕂 n) i y) := by
         simp_rw [← Matrix.mul_apply, Matrix.IsHermitian.eigenvectorMatrix_mul_inv]
-      _ = ∑ y : n, IsROrC.re (∑ i : n, A y i * (1 : 𝕂 n) i y) :=
+      _ = ∑ y : n, RCLike.re (∑ i : n, A y i * (1 : 𝕂 n) i y) :=
         by simp_rw [← _root_.map_sum]; rw [Finset.sum_comm]
-      _ = ∑ y : n, IsROrC.re ((A * (1 : Matrix n n 𝕜)) y y) :=
+      _ = ∑ y : n, RCLike.re ((A * (1 : Matrix n n 𝕜)) y y) :=
         by simp_rw [← Matrix.mul_apply]
-      _ = ∑ y : n, IsROrC.re (A y y) := by rw [Matrix.mul_one]
-  · rw [this, IsROrC.ofReal_sum]
+      _ = ∑ y : n, RCLike.re (A y y) := by rw [Matrix.mul_one]
+  · rw [this, RCLike.ofReal_sum]
     congr
     ext1 i
     rw [hA.coe_re_apply_self i]
@@ -162,14 +162,14 @@ theorem LinearMap.IsSymmetric.eigenvalue_mem_spectrum [DecidableEq 𝕜]
   simp_rw [← Module.End.hasEigenvalue_iff_mem_spectrum]
   exact hA.hasEigenvalue_eigenvalues hn i
 
-theorem Matrix.IsHermitian.eigenvalues_hasEigenvalue {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n]
+theorem Matrix.IsHermitian.eigenvalues_hasEigenvalue {𝕜 n : Type _} [RCLike 𝕜] [Fintype n]
     [DecidableEq n] [DecidableEq 𝕜] {M : Matrix n n 𝕜} (hM : M.IsHermitian) (i : n) :
     Module.End.HasEigenvalue (toEuclideanLin M) (hM.eigenvalues i) :=
   by
   simp_rw [Matrix.IsHermitian.eigenvalues, Matrix.IsHermitian.eigenvalues₀]
   exact LinearMap.IsSymmetric.hasEigenvalue_eigenvalues _ _ _
 
-theorem Matrix.IsHermitian.hasEigenvector_eigenvectorBasis {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n]
+theorem Matrix.IsHermitian.hasEigenvector_eigenvectorBasis {𝕜 n : Type _} [RCLike 𝕜] [Fintype n]
     [DecidableEq n] [DecidableEq 𝕜] {M : Matrix n n 𝕜} (hM : M.IsHermitian) (i : n) :
     Module.End.HasEigenvector (toEuclideanLin M) (hM.eigenvalues i) (hM.eigenvectorBasis i) :=
   by
@@ -179,7 +179,7 @@ theorem Matrix.IsHermitian.hasEigenvector_eigenvectorBasis {𝕜 n : Type _} [Is
 
 /-- a Hermitian matrix applied to its eigenvector basis element equals
   the basis element scalar-ed by its respective eigenvalue -/
-theorem Matrix.IsHermitian.apply_eigenvectorBasis {𝕜 n : Type _} [IsROrC 𝕜] [Fintype n]
+theorem Matrix.IsHermitian.apply_eigenvectorBasis {𝕜 n : Type _} [RCLike 𝕜] [Fintype n]
     [DecidableEq n] [DecidableEq 𝕜] {M : Matrix n n 𝕜} (hM : M.IsHermitian) (i : n) :
     M.mulVec (hM.eigenvectorBasis i) = hM.eigenvalues i • hM.eigenvectorBasis i :=
   by
@@ -187,7 +187,7 @@ theorem Matrix.IsHermitian.apply_eigenvectorBasis {𝕜 n : Type _} [IsROrC 𝕜
     M.mulVec (hM.eigenvectorBasis i) = (toEuclideanLin M) (hM.eigenvectorBasis i) := rfl
     _ = hM.eigenvalues i • hM.eigenvectorBasis i := ?_
   rw [Module.End.mem_eigenspace_iff.mp (hM.hasEigenvector_eigenvectorBasis i).1]
-  simp only [RingHom.toFun_eq_coe, algebraMap_smul, ← IsROrC.real_smul_eq_coe_smul]
+  simp only [RingHom.toFun_eq_coe, algebraMap_smul, ← RCLike.real_smul_eq_coe_smul]
 
 
 open scoped Matrix
@@ -195,11 +195,11 @@ open scoped Matrix
 noncomputable instance : Inner 𝕜 (n → 𝕜) :=
 { inner := fun x y => ⟪(EuclideanSpace.equiv n 𝕜).symm x, (EuclideanSpace.equiv n 𝕜).symm y⟫_𝕜 }
 
-theorem EuclideanSpace.inner_eq {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] {x y : n → 𝕜} :
+theorem EuclideanSpace.inner_eq {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] {x y : n → 𝕜} :
   inner x y = star (x : n → 𝕜) ⬝ᵥ (y : n → 𝕜) :=
   rfl
 
-theorem EuclideanSpace.rankOne_of_orthonormalBasis_eq_one {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n]
+theorem EuclideanSpace.rankOne_of_orthonormalBasis_eq_one {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n]
     (h : OrthonormalBasis n 𝕜 (EuclideanSpace 𝕜 n)) :
     ∑ i : n, (rankOne (h i) (h i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) = 1 :=
   by
@@ -249,7 +249,7 @@ theorem Matrix.kronecker.transpose {n : Type _} (x y : Matrix n n 𝕜) : (x ⊗
 theorem Matrix.kronecker.conj {n : Type _} (x y : Matrix n n 𝕜) : (x ⊗ₖ y)ᴴᵀ = xᴴᵀ ⊗ₖ yᴴᵀ := by
   rw [Matrix.conj, Matrix.kronecker_conjTranspose, Matrix.kronecker.transpose]; rfl
 
-theorem Matrix.IsHermitian.eigenvectorMatrix_mem_unitaryGroup {𝕜 : Type _} [IsROrC 𝕜]
+theorem Matrix.IsHermitian.eigenvectorMatrix_mem_unitaryGroup {𝕜 : Type _} [RCLike 𝕜]
     [DecidableEq 𝕜] [DecidableEq n] {x : Matrix n n 𝕜} (hx : x.IsHermitian) :
     hx.eigenvectorMatrix ∈ Matrix.unitaryGroup n 𝕜 := by
   simp_rw [mem_unitaryGroup_iff, star_eq_conjTranspose,

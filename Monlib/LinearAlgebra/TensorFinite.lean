@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Mathlib.LinearAlgebra.FiniteDimensional
-import Mathlib.Data.IsROrC.Basic
+import Mathlib.Data.RCLike.Basic
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.MyIps.OpUnop
 import Monlib.LinearAlgebra.MyIps.MulOp

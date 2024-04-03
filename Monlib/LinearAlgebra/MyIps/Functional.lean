@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.MyMatrix.PosEqLinearMapIsPositive
-import Monlib.Preq.IsROrCLe
+import Monlib.Preq.RCLikeLe
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.MyMatrix.IncludeBlock
 
@@ -71,7 +71,7 @@ end
 
 section
 variable {n : Type _} [Fintype n] [DecidableEq n]
-variable {𝕜 R : Type _} [IsROrC 𝕜] [CommSemiring R]
+variable {𝕜 R : Type _} [RCLike 𝕜] [CommSemiring R]
 
 open Matrix
 
@@ -487,11 +487,11 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
       by
       ext
       exact this _ _ i
-    have this' : ∀ p, Q p p = IsROrC.re (Q p p) :=
+    have this' : ∀ p, Q p p = RCLike.re (Q p p) :=
       by
       intro p
       rw [eq_comm]
-      simp_rw [IsROrC.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← IsROrC.star_def, ← Matrix.star_apply,
+      simp_rw [RCLike.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← RCLike.star_def, ← Matrix.star_apply,
         star_eq_conjTranspose, hQ.1.eq]
     have : 0 ≤ Q i i := by
       rw [PosSemidef.complex] at hQ
@@ -499,12 +499,12 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
       simp_rw [dotProduct, mulVec, dotProduct, Pi.star_apply, star_ite, star_zero, star_one,
         boole_mul, mul_boole, Finset.sum_ite_eq, Finset.mem_univ, if_true] at hQ
       exact hQ
-    have thisthis : 0 ≤ IsROrC.re (Q i i) :=
+    have thisthis : 0 ≤ RCLike.re (Q i i) :=
       by
-      rw [IsROrC.nonneg_def'] at this
+      rw [RCLike.nonneg_def'] at this
       exact this.2
-    let α : NNReal := ⟨IsROrC.re (Q i i), thisthis⟩
-    have hα' : IsROrC.re (Q i i) = α := rfl
+    let α : NNReal := ⟨RCLike.re (Q i i), thisthis⟩
+    have hα' : RCLike.re (Q i i) = α := rfl
     refine' ⟨α, _⟩
     · simp only [smul_eq_diagonal_mul, ← hα', Matrix.mul_one]
       rw [← this']
@@ -512,7 +512,7 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
   · rintro ⟨α, hα1⟩
     simp_rw [Module.Dual.IsPosMap, Module.Dual.IsTracial, Module.Dual.apply, hα1,
       smul_mul, one_mul, trace_smul, smul_eq_mul, star_eq_conjTranspose]
-    exact ⟨fun _ => mul_nonneg (IsROrC.zero_le_real.mpr (NNReal.coe_nonneg α))
+    exact ⟨fun _ => mul_nonneg (RCLike.zero_le_real.mpr (NNReal.coe_nonneg α))
         (Matrix.trace_conjTranspose_hMul_self_nonneg _),
       fun _ _ => by rw [trace_mul_comm]⟩
 
@@ -549,11 +549,11 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
       by
       ext
       exact this _ _ i
-    have this' : ∀ p, Q p p = IsROrC.re (Q p p) :=
+    have this' : ∀ p, Q p p = RCLike.re (Q p p) :=
       by
       intro p
       rw [eq_comm]
-      simp_rw [IsROrC.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← IsROrC.star_def, ← Matrix.star_apply,
+      simp_rw [RCLike.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← RCLike.star_def, ← Matrix.star_apply,
         star_eq_conjTranspose, hQ.1.eq]
     have : 0 ≤ Q i i := by
       rw [PosSemidef.complex] at hQ
@@ -561,12 +561,12 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
       simp_rw [dotProduct, mulVec, dotProduct, Pi.star_apply, star_ite, star_zero, star_one,
         boole_mul, mul_boole, Finset.sum_ite_eq, Finset.mem_univ, if_true] at hQ
       exact hQ
-    have thisthis : 0 ≤ IsROrC.re (Q i i) :=
+    have thisthis : 0 ≤ RCLike.re (Q i i) :=
       by
-      rw [IsROrC.nonneg_def'] at this
+      rw [RCLike.nonneg_def'] at this
       exact this.2
-    let α : NNReal := ⟨IsROrC.re (Q i i), thisthis⟩
-    have hα' : IsROrC.re (Q i i) = α := rfl
+    let α : NNReal := ⟨RCLike.re (Q i i), thisthis⟩
+    have hα' : RCLike.re (Q i i) = α := rfl
     refine' ⟨α, ⟨_, _⟩⟩
     · simp only [smul_eq_diagonal_mul, ← hα', Matrix.mul_one]
       rw [← this']
@@ -582,7 +582,7 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
   · rintro ⟨α, ⟨hα1, _⟩⟩
     simp_rw [Module.Dual.IsPosMap, Module.Dual.IsTracial, Module.Dual.apply, hα1,
       smul_mul, one_mul, trace_smul]
-    exact ⟨fun _ =>  mul_nonneg (IsROrC.zero_le_real.mpr (NNReal.coe_nonneg α))
+    exact ⟨fun _ =>  mul_nonneg (RCLike.zero_le_real.mpr (NNReal.coe_nonneg α))
         (Matrix.trace_conjTranspose_hMul_self_nonneg _),
       fun _ _ => by rw [trace_mul_comm]⟩
 
@@ -622,7 +622,7 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
         false_or_iff, star_eq_conjTranspose,
         trace_conjTranspose_hMul_self_eq_zero, forall_true_iff]
     rw [h1, ← sub_eq_zero, ← sub_smul, smul_eq_zero, sub_eq_zero] at hy
-    simp only [one_ne_zero', or_false_iff, IsROrC.ofReal_inj, NNReal.coe_inj,
+    simp only [one_ne_zero', or_false_iff, RCLike.ofReal_inj, NNReal.coe_inj,
       Complex.ofReal_inj, NNReal.coe_inj] at hy
     exact hy.symm
 
@@ -724,7 +724,7 @@ theorem Module.Dual.pi.IsPosMap.isReal {k : Type _} [Fintype k] [DecidableEq k] 
 /-- A function $H \times H \to 𝕜$ defines an inner product if it satisfies the following. -/
 def IsInner {H : Type _} [AddCommMonoid H] [Module 𝕜 H] (φ : H × H → 𝕜) : Prop :=
   (∀ x y : H, φ (x, y) = star (φ (y, x))) ∧
-    (∀ x : H, 0 ≤ IsROrC.re (φ (x, x))) ∧
+    (∀ x : H, 0 ≤ RCLike.re (φ (x, x))) ∧
       (∀ x : H, φ (x, x) = 0 ↔ x = 0) ∧
         (∀ x y z : H, φ (x + y, z) = φ (x, z) + φ (y, z)) ∧
           ∀ (x y : H) (α : 𝕜), φ (α • x, y) = starRingEnd 𝕜 α * φ (x, y)
@@ -750,12 +750,12 @@ theorem Module.Dual.isFaithfulPosMap_iff_isInner_of_matrix (φ : Module.Dual ℂ
     simp_rw [hip, ← h.1.isReal _, star_eq_conjTranspose, conjTranspose_mul,
       conjTranspose_conjTranspose]
     have := fun x => h.1 x
-    simp only [@IsROrC.nonneg_def' ℂ] at this
+    simp only [@RCLike.nonneg_def' ℂ] at this
     exact ⟨fun _ _ => trivial, ⟨fun x => (this x).2, h.2⟩⟩
   · intro h
     refine' ⟨_, h.2.2⟩
-    simp_rw [Module.Dual.IsPosMap, star_eq_conjTranspose, ← hip, @IsROrC.nonneg_def' ℂ,
-      ← @IsROrC.conj_eq_iff_re ℂ _ (ip (_,_)),
+    simp_rw [Module.Dual.IsPosMap, star_eq_conjTranspose, ← hip, @RCLike.nonneg_def' ℂ,
+      ← @RCLike.conj_eq_iff_re ℂ _ (ip (_,_)),
       starRingEnd_apply, ← h.1, true_and_iff]
     exact h.2.1
 
@@ -847,7 +847,7 @@ noncomputable def Module.Dual.PiNormedAddCommGroup
   --       ext1 i
   --       exact hx i
   --       · intro i hi
-  --         rw [IsROrC.nonneg_def', ← IsROrC.conj_eq_iff_re]
+  --         rw [RCLike.nonneg_def', ← RCLike.conj_eq_iff_re]
   --         exact ⟨inner_self_conj _, inner_self_nonneg⟩
   --     add_left := fun x y z => by
   --       simp_rw [inner, Pi.add_apply, inner_add_left, Finset.sum_add_distrib]

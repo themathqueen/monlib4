@@ -8,7 +8,7 @@ import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Monlib.LinearAlgebra.MyIps.RankOne
 import Monlib.LinearAlgebra.End
 import Mathlib.Analysis.InnerProductSpace.Positive
-import Monlib.Preq.IsROrCLe
+import Monlib.Preq.RCLikeLe
 
 #align_import linear_algebra.my_ips.pos
 
@@ -31,11 +31,11 @@ for linear maps:
 def Set.IsNonneg {K : Type _} [LE K] [Zero K] (A : Set K) : Prop :=
   ∀ x : K, x ∈ A → 0 ≤ x
 
-open InnerProductSpace IsROrC
+open InnerProductSpace RCLike
 
 open scoped InnerProduct ComplexConjugate
 
-variable {𝕜 E F : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
+variable {𝕜 E F : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
   [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
 
 local notation "⟪" x ", " y "⟫" => @inner 𝕜 _ _ x y
@@ -118,7 +118,7 @@ theorem IsPositive.nonneg_spectrum (h : T.IsPositive) : (spectrum 𝕜 T).IsNonn
     simp_rw [← conj_eq_iff_re]
     exact IsSymmetric.conj_eigenvalue_eq_self hT hμ
   rw [← this] at hμ
-  rw [IsROrC.nonneg_def']
+  rw [RCLike.nonneg_def']
   exact ⟨this, eigenvalue_nonneg_of_nonneg hμ h⟩
 
 open scoped BigOperators
@@ -266,7 +266,7 @@ theorem complex_isPositive {V : Type _} [NormedAddCommGroup V] [InnerProductSpac
     (T : V →ₗ[ℂ] V) : T.IsPositive ↔ ∀ v : V, ↑(re ⟪v, T v⟫_ℂ) = ⟪v, T v⟫_ℂ ∧ 0 ≤ re ⟪v, T v⟫_ℂ :=
   by
   simp_rw [IsPositive, isSymmetric_iff_inner_map_self_real, inner_conj_symm,
-    IsROrC.re_to_complex, ← Complex.conj_eq_iff_re, inner_conj_symm,
+    RCLike.re_to_complex, ← Complex.conj_eq_iff_re, inner_conj_symm,
     ← forall_and, eq_comm]
 
 end Complex
@@ -347,7 +347,7 @@ theorem invertible_iff_inner_map_self_pos (hn : FiniteDimensional.finrank 𝕜 E
     rw [ha.1, inner_zero_left, zero_re', lt_self_iff_false] at h
     exact h
 
-theorem ext_inner_left_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem ext_inner_left_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) : x = y ↔ ∀ v : E, inner x v = (inner y v : 𝕜) :=
   by
   constructor
@@ -381,7 +381,7 @@ theorem invertiblePos (T : E →ₗ[𝕜] E) [hTi : Invertible T] (hn : FiniteDi
       rw [← mul_apply, mul_invOf_self, one_apply] at this
       exact le_of_lt this
 
-theorem IsSymmetric.rePow_eq_rankOne {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem IsSymmetric.rePow_eq_rankOne {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] [DecidableEq 𝕜] {n : ℕ}
     (hn : FiniteDimensional.finrank 𝕜 E = n) {T : E →ₗ[𝕜] E} (hT : T.IsSymmetric) (r : ℝ) :
     LinearMap.rePow T hn hT r =
@@ -417,7 +417,7 @@ theorem isPositive_and_invertible_pos_eigenvalues (hT : T.IsPositive) [Invertibl
     Module.End.has_eigenvector_iff_hasEigenvalue.mpr
       (@LinearMap.IsSymmetric.hasEigenvalue_eigenvalues 𝕜 _ E _ _ T hT.1 _ n hn i)
   have ugh := (LinearMap.invertible_iff_inner_map_self_pos T hn hT).mp fs v gh
-  rw [hv, inner_smul_real_left, IsROrC.smul_re, inner_self_eq_norm_sq, mul_pos_iff] at ugh
+  rw [hv, inner_smul_real_left, RCLike.smul_re, inner_self_eq_norm_sq, mul_pos_iff] at ugh
   simp_rw [not_lt_of_le (sq_nonneg _), and_false_iff, or_false_iff] at ugh
   exact ugh.1
 
@@ -427,13 +427,13 @@ noncomputable def IsPositive.rePowIsInvertible [DecidableEq 𝕜] (hT : T.IsPosi
       simp_rw [LinearMap.mul_apply, LinearMap.rePow_apply, inner_sum, inner_smul_right,
         orthonormal_iff_ite.mp (hT.1.eigenvectorBasis hn).orthonormal, mul_boole, mul_ite,
         MulZeroClass.mul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, smul_smul, ← mul_assoc,
-        ← IsROrC.ofReal_mul, ←
+        ← RCLike.ofReal_mul, ←
         Real.rpow_add (LinearMap.isPositive_and_invertible_pos_eigenvalues _ hn hT _),
         LinearMap.one_apply] <;>
-    simp only [add_neg_self, neg_add_self, Real.rpow_zero, IsROrC.ofReal_one, one_mul, ←
+    simp only [add_neg_self, neg_add_self, Real.rpow_zero, RCLike.ofReal_one, one_mul, ←
       OrthonormalBasis.repr_apply_apply, OrthonormalBasis.sum_repr]
 
-theorem IsPositive.sum {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem IsPositive.sum {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     {n : ℕ} {T : Fin n → E →ₗ[𝕜] E} (hT : ∀ i, (T i).IsPositive) : (∑ i, T i).IsPositive :=
   by
   induction' n with d hd
@@ -445,11 +445,11 @@ theorem IsPositive.sum {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [I
       exact hT _
     · exact hT _
 
-theorem IsPositive.smulNonneg {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem IsPositive.smulNonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) {r : ℝ} (hr : 0 ≤ r) :
     ((r : 𝕜) • T).IsPositive := by
   simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, LinearMap.smul_apply, inner_smul_left,
-    inner_smul_right, IsROrC.conj_ofReal, IsROrC.re_ofReal_mul, hT.1 _ _,
+    inner_smul_right, RCLike.conj_ofReal, RCLike.re_ofReal_mul, hT.1 _ _,
     forall₂_true_iff, true_and_iff, mul_nonneg hr (hT.2 _), forall_true_iff]
 
 end FiniteDimensional
@@ -468,13 +468,13 @@ theorem IsPositive.toLinearMap (T : E →L[𝕜] E) : T.toLinearMap.IsPositive �
 
 end ContinuousLinearMap
 
-theorem rankOne.isPositive {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.isPositive {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     [CompleteSpace E] (x : E) : (@rankOne 𝕜 E _ _ _ x x).IsPositive :=
   by
   refine' ⟨rankOne.isSelfAdjoint _, _⟩
   intro y
-  rw [ContinuousLinearMap.reApplyInnerSelf_apply, rankOne_apply, inner_smul_left, IsROrC.conj_mul, ← IsROrC.ofReal_pow,
-    IsROrC.ofReal_re]
+  rw [ContinuousLinearMap.reApplyInnerSelf_apply, rankOne_apply, inner_smul_left, RCLike.conj_mul, ← RCLike.ofReal_pow,
+    RCLike.ofReal_re]
   exact sq_nonneg _
 
 theorem LinearMap.IsPositive.nonneg_eigenvalue {E : Type _} [NormedAddCommGroup E]
@@ -500,8 +500,8 @@ theorem LinearMap.isPositive_iff_eq_sum_rankOne {n : ℕ} [DecidableEq 𝕜] [Fi
     intros
     ext1
     simp_rw [LinearMap.sum_apply, ContinuousLinearMap.coe_coe, rankOne_apply, a, inner_smul_left,
-      smul_smul, mul_assoc, IsROrC.conj_ofReal, mul_comm (⟪_, _⟫_𝕜),
-      ← mul_assoc, ← IsROrC.ofReal_mul, ←
+      smul_smul, mul_assoc, RCLike.conj_ofReal, mul_comm (⟪_, _⟫_𝕜),
+      ← mul_assoc, ← RCLike.ofReal_mul, ←
       Real.sqrt_mul (hT.nonneg_eigenvalue (hT.1.hasEigenvalue_eigenvalues hn _)),
       Real.sqrt_mul_self (hT.nonneg_eigenvalue (hT.1.hasEigenvalue_eigenvalues hn _)),
       mul_comm _ (inner _ _), ← smul_eq_mul, smul_assoc, ← hT.1.apply_eigenvectorBasis, ←
@@ -514,10 +514,10 @@ theorem LinearMap.isPositive_iff_eq_sum_rankOne {n : ℕ} [DecidableEq 𝕜] [Fi
     intros
     apply Finset.sum_nonneg'
     intros
-    simp_rw [← inner_conj_symm _ (u _), IsROrC.conj_mul, ← IsROrC.ofReal_pow,
-      IsROrC.ofReal_re, sq_nonneg]
+    simp_rw [← inner_conj_symm _ (u _), RCLike.conj_mul, ← RCLike.ofReal_pow,
+      RCLike.ofReal_re, sq_nonneg]
 
-theorem LinearMap.IsSymmetric.rePowIsPositiveOfIsPositive {𝕜 E : Type _} [IsROrC 𝕜]
+theorem LinearMap.IsSymmetric.rePowIsPositiveOfIsPositive {𝕜 E : Type _} [RCLike 𝕜]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] [DecidableEq 𝕜] {n : ℕ}
     (hn : FiniteDimensional.finrank 𝕜 E = n) {T : E →ₗ[𝕜] E} (hT : T.IsPositive) (r : ℝ) :
     (T.rePow hn hT.1 r).IsPositive :=

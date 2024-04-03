@@ -438,7 +438,7 @@ private theorem qam_A_is_sa_iff_aux3_aux6 [hφ : φ.IsFaithfulPosMap] (x : ℍ) 
   by
   have : 0 ≤ ((α : NNReal) : ℝ) := NNReal.coe_nonneg _
   rw [Complex.ofReal'_eq_isROrC_ofReal, rankOne.smul_real_apply, rankOne.apply_smul, smul_smul, ←
-    IsROrC.ofReal_mul, ← Real.sqrt_mul this, Real.sqrt_mul_self this, ← rankOne.apply_smul, ← Complex.ofReal'_eq_isROrC_ofReal,
+    RCLike.ofReal_mul, ← Real.sqrt_mul this, Real.sqrt_mul_self this, ← rankOne.apply_smul, ← Complex.ofReal'_eq_isROrC_ofReal,
     ← h, ← H]
 
 private theorem qam_A_is_sa_iff_aux4_aux6 [hφ : φ.IsFaithfulPosMap] (x' : { x : ℍ // x ≠ 0 })
@@ -519,7 +519,7 @@ private theorem qam_A_is_sa_iff_aux8 (α : NNRealˣ) (β : ℂˣ)
   have this1 : ‖γ‖ ^ 2 = 1 := by
     rw [← sq_eq_sq (sq_nonneg ‖γ‖) (zero_le_one' ℝ), ← norm_pow, this, norm_mul, mul_pow,
       Complex.ofReal'_eq_isROrC_ofReal,
-      IsROrC.norm_ofReal, abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt (NNReal.coe_nonneg _), h,
+      RCLike.norm_ofReal, abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt (NNReal.coe_nonneg _), h,
       one_pow]
   refine' ⟨Units.mk0 γ hγ, this, this1, _⟩
   rw [Complex.norm_eq_abs, ← Complex.ofReal_inj, ← Complex.normSq_eq_abs, ← Complex.mul_conj,

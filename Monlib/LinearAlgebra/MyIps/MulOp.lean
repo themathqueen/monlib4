@@ -63,11 +63,11 @@ theorem mulOpposite_finiteDimensional {R H : Type _} [DivisionRing R] [AddCommGr
   exact (Basis.ofVectorSpaceIndex R H).toFinite
 
 @[instance]
-def MulOpposite.hasInner {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] :
+def MulOpposite.hasInner {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] :
     Inner 𝕜 Hᵐᵒᵖ where inner x y := inner (MulOpposite.unop x) (MulOpposite.unop y)
 
 @[instance, reducible]
-def MulOpposite.innerProductSpace {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
+def MulOpposite.innerProductSpace {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] : InnerProductSpace 𝕜 Hᵐᵒᵖ
     where
   norm_sq_eq_inner x := by simp only [inner, inner_self_eq_norm_sq, MulOpposite.norm_unop]
@@ -75,22 +75,22 @@ def MulOpposite.innerProductSpace {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddComm
   add_left x y z := by simp only [inner, inner_add_left, MulOpposite.unop_add]
   smul_left r x y := by simp only [inner, inner_smul_left, MulOpposite.unop_smul]
 
-theorem MulOpposite.inner_eq {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
+theorem MulOpposite.inner_eq {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] (x y : Hᵐᵒᵖ) :
     (inner x y : 𝕜) = inner (MulOpposite.unop x) (MulOpposite.unop y) :=
   rfl
 
-theorem MulOpposite.inner_eq' {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
+theorem MulOpposite.inner_eq' {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] (x y : H) :
     inner (MulOpposite.op x) (MulOpposite.op y) = (inner x y : 𝕜) :=
   rfl
 
-theorem Basis.mulOpposite_is_orthonormal_iff {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
+theorem Basis.mulOpposite_is_orthonormal_iff {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] {ι : Type _} [Fintype ι] (b : Basis ι 𝕜 H) :
     Orthonormal 𝕜 b ↔ Orthonormal 𝕜 b.mulOpposite := by
   simp only [Orthonormal, Basis.mulOpposite_apply, MulOpposite.inner_eq', MulOpposite.norm_op]
 
-noncomputable def OrthonormalBasis.mulOpposite {𝕜 H : Type _} [IsROrC 𝕜] [NormedAddCommGroup H]
+noncomputable def OrthonormalBasis.mulOpposite {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] {ι : Type _} [Fintype ι] (b : OrthonormalBasis ι 𝕜 H) :
     OrthonormalBasis ι 𝕜 Hᵐᵒᵖ :=
   by

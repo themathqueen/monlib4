@@ -21,7 +21,7 @@ This defines the rank one operator $| x \rangle\!\langle y |$ for continuous lin
 
 section rankOne
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 -- local notation "L(" x ")" => x →L[ℂ] x
 
@@ -61,7 +61,7 @@ theorem rankOne.apply_smul {x y : E} {α : 𝕜} : rankOne (α • x) y = α •
 @[simp]
 theorem rankOne.smul_real_apply {x y : E} {α : ℝ} :
     rankOne x ((α : 𝕜) • y) = (α : 𝕜) • (rankOne x y : E →L[𝕜] E) := by
-  simp_rw [rankOne.smul_apply, IsROrC.conj_ofReal]
+  simp_rw [rankOne.smul_apply, RCLike.conj_ofReal]
 
 /--
 $| x \rangle\!\langle y | | z \rangle\!\langle w | = \langle y, z \rangle \cdot  | x \rangle\!\langle w |$ -/
@@ -89,7 +89,7 @@ theorem ContinuousLinearMap.rankOne_comp [CompleteSpace E] (x y : E) (u : E →L
 @[simp]
 theorem rankOne.isIdempotentElem (x : E) (h : ‖x‖ = 1) : IsIdempotentElem (rankOne x x : E →L[𝕜] E) := by
   simp_rw [IsIdempotentElem, ContinuousLinearMap.ext_iff, mul_def, rankOne.apply_rankOne,
-    inner_self_eq_norm_sq_to_K, h, IsROrC.ofReal_one, one_pow, one_smul,
+    inner_self_eq_norm_sq_to_K, h, RCLike.ofReal_one, one_pow, one_smul,
     forall_const]
 
 theorem rankOne.isSymmetric (x : E) : LinearMap.IsSymmetric ((rankOne x x : E →L[𝕜] E) : E →ₗ[𝕜] E) := by
@@ -162,17 +162,17 @@ theorem ContinuousLinearMap.centralizer_centralizer [CompleteSpace E] :
     (@Set.univ (E →L[𝕜] E)).centralizer.centralizer = Set.univ := by
   rw [ContinuousLinearMap.centralizer, ContinuousLinearMap.scalar_centralizer]
 
-theorem rankOne.zero_left {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.zero_left {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x : E) : (rankOne 0 x : E →L[𝕜] E) = 0 := by
   ext1
   simp_rw [rankOne_apply, smul_zero, ContinuousLinearMap.zero_apply]
 
-theorem rankOne.zero_right {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.zero_right {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x : E) : (rankOne x 0 : E →L[𝕜] E) = 0 := by
   ext1
   simp_rw [rankOne_apply, inner_zero_left, zero_smul, ContinuousLinearMap.zero_apply]
 
-theorem rankOne.ext_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.ext_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) (h : (rankOne x x : E →L[𝕜] E) = rankOne y y) : ∃ α : 𝕜ˣ, x = (α : 𝕜) • y :=
   by
   have : x = 0 ↔ y = 0 :=
@@ -251,7 +251,7 @@ theorem LinearMap.exists_sum_rankOne [FiniteDimensional 𝕜 E] (T : E →ₗ[�
   simp_rw [← coe_sum, ← h]
   rfl
 
-theorem rankOne.sum_orthonormalBasis_eq_id {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem rankOne.sum_orthonormalBasis_eq_id {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {ι : Type _} [Fintype ι] (b : OrthonormalBasis ι 𝕜 E) :
     ∑ i, (rankOne (b i) (b i) : E →L[𝕜] E) = 1 :=
   by
@@ -266,7 +266,7 @@ end rankOne
 
 section rankOneLm
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 local notation "⟪" x "," y "⟫_𝕜" => @inner 𝕜 _ _ x y
 
@@ -324,7 +324,7 @@ theorem rankOneLm_sum {n : Type _} [Fintype n] (x : E) (y : n → E) :
 
 end rankOneLm
 
-theorem LinearMap.ext_of_rankOne {𝕜 H H' : Type _} [IsROrC 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
+theorem LinearMap.ext_of_rankOne {𝕜 H H' : Type _} [RCLike 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
     [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] [FiniteDimensional 𝕜 H]
     {x y : (H →L[𝕜] H) →ₗ[𝕜] H'} (h : ∀ a b : H, x (rankOne a b) = y (rankOne a b)) : x = y :=
   by
@@ -332,7 +332,7 @@ theorem LinearMap.ext_of_rankOne {𝕜 H H' : Type _} [IsROrC 𝕜] [AddCommMono
   obtain ⟨α, β, rfl⟩ := ContinuousLinearMap.exists_sum_rankOne a
   simp_rw [map_sum, h]
 
-theorem LinearMap.ext_of_rank_one' {𝕜 H H' : Type _} [IsROrC 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
+theorem LinearMap.ext_of_rank_one' {𝕜 H H' : Type _} [RCLike 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
     [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] [FiniteDimensional 𝕜 H]
     {x y : (H →ₗ[𝕜] H) →ₗ[𝕜] H'}
     (h : ∀ a b : H, x ↑(@rankOne 𝕜 _ _ _ _ a b) = y ↑(@rankOne 𝕜 _ _ _ _ a b)) : x = y :=
@@ -343,47 +343,47 @@ theorem LinearMap.ext_of_rank_one' {𝕜 H H' : Type _} [IsROrC 𝕜] [AddCommMo
 
 open scoped BigOperators
 
-theorem rankOne.sum_orthonormalBasis_eq_id_lm {𝕜 : Type _} {E : Type _} [IsROrC 𝕜]
+theorem rankOne.sum_orthonormalBasis_eq_id_lm {𝕜 : Type _} {E : Type _} [RCLike 𝕜]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {ι : Type _} [Fintype ι]
     (b : OrthonormalBasis ι 𝕜 E) : ∑ i, (@rankOne 𝕜 E _ _ _ (b i) (b i) : E →ₗ[𝕜] E) = 1 :=
   by
   simp only [← ContinuousLinearMap.coe_sum, rankOne.sum_orthonormalBasis_eq_id b]
   rfl
 
-theorem ContinuousLinearMap.coe_eq_zero {𝕜 E₁ E₂ : Type _} [IsROrC 𝕜] [NormedAddCommGroup E₁]
+theorem ContinuousLinearMap.coe_eq_zero {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E₁]
     [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂] (f : E₁ →L[𝕜] E₂) :
     (f : E₁ →ₗ[𝕜] E₂) = 0 ↔ f = 0 := by norm_cast
 
-theorem rankOne.eq_zero_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.eq_zero_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) : (rankOne x y : E →L[𝕜] E) = 0 ↔ x = 0 ∨ y = 0 := by
   simp_rw [ContinuousLinearMap.ext_iff, rankOne_apply, ContinuousLinearMap.zero_apply, smul_eq_zero,
     forall_or_right, forall_inner_eq_zero_iff, or_comm]
 
-theorem rankOne.left_add {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.left_add {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y z : E) : (rankOne (x + y) z : E →L[𝕜] E) = rankOne x z + rankOne y z :=
   by
   ext
   simp only [rankOne_apply, ContinuousLinearMap.add_apply, smul_add]
 
-theorem rankOne.right_add {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.right_add {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y z : E) : (rankOne x (y + z) : E →L[𝕜] E) = rankOne x y + rankOne x z :=
   by
   ext
   simp only [rankOne_apply, ContinuousLinearMap.add_apply, inner_add_left, add_smul]
 
-theorem rankOne.left_sub {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.left_sub {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y z : E) : (rankOne (x - y) z : E →L[𝕜] E) = rankOne x z - rankOne y z :=
   by
   ext
   simp only [rankOne_apply, ContinuousLinearMap.sub_apply, smul_sub]
 
-theorem rankOne.right_sub {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne.right_sub {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y z : E) : (rankOne x (y - z) : E →L[𝕜] E) = rankOne x y - rankOne x z :=
   by
   ext
   simp only [rankOne_apply, ContinuousLinearMap.sub_apply, inner_sub_left, sub_smul]
 
-theorem LinearMap.rankOne_comp {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem LinearMap.rankOne_comp {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (x y : E) (u : E →ₗ[𝕜] E) :
     ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ u = (rankOne x (adjoint u y) : E →L[𝕜] E) :=
   by
@@ -391,12 +391,12 @@ theorem LinearMap.rankOne_comp {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGro
   simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
     LinearMap.adjoint_inner_left]
 
-theorem LinearMap.rankOne_comp' {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem LinearMap.rankOne_comp' {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (x y : E) (u : E →ₗ[𝕜] E) :
     ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) ∘ₗ adjoint u = (rankOne x (u y) : E →L[𝕜] E) := by
   rw [LinearMap.rankOne_comp, LinearMap.adjoint_adjoint]
 
-theorem OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne {ι 𝕜 : Type _} [IsROrC 𝕜] {E : Type _}
+theorem OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne {ι 𝕜 : Type _} [RCLike 𝕜] {E : Type _}
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [Fintype ι] {U : Submodule 𝕜 E}
     [CompleteSpace ↥U] (b : OrthonormalBasis ι 𝕜 ↥U) :
     orthogonalProjection' U = ∑ i : ι, rankOne (b i : E) (b i : E) :=
@@ -405,7 +405,7 @@ theorem OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne {ι 𝕜 : Type _}
   simp_rw [orthogonalProjection'_apply, b.orthogonalProjection_eq_sum,
     ContinuousLinearMap.sum_apply, rankOne_apply, Submodule.coe_sum, Submodule.coe_smul_of_tower]
 
-theorem LinearMap.comp_rankOne {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem LinearMap.comp_rankOne {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] (x y : E) (u : E →ₗ[𝕜] E) :
     u ∘ₗ ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) = (rankOne (u x) y : E →L[𝕜] E) :=
   by

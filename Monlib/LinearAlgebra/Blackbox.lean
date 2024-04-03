@@ -47,7 +47,7 @@ namespace Matrix
 
 open scoped Matrix
 
-variable {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n]
+variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
 
 theorem IsAlmostHermitian.spectra_ext [DecidableEq 𝕜] {A B : n → 𝕜}
     (hA : (diagonal A).IsAlmostHermitian) (hB : (diagonal B).IsAlmostHermitian) :
@@ -122,7 +122,7 @@ theorem IsAlmostHermitian.spectrum_eq_iff [DecidableEq 𝕜] {A₁ A₂ : Matrix
 
 /-- two matrices are _almost similar_ if there exists some
   $0\neq\beta\in\mathbb{C}$ such that $x$ and $\beta y$ are similar -/
-def IsAlmostSimilarTo [Fintype n] [DecidableEq n] [IsROrC 𝕜] (x y : Matrix n n 𝕜) : Prop :=
+def IsAlmostSimilarTo [Fintype n] [DecidableEq n] [RCLike 𝕜] (x y : Matrix n n 𝕜) : Prop :=
   ∃ (β : 𝕜ˣ) (U : unitaryGroup n 𝕜), (β : 𝕜) • y = innerAut U⁻¹ x
 
 /-- an immediate corollary to `matrix.IsAlmostHermitian.spectrum_eq_iff` using

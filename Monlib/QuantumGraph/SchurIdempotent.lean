@@ -169,7 +169,7 @@ theorem rmul_adjoint {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   simp_rw [LinearMap.adjoint_inner_left, rmul_apply,
     Module.Dual.pi.IsFaithfulPosMap.inner_left_conj']
 
-theorem ContinuousLinearMap.linearMap_adjoint {𝕜 B C : Type _} [IsROrC 𝕜] [NormedAddCommGroup B]
+theorem ContinuousLinearMap.linearMap_adjoint {𝕜 B C : Type _} [RCLike 𝕜] [NormedAddCommGroup B]
     [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
     [FiniteDimensional 𝕜 C] (x : B →L[𝕜] C) :
     LinearMap.adjoint (x : B →ₗ[𝕜] C) =

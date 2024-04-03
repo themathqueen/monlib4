@@ -25,7 +25,7 @@ import Monlib.Preq.Complex
 import Monlib.Preq.Dite
 import Monlib.Preq.Equiv
 import Monlib.Preq.Finset
-import Monlib.Preq.IsROrCLe
+import Monlib.Preq.RCLikeLe
 import Monlib.Preq.Ites
 import Monlib.Preq.StarAlgEquiv
 import Monlib.QuantumGraph.Example

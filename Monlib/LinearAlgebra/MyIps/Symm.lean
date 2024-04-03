@@ -18,7 +18,7 @@ This file provides the polarization identity for self adjoint continuous linear 
 -/
 
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 local notation "⟪" x "," y "⟫" => @inner 𝕜 _ _ x y
 
@@ -33,7 +33,7 @@ theorem IsSelfAdjoint.inner_map_self_eq_zero [CompleteSpace E] {T : E →L[𝕜]
   simp_rw [isSelfAdjoint_iff_isSymmetric] at hT
   exact hT.inner_map_self_eq_zero
 
-open IsROrC
+open RCLike
 
 /-- The polarization identity for self-adjoint operators. -/
 theorem IsSelfAdjoint.inner_map_polarization [CompleteSpace E] {T : E →L[𝕜] E}

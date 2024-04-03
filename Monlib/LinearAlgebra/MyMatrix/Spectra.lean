@@ -17,16 +17,16 @@ theorem Finset.val.map_coe' {α β γ : Type _} (f : α → β) (s : Finset α) 
     ((s.val.map f : Multiset β) : Multiset γ) = s.val.map ↑f :=
 Finset.val.map_coe f s
 
-noncomputable instance multisetCoeTC_RToIsROrC {𝕜 : Type _} [IsROrC 𝕜] :
+noncomputable instance multisetCoeTC_RToRCLike {𝕜 : Type _} [RCLike 𝕜] :
   CoeTC (Multiset ℝ) (Multiset 𝕜) :=
-@multisetCoeTC ℝ 𝕜 ⟨IsROrC.ofReal⟩
-noncomputable instance multisetCoeRToIsROrC {𝕜 : Type _} [IsROrC 𝕜] :
+@multisetCoeTC ℝ 𝕜 ⟨RCLike.ofReal⟩
+noncomputable instance multisetCoeRToRCLike {𝕜 : Type _} [RCLike 𝕜] :
   Coe (Multiset ℝ) (Multiset 𝕜) where
-  coe := (@multisetCoeTC_RToIsROrC 𝕜 _).coe
+  coe := (@multisetCoeTC_RToRCLike 𝕜 _).coe
 
 namespace Matrix
 
-variable {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] [DecidableEq 𝕜]
+variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] [DecidableEq 𝕜]
 
 open scoped Matrix
 

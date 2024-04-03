@@ -64,7 +64,7 @@ theorem Module.Dual.pi.matrixBlock_apply {i : k} : Module.Dual.pi.matrixBlock ψ
   rfl
 
 /-- A function that returns a star algebra equivalence for each index of type 'i'. -/
-def StarAlgEquiv.pi {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k] [DecidableEq k]
+def StarAlgEquiv.pi {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k] [DecidableEq k]
     {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) :
     (PiMat 𝕜 k s) ≃⋆ₐ[𝕜] PiMat 𝕜 k s
@@ -86,26 +86,26 @@ def StarAlgEquiv.pi {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k] [Deci
     simp only [Pi.star_apply, map_star]
     rfl
 
-theorem StarAlgEquiv.pi_apply {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k] [DecidableEq k]
+theorem StarAlgEquiv.pi_apply {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k] [DecidableEq k]
     {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) (x : PiMat 𝕜 k s)
     (i : k) : StarAlgEquiv.pi f x i = f i (x i) :=
   rfl
 
 /-- the unitary element from the star algebraic equivalence -/
-noncomputable def StarAlgEquiv.pi.unitary {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k]
+noncomputable def StarAlgEquiv.pi.unitary {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) : ∀ i, unitaryGroup (s i) 𝕜 :=
   fun i => (f i).of_matrix_unitary
 
-theorem StarAlgEquiv.pi.unitary_apply {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k]
+theorem StarAlgEquiv.pi.unitary_apply {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) (a : k) :
     (StarAlgEquiv.pi.unitary f) a = (f a).of_matrix_unitary :=
   rfl
 
 /-- any $^*$-isomorphism on $\bigoplus_i M_{n_i}$ is an inner automorphism -/
-theorem StarAlgEquiv.of_pi_is_inner {𝕜 : Type _} [IsROrC 𝕜] {k : Type _} [Fintype k]
+theorem StarAlgEquiv.of_pi_is_inner {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) :
     unitary.innerAutStarAlg 𝕜 (unitary.pi (StarAlgEquiv.pi.unitary f)) = StarAlgEquiv.pi f :=
@@ -308,7 +308,7 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
   · simp_rw [InnerProductSpace.Core.norm_eq_sqrt_inner,
       Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← Complex.ofReal_inj]
-    have : ∀ x : Matrix n n ℂ, (IsROrC.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ := fun x => inner_self_ofReal_re x
+    have : ∀ x : Matrix n n ℂ, (RCLike.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ := fun x => inner_self_ofReal_re x
       -- inner_self_ofReal_re (f ?_ : Matrix n n ℂ),
     simp_rw [this, ← @sub_eq_zero _ _ _ (⟪_, _⟫_ℂ)]
     have :
@@ -847,9 +847,9 @@ theorem starAlgEquiv_is_isometry_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   letI := fun i => (ψ i).NormedAddCommGroup
   letI := fun i => (ψ i).InnerProductSpace
   tfae_have 5 ↔ 2
-  · have : ∀ x : PiMat ℂ k s, ‖x‖ = Real.sqrt (IsROrC.re ⟪x, x⟫_ℂ) :=
+  · have : ∀ x : PiMat ℂ k s, ‖x‖ = Real.sqrt (RCLike.re ⟪x, x⟫_ℂ) :=
     fun x => norm_eq_sqrt_inner _
-    have this' : ∀ x : PiMat ℂ k s, (IsROrC.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ :=
+    have this' : ∀ x : PiMat ℂ k s, (RCLike.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ :=
     fun x => inner_self_re _
     simp_rw [this, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← Complex.ofReal_inj, this', ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]

@@ -16,10 +16,10 @@ This files provides some useful and obvious results for linear maps and continuo
 -/
 
 
-theorem inner_self_re {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x : E) : (IsROrC.re (inner x x : 𝕜) : 𝕜) = inner x x := by simp only [inner_self_ofReal_re]
+theorem inner_self_re {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+    (x : E) : (RCLike.re (inner x x : 𝕜) : 𝕜) = inner x x := by simp only [inner_self_ofReal_re]
 
-theorem forall_inner_eq_zero_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem forall_inner_eq_zero_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] (x : E) : (∀ y, (inner x y : 𝕜) = 0) ↔ x = 0 :=
   by
   refine' ⟨fun h => _, fun h y => by rw [h, inner_zero_left]⟩
@@ -27,7 +27,7 @@ theorem forall_inner_eq_zero_iff {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommG
   rw [inner_self_eq_zero] at h
   exact h
 
-open IsROrC ContinuousLinearMap
+open RCLike ContinuousLinearMap
 
 variable {E : Type _} [NormedAddCommGroup E]
 
@@ -50,7 +50,7 @@ theorem ContinuousLinearMap.ext_iff_inner_map [InnerProductSpace ℂ E] (p q : E
 
 /-- Self-adjoint linear operators $p,q$ are equal if and only if
   $\langle p x, x \rangle_\mathbb{k} = \langle q x, x \rangle_\mathbb{k}$. -/
-theorem ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map {E 𝕜 : Type _} [IsROrC 𝕜]
+theorem ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map {E 𝕜 : Type _} [RCLike 𝕜]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] {p q : E →L[𝕜] E}
     (hp : IsSelfAdjoint p) (hq : IsSelfAdjoint q) :
     p = q ↔ ∀ x : E, @inner 𝕜 _ _ (p x) x = @inner 𝕜 _ _ (q x) x :=
@@ -58,9 +58,9 @@ theorem ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map {E 𝕜 : Type _} [I
   rw [← sub_eq_zero, ← IsSelfAdjoint.inner_map_self_eq_zero (hp.sub hq)]
   simp_rw [sub_apply, inner_sub_left, sub_eq_zero]
 
-section IsROrC
+section RCLike
 
-variable {𝕜 : Type _} [IsROrC 𝕜]
+variable {𝕜 : Type _} [RCLike 𝕜]
 
 /-- in a complex inner product space, we have
   that an operator $a$ is self-adjoint if and only if
@@ -91,7 +91,7 @@ theorem IsSelfAdjoint.inner_re_eq {E : Type _} [NormedAddCommGroup E] [InnerProd
       ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map ha.adjoint ha, adjoint_inner_left] at ha'
     exact ha' x
 
-end IsROrC
+end RCLike
 
 /-- copy of `inner_map_self_eq_zero` for bounded linear maps -/
 theorem ContinuousLinearMap.inner_map_self_eq_zero [InnerProductSpace ℂ E] {p : E →L[ℂ] E} :
@@ -101,12 +101,12 @@ theorem ContinuousLinearMap.inner_map_self_eq_zero [InnerProductSpace ℂ E] {p 
     ← LinearMap.ext_iff, coe_zero]
   exact @_root_.inner_map_self_eq_zero E _ _ _
 
-theorem ContinuousLinearMap.adjoint_smul {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
+theorem ContinuousLinearMap.adjoint_smul {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [CompleteSpace E] (φ : E →L[K] E) (a : K) :
     adjoint (a • φ) = starRingEnd K a • adjoint φ := by
   simp_rw [← ContinuousLinearMap.star_eq_adjoint, star_smul, starRingEnd_apply]
 
-theorem LinearMap.adjoint_smul {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
+theorem LinearMap.adjoint_smul {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [FiniteDimensional K E] (φ : E →ₗ[K] E) (a : K) :
     adjoint (a • φ) = starRingEnd K a • adjoint φ :=
   by
@@ -117,6 +117,6 @@ theorem LinearMap.adjoint_smul {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
   rw [LinearMap.adjoint_eq_toCLM_adjoint, SMulHomClass.map_smul, this]
   rfl
 
-theorem LinearMap.adjoint_one {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
+theorem LinearMap.adjoint_one {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [FiniteDimensional K E] : adjoint (1 : E →ₗ[K] E) = 1 :=
   star_one _

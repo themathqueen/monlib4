@@ -93,7 +93,7 @@ theorem LinearMap.isIdempotentElem_sub_of (h : p.comp q = p ∧ q.comp p = p) :
 
 /-- if $p,q$ are idempotent operators and $q - p$ is also an idempotent
   operator, then $pq = p = qp$ -/
-theorem LinearMap.commutes_of_isIdempotentElem {E 𝕜 : Type _} [IsROrC 𝕜] [AddCommGroup E]
+theorem LinearMap.commutes_of_isIdempotentElem {E 𝕜 : Type _} [RCLike 𝕜] [AddCommGroup E]
     [Module 𝕜 E] {p q : E →ₗ[𝕜] E} (hp : IsIdempotentElem p) (hq : IsIdempotentElem q)
     (h : IsIdempotentElem (q - p)) : p.comp q = p ∧ q.comp p = p :=
   by
@@ -117,7 +117,7 @@ theorem LinearMap.commutes_of_isIdempotentElem {E 𝕜 : Type _} [IsROrC 𝕜] [
 
 /-- given idempotent operators $p,q$,
   we have $pq = p = qp$ iff $q - p$ is an idempotent operator -/
-theorem LinearMap.commutes_iff_isIdempotentElem {E 𝕜 : Type _} [IsROrC 𝕜] [AddCommGroup E]
+theorem LinearMap.commutes_iff_isIdempotentElem {E 𝕜 : Type _} [RCLike 𝕜] [AddCommGroup E]
     [Module 𝕜 E] {p q : E →ₗ[𝕜] E} (hp : IsIdempotentElem p) (hq : IsIdempotentElem q) :
     p.comp q = p ∧ q.comp p = p ↔ IsIdempotentElem (q - p) :=
   ⟨fun h => LinearMap.isIdempotentElem_sub_of hp hq h, fun h =>
@@ -127,7 +127,7 @@ end
 
 open ContinuousLinearMap
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
 
 local notation "P" => orthogonalProjection
 
@@ -243,7 +243,7 @@ theorem sub_of_isOrthogonalProjection [InnerProductSpace ℂ E] [CompleteSpace E
 section
 
 /-- instance for `≤` on linear maps -/
-instance LinearMap.IsSymmetric.hasLe {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+instance LinearMap.IsSymmetric.hasLe {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] : LE (E →ₗ[𝕜] E) :=
   by
   refine' { le := _ }
@@ -271,7 +271,7 @@ instance {E : Type _} [NormedAddCommGroup E] [InnerProductSpace ℂ E] : Partial
     · intro u v
       simp_rw [LinearMap.zero_apply, inner_zero_left, inner_zero_right]
     · intro x
-      simp_rw [LinearMap.zero_apply, inner_zero_right, IsROrC.zero_re', le_rfl]
+      simp_rw [LinearMap.zero_apply, inner_zero_right, RCLike.zero_re', le_rfl]
   le_trans := by
     intro a b c hab hbc
     simp only
@@ -302,7 +302,7 @@ noncomputable instance IsSymmetric.hasZero {E : Type _} [NormedAddCommGroup E]
     inner_zero_right, forall_const]
 
 /-- saying `p` is positive is the same as saying `0 ≤ p` -/
-theorem LinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem LinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {p : l(E,𝕜)} : p.IsPositive ↔ 0 ≤ p :=
   by
   nth_rw 1 [← sub_zero p]
@@ -313,7 +313,7 @@ end
 section
 
 /-- instance for `≤` on bounded linear maps -/
-instance {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     [CompleteSpace E] : LE (E →L[𝕜] E) :=
   by
   refine' { le := _ }
@@ -327,7 +327,7 @@ _root_.isSelfAdjoint_zero _
 
 /-- when `a,b` are self-adjoint operators, then
   if `a ≤ b` and `b ≤ a`, then `a = b` -/
-theorem IsSelfAdjoint.HasLe.le_antisymm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem IsSelfAdjoint.HasLe.le_antisymm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a b : E →L[𝕜] E} (ha : IsSelfAdjoint a)
     (hb : IsSelfAdjoint b) (hab : a ≤ b) (hba : b ≤ a) : a = b :=
   by
@@ -340,19 +340,19 @@ theorem IsSelfAdjoint.HasLe.le_antisymm {𝕜 E : Type _} [IsROrC 𝕜] [NormedA
   symm
   have := (hab.2 x)
   simp_rw [reApplyInnerSelf_apply] at this
-  rw [← sub_eq_zero, ← inner_sub_left, ← sub_apply, ← IsSelfAdjoint.inner_re_eq hab.1 x, IsROrC.ofReal_eq_zero,
+  rw [← sub_eq_zero, ← inner_sub_left, ← sub_apply, ← IsSelfAdjoint.inner_re_eq hab.1 x, RCLike.ofReal_eq_zero,
     _root_.le_antisymm hba2 this]
 
 /-- we always have `a ≤ a` -/
 @[refl, simp]
-theorem ContinuousLinearMap.hasLe.le_refl {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem ContinuousLinearMap.hasLe.le_refl {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a : E →L[𝕜] E} : a ≤ a := by
   simp_rw [LE.le, sub_self, isPositive_zero]
 
 /-- when `a,b` are self-adjoint operators, then
   if `a ≤ b` and `b ≤ c`, then `a ≤ c` -/
 @[simp]
-theorem IsSelfAdjoint.HasLe.le_trans {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem IsSelfAdjoint.HasLe.le_trans {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a b c : E →L[𝕜] E}
     (hab : a ≤ b) (hbc : b ≤ c) : a ≤ c :=
   by
@@ -362,13 +362,13 @@ theorem IsSelfAdjoint.HasLe.le_trans {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddC
 
 /-- `p ≤ q` means `q - p` is positive -/
 @[refl, simp]
-theorem ContinuousLinearMap.IsPositive.hasLe {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem ContinuousLinearMap.IsPositive.hasLe {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p q : E →L[𝕜] E} : p ≤ q ↔ (q - p).IsPositive := by
   rfl
 
 /-- saying `p` is positive is the same as saying `0 ≤ p` -/
 @[simp]
-theorem ContinuousLinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem ContinuousLinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p : E →L[𝕜] E} : p.IsPositive ↔ 0 ≤ p :=
   by
   nth_rw 1 [← sub_zero p]
@@ -377,7 +377,7 @@ theorem ContinuousLinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [IsROrC 𝕜]
 end
 
 /-- a self-adjoint idempotent operator is positive -/
-theorem SelfAdjointAndIdempotent.is_positive {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem SelfAdjointAndIdempotent.is_positive {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p : E →L[𝕜] E} (hp : IsIdempotentElem p)
     (hpa : IsSelfAdjoint p) : 0 ≤ p :=
   by
@@ -469,7 +469,7 @@ theorem ContinuousLinearMap.isPositive_iff_exists_adjoint_hMul_self [InnerProduc
   · simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe, ← LinearMap.ext_iff] at *
     exact ⟨S, hS⟩
 
-open IsROrC
+open RCLike
 
 /-- in a finite-dimensional complex Hilbert space `E`,
   if `p,q` are self-adjoint operators, then
@@ -797,7 +797,7 @@ theorem orthogonalProjection.isMinimalProjection_to_clm [InnerProductSpace 𝕜 
   refine' ⟨h, _⟩
   rfl
 
-theorem Submodule.isOrtho_iff_inner_eq' {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem Submodule.isOrtho_iff_inner_eq' {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {U W : Submodule 𝕜 E} :
     U ⟂ W ↔ ∀ (u : ↥U) (w : ↥W), (inner (u : E) (w : E) : 𝕜) = 0 :=
   by

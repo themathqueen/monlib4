@@ -37,7 +37,7 @@ theorem isProj'_eq {p : E →ₗ[R] E} (hp : LinearMap.IsProj U p) : ∀ x : ↥
 
 end
 
-variable {E 𝕜 : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable {E 𝕜 : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpace K] :
     (orthogonalProjection K : E →ₗ[𝕜] K) =

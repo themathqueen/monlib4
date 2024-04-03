@@ -54,7 +54,7 @@ theorem Matrix.KroneckerProduct.ext_iff {R P n₁ n₂ : Type _} [Fintype n₁] 
   rw [kmul_representation x]
   simp_rw [map_sum, SMulHomClass.map_smul, h _ _]
 
-private def mul_map_aux (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
+private def mul_map_aux (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
     [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X] : X →ₗ[𝕜] X →L[𝕜] X
     where
   toFun x :=
@@ -72,7 +72,7 @@ private def mul_map_aux (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRin
       LinearMap.smul_apply, ContinuousLinearMap.smul_apply]
     rfl
 
-def LinearMap.mulToClm (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
+def LinearMap.mulToClm (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
     [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X] : X →L[𝕜] X →L[𝕜] X
     where
   toFun := mul_map_aux 𝕜 X
@@ -82,7 +82,7 @@ def LinearMap.mulToClm (𝕜 X : Type _) [IsROrC 𝕜] [NormedAddCommGroupOfRing
     simp only [LinearMap.mk_coe]
     exact map_continuous _
 
-theorem LinearMap.mulToClm_apply {𝕜 X : Type _} [IsROrC 𝕜] [NormedAddCommGroupOfRing X]
+theorem LinearMap.mulToClm_apply {𝕜 X : Type _} [RCLike 𝕜] [NormedAddCommGroupOfRing X]
     [NormedSpace 𝕜 X] [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X]
     (x y : X) : LinearMap.mulToClm 𝕜 X x y = x * y :=
   rfl

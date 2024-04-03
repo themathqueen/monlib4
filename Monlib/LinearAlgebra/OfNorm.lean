@@ -1,7 +1,12 @@
 import Monlib.LinearAlgebra.MyIps.Basic
 import Monlib.LinearAlgebra.MyIps.Ips
 import Monlib.LinearAlgebra.MyIps.RankOne
-import Monlib.Preq.IsROrCLe
+import Monlib.Preq.RCLikeLe
+import Mathlib.Topology.Algebra.Module.WeakDual
+import Mathlib.Topology.MetricSpace.PseudoMetric
+import Mathlib.Analysis.NormedSpace.Dual
+import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Analysis.Convex.Extreme
 
 #align_import linear_algebra.of_norm
 
@@ -9,37 +14,37 @@ open scoped ComplexOrder
 
 section Ex4
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 theorem cs_aux {x y : E} (hy : y ≠ 0) :
     ‖x - ((inner y x : 𝕜) * (‖y‖ ^ 2 : ℝ)⁻¹) • y‖ ^ 2 = ‖x‖ ^ 2 - ‖(inner x y : 𝕜)‖ ^ 2 * (‖y‖ ^ 2)⁻¹ :=
   by
   have : ((‖y‖ ^ 2 : ℝ) : 𝕜) ≠ 0 :=
     by
-    rw [Ne.def, IsROrC.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
+    rw [Ne.def, RCLike.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
     exact hy
   rw [← @inner_self_eq_norm_sq 𝕜]
   simp only [inner_sub_sub_self, inner_smul_left, inner_smul_right, _root_.map_mul, inner_conj_symm,
-    ← IsROrC.ofReal_pow]
+    ← RCLike.ofReal_pow]
   simp_rw [inner_self_eq_norm_sq_to_K, starRingEnd_apply,
-    IsROrC.ofReal_inv, star_inv', IsROrC.star_def,
-    IsROrC.conj_ofReal, mul_assoc, ← IsROrC.ofReal_pow, inv_mul_cancel this, mul_one]
+    RCLike.ofReal_inv, star_inv', RCLike.star_def,
+    RCLike.conj_ofReal, mul_assoc, ← RCLike.ofReal_pow, inv_mul_cancel this, mul_one]
   letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
   calc
-    IsROrC.re
+    RCLike.re
           (((‖x‖ ^ 2 : ℝ) : 𝕜) - (inner y x : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner x y : 𝕜)) -
               (inner x y : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner y x : 𝕜)) +
             (inner y x : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner x y : 𝕜))) =
-        IsROrC.re (((‖x‖ ^ 2 : ℝ) : 𝕜) - (inner x y : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner y x)) :=
+        RCLike.re (((‖x‖ ^ 2 : ℝ) : 𝕜) - (inner x y : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner y x)) :=
       ?_
-    _ = IsROrC.re (↑(‖x‖ ^ 2) - ‖(inner x y : 𝕜)‖ ^ 2 * (↑(‖y‖ ^ 2))⁻¹) := ?_
+    _ = RCLike.re (↑(‖x‖ ^ 2) - ‖(inner x y : 𝕜)‖ ^ 2 * (↑(‖y‖ ^ 2))⁻¹) := ?_
     _ = ‖x‖ ^ 2 - ‖(inner x y : 𝕜)‖ ^ 2 * (‖y‖ ^ 2)⁻¹ := ?_
   · congr
     ring_nf
-  · rw [mul_rotate', ← inner_conj_symm, IsROrC.conj_mul, mul_comm,
-      ← IsROrC.normSq_eq_def', IsROrC.normSq_eq_def']
-    simp_rw [_root_.map_sub, ← IsROrC.ofReal_inv,
-      ← IsROrC.ofReal_pow, ← IsROrC.ofReal_mul]
+  · rw [mul_rotate', ← inner_conj_symm, RCLike.conj_mul, mul_comm,
+      ← RCLike.normSq_eq_def', RCLike.normSq_eq_def']
+    simp_rw [_root_.map_sub, ← RCLike.ofReal_inv,
+      ← RCLike.ofReal_pow, ← RCLike.ofReal_mul]
     norm_cast
   · norm_cast
 
@@ -63,20 +68,20 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
     use Units.mk0 ((inner y x : 𝕜) * ((‖y‖ : 𝕜) ^ 2)⁻¹)
           (mul_ne_zero this
             (by
-              rw [Ne.def, inv_eq_zero, sq_eq_zero_iff, IsROrC.ofReal_eq_zero, norm_eq_zero]
+              rw [Ne.def, inv_eq_zero, sq_eq_zero_iff, RCLike.ofReal_eq_zero, norm_eq_zero]
               exact hy))
     norm_cast at h ⊢
   · rintro ⟨α, rfl⟩
     simp_rw [inner_smul_left, norm_mul, norm_smul, ← inner_self_re_eq_norm,
-      inner_self_eq_norm_mul_norm, mul_assoc, IsROrC.norm_conj]
+      inner_self_eq_norm_mul_norm, mul_assoc, RCLike.norm_conj]
 
 end Ex4
 
-open IsROrC
+open RCLike
 
 open scoped ComplexConjugate
 
-variable {𝕜 X : Type _} [IsROrC 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
+variable {𝕜 X : Type _} [RCLike 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
 
 noncomputable def OfNorm.innerDef (x y : X) : 𝕜 :=
   4⁻¹ * (‖x + y‖ ^ 2 - ‖x - y‖ ^ 2 + I * ‖(I : 𝕜) • x + y‖ ^ 2 - I * ‖(I : 𝕜) • x - y‖ ^ 2)
@@ -244,7 +249,7 @@ theorem exists_dual_vector_of_ne {X : Type _} [NormedAddCommGroup X] [NormedSpac
   rw [map_sub] at hxy
   use f
   intro H
-  rw [H, sub_self, eq_comm, IsROrC.ofReal_eq_zero, norm_eq_zero] at hxy
+  rw [H, sub_self, eq_comm, RCLike.ofReal_eq_zero, norm_eq_zero] at hxy
   contradiction
 
 theorem isLinearMap_zero (R : Type _) {E F : Type _} [CommSemiring R] [AddCommMonoid E] [Module R E]
@@ -387,22 +392,10 @@ theorem IsContinuousLinearMap.to_is_lm {𝕜 X Y : Type _} [NormedField 𝕜] [N
     (hf : IsContinuousLinearMap 𝕜 β) : IsLinearMap 𝕜 β :=
   hf.1
 
-#print ContinuousLinearMap.op_norm_le_iff /-
-theorem ContinuousLinearMap.op_norm_le_iff {𝕜 X Y : Type _} [NontriviallyNormedField 𝕜]
-    [NormedAddCommGroup X] [NormedAddCommGroup Y] [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y]
-    (f : X →L[𝕜] Y) {r : ℝ} (hr : 0 ≤ r) : ‖f‖ ≤ r ↔ ∀ x, ‖f x‖ ≤ r * ‖x‖ :=
-  by
-  constructor
-  · intro hf x
-    exact f.le_of_op_norm_le hf _
-  · intro h
-    exact f.op_norm_le_bound hr h
--/
-
 example
     --is_continuous_bilinear_map_norm_of_clm
     {𝕜 X Y Z : Type _}
-    [IsROrC 𝕜] [NormedAddCommGroup X] [NormedAddCommGroup Y] [NormedAddCommGroup Z]
+    [RCLike 𝕜] [NormedAddCommGroup X] [NormedAddCommGroup Y] [NormedAddCommGroup Z]
     [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [NormedSpace 𝕜 Z] [CompleteSpace X] [CompleteSpace Y]
     [CompleteSpace Z] (β : X →L[𝕜] Y →L[𝕜] Z) : ∃ M : ℝ, ∀ x y, ‖β x y‖ ≤ M * ‖x‖ * ‖y‖ :=
   by
@@ -410,3 +403,172 @@ example
   intro x y
   apply ContinuousLinearMap.le_of_opNorm_le
   exact ContinuousLinearMap.le_opNorm _ _
+
+open scoped ComplexOrder
+open RCLike
+lemma Metric.mem_extremePoints_of_closedUnitBall_iff
+  {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [NormedSpace 𝕜 H] (x : H) :
+  x ∈ Set.extremePoints 𝕜 (closedBall 0 1) ↔
+  (‖x‖ ≤ 1 ∧
+    ∀ (x₁ : H), ‖x₁‖ ≤ 1 → ∀ (x₂ : H), ‖x₂‖ ≤ 1 →
+      (∃ a : 𝕜, 0 < a ∧ a < 1 ∧ a • x₁ + (1 - a) • x₂ = x) → x₁ = x ∧ x₂ = x) := by
+{ simp only [mem_extremePoints, mem_closedBall, openSegment, Set.mem_setOf]
+  simp only [exists_and_left, forall_exists_index, and_imp, dist_zero_right, and_congr_right_iff]
+  intro h
+  constructor
+  { rintro h2 y hy z hz r hr hrr rfl
+    exact h2 y hy z hz r hr (1 - r) (sub_pos.mpr hrr) (add_sub_cancel _ _) rfl }
+  { rintro h2 y hy z hz r hr s hs hrs rfl
+    have hs' := calc 0 < s ↔ 0 < 1 - r := by rw [← hrs, add_sub_cancel_left]
+      _ ↔ r < 1 := by rw [sub_pos]
+    apply h2 y hy z hz r hr (hs'.mp hs)
+    simp only [add_right_inj, ← hrs, add_sub_cancel_left] } }
+lemma Metric.mem_extremePoints_of_unitBall_iff
+  {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [NormedSpace 𝕜 H] (x : H) :
+  x ∈ Set.extremePoints 𝕜 (ball 0 1) ↔
+  (‖x‖ < 1 ∧
+    ∀ (x₁ : H), ‖x₁‖ < 1 → ∀ (x₂ : H), ‖x₂‖ < 1 →
+      (∃ a : 𝕜, 0 < a ∧ a < 1 ∧ a • x₁ + (1 - a) • x₂ = x) → x₁ = x ∧ x₂ = x) := by
+{ simp only [mem_extremePoints, mem_ball, openSegment, Set.mem_setOf]
+  simp only [exists_and_left, forall_exists_index, and_imp, dist_zero_right, and_congr_right_iff]
+  intro h
+  constructor
+  { rintro h2 y hy z hz r hr hrr rfl
+    exact h2 y hy z hz r hr (1 - r) (sub_pos.mpr hrr) (add_sub_cancel _ _) rfl }
+  { rintro h2 y hy z hz r hr s hs hrs rfl
+    have hs' := calc 0 < s ↔ 0 < 1 - r := by rw [← hrs, add_sub_cancel_left]
+      _ ↔ r < 1 := by rw [sub_pos]
+    apply h2 y hy z hz r hr (hs'.mp hs)
+    simp only [add_right_inj, ← hrs, add_sub_cancel_left] } }
+
+lemma Metric.exists_mem_closedUnitBall_of_norm_one (𝕜 H : Type _) [RCLike 𝕜] [NormedAddCommGroup H] [NormedSpace 𝕜 H]
+  [Nontrivial H] :
+  ∃ x : H, ‖x‖ = 1 ∧ x ∈ closedBall (0 : H) 1 := by
+obtain ⟨x, hx⟩ : ∃ x : H, x ≠ 0 := exists_ne 0
+use (1 / ‖x‖ : 𝕜) • x
+simp only [one_div, mem_closedBall, dist_zero_right, norm_smul, norm_inv]
+simp only [norm_ofReal, abs_norm]
+rw [inv_mul_cancel (norm_ne_zero_iff.mpr hx)]
+exact ⟨rfl, le_rfl⟩
+
+lemma Metric.exists_mem_unitBall_of_norm_one (𝕜 H : Type _) [RCLike 𝕜] [NormedAddCommGroup H] [NormedSpace 𝕜 H]
+  [Nontrivial H] :
+  ∃ (x : H) (ε : ℝ), ‖x‖ = ε ∧ 0 < ε ∧ ε < 1 ∧ x ∈ ball (0 : H) 1 := by
+obtain ⟨x, hx⟩ : ∃ x : H, x ≠ 0 := exists_ne 0
+obtain ⟨ε, hε⟩ : ∃ r : ℝ, 0 < r ∧ r < 1 := ⟨1 / 2, by norm_num⟩
+use ((ε / ‖x‖ : ℝ) : 𝕜) • x, ε
+simp only [div_eq_inv_mul, mem_ball, dist_zero_right, norm_smul, norm_inv]
+simp only [norm_ofReal, abs_norm, abs_mul, abs_inv, abs_of_pos hε.1]
+rw [mul_comm, ← mul_assoc, mul_inv_cancel (norm_ne_zero_iff.mpr hx), one_mul]
+exact ⟨rfl, hε.1, hε.2, hε.2⟩
+
+theorem inner_lt_one_iff_of_norm_one {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H]
+  {x y : H} (hx : ‖x‖ = 1) (hy : ‖y‖ = 1) :
+  ⟪x, y⟫_𝕜 < 1 ↔ x ≠ y ∧ (re ⟪x, y⟫_𝕜 : 𝕜) = ⟪x, y⟫_𝕜 :=
+by
+  simp_rw [lt_iff_le_and_ne, ne_eq, inner_eq_one_iff_of_norm_one hx hy]
+  -- rw [← @inner_eq_one_iff_of_norm_one 𝕜 _ _ _ _ _ _ hx hy]
+  refine ⟨λ ⟨h1, h2⟩ => ⟨h2, ?_⟩, λ h => ⟨?_, h.1⟩⟩
+  rw [@le_def 𝕜, one_re, one_im, ← conj_eq_iff_im, conj_eq_iff_re] at h1
+  exact h1.2
+  rw [← h.2, ← @RCLike.ofReal_one 𝕜, real_le_real]
+  calc re ⟪x, y⟫_𝕜 ≤ ‖x‖ * ‖y‖ := re_inner_le_norm _ _
+    _ = 1 := by rw [hx, hy, mul_one]
+
+theorem re_inner_lt_one_iff_of_norm_one {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H]
+  {x y : H} (hx : ‖x‖ = 1) (hy : ‖y‖ = 1) :
+  re ⟪x, y⟫_𝕜 < 1 ↔ x ≠ y :=
+by
+  rw [← real_inner_eq_re_inner]
+  exact @inner_lt_one_iff_real_of_norm_one H _ (InnerProductSpace.rclikeToReal 𝕜 H) _ _ hx hy
+
+theorem mem_extremePoints_of_closedBall_iff_norm_eq_one
+  {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] [Nontrivial H] (x : H) :
+  x ∈ Set.extremePoints 𝕜 (Metric.closedBall (0 : H) 1) ↔ ‖x‖ = 1 := by
+  simp_rw [Metric.mem_extremePoints_of_closedUnitBall_iff]
+  constructor
+  .
+    rintro ⟨h1, h⟩
+    by_cases hx : x = 0
+    . simp_rw [hx] at h1 h ⊢
+      obtain ⟨y, hy, h₂⟩ := Metric.exists_mem_closedUnitBall_of_norm_one 𝕜 H
+      simp_rw [Metric.mem_closedBall, dist_eq_norm, sub_zero] at h₂
+      specialize h y h₂ (- y) (by rw [norm_neg]; exact h₂)
+        (⟨(1/2 : ℝ), by simp_rw [RCLike.zero_lt_real, one_half_pos],
+          by simp_rw [← @RCLike.ofReal_one 𝕜, RCLike.real_lt_real]; norm_num,
+          by simp only [one_div, ofReal_inv, ofReal_ofNat, smul_neg, sub_smul, neg_sub,
+            ← add_sub_assoc, ← add_smul]; norm_num⟩)
+      rw [h.1] at hy
+      exact hy
+    by_cases hx' : ‖x‖ ≠ 1
+    . specialize h ((1 / ‖x‖ : 𝕜) • x)
+        (by simp_rw [norm_smul, one_div, norm_inv, norm_ofReal, abs_norm, inv_mul_cancel (norm_ne_zero_iff.mpr hx), le_rfl])
+        0 (by simp_rw [norm_zero, zero_le_one])
+        (⟨‖x‖, by simp_rw [RCLike.zero_lt_real]; exact norm_pos_iff.mpr hx,
+          by simp_rw [← @RCLike.ofReal_one 𝕜, real_lt_real, lt_iff_le_and_ne]; exact ⟨h1, hx'⟩,
+          by simp only [one_div, smul_zero, add_zero, smul_smul, ← ofReal_inv, ← ofReal_mul,
+            mul_inv_cancel (norm_ne_zero_iff.mpr hx), ofReal_one, one_smul]⟩)
+      exfalso
+      exact hx h.2.symm
+    rw [not_ne_iff] at hx'
+    exact hx'
+  . rintro hx
+    refine ⟨by simp_rw [hx, le_rfl], λ y hy z hz ⟨α, hα₁, hα₂, hαx⟩ => ?_⟩
+    let β : ℝ := re α
+    have : (β : 𝕜) = α :=
+    by
+      simp_rw [@lt_def 𝕜, map_zero] at hα₁
+      rw [← re_add_im α, ← hα₁.2, ofReal_zero, zero_mul, add_zero]
+    simp_rw [← this, ← @ofReal_zero 𝕜, ← @ofReal_one 𝕜, real_lt_real, ← ofReal_sub] at hα₁ hα₂ hαx
+    have :=
+      calc 1 = ‖x‖ ^ 2 := by rw [hx, one_pow]
+          _ = ‖(β : 𝕜) • y + ((1 - β : ℝ) : 𝕜) • z‖ ^ 2 := by rw [hαx]
+          _ = (‖(β : 𝕜) • y‖ ^ 2 + 2 * re (⟪(β : 𝕜) • y, ((1 - β : ℝ) : 𝕜) • z⟫_𝕜)
+                + ‖((1 - β : ℝ) : 𝕜) • z‖ ^ 2 : ℝ) := by rw [← norm_add_pow_two]
+          _ = β ^ 2 * ‖y‖ ^ 2 + (2 * β * (1 - β)) * re (⟪y, z⟫_𝕜) + (1 - β) ^ 2 * ‖z‖ ^ 2 :=
+            by
+              simp_rw [norm_smul, inner_smul_left, inner_smul_right, conj_ofReal,
+                ← mul_assoc, ← ofReal_mul, re_ofReal_mul, mul_pow, ← norm_pow, ← ofReal_pow]
+              simp only [norm_ofReal, abs_sq]
+              simp only [mul_assoc]
+    by_cases hyz : y = z
+    . rw [hyz, ← add_smul, ← ofReal_add, add_sub_cancel, ofReal_one, one_smul] at hαx
+      rw [hyz, and_self, hαx]
+    . by_cases hyzyz : ‖y‖ = 1 ∧ ‖z‖ = 1
+      . simp_rw [hyzyz, one_pow, mul_one] at this
+        have this' : re ⟪y, z⟫_𝕜 < 1 := (re_inner_lt_one_iff_of_norm_one hyzyz.1 hyzyz.2).mpr hyz
+        have := calc 1 = β ^ 2 + 2 * β * (1 - β) * re ⟪y, z⟫_𝕜 + (1 - β) ^ 2 := this
+          _ < β ^ 2 + 2 * β * (1 - β) * 1 + (1 - β) ^ 2 := by
+            simp only [add_lt_add_iff_right, add_lt_add_iff_left]
+            apply mul_lt_mul_of_pos_left this'
+            apply mul_pos (mul_pos two_pos hα₁)
+            simp only [sub_pos, hα₂]
+          _ = 1 := by ring_nf
+        simp only [lt_irrefl] at this
+      . rw [not_and_or] at hyzyz
+        rcases hyzyz with (Hy | Hy)
+        on_goal 1 => have Hyy : ‖y‖ < 1 := lt_of_le_of_ne hy Hy
+        on_goal 2 => have Hyy : ‖z‖ < 1 := lt_of_le_of_ne hz Hy
+        all_goals
+          have :=
+            calc 1 = ‖x‖ := hx.symm
+              _ = ‖(β : 𝕜) • y + ((1 - β : ℝ) : 𝕜) • z‖ := by rw [hαx]
+              _ ≤ ‖(β : 𝕜) • y‖ + ‖((1 - β : ℝ) : 𝕜) • z‖ := norm_add_le _ _
+              _ ≤ β * ‖y‖ + (1 - β) * ‖z‖ :=
+                by
+                  simp_rw [norm_smul, norm_ofReal, abs_of_pos hα₁]
+                  rw [abs_of_pos]; simp_rw [sub_pos, hα₂]
+              _ < β * 1 + (1 - β) * 1 :=
+                by
+                  try
+                  { apply add_lt_add_of_lt_of_le
+                    apply mul_lt_mul' le_rfl Hyy (norm_nonneg _) hα₁
+                    apply mul_le_mul_of_nonneg_left hz
+                    simp_rw [sub_nonneg, le_of_lt hα₂] }
+                  try
+                  { apply add_lt_add_of_le_of_lt
+                    exact mul_le_mul le_rfl hy (norm_nonneg y) (le_of_lt hα₁)
+                    apply mul_lt_mul' le_rfl Hyy (norm_nonneg _)
+                    simp only [sub_pos, hα₂] }
+              _ = 1 := by ring_nf
+          simp only [lt_irrefl] at this

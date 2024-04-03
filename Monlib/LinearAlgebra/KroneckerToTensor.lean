@@ -70,13 +70,13 @@ theorem TensorProduct.matrix_star {R m n : Type _} [Field R] [StarRing R] [Finty
     (x : Matrix m m R) (y : Matrix n n R) : star (x ⊗ₜ[R] y) = xᴴ ⊗ₜ yᴴ :=
   TensorProduct.star_tmul _ _
 
-theorem TensorProduct.toKronecker_star {R m n : Type _} [IsROrC R] [Fintype m] [Fintype n]
+theorem TensorProduct.toKronecker_star {R m n : Type _} [RCLike R] [Fintype m] [Fintype n]
     [DecidableEq m] [DecidableEq n] (x : Matrix m m R) (y : Matrix n n R) :
     star (toKronecker (x ⊗ₜ y)) = toKronecker (star (x ⊗ₜ y)) := by
   simp_rw [TensorProduct.matrix_star, TensorProduct.toKronecker_apply, Matrix.star_eq_conjTranspose,
     Matrix.kronecker_conjTranspose]
 
-theorem Matrix.kroneckerToTensorProduct_star {R m n : Type _} [IsROrC R] [Fintype m] [Fintype n]
+theorem Matrix.kroneckerToTensorProduct_star {R m n : Type _} [RCLike R] [Fintype m] [Fintype n]
     [DecidableEq m] [DecidableEq n] (x : Matrix m m R) (y : Matrix n n R) :
     star (kroneckerToTensorProduct (x ⊗ₖ y)) = kroneckerToTensorProduct (star (x ⊗ₖ y)) := by
   simp only [Matrix.kroneckerToTensorProduct_apply, TensorProduct.matrix_star,

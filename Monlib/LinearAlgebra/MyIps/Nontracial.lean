@@ -203,7 +203,7 @@ theorem rankOne_toMatrix [hφ : φ.IsFaithfulPosMap] (a b : Matrix n n ℂ) :
     ContinuousLinearMap.coe_coe, rankOne_apply, SMulHomClass.map_smul, Finsupp.smul_apply,
     IsFaithfulPosMap.basis_repr_apply, ← inner_conj_symm b,
     Module.Dual.IsFaithfulPosMap.inner_coord', smul_eq_mul, mul_comm, conjTranspose_col, ←
-    vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply, IsROrC.star_def]
+    vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply, RCLike.star_def]
 
 noncomputable def Module.Dual.IsFaithfulPosMap.sig (hφ : φ.IsFaithfulPosMap) (z : ℝ) :
     Matrix n n ℂ ≃ₐ[ℂ] Matrix n n ℂ
@@ -886,7 +886,7 @@ theorem Module.Dual.pi.IsFaithfulPosMap.toMatrix_symm_apply' [hψ : ∀ i, (ψ i
     pi.IsFaithfulPosMap.includeBlock_left_inner, Finset.sum_product_univ, Finset.sum_smul,
     smul_smul]
 
-theorem TensorProduct.of_basis_eq_span {𝕜 : Type _} {E : Type _} {F : Type _} [IsROrC 𝕜]
+theorem TensorProduct.of_basis_eq_span {𝕜 : Type _} {E : Type _} {F : Type _} [RCLike 𝕜]
     [AddCommGroup E] [Module 𝕜 E] [AddCommGroup F] [Module 𝕜 F] (x : TensorProduct 𝕜 E F)
     {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (b₁ : Basis ι₁ 𝕜 E) (b₂ : Basis ι₂ 𝕜 F) :
     x = ∑ i : ι₁, ∑ j : ι₂, (b₁.tensorProduct b₂).repr x (i, j) • b₁ i ⊗ₜ[𝕜] b₂ j :=
@@ -1116,26 +1116,26 @@ noncomputable def Module.Dual.pi.IsFaithfulPosMap.psiInvFun' (hψ : ∀ i, (ψ i
     simp_rw [SMulHomClass.map_smul, Finsupp.smul_apply, smul_eq_mul, ← smul_smul, ← Finset.smul_sum,
       RingHom.id_apply]
 
-theorem rankOne_smul_smul {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne_smul_smul {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) (r₁ r₂ : 𝕜) :
     rankOne (r₁ • x) (star r₂ • y) = (r₁ * r₂) • (rankOne x y : E →L[𝕜] E) := by
   simp only [rankOne.smul_apply, rankOne.apply_smul, smul_smul, starRingEnd_apply, star_star, mul_comm]
 
-theorem rankOne_lm_smul_smul {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem rankOne_lm_smul_smul {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] (x y : E) (r₁ r₂ : 𝕜) :
     ↑(rankOne (r₁ • x) (star r₂ • y) : E →L[𝕜] E) =
       (r₁ * r₂) • ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) :=
   by rw [rankOne_smul_smul, ContinuousLinearMap.coe_smul]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
-theorem rankOne_sum_sum {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne_sum_sum {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (f : ι₁ → E) (g : ι₂ → E) :
     rankOne (∑ i, f i) (∑ i, g i) = ∑ i, ∑ j, (rankOne (f i) (g j) : E →L[𝕜] E) := by
   simp only [sum_rankOne, rankOne_sum]
   rw [Finset.sum_comm]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
-theorem rankOne_lm_sum_sum {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOne_lm_sum_sum {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (f : ι₁ → E) (g : ι₂ → E) :
     ↑(rankOne (∑ i, f i) (∑ i, g i) : E →L[𝕜] E) =
       ∑ i, ∑ j, ((rankOne (f i) (g j) : E →L[𝕜] E) : E →ₗ[𝕜] E) :=
@@ -1218,28 +1218,28 @@ theorem Module.Dual.pi.IsFaithfulPosMap.sig_adjoint [hψ : ∀ i, (ψ i).IsFaith
     LinearMap.adjoint_inner_left, Module.Dual.IsFaithfulPosMap.sig_adjoint]
 
 theorem Module.Dual.IsFaithfulPosMap.norm_eq {ψ : Module.Dual ℂ (Matrix n n ℂ)}
-    [hψ : ψ.IsFaithfulPosMap] (x : Matrix n n ℂ) : ‖x‖ = Real.sqrt (IsROrC.re (ψ (xᴴ * x))) :=
+    [hψ : ψ.IsFaithfulPosMap] (x : Matrix n n ℂ) : ‖x‖ = Real.sqrt (RCLike.re (ψ (xᴴ * x))) :=
   by simp_rw [InnerProductSpace.Core.norm_eq_sqrt_inner, ← Module.Dual.IsFaithfulPosMap.inner_eq]
 
 theorem Module.Dual.pi.IsFaithfulPosMap.norm_eq {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : Π i, (ψ i).IsFaithfulPosMap] (x : Π i, Matrix (s i) (s i) ℂ) :
-    ‖x‖ = Real.sqrt (IsROrC.re (pi ψ (star x * x))) := by
+    ‖x‖ = Real.sqrt (RCLike.re (pi ψ (star x * x))) := by
   simp_rw [← Module.Dual.pi.IsFaithfulPosMap.inner_eq]
   exact norm_eq_sqrt_inner _
 
-theorem norm_hMul_norm_eq_norm_tmul {𝕜 B C : Type _} [IsROrC 𝕜] [NormedAddCommGroup B]
+theorem norm_hMul_norm_eq_norm_tmul {𝕜 B C : Type _} [RCLike 𝕜] [NormedAddCommGroup B]
     [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
     [FiniteDimensional 𝕜 C] (x : B) (y : C) : ‖x‖ * ‖y‖ = ‖x ⊗ₜ[𝕜] y‖ := by
   calc
-    ‖x‖ * ‖y‖ = Real.sqrt (IsROrC.re (inner x x : 𝕜)) * Real.sqrt (IsROrC.re (inner y y : 𝕜)) := by
+    ‖x‖ * ‖y‖ = Real.sqrt (RCLike.re (inner x x : 𝕜)) * Real.sqrt (RCLike.re (inner y y : 𝕜)) := by
       simp_rw [@norm_eq_sqrt_inner 𝕜]
-    _ = Real.sqrt (IsROrC.re (inner x x : 𝕜) * IsROrC.re (inner y y : 𝕜)) := by
+    _ = Real.sqrt (RCLike.re (inner x x : 𝕜) * RCLike.re (inner y y : 𝕜)) := by
       rw [Real.sqrt_mul inner_self_nonneg]
-    _ = Real.sqrt (IsROrC.re ((inner x x : 𝕜) * (inner y y : 𝕜))) :=
+    _ = Real.sqrt (RCLike.re ((inner x x : 𝕜) * (inner y y : 𝕜))) :=
       by
       congr 1
-      simp only [IsROrC.mul_re, @inner_self_im 𝕜, MulZeroClass.zero_mul, sub_zero]
-    _ = Real.sqrt (IsROrC.re (inner (x ⊗ₜ[𝕜] y) (x ⊗ₜ[𝕜] y) : 𝕜)) := by
+      simp only [RCLike.mul_re, @inner_self_im 𝕜, MulZeroClass.zero_mul, sub_zero]
+    _ = Real.sqrt (RCLike.re (inner (x ⊗ₜ[𝕜] y) (x ⊗ₜ[𝕜] y) : 𝕜)) := by
       rw [TensorProduct.inner_tmul]
     _ = ‖x ⊗ₜ[𝕜] y‖ := by rw [@norm_eq_sqrt_inner 𝕜]
 
@@ -1345,7 +1345,7 @@ theorem Pi.sig_comp_eq_iff [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (t : ℝ) (f g
   all_goals
     rw [Module.Dual.pi.IsFaithfulPosMap.sig_zero', AlgEquiv.one_toLinearMap, LinearMap.one_comp]
 
-theorem rankOneLm_eq_rankOne {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem rankOneLm_eq_rankOne {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] (x y : E) : (rankOneLm x y : E →ₗ[𝕜] E) = (rankOne x y : E →L[𝕜] E) :=
   rfl
 

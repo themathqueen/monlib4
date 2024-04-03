@@ -24,7 +24,7 @@ We let $V$ be an inner product space over $\mathbb{k}$.
 -/
 
 
-variable {V 𝕜 : Type _} [IsROrC 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
+variable {V 𝕜 : Type _} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
 
 local notation "P" => orthogonalProjection
 
@@ -325,7 +325,7 @@ theorem LinearMap.IsStarNormal.eigenvec_in_eigenspace_iff_eigenvec_in_adjoint_co
       IsStarNormal T → ∀ μ : ℂ, ∀ v : V, v ∈ eigenspace T μ → v ∈ eigenspace (adjoint T) (conj μ)
     by
     intro v; refine' ⟨this T h μ v, _⟩
-    intro hv; rw [← adjoint_adjoint T, ← IsROrC.conj_conj μ]
+    intro hv; rw [← adjoint_adjoint T, ← RCLike.conj_conj μ]
     apply this _ _ _ _ hv; exact IsStarNormal.star
   clear h μ T
   intro T h μ v hv
@@ -340,12 +340,12 @@ theorem LinearMap.IsStarNormal.eigenvec_in_eigenspace_iff_eigenvec_in_adjoint_co
   rw [← norm_eq_zero]
   have nh : IsStarNormal (T - μ • 1) := by
     apply IsStarNormal.mk
-    rw [star_sub, star_smul, IsROrC.star_def, star_one, Commute, SemiconjBy]
+    rw [star_sub, star_smul, RCLike.star_def, star_one, Commute, SemiconjBy]
     simp only [sub_mul, mul_sub, Commute.eq h.star_comm_self]
     simp only [smul_one_mul, smul_smul, mul_smul_comm, mul_one]
     rw [mul_comm, sub_sub_sub_comm]
   have : adjoint (T - μ • 1) = adjoint T - conj μ • 1 := by
-    simp only [← star_eq_adjoint, star_sub, star_smul, IsROrC.star_def, star_one]
+    simp only [← star_eq_adjoint, star_sub, star_smul, RCLike.star_def, star_one]
   rw [← this, ← (LinearMap.IsStarNormal.norm_eq_adjoint (T - μ • 1)).mp nh, t1, norm_zero]
 
 end IsStarNormal

@@ -115,7 +115,7 @@ theorem LinearMap.mulLeft_real {E K : Type _} [CommSemiring K] [NonUnitalSemirin
 
 end Sec
 
-variable {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [StarAddMonoid E]
+variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [StarAddMonoid E]
   [StarModule 𝕜 E] [FiniteDimensional 𝕜 E]
 
 theorem LinearMap.real.spectrum (φ : E →ₗ[𝕜] E) : spectrum 𝕜 φ.real = star (spectrum 𝕜 φ) :=

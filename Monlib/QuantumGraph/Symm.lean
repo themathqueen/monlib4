@@ -4,7 +4,7 @@ import Monlib.LinearAlgebra.MyIps.Nontracial
 #align_import quantum_graph.symm
 
 @[simps]
-noncomputable def LinearEquiv.symmMap (R : Type _) [IsROrC R] (M : Type _) [NormedAddCommGroup M]
+noncomputable def LinearEquiv.symmMap (R : Type _) [RCLike R] (M : Type _) [NormedAddCommGroup M]
     [InnerProductSpace R M] [StarAddMonoid M] [StarModule R M] [FiniteDimensional R M] :
     (M →ₗ[R] M) ≃ₗ[R] M →ₗ[R] M
     where
@@ -17,7 +17,7 @@ noncomputable def LinearEquiv.symmMap (R : Type _) [IsROrC R] (M : Type _) [Norm
     simp only [LinearMap.real_smul, LinearMap.adjoint_smul, starRingEnd_self_apply,
       RingHom.id_apply]
 
-theorem LinearEquiv.symmMap_real {R : Type _} [IsROrC R] {M : Type _} [NormedAddCommGroup M]
+theorem LinearEquiv.symmMap_real {R : Type _} [RCLike R] {M : Type _} [NormedAddCommGroup M]
     [InnerProductSpace R M] [StarAddMonoid M] [StarModule R M] [FiniteDimensional R M] :
     LinearMap.real (LinearEquiv.symmMap R M : (M →ₗ[R] M) →ₗ[R] M →ₗ[R] M) =
       (LinearEquiv.symmMap R M).symm :=

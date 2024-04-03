@@ -48,7 +48,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
     have : ∀ i j : n, x i j = 0 ↔ x j i = 0 := by
       intro i j
       specialize h (i, i) (j, j)
-      simp_rw [IsROrC.star_def, IsROrC.conj_mul] at h
+      simp_rw [RCLike.star_def, RCLike.conj_mul] at h
       norm_cast at h
       constructor <;> intro H
       · rw [H, norm_zero, zero_pow (two_ne_zero), sq_eq_zero_iff, norm_eq_zero] at h
@@ -67,7 +67,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
     --   intro m₁ m₂ m₃ m₄ hx₁ hx₂
     --   rw [Ne.def, this] at hx₁ hx₂
     --   simp_rw [div_eq_div_iff (star_ne_zero.mpr hx₁) (star_ne_zero.mpr hx₂), mul_comm _ (star _),
-    --     IsROrC.star_def]
+    --     RCLike.star_def]
     --   exact h (_, _) (_, _)
     have nonzero_ : ∃ i j : n, x i j ≠ 0 :=
       by
@@ -80,19 +80,19 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       simp_rw [α, div_ne_zero_iff, star_ne_zero, Ne.def, this k i]
       exact ⟨hik, hik⟩
     have Hα : α⁻¹ = conj α := by
-      simp_rw [α, ← IsROrC.star_def, star_div', star_star, inv_div, IsROrC.star_def,
-        div_eq_div_iff hik ((not_iff_not.mpr (this i k)).mp hik), ← IsROrC.star_def,
+      simp_rw [α, ← RCLike.star_def, star_div', star_star, inv_div, RCLike.star_def,
+        div_eq_div_iff hik ((not_iff_not.mpr (this i k)).mp hik), ← RCLike.star_def,
         h (k, k) (i, i)]
-    have conj_ : ∀ α : ℂ, IsROrC.normSq α = IsROrC.re (conj α * α) := fun α => by
-      simp_rw [IsROrC.conj_mul, ← IsROrC.ofReal_pow, IsROrC.ofReal_re,
-        IsROrC.normSq_eq_def']
-    have Hα' : Real.sqrt (IsROrC.normSq α) = 1 := by
-      simp_rw [Real.sqrt_eq_iff_sq_eq (IsROrC.normSq_nonneg _) zero_le_one, one_pow, conj_, ← Hα,
-        inv_mul_cancel hα', IsROrC.one_re]
+    have conj_ : ∀ α : ℂ, RCLike.normSq α = RCLike.re (conj α * α) := fun α => by
+      simp_rw [RCLike.conj_mul, ← RCLike.ofReal_pow, RCLike.ofReal_re,
+        RCLike.normSq_eq_def']
+    have Hα' : Real.sqrt (RCLike.normSq α) = 1 := by
+      simp_rw [Real.sqrt_eq_iff_sq_eq (RCLike.normSq_nonneg _) zero_le_one, one_pow, conj_, ← Hα,
+        inv_mul_cancel hα', RCLike.one_re]
     have another_hα : ∀ p q : n, x p q ≠ 0 → x p q = α * conj (x q p) :=
       by
       intro p q _
-      simp_rw [α, div_mul_eq_mul_div, mul_comm (x i k), ← IsROrC.star_def, h (p, _) (_, _), ←
+      simp_rw [α, div_mul_eq_mul_div, mul_comm (x i k), ← RCLike.star_def, h (p, _) (_, _), ←
         div_mul_eq_mul_div, ← star_div', div_self ((not_iff_not.mpr (this i k)).mp hik), star_one,
         one_mul]
     have : ∃ β : ℂ, β ^ 2 = α := by

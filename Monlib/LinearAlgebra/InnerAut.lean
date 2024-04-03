@@ -21,13 +21,13 @@ import Mathlib.Tactic.Explode
 This file defines the inner automorphism of a unitary matrix `U` as `U x U⁻¹` and proves that any star-algebraic automorphism on `Mₙ(ℂ)` is an inner automorphism.
 
 -/
-alias IsROrC.pos_ofReal := IsROrC.zero_le_real
+alias RCLike.pos_ofReal := RCLike.zero_le_real
 
 open scoped ComplexOrder
-lemma IsROrC.neg_ofReal {𝕜 : Type*} [IsROrC 𝕜] (a : ℝ) :
+lemma RCLike.neg_ofReal {𝕜 : Type*} [RCLike 𝕜] (a : ℝ) :
   (a : 𝕜) < 0 ↔ a < 0 :=
 by
-simp_rw [@IsROrC.lt_def 𝕜, ofReal_re, map_zero, ofReal_im, and_true]
+simp_rw [@RCLike.lt_def 𝕜, ofReal_re, map_zero, ofReal_im, and_true]
 
 section
 
@@ -310,7 +310,7 @@ theorem innerAut_isHermitian_iff (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜)
 
 end
 
-variable [IsROrC 𝕜] [DecidableEq n]
+variable [RCLike 𝕜] [DecidableEq n]
 open scoped ComplexOrder
 
 theorem innerAut_posSemidef_iff (U : unitaryGroup n 𝕜) {a : Matrix n n 𝕜} :
@@ -375,7 +375,7 @@ theorem PosDef.innerAut {a : Matrix n n 𝕜}
 /-- Schur decomposition, but only for almost Hermitian matrices:
   given an almost Hermitian matrix $A$, there exists a diagonal matrix $D$ and
   a unitary matrix $U$ such that $UDU^*=A$ -/
-theorem IsAlmostHermitian.schur_decomp {𝕜 : Type _} [IsROrC 𝕜] [DecidableEq 𝕜] {A : Matrix n n 𝕜}
+theorem IsAlmostHermitian.schur_decomp {𝕜 : Type _} [RCLike 𝕜] [DecidableEq 𝕜] {A : Matrix n n 𝕜}
     (hA : A.IsAlmostHermitian) :
     ∃ (D : n → 𝕜) (U : unitaryGroup n 𝕜), innerAut U (diagonal D) = A :=
   by
@@ -386,7 +386,7 @@ theorem IsAlmostHermitian.schur_decomp {𝕜 : Type _} [IsROrC 𝕜] [DecidableE
       IsHermitian.eigenvectorMatrix_mul_inv]
   let U : unitaryGroup n 𝕜 := ⟨_, this⟩
   have hU : ⇑U = hB.eigenvectorMatrix := rfl
-  use α • IsROrC.ofReal ∘ hB.eigenvalues
+  use α • RCLike.ofReal ∘ hB.eigenvalues
   use U
   simp_rw [diagonal_smul, SMulHomClass.map_smul, innerAut_apply,
     UnitaryGroup.inv_apply, star_eq_conjTranspose]
@@ -467,12 +467,12 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     by
     simp_rw [Ne.def, Function.funext_iff, Pi.one_apply, Pi.zero_apply, one_ne_zero]
     simp only [Classical.not_forall, not_false_iff, exists_const]
-  have this10 : α = IsROrC.re α :=
+  have this10 : α = RCLike.re α :=
     by
     have this10 := IsHermitian.coe_re_diag this8.1
     simp_rw [hα, diag_smul, diag_one, Pi.smul_apply, Pi.one_apply, Algebra.id.smul_eq_mul,
       mul_one] at this10
-    have this11 : (IsROrC.re α : 𝕜) • (1 : n → 𝕜) = α • 1 :=
+    have this11 : (RCLike.re α : 𝕜) • (1 : n → 𝕜) = α • 1 :=
       by
       rw [← this10]
       ext1
@@ -483,44 +483,44 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     by
     simp only [dotProduct, Pi.star_apply, Pi.one_apply, star_one, one_mul, Finset.sum_const]
     simp only [Nat.smul_one_eq_coe, Nat.cast_inj,
-      IsROrC.ofReal_natCast]
+      RCLike.ofReal_natCast]
     rfl
   simp_rw [hα, PosDef, smul_mulVec_assoc, dotProduct_smul, one_mulVec, smul_eq_mul] at this9
   cases' this9 with this9l this9
   specialize this9 1 this12
-  rw [this10, this13, ← IsROrC.ofReal_mul, IsROrC.zero_lt_real,
+  rw [this10, this13, ← RCLike.ofReal_mul, RCLike.zero_lt_real,
     mul_pos_iff] at this9
   simp only [Nat.cast_pos, Fintype.card_pos] at this9
   have this14 : ¬(Fintype.card n : ℝ) < 0 := by simp only [not_lt, Nat.cast_nonneg]
   simp_rw [this14, and_false_iff, and_true_iff, or_false_iff] at this9
-  have fin : (((IsROrC.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y ∈ unitaryGroup n 𝕜 :=
+  have fin : (((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y ∈ unitaryGroup n 𝕜 :=
     by
     rw [mem_unitaryGroup_iff', star_eq_conjTranspose]
-    simp_rw [conjTranspose_smul, IsROrC.star_def, Matrix.smul_mul, Matrix.mul_smul,
-      IsROrC.conj_ofReal, smul_smul, ← IsROrC.ofReal_mul]
-    rw [← Real.rpow_add this9, hα, this10, smul_smul, ← IsROrC.ofReal_mul, IsROrC.ofReal_re, ←
+    simp_rw [conjTranspose_smul, RCLike.star_def, Matrix.smul_mul, Matrix.mul_smul,
+      RCLike.conj_ofReal, smul_smul, ← RCLike.ofReal_mul]
+    rw [← Real.rpow_add this9, hα, this10, smul_smul, ← RCLike.ofReal_mul, RCLike.ofReal_re, ←
       Real.rpow_add_one (NeZero.of_pos this9).out]
     norm_num
   let U : unitaryGroup n 𝕜 := ⟨_, fin⟩
-  have hU : (U : Matrix n n 𝕜) = (((IsROrC.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y := rfl
-  have hU2 : ((((IsROrC.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y)⁻¹ = ((U⁻¹ : _) : Matrix n n 𝕜) :=
+  have hU : (U : Matrix n n 𝕜) = (((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y := rfl
+  have hU2 : ((((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y)⁻¹ = ((U⁻¹ : _) : Matrix n n 𝕜) :=
     by
     apply inv_eq_left_inv
     rw [← hU, UnitaryGroup.inv_apply, UnitaryGroup.star_mul_self]
   have hU3 :
-    ((((IsROrC.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y)⁻¹ =
-      (((IsROrC.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜)⁻¹ • y⁻¹ :=
+    ((((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y)⁻¹ =
+      (((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜)⁻¹ • y⁻¹ :=
     by
     apply inv_eq_left_inv
     simp_rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
     rw [inv_mul_cancel, one_smul, H, Hy.2]
-    · simp_rw [Ne.def, IsROrC.ofReal_eq_zero, Real.rpow_eq_zero_iff_of_nonneg (le_of_lt this9),
+    · simp_rw [Ne.def, RCLike.ofReal_eq_zero, Real.rpow_eq_zero_iff_of_nonneg (le_of_lt this9),
         (NeZero.of_pos this9).out, false_and_iff]
       exact not_false
   use U
   ext1 x
   simp_rw [innerAutStarAlg_apply_eq_innerAut_apply, innerAut_apply, ← hU2, hU3, hf,
-    Matrix.smul_mul, Matrix.mul_smul, smul_smul, ← IsROrC.ofReal_inv, ← IsROrC.ofReal_mul, ←
+    Matrix.smul_mul, Matrix.mul_smul, smul_smul, ← RCLike.ofReal_inv, ← RCLike.ofReal_mul, ←
     Real.rpow_neg_one, ← Real.rpow_mul (le_of_lt this9), ← Real.rpow_add this9]
   norm_num
 
@@ -534,17 +534,17 @@ lemma _root_.StarAlgEquiv.eq_innerAut (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matri
     innerAutStarAlg f.of_matrix_unitary = f :=
 StarAlgEquiv.of_matrix_unitary.proof_2 _
 
-theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [IsROrC 𝕜] {x : Matrix n n 𝕜}
+theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [RCLike 𝕜] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) :
-    x = innerAut ⟨_, hx.eigenvectorMatrix_mem_unitaryGroup⟩ (diagonal (IsROrC.ofReal ∘ hx.eigenvalues)) :=
+    x = innerAut ⟨_, hx.eigenvectorMatrix_mem_unitaryGroup⟩ (diagonal (RCLike.ofReal ∘ hx.eigenvalues)) :=
   by
   rw [innerAut_apply, UnitaryGroup.inv_apply, Matrix.unitaryGroup.coe_mk, star_eq_conjTranspose,
     IsHermitian.conjTranspose_eigenvectorMatrix]
   simp_rw [Matrix.mul_assoc, ← IsHermitian.spectral_theorem hx, ← Matrix.mul_assoc,
     IsHermitian.eigenvectorMatrix_mul_inv, Matrix.one_mul]
 
-theorem coe_diagonal_eq_diagonal_coe {n 𝕜 : Type _} [IsROrC 𝕜] [DecidableEq n] (x : n → ℝ) :
-    (diagonal (IsROrC.ofReal ∘ x) : Matrix n n 𝕜) = CoeTC.coe ∘ diagonal x :=
+theorem coe_diagonal_eq_diagonal_coe {n 𝕜 : Type _} [RCLike 𝕜] [DecidableEq n] (x : n → ℝ) :
+    (diagonal (RCLike.ofReal ∘ x) : Matrix n n 𝕜) = CoeTC.coe ∘ diagonal x :=
   by
   simp only [← Matrix.ext_iff, diagonal, Function.comp_apply,
     CoeTC.coe, of_apply, coe_ite]
@@ -587,7 +587,7 @@ theorem IsHermitian.spectrum {x : Matrix n n 𝕜}
   simp_rw [innerAut.spectrum_eq, diagonal.spectrum]
   rfl
 
-theorem IsHermitian.hasEigenvalue_iff {𝕜 : Type _} [IsROrC 𝕜] [DecidableEq 𝕜] {x : Matrix n n 𝕜}
+theorem IsHermitian.hasEigenvalue_iff {𝕜 : Type _} [RCLike 𝕜] [DecidableEq 𝕜] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) (α : 𝕜) :
     Module.End.HasEigenvalue (toLin' x) α ↔ ∃ i, (hx.eigenvalues i : 𝕜) = α := by
   rw [Module.End.hasEigenvalue_iff_mem_spectrum, hx.spectrum, Set.mem_setOf]
@@ -614,7 +614,7 @@ theorem innerAut_commutes_with_lid_comm (U : Matrix.unitaryGroup n 𝕜) :
     TensorProduct.lid_tmul, LinearMap.one_apply, SMulHomClass.map_smul,
     forall₂_true_iff]
 
-theorem unitaryGroup.conj_mem {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n]
+theorem unitaryGroup.conj_mem {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
     (U : unitaryGroup n 𝕜) : (U : Matrix n n 𝕜)ᴴᵀ ∈ unitaryGroup n 𝕜 :=
   by
   rw [mem_unitaryGroup_iff']
@@ -625,22 +625,22 @@ theorem unitaryGroup.conj_mem {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [Decid
     _ = 1ᴴᵀ := by rw [← star_eq_conjTranspose, UnitaryGroup.star_mul_self]
     _ = 1 := Matrix.conj_one
 
-def unitaryGroup.conj {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] (U : unitaryGroup n 𝕜) :
+def unitaryGroup.conj {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] (U : unitaryGroup n 𝕜) :
     unitaryGroup n 𝕜 :=
   ⟨(U : _)ᴴᵀ, unitaryGroup.conj_mem U⟩
 
 @[norm_cast]
-theorem unitaryGroup.conj_coe {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n]
+theorem unitaryGroup.conj_coe {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
     (U : unitaryGroup n 𝕜) : (unitaryGroup.conj U : Matrix n n 𝕜) = Uᴴᵀ :=
   rfl
 
-theorem innerAut.conj {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n] (U : unitaryGroup n 𝕜)
+theorem innerAut.conj {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] (U : unitaryGroup n 𝕜)
     (x : Matrix n n 𝕜) : (innerAut U x)ᴴᵀ = innerAut (unitaryGroup.conj U) xᴴᵀ :=
   by
   simp_rw [innerAut_apply, Matrix.conj_mul, UnitaryGroup.inv_apply, unitaryGroup.conj_coe]
   rfl
 
-theorem UnitaryGroup.mul_star_self {n 𝕜 : Type _} [IsROrC 𝕜] [Fintype n] [DecidableEq n]
+theorem UnitaryGroup.mul_star_self {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
     (U : unitaryGroup n 𝕜) : U * star (U : Matrix n n 𝕜) = 1 :=
 mem_unitaryGroup_iff.mp (SetLike.coe_mem U)
 
@@ -674,21 +674,21 @@ theorem PosSemidef.kronecker {n p : Type _} [Fintype n] [Fintype p]
   rw [Matrix.IsHermitian.spectral_theorem'' hx.1, Matrix.IsHermitian.spectral_theorem'' hy.1,
     innerAut_kronecker, diagonal_kronecker_diagonal, innerAut_posSemidef_iff,
     PosSemidef.diagonal]
-  simp_rw [Function.comp_apply, ← IsROrC.ofReal_mul, IsROrC.pos_ofReal,
+  simp_rw [Function.comp_apply, ← RCLike.ofReal_mul, RCLike.pos_ofReal,
     mul_nonneg (IsHermitian.nonneg_eigenvalues_of_posSemidef hx _)
       (IsHermitian.nonneg_eigenvalues_of_posSemidef hy _),
     forall_true_iff]
 
-theorem PosDef.kronecker {𝕜 n p : Type _} [IsROrC 𝕜] [DecidableEq 𝕜] [Fintype n] [Fintype p]
+theorem PosDef.kronecker {𝕜 n p : Type _} [RCLike 𝕜] [DecidableEq 𝕜] [Fintype n] [Fintype p]
     [DecidableEq n] [DecidableEq p] {x : Matrix n n 𝕜} {y : Matrix p p 𝕜} (hx : x.PosDef)
     (hy : y.PosDef) : (x ⊗ₖ y).PosDef :=
   by
   rw [Matrix.IsHermitian.spectral_theorem'' hx.1, Matrix.IsHermitian.spectral_theorem'' hy.1,
     innerAut_kronecker, innerAut_posDef_iff, diagonal_kronecker_diagonal, PosDef.diagonal]
-  simp_rw [Function.comp_apply, ← IsROrC.ofReal_mul,
-    @IsROrC.zero_lt_real 𝕜, mul_pos (hx.pos_eigenvalues _) (hy.pos_eigenvalues _), forall_true_iff]
+  simp_rw [Function.comp_apply, ← RCLike.ofReal_mul,
+    @RCLike.zero_lt_real 𝕜, mul_pos (hx.pos_eigenvalues _) (hy.pos_eigenvalues _), forall_true_iff]
 
-theorem unitaryGroup.injective_hMul {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [IsROrC 𝕜]
+theorem unitaryGroup.injective_hMul {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     (U : unitaryGroup n 𝕜) (x y : Matrix n n 𝕜) : x = y ↔ x * U = y * U :=
   by
   refine' ⟨fun h => by rw [h], fun h => _⟩
@@ -696,12 +696,12 @@ theorem unitaryGroup.injective_hMul {n 𝕜 : Type _} [Fintype n] [DecidableEq n
   rw [← UnitaryGroup.mul_star_self U, ← Matrix.mul_assoc, ← h, Matrix.mul_assoc,
     UnitaryGroup.mul_star_self, Matrix.mul_one]
 
-theorem innerAutStarAlg_equiv_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [IsROrC 𝕜]
+theorem innerAutStarAlg_equiv_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     [DecidableEq 𝕜] (U : unitaryGroup n 𝕜) :
     (innerAutStarAlg U).toAlgEquiv.toLinearMap = innerAut U :=
   rfl
 
-theorem innerAutStarAlg_equiv_symm_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [IsROrC 𝕜]
+theorem innerAutStarAlg_equiv_symm_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     (U : unitaryGroup n 𝕜) : (innerAutStarAlg U).symm.toAlgEquiv.toLinearMap = innerAut U⁻¹ :=
   by
   ext1
@@ -710,13 +710,13 @@ theorem innerAutStarAlg_equiv_symm_toLinearMap {n 𝕜 : Type _} [Fintype n] [De
   rw [UnitaryGroup.inv_apply]
   rfl
 
-theorem innerAut.comp_inj {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [IsROrC 𝕜]
+theorem innerAut.comp_inj {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     (U : Matrix.unitaryGroup n 𝕜) (S T : Matrix n n 𝕜 →ₗ[𝕜] Matrix n n 𝕜) :
     S = T ↔ innerAut U ∘ₗ S = innerAut U ∘ₗ T := by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, innerAut_eq_iff,
     innerAut_inv_apply_innerAut_self]
 
-theorem innerAut.inj_comp {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [IsROrC 𝕜]
+theorem innerAut.inj_comp {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     (U : unitaryGroup n 𝕜) (S T : Matrix n n 𝕜 →ₗ[𝕜] Matrix n n 𝕜) :
     S = T ↔ S ∘ₗ innerAut U = T ∘ₗ innerAut U :=
   by

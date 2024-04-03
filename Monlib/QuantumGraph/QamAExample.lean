@@ -31,11 +31,11 @@ variable {n : Type _} [Fintype n] [DecidableEq n]
 
 local notation "ℍ" => Matrix n n ℂ
 
-def traceModuleDual {𝕜 n : Type _} [Fintype n] [IsROrC 𝕜] : Module.Dual 𝕜 (Matrix n n 𝕜) :=
+def traceModuleDual {𝕜 n : Type _} [Fintype n] [RCLike 𝕜] : Module.Dual 𝕜 (Matrix n n 𝕜) :=
   traceLinearMap n 𝕜 𝕜
 
 @[instance]
-def trace_isFaithfulPosMap {n : Type _} [Fintype n] {𝕜 : Type _} [IsROrC 𝕜] :
+def trace_isFaithfulPosMap {n : Type _} [Fintype n] {𝕜 : Type _} [RCLike 𝕜] :
    (traceModuleDual : Module.Dual 𝕜 (Matrix n n 𝕜)).IsFaithfulPosMap :=
   by
   simp_rw [Module.Dual.IsFaithfulPosMap_iff, Module.Dual.IsFaithful, Module.Dual.IsPosMap,
@@ -67,13 +67,13 @@ theorem posDefOne_rpow (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, IsHermitian.eigenvalues_eq, one_mulVec]
+  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq, one_mulVec]
   simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply, ←
     IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
     IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
     star_eq_conjTranspose,
     mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
-    IsROrC.one_re]
+    RCLike.one_re]
   exact (Real.one_rpow _).symm
 
 private theorem PosDef_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
@@ -88,13 +88,13 @@ private theorem PosDef_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← IsROrC.ofReal_one, IsROrC.ofReal_inj, IsHermitian.eigenvalues_eq]
+  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq]
   simp_rw [traceModuleDual_matrix, one_mulVec, dotProduct, Pi.star_apply, transpose_apply, ←
     conjTranspose_apply, ← IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
     IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
     star_eq_conjTranspose,
     mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
-    IsROrC.one_re]
+    RCLike.one_re]
   exact (Real.one_rpow _).symm
 
 private theorem aux.ug :
@@ -175,10 +175,10 @@ open scoped TensorProduct
 
 open scoped ComplexConjugate
 
-private theorem linear_map.rsmul_adjoint {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+private theorem linear_map.rsmul_adjoint {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] (A : E →ₗ[𝕜] E) (r : ℝ) :
     LinearMap.adjoint ((r : 𝕜) • A) = (r : 𝕜) • LinearMap.adjoint A := by
-  simp_rw [← @LinearMap.star_eq_adjoint 𝕜 E, star_smul, IsROrC.star_def, IsROrC.conj_ofReal]
+  simp_rw [← @LinearMap.star_eq_adjoint 𝕜 E, star_smul, RCLike.star_def, RCLike.conj_ofReal]
 
 /-- when a matrix $x$ is non-zero, then for any unitary $U$, we also have $f_U(x)$ is non-zero -/
 private noncomputable def inner_aut_inv.of_ne_zero (U : unitaryGroup n ℂ)
@@ -270,7 +270,7 @@ theorem Matrix.IsAlmostHermitian.spectrum {x : Matrix n n ℂ} (hx : x.IsAlmostH
 
 private theorem matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero
     {x : { x : ℍ // x ≠ 0 }} (hx : (x : ℍ).IsAlmostHermitian) :
-    ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) ≠ 0 :=
+    ((@RCLike.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) ≠ 0 :=
   by
   rw [Ne.def, Matrix.IsHermitian.eigenvalues_eq_zero_iff]
   have := hx.eq_smul_matrix
@@ -371,7 +371,7 @@ theorem spectra_fin_two_ext_of_traceless {α₁ α₂ β₁ β₂ : ℂ} (hα₂
 theorem Matrix.IsAlmostHermitian.trace {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
     x.trace = ∑ i, hx.eigenvalues i :=
   by
-  simp_rw [IsAlmostHermitian.eigenvalues, ← Finset.smul_sum, ← IsROrC.ofReal_sum,
+  simp_rw [IsAlmostHermitian.eigenvalues, ← Finset.smul_sum, ← RCLike.ofReal_sum,
     ← IsHermitian.trace_eq, ← trace_smul]
   rw [← IsAlmostHermitian.eq_smul_matrix hx]
 
@@ -393,11 +393,11 @@ theorem Matrix.IsAlmostHermitian.spectral_theorem' {x : Matrix n n ℂ} (hx : x.
         innerAut
           ⟨hx.matrix_isHermitian.eigenvectorMatrix,
             IsHermitian.eigenvectorMatrix_mem_unitaryGroup _⟩
-          (diagonal ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues)) :=
+          (diagonal ((@RCLike.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues)) :=
   by rw [← Matrix.IsHermitian.spectral_theorem'', ← hx.eq_smul_matrix]
 
 theorem Matrix.IsAlmostHermitian.eigenvalues_eq {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
-    hx.eigenvalues = hx.scalar • ((@IsROrC.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) :=
+    hx.eigenvalues = hx.scalar • ((@RCLike.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) :=
   rfl
 
 theorem Matrix.IsAlmostHermitian.spectral_theorem {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :

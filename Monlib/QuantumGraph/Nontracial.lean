@@ -122,12 +122,12 @@ theorem Qam.symm_adjoint_eq_symm'_of_adjoint [hφ : φ.IsFaithfulPosMap] (x : l(
   simp_rw [map_sum, ← rankOneLm_eq_rankOne, rankOneLm_adjoint, rankOneLm_eq_rankOne,
     Qam.RankOne.symmetric_eq, Qam.RankOne.symmetric'_eq, ← rankOneLm_eq_rankOne, rankOneLm_adjoint]
 
-private theorem commute.adjoint_adjoint {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
+private theorem commute.adjoint_adjoint {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [CompleteSpace E] {f g : E →L[K] E} :
     Commute (ContinuousLinearMap.adjoint f) (ContinuousLinearMap.adjoint g) ↔ Commute f g :=
   commute_star_star
 
-private theorem commute.adjoint_adjoint_lm {K E : Type _} [IsROrC K] [NormedAddCommGroup E]
+private theorem commute.adjoint_adjoint_lm {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     [InnerProductSpace K E] [FiniteDimensional K E] {f g : E →ₗ[K] E} :
     Commute (LinearMap.adjoint f) (LinearMap.adjoint g) ↔ Commute f g :=
   commute_star_star
@@ -328,11 +328,11 @@ theorem stdBasisMatrix_squash (i j k l : n) (x : Matrix n n ℂ) :
     Finset.mem_univ, if_true, smul_eq_mul, mul_one, MulZeroClass.mul_zero]
   simp_rw [← ite_and, @and_comm (l = j_1) (i = i_1)]
 
-theorem rankOneLm_smul {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem rankOneLm_smul {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) (r : 𝕜) : (rankOneLm x (r • y) : E →ₗ[𝕜] E) = starRingEnd 𝕜 r • rankOneLm x y := by
   rw [rankOneLm, rankOne.smul_apply]; rfl
 
-theorem smul_rankOneLm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+theorem smul_rankOneLm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x y : E) (r : 𝕜) : (rankOneLm (r • x) y : E →ₗ[𝕜] E) = r • rankOneLm x y := by
   rw [rankOneLm, rankOne.apply_smul]; rfl
 

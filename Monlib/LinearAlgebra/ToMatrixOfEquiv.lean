@@ -19,7 +19,7 @@ This defines the identification $L(M_{n \times m})\cong_{a} M_{n \times m}$
 -/
 
 
-variable {R I J 𝕜 : Type _} [Fintype I] [Fintype J] [IsROrC 𝕜] [CommSemiring R] [DecidableEq I]
+variable {R I J 𝕜 : Type _} [Fintype I] [Fintype J] [RCLike 𝕜] [CommSemiring R] [DecidableEq I]
   [DecidableEq J]
 
 open scoped BigOperators
@@ -44,7 +44,7 @@ noncomputable def OrthonormalBasis.toMatrix {n E : Type _} [Fintype n] [Decidabl
   map_star' x := by
     ext
     simp only [star_eq_conjTranspose, conjTranspose_apply, LinearMap.star_eq_adjoint,
-      LinearMap.adjoint_inner_right, IsROrC.star_def, inner_conj_symm]
+      LinearMap.adjoint_inner_right, RCLike.star_def, inner_conj_symm]
   right_inv x := by
     ext
     simp only [LinearMap.sum_apply, LinearMap.smul_apply, ContinuousLinearMap.coe_coe,
@@ -189,7 +189,7 @@ namespace LinearMap
 
 open scoped Matrix ComplexConjugate BigOperators
 
-open IsROrC Matrix
+open RCLike Matrix
 
 theorem toMatrix_stdBasis_stdBasis {I J K L : Type _} [Fintype I] [Fintype J] [Fintype K]
     [Fintype L] [DecidableEq I] [DecidableEq J] (x : Matrix I J R →ₗ[R] Matrix K L R) :

@@ -3,19 +3,19 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Mathlib.Data.IsROrC.Basic
+import Mathlib.Analysis.RCLike.Basic
 
 #align_import preq.is_R_or_C_le
 
 /-!
- # Extra lemmas on IsROrC
+ # Extra lemmas on RCLike
 
- This file contains extra lemmas on `IsROrC`.
+ This file contains extra lemmas on `RCLike`.
 -/
 
-namespace IsROrC
+namespace RCLike
 
-variable {𝕜 : Type _} [IsROrC 𝕜]
+variable {𝕜 : Type _} [RCLike 𝕜]
 
 open scoped ComplexOrder
 
@@ -58,8 +58,8 @@ theorem not_lt_zero_iff {z : 𝕜} : ¬z < 0 ↔ 0 ≤ re z ∨ im z ≠ 0 := by
 
 theorem eq_re_ofReal_le {r : ℝ} {z : 𝕜} (hz : (r : 𝕜) ≤ z) : z = re z :=
   by
-  rw [IsROrC.ext_iff]
+  rw [RCLike.ext_iff]
   exact
-    ⟨by simp only [ofReal_re], by simp only [← (IsROrC.le_def.1 hz).2, map_zero, IsROrC.ofReal_im]⟩
+    ⟨by simp only [ofReal_re], by simp only [← (RCLike.le_def.1 hz).2, map_zero, RCLike.ofReal_im]⟩
 
-end IsROrC
+end RCLike
