@@ -233,19 +233,19 @@ theorem rankOne_toMatrix_transpose_psi_symm [hφ : φ.IsFaithfulPosMap]
 --   FiniteDimensional.complete ℂ U
 
 open LinearMap in
-private theorem lm_to_clm_comp {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+private theorem lm_to_clm_comp {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {p q : E →ₗ[𝕜] E} :
     toContinuousLinearMap p * toContinuousLinearMap q = toContinuousLinearMap (p * q) :=
   rfl
 
 open LinearMap in
-private theorem is_idempotent_elem_to_clm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+private theorem is_idempotent_elem_to_clm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
     IsIdempotentElem p ↔ IsIdempotentElem (toContinuousLinearMap p) := by
   simp_rw [IsIdempotentElem, lm_to_clm_comp, Function.Injective.eq_iff (LinearEquiv.injective _)]
 
 open LinearMap in
-private theorem is_self_adjoint_to_clm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+private theorem is_self_adjoint_to_clm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
     IsSelfAdjoint p ↔ IsSelfAdjoint (toContinuousLinearMap p) := by
   simp_rw [_root_.IsSelfAdjoint, ContinuousLinearMap.star_eq_adjoint, ←
@@ -253,7 +253,7 @@ private theorem is_self_adjoint_to_clm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAd
     LinearMap.star_eq_adjoint]
 
 open LinearMap in
-theorem orthogonal_projection_iff_lm {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem orthogonal_projection_iff_lm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
     (∃ U : Submodule 𝕜 E, (orthogonalProjection' U : E →ₗ[𝕜] E) = p) ↔
       IsSelfAdjoint p ∧ IsIdempotentElem p :=
@@ -328,7 +328,7 @@ theorem toMatrix''_map_star [hφ : φ.IsFaithfulPosMap] (x : l(ℍ)) :
   ext
   simp only [Module.Dual.IsFaithfulPosMap.toMatrix, LinearMap.toMatrixAlgEquiv_apply, Pi.star_apply,
     star_apply, star_eq_conjTranspose, conjTranspose_apply, LinearMap.star_eq_adjoint,
-    LinearMap.adjoint_inner_right, IsROrC.star_def, inner_conj_symm,
+    LinearMap.adjoint_inner_right, RCLike.star_def, inner_conj_symm,
     Module.Dual.IsFaithfulPosMap.basis_repr_apply]
 
 private theorem ffsugh [hφ : φ.IsFaithfulPosMap] {x : Matrix (p × p) (p × p) ℂ} {y : l(ℍ)} :
@@ -529,7 +529,7 @@ theorem RealQam.edges_eq_zero_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA :
   norm_cast
   simp_rw [Matrix.zero_mul, LinearMap.mulLeft_zero_eq_zero, MulZeroClass.zero_mul]
 
-theorem orthogonal_projection_of_top {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+theorem orthogonal_projection_of_top {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace ↥(⊤ : Submodule 𝕜 E)] :
     orthogonalProjection' (⊤ : Submodule 𝕜 E) = 1 :=
   by
@@ -580,7 +580,7 @@ theorem RealQam.edges_eq_dim_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
   rw [← this'', AlgEquiv.toLinearMap_apply, MulEquivClass.map_eq_one_iff] at this'
   exact this'
 
-private theorem orthogonal_projection_of_dim_one {𝕜 E : Type _} [IsROrC 𝕜] [NormedAddCommGroup E]
+private theorem orthogonal_projection_of_dim_one {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {U : Submodule 𝕜 E}
     (hU : FiniteDimensional.finrank 𝕜 U = 1) :
     ∃ v : { x : E // (x : E) ≠ 0 },
@@ -598,12 +598,12 @@ private theorem orthogonal_projection_of_dim_one {𝕜 E : Type _} [IsROrC 𝕜]
   have : ‖(u 0 : E)‖ = 1 := by
     rw [@norm_eq_sqrt_inner 𝕜, Real.sqrt_eq_one]
     simp_rw [← Submodule.coe_inner, orthonormal_iff_ite.mp u.orthonormal, if_true,
-      IsROrC.one_re]
+      RCLike.one_re]
   refine' ⟨⟨u 0, hcc⟩, _⟩
-  simp only [Subtype.coe_mk, this, IsROrC.ofReal_one, one_div_one, one_smul, one_pow]
+  simp only [Subtype.coe_mk, this, RCLike.ofReal_one, one_div_one, one_smul, one_pow]
 
 lemma Complex.ofReal'_eq_isROrC_ofReal (a : ℝ) :
-  Complex.ofReal' a = IsROrC.ofReal a :=
+  Complex.ofReal' a = RCLike.ofReal a :=
 rfl
 
 -- set_option pp.explicit true in

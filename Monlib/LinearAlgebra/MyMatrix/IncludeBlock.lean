@@ -268,6 +268,8 @@ instance addCommMonoidBlockDiagonal {k : Type _} [Fintype k] [DecidableEq k] {s 
   nsmul_succ n x := by
     ext
     simp only [IsBlockDiagonal.coe_smul, Nat.cast_succ, add_smul, one_smul, add_comm]
+    simp only [IsBlockDiagonal.coe_add, add_apply]
+    rw [add_comm]
     rfl
 
 
@@ -489,7 +491,7 @@ theorem IsBlockDiagonal.npow {k : Type _} [Fintype k] [DecidableEq k] {s : k →
   induction' n with d hd
   · simp only [pow_zero]; exact IsBlockDiagonal.one
   · simp only [pow_succ, IsBlockDiagonal.mul, hd]
-    exact IsBlockDiagonal.mul hx hd
+    exact IsBlockDiagonal.mul hd hx
 
 @[instance]
 def IsBlockDiagonal.hasNpow {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
@@ -553,7 +555,7 @@ def IsBlockDiagonal.semiring {k : Type _} [Fintype k] [DecidableEq k] {s : k →
     simp only [IsBlockDiagonal.coe_npow, IsBlockDiagonal.coe_one, pow_zero]
   npow_succ n x := by
     ext
-    simp_rw [IsBlockDiagonal.coe_npow, add_comm _ 1, pow_add, IsBlockDiagonal.coe_mul,
+    simp_rw [IsBlockDiagonal.coe_npow, pow_add, IsBlockDiagonal.coe_mul,
       pow_one, IsBlockDiagonal.coe_npow]
 
 @[instance]
