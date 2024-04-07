@@ -415,7 +415,7 @@ theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).Pos
 -- /-- each eigenvalue of a positive definite matrix is positive -/
 alias Matrix.PosDef.pos_eigenvalues := Matrix.PosDef.eigenvalues_pos
 
-theorem Matrix.PosDef.pos_trace [Fintype n] [DecidableEq n] [DecidableEq 𝕜] [Nonempty n] {x : Matrix n n 𝕜}
+theorem Matrix.PosDef.pos_trace [Fintype n] [DecidableEq n] [Nonempty n] {x : Matrix n n 𝕜}
     (hx : x.PosDef) : 0 < RCLike.re x.trace :=
   by
   simp_rw [IsHermitian.trace_eq hx.1, RCLike.ofReal_re]
@@ -424,7 +424,7 @@ theorem Matrix.PosDef.pos_trace [Fintype n] [DecidableEq n] [DecidableEq 𝕜] [
   · exact Finset.univ_nonempty
 
 /-- the trace of a positive definite matrix is non-zero -/
-theorem Matrix.PosDef.trace_ne_zero [Fintype n] [DecidableEq n] [Nonempty n] [DecidableEq 𝕜] {x : Matrix n n 𝕜}
+theorem Matrix.PosDef.trace_ne_zero [Fintype n] [DecidableEq n] [Nonempty n] {x : Matrix n n 𝕜}
     (hx : x.PosDef) : x.trace ≠ 0 :=
   by
   rw [Matrix.IsHermitian.trace_eq hx.1]
@@ -750,7 +750,7 @@ end Matrix
 namespace Matrix
 
 theorem PosSemidef.colMulConjTransposeCol [Fintype n] [DecidableEq n]
-    [DecidableEq 𝕜] (x : n → 𝕜) : (col x * (col x)ᴴ : Matrix n n 𝕜).PosSemidef :=
+    (x : n → 𝕜) : (col x * (col x)ᴴ : Matrix n n 𝕜).PosSemidef :=
 Matrix.posSemidef_self_mul_conjTranspose _
 
 alias PosSemidef.mulConjTransposeSelf := Matrix.posSemidef_self_mul_conjTranspose

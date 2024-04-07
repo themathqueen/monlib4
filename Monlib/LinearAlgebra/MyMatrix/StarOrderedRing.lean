@@ -220,6 +220,25 @@ theorem posSemidef_iff_of_isHermitian {𝕜 n : Type _}
     rw [Pi.zero_apply, Function.comp_apply, RCLike.zero_le_real]
     exact h i
 
+theorem posSemidef_iff_isHermitian_and_nonneg_spectrum {𝕜 n : Type _}
+  [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
+  x.PosSemidef ↔ (x.IsHermitian ∧ spectrum 𝕜 (Matrix.toLin' x) ⊆ {x : 𝕜 | 0 ≤ x}) :=
+by
+  constructor
+  . intro h
+    refine ⟨h.1, ?_⟩
+    simp_rw [h.1.spectrum]
+    simp only [Set.setOf_subset_setOf, forall_exists_index, forall_apply_eq_imp_iff,
+      RCLike.zero_le_real]
+    intro i
+    exact h.eigenvalues_nonneg i
+  . rintro ⟨h1, h2⟩
+    rw [posSemidef_iff_of_isHermitian h1]
+    rw [h1.spectrum] at h2
+    simp only [Set.setOf_subset_setOf, forall_exists_index, forall_apply_eq_imp_iff,
+      RCLike.zero_le_real] at h2
+    exact h2
+
 theorem posDef_iff_of_isHermitian {𝕜 n : Type _}
   [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
   (hx : x.IsHermitian) :
@@ -234,6 +253,45 @@ theorem posDef_iff_of_isHermitian {𝕜 n : Type _}
     intro i
     rw [Function.comp_apply, RCLike.zero_lt_real]
     exact h i
+
+theorem posDef_iff_isHermitian_and_pos_spectrum {𝕜 n : Type _}
+  [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
+  x.PosDef ↔ (x.IsHermitian ∧ spectrum 𝕜 (Matrix.toLin' x) ⊆ {x : 𝕜 | 0 < x}) :=
+by
+  constructor
+  . intro h
+    refine ⟨h.1, ?_⟩
+    simp_rw [h.1.spectrum]
+    simp only [Set.setOf_subset_setOf, forall_exists_index, forall_apply_eq_imp_iff,
+      RCLike.zero_lt_real]
+    intro i
+    exact h.eigenvalues_pos i
+  . rintro ⟨h1, h2⟩
+    rw [posDef_iff_of_isHermitian h1]
+    rw [h1.spectrum] at h2
+    simp only [Set.setOf_subset_setOf, forall_exists_index, forall_apply_eq_imp_iff,
+      RCLike.zero_lt_real] at h2
+    exact h2
+
+theorem posSemidef_iff_commute {𝕜 n : Type _} [RCLike 𝕜]
+  [Fintype n] [DecidableEq n] {x y : Matrix n n 𝕜}
+  (hx : x.PosSemidef) (hy : y.PosSemidef) :
+  Commute x y ↔ (x * y).PosSemidef :=
+by
+  refine ⟨λ h => ?_, λ h => (Matrix.commute_iff hx.1 hy.1).mpr h.1⟩
+  rw [posSemidef_iff_isHermitian_and_nonneg_spectrum]
+  refine ⟨(Matrix.commute_iff hx.1 hy.1).mp h, ?_⟩
+  obtain ⟨a, rfl⟩ := (posSemidef_iff _).mp hx
+  obtain ⟨b, rfl⟩ := (posSemidef_iff _).mp hy
+  calc spectrum 𝕜 (toLin' (aᴴ * a * (bᴴ * b)))
+      = spectrum 𝕜 ((toLin' a) * toLin' (bᴴ * b) * toLin' aᴴ) :=
+      by
+        rw [LinearMap.mul_eq_comp, spectrum.comm]
+        simp_rw [LinearMap.mul_eq_comp, ← toLin'_mul, mul_assoc]
+    _ = spectrum 𝕜 (toLin' ((b * aᴴ)ᴴ * (b * aᴴ))) :=
+      by simp_rw [conjTranspose_mul, conjTranspose_conjTranspose, LinearMap.mul_eq_comp,
+        ← toLin'_mul, mul_assoc]
+  exact (posSemidef_iff_isHermitian_and_nonneg_spectrum.mp (posSemidef_conjTranspose_mul_self _)).2
 
 theorem innerAut_negSemidef_iff {𝕜 n : Type _}
   [RCLike 𝕜] [Fintype n] [DecidableEq n] (U : unitaryGroup n 𝕜) {a : Matrix n n 𝕜} :

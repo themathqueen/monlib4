@@ -31,6 +31,13 @@ noncomputable def PosDef.rpow {Q : Matrix n n 𝕜} (hQ : PosDef Q) (r : ℝ) :
     hQ.1.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup n 𝕜)
     (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ r : n → ℝ) : n → 𝕜))
 
+noncomputable def PosSemidef.rpow {Q : Matrix n n 𝕜} (hQ : PosSemidef Q) (r : NNReal) :
+  Matrix n n 𝕜 :=
+  Matrix.innerAut
+    (⟨(IsHermitian.eigenvectorMatrix hQ.1 : Matrix n n 𝕜),
+    hQ.1.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup n 𝕜)
+    (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ (r : ℝ) : n → ℝ) : n → 𝕜))
+
 theorem PosDef.rpow_mul_rpow (r₁ r₂ : ℝ) {Q : Matrix n n 𝕜} (hQ : PosDef Q) :
     hQ.rpow r₁ * hQ.rpow r₂ = hQ.rpow (r₁ + r₂) :=
   by
@@ -38,9 +45,34 @@ theorem PosDef.rpow_mul_rpow (r₁ r₂ : ℝ) {Q : Matrix n n 𝕜} (hQ : PosDe
     Function.comp_apply, ← RCLike.ofReal_mul, ← Real.rpow_add (hQ.pos_eigenvalues _)]
   rfl
 
+theorem PosSemidef.rpow_mul_rpow (r₁ r₂ : NNRealˣ) (h : r₁ + (r₂ : NNReal) ≠ 0)
+  {Q : Matrix n n 𝕜} (hQ : PosSemidef Q) :
+    hQ.rpow r₁ * hQ.rpow r₂ = hQ.rpow (r₁ + r₂) :=
+  by
+  simp_rw [Matrix.PosSemidef.rpow, ← innerAut.map_mul, Pi.pow_def, diagonal_mul_diagonal,
+    Function.comp_apply, ← RCLike.ofReal_mul]
+  congr
+  simp_rw [diagonal_eq_diagonal_iff, Function.comp_apply]
+  intro i
+  by_cases h : hQ.1.eigenvalues i = 0
+  . simp_rw [h]
+    rw [Real.zero_rpow, zero_mul, Real.zero_rpow]
+    rw [ne_eq, NNReal.coe_eq_zero]
+    simp only [add_eq_zero_iff, Units.ne_zero, and_self, not_false_eq_true]
+    simp only [ne_eq, NNReal.coe_eq_zero, Units.ne_zero, not_false_eq_true]
+  . rw [← Real.rpow_add]; rfl
+    apply lt_of_le_of_ne (hQ.eigenvalues_nonneg _)
+    rw [ne_eq, eq_comm]
+    exact h
+
 theorem PosDef.rpow_one_eq_self {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
     hQ.rpow 1 = Q := by
   simp_rw [PosDef.rpow, Pi.pow_def, Real.rpow_one]
+  rw [← IsHermitian.spectral_theorem'' hQ.1]
+
+theorem PosSemidef.rpow_one_eq_self {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) :
+    hQ.rpow 1 = Q := by
+  simp_rw [PosSemidef.rpow, Pi.pow_def, NNReal.coe_one, Real.rpow_one]
   rw [← IsHermitian.spectral_theorem'' hQ.1]
 
 @[instance]
@@ -92,6 +124,20 @@ theorem PosDef.rpow.isPosDef [DecidableEq 𝕜] {Q : Matrix n n 𝕜} (hQ : Q.Po
   rw [Matrix.PosDef.rpow, innerAut_posDef_iff, Matrix.PosDef.diagonal]
   simp only [Function.comp_apply, RCLike.zero_lt_real, Pi.pow_apply]
   exact fun i => Real.rpow_pos_of_pos (PosDef.pos_eigenvalues hQ i) r
+
+theorem PosSemidef.sqrt_eq_rpow {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) :
+  hQ.sqrt = hQ.rpow (1 / 2) :=
+by
+  rw [PosSemidef.rpow, PosSemidef.sqrt, Matrix.innerAut_apply]
+  congr
+  simp_rw [diagonal_eq_diagonal_iff, Function.comp_apply, Pi.pow_apply,
+    Real.sqrt_eq_rpow]
+  intro
+  rfl
+
+theorem PosDef.sqrt_eq_rpow {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
+  hQ.posSemidef.sqrt = hQ.rpow (1 / 2) :=
+by convert PosSemidef.sqrt_eq_rpow hQ.posSemidef
 
 theorem PosDef.rpow.isHermitian [DecidableEq 𝕜] {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) :
     (hQ.rpow r).IsHermitian :=
