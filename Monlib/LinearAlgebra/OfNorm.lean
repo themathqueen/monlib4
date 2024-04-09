@@ -585,6 +585,31 @@ theorem mem_extremePoints_of_closedBall_iff_norm_eq_one
             _ = 1 := by ring_nf
         simp only [lt_irrefl] at this
 
+theorem LinearIsometry.norm_comp_toContinuousLinearMap_le
+  {𝕜 X Y Z : Type _} [RCLike 𝕜] [NormedAddCommGroup X]
+  [NormedAddCommGroup Y] [NormedAddCommGroup Z] [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [NormedSpace 𝕜 Z]
+  (f : X →ₗᵢ[𝕜] Y) (h : Y →L[𝕜] Z) :
+  ‖h ∘L f.toContinuousLinearMap‖ ≤ ‖h‖ :=
+by
+  apply ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _) (λ x => _)
+  intro x
+  rw [ContinuousLinearMap.comp_apply, LinearIsometry.coe_toContinuousLinearMap, ← f.norm_map x]
+  exact h.le_op_norm _
+
+example {𝕜 X Y Z : Type _} [RCLike 𝕜] [NormedAddCommGroup X]
+  [NormedAddCommGroup Y] [NormedAddCommGroup Z] [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [NormedSpace 𝕜 Z]
+  (f : X ≃ₗᵢ[𝕜] Y) (h : Y →L[𝕜] Z) :
+  ‖h ∘L f.toLinearIsometry.toContinuousLinearMap‖ = ‖h‖ :=
+by
+  apply le_antisymm (f.toLinearIsometry.norm_comp_toContinuousLinearMap_le _)
+  calc ‖h‖ = ‖(h ∘L f.toLinearIsometry.toContinuousLinearMap) ∘L f.symm.toLinearIsometry.toContinuousLinearMap‖ := ?_
+    _ ≤ _ := f.symm.toLinearIsometry.norm_comp_toContinuousLinearMap_le _
+  apply ContinuousLinearMap.opNorm_ext
+  intro y
+  simp only [ContinuousLinearMap.coe_comp', LinearIsometry.coe_toContinuousLinearMap,
+    LinearIsometryEquiv.coe_toLinearIsometry, Function.comp_apply,
+    LinearIsometryEquiv.apply_symm_apply]
+
 @[simps] def NormedSpace.Dual.transpose {E F : Type*} (𝕜 : Type*) [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] (f : E →L[𝕜] F) :
   Dual 𝕜 F →ₗ[𝕜] Dual 𝕜 E :=
@@ -596,7 +621,7 @@ theorem mem_extremePoints_of_closedBall_iff_norm_eq_one
 
 lemma NormedSpace.Dual.transpose_isometry
   {𝕜 X Y : Type*} [RCLike 𝕜] [NormedAddCommGroup X] [NormedAddCommGroup Y]
-  [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [Nontrivial X]
+  [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y]
   {f : X ≃ₗᵢ[𝕜] Y} :
   _root_.Isometry (NormedSpace.Dual.transpose 𝕜 f.toLinearIsometry.toContinuousLinearMap) :=
 by
@@ -604,28 +629,12 @@ by
   rw [AddMonoidHomClass.isometry_iff_norm]
   intro x
   simp_rw [NormedSpace.Dual.transpose_apply]
-  have := calc ‖x ∘L f.toLinearIsometry.toContinuousLinearMap‖ ≤ ‖x‖ * ‖f.toLinearIsometry.toContinuousLinearMap‖ := ContinuousLinearMap.opNorm_comp_le _ _
-    _ = ‖x‖ * 1 := by rw [LinearIsometry.norm_toContinuousLinearMap]
-    _ = ‖x‖ := by rw [mul_one]
-  by_cases h : Subsingleton Y
-  . simp only [ContinuousLinearMap.opNorm_subsingleton, norm_eq_zero]
-    ext y
-    simp only [ContinuousLinearMap.coe_comp', LinearIsometry.coe_toContinuousLinearMap,
-      LinearIsometryEquiv.coe_toLinearIsometry, Function.comp_apply, ContinuousLinearMap.zero_apply]
-    suffices f y = 0 by rw [this, map_zero]
-    exact Subsingleton.elim _ _
-  rw [not_subsingleton_iff_nontrivial] at h
-  have := calc ‖x‖ = ‖x ∘L (f.symm.trans f).toLinearIsometry.toContinuousLinearMap‖ := by simp only [LinearIsometryEquiv.symm_trans_self]; rfl
-    _ = ‖(x ∘L f.toLinearIsometry.toContinuousLinearMap) ∘L f.symm.toLinearIsometry.toContinuousLinearMap‖ := rfl
-    _ ≤ ‖x ∘L f.toLinearIsometry.toContinuousLinearMap‖ * ‖f.symm.toLinearIsometry.toContinuousLinearMap‖ := ContinuousLinearMap.opNorm_comp_le _ _
-    _ = ‖x ∘L f.toLinearIsometry.toContinuousLinearMap‖ * 1 := by rw [LinearIsometry.norm_toContinuousLinearMap]
-    _ = ‖x ∘L f.toLinearIsometry.toContinuousLinearMap‖ := by rw [mul_one]
-  linarith
+  exact ContinuousLinearMap.opNorm_comp_linearIsometryEquiv _ _
 }
 
 open NormedSpace in
 @[simps] def LinearEquiv.transpose {E F : Type*} (𝕜 : Type*) [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [NormedAddCommGroup F] [NormedSpace 𝕜 F] [Nontrivial E]
+  [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   (f : E ≃ₗᵢ[𝕜] F) :
   Dual 𝕜 F ≃ₗᵢ[𝕜] Dual 𝕜 E :=
 { toFun := NormedSpace.Dual.transpose 𝕜 (f.toLinearIsometry).toContinuousLinearMap
