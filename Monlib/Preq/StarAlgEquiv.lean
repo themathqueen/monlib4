@@ -6,6 +6,7 @@ Authors: Monica Omar
 import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Algebra.Equiv
 import Mathlib.Algebra.Ring.Idempotents
+import Mathlib.LinearAlgebra.Span
 
 #align_import preq.star_alg_equiv
 
@@ -141,3 +142,37 @@ theorem StarAlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Sem
     [Semiring B] [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) {a : B} {b : A} :
     a = f b ↔ f.symm a = b :=
   AlgEquiv.eq_apply_iff_symm_eq f.toAlgEquiv
+
+lemma AlgEquiv.apply_eq_iff_eq {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
+  (f : A ≃ₐ[R] B) {x y : A} :
+  f x = f y ↔ x = y :=
+Equiv.apply_eq_iff_eq f.toEquiv
+
+lemma AlgEquiv.image_center {R A : Type*} [CommRing R] [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
+  f '' (Set.center A) = Set.center A :=
+by
+  ext x
+  simp only [Set.mem_image, Set.mem_center_iff, isMulCentral_iff,
+    mul_assoc, forall_const, and_self, and_true]
+  constructor
+  . rintro ⟨y, hy, rfl⟩ a
+    let b : A := f.symm a
+    have hb : a = f b := by simp only [b, AlgEquiv.apply_symm_apply]
+    simp_rw [hb, ← f.map_mul, hy]
+  . rintro hx
+    refine ⟨f.symm x, λ a => ?_, f.apply_symm_apply x⟩
+    apply_fun f using f.injective
+    simp_rw [f.map_mul, AlgEquiv.apply_symm_apply, hx]
+
+lemma AlgEquiv.image_span_center {R A : Type*} [CommRing R]
+  [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
+  f '' (Submodule.span R (Set.center A)) = Submodule.span R (Set.center A) :=
+by rw [← Submodule.map_coe, Submodule.map_span, AlgEquiv.image_center]
+
+lemma AlgEquiv.map_span_center {R A : Type*} [CommRing R]
+  [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
+  Submodule.map f (Submodule.span R (Set.center A)) = Submodule.span R (Set.center A) :=
+by
+  have := _root_.AlgEquiv.image_span_center f
+  rw [← Submodule.map_coe] at this
+  norm_cast at this

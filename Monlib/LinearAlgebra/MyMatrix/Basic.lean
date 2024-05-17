@@ -423,3 +423,22 @@ theorem forall_left_hMul {n R : Type _} [Fintype n] [DecidableEq n] [Semiring R]
   specialize h 1
   simp_rw [one_mul] at h
   exact h
+
+lemma _root_.Matrix.smul_one_eq_one_iff {𝕜 n : Type*} [Fintype n] [DecidableEq n] [Field 𝕜] (c : 𝕜) :
+  c • (1 : Matrix n n 𝕜) = (1 : Matrix n n 𝕜) ↔ c = 1 ∨ IsEmpty n :=
+by
+  simp_rw [← ext_iff, smul_apply, one_apply, smul_ite, smul_zero, smul_eq_mul, mul_one]
+  by_cases h : IsEmpty n
+  . simp only [h, ite_true, eq_self_iff_true, or_true, iff_true]
+    intro i j
+    exact h.elim i
+  . simp only [h, ite_false, not_false_iff, or_false, iff_false]
+    constructor
+    . rintro h1
+      rw [not_isEmpty_iff] at h
+      let i : n := h.some
+      specialize h1 i i
+      simp only [↓reduceIte] at h1
+      exact h1
+    . rintro rfl i j
+      rfl

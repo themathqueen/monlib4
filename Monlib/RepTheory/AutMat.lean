@@ -9,6 +9,9 @@ import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.Preq.Set
+import Monlib.Preq.Submodule
+import Monlib.Preq.StarAlgEquiv
 
 #align_import rep_theory.aut_mat
 
@@ -39,7 +42,6 @@ local notation "L(" V ")" => V →ₗ[𝕜] V
 local notation "M" n => Matrix n n 𝕜
 
 local notation "Mₙ" n => Matrix n n R
-
 section Matrix
 
 open Matrix
@@ -239,6 +241,107 @@ theorem Algebra.autInner_hMul_autInner {R E : Type _} [CommSemiring R] [Semiring
   ext
   simp_rw [AlgEquiv.mul_apply, Algebra.autInner_apply, invOf_mul, mul_assoc]
 
+@[pp_dot] def AlgEquiv.IsInner {R E : Type*} [CommSemiring R] [Semiring E]
+  [Algebra R E]
+  (f : E ≃ₐ[R] E) : Prop :=
+∃ (a : E) (ha : Invertible a), f = Algebra.autInner a
+
+@[simps] def AlgEquiv.prod_map {K R₁ R₂ : Type*} [CommSemiring K]
+  [Semiring R₁] [Semiring R₂]
+  [Algebra K R₁] [Algebra K R₂] (f : R₁ ≃ₐ[K] R₁) (g : R₂ ≃ₐ[K] R₂) :
+  (R₁ × R₂) ≃ₐ[K] (R₁ × R₂) :=
+{ toFun := Prod.map f g
+  invFun := Prod.map f.symm g.symm
+  left_inv := λ x => by simp
+  right_inv := λ x => by simp
+  map_add' := λ x y => by simp
+  map_mul' := λ x y => by simp
+  commutes' := λ r => by simp }
+
+@[simps] def AlgEquiv.Pi {K ι : Type*} [CommSemiring K] {R : ι → Type*} [∀ i, Semiring (R i)]
+  [∀ i, Algebra K (R i)] (f : Π i, R i ≃ₐ[K] R i) : (Π i, R i) ≃ₐ[K] (Π i, R i) :=
+{ toFun := λ x i => f i (x i)
+  invFun := λ x i => (f i).symm (x i)
+  left_inv := λ x => funext λ i => (f i).left_inv (x i)
+  right_inv := λ x => funext λ i => (f i).right_inv (x i)
+  map_add' := λ x y => funext λ i => (f i).map_add (x i) (y i)
+  map_mul' := λ x y => funext λ i => (f i).map_mul (x i) (y i)
+  commutes' := λ r => funext λ i => (f i).commutes r }
+
+instance Prod.invertible_fst {R₁ R₂ : Type*} [Semiring R₁] [Semiring R₂]
+  {a : R₁ × R₂} [ha : Invertible a] :
+  Invertible a.1 :=
+by
+  use (⅟ a).1
+  on_goal 1 => have := ha.invOf_mul_self
+  on_goal 2 => have := ha.mul_invOf_self
+  all_goals
+    rw [Prod.mul_def, Prod.mk_eq_one] at this
+    simp_rw [this]
+instance Prod.invertible_snd {R₁ R₂ : Type*} [Semiring R₁] [Semiring R₂]
+  {a : R₁ × R₂} [ha : Invertible a] :
+  Invertible a.2 :=
+by
+  use (⅟ a).2
+  on_goal 1 => have := ha.invOf_mul_self
+  on_goal 2 => have := ha.mul_invOf_self
+  all_goals
+    rw [Prod.mul_def, Prod.mk_eq_one] at this
+    simp_rw [this]
+instance Prod.invertible {R₁ R₂ : Type*} [Semiring R₁] [Semiring R₂]
+  {a : R₁} {b : R₂} [ha : Invertible a] [hb : Invertible b] :
+  Invertible (a, b) :=
+⟨(⅟ a, ⅟ b), by simp, by simp⟩
+
+instance Pi.invertible_i {ι : Type*} {R : ι → Type*} [Π i, Semiring (R i)]
+  [Π i, Semiring (R i)] {a : Π i, R i} [ha : Invertible a] (i : ι) :
+  Invertible (a i) :=
+by
+  use (⅟ a) i
+  on_goal 1 => have := ha.invOf_mul_self
+  on_goal 2 => have := ha.mul_invOf_self
+  all_goals
+    rw [Pi.mul_def, Function.funext_iff] at this
+    simp_rw [this]
+    rfl
+instance Pi.invertible {ι : Type*} {R : ι → Type*} [Π i, Semiring (R i)]
+  [Π i, Semiring (R i)] {a : Π i, R i} [ha : Π i, Invertible (a i)] :
+  Invertible a :=
+⟨λ i => ⅟ (a i), by simp_rw [mul_def, invOf_mul_self]; rfl,
+  by simp_rw [mul_def, mul_invOf_self]; rfl⟩
+
+theorem AlgEquiv.prod_isInner_iff_prod_map {K R₁ R₂ : Type*} [CommSemiring K]
+  [Semiring R₁] [Semiring R₂]
+  [Algebra K R₁] [Algebra K R₂] (f : (R₁ × R₂) ≃ₐ[K] (R₁ × R₂)) :
+  AlgEquiv.IsInner f
+    ↔ ∃ (a : R₁) (ha : Invertible a) (b : R₂) (hb : Invertible b),
+      f = AlgEquiv.prod_map (Algebra.autInner a) (Algebra.autInner b) :=
+by
+  constructor
+  . rintro ⟨a, ha, h⟩
+    use a.1, by infer_instance, a.snd, by infer_instance
+    exact h
+  . rintro ⟨a, ha, b, hb, h⟩
+    use (a, b), by infer_instance
+    exact h
+
+theorem AlgEquiv.pi_isInner_iff_pi_map {K ι : Type*} {R : ι → Type*} [CommSemiring K]
+  [Π i, Semiring (R i)] [Π i, Algebra K (R i)]
+  (f : (Π i, R i) ≃ₐ[K] (Π i, R i)) :
+  AlgEquiv.IsInner f
+    ↔ ∃ (a : Π i, R i) (ha : Π i, Invertible (a i)),
+      f = AlgEquiv.Pi (λ i => Algebra.autInner (a i)) :=
+by
+  constructor
+  . rintro ⟨a, ha, h⟩
+    use (λ i => a i), by infer_instance
+    rw [h]
+    rfl
+  . rintro ⟨a, ha, h⟩
+    use (λ i => a i), by infer_instance
+    rw [h]
+    rfl
+
 private theorem automorphism_matrix_inner''' [DecidableEq n] [Nonempty n] (f : (M n) ≃ₐ[𝕜] M n) :
     ∃ T : (n → 𝕜) ≃ₗ[𝕜] n → 𝕜,
       f = @Algebra.autInner 𝕜 (M n) _ _ _
@@ -320,6 +423,29 @@ theorem Matrix.commutes_with_all_iff {R : Type _} [CommSemiring R] [DecidableEq 
   · rintro ⟨α, rfl⟩ y
     simp_rw [Matrix.smul_mul, Matrix.mul_smul, Matrix.one_mul, Matrix.mul_one]
 
+
+lemma _root_.Matrix.center {R n : Type*} [CommSemiring R] [Fintype n] [DecidableEq n] :
+  Set.center (Matrix n n R) = Submodule.span R {(1 : Matrix n n R)} :=
+by
+  ext x
+  rw [Set.mem_center_iff, isMulCentral_iff]
+  simp_rw [mul_assoc, forall_const, and_self, and_true, SetLike.mem_coe]
+  have := @Matrix.commutes_with_all_iff _ _ _ _ _ x
+  simp_rw [Commute, SemiconjBy] at this
+  simp_rw [@eq_comm _ (x * _), this, Submodule.mem_span_singleton, eq_comm]
+
+lemma _root_.Matrix.prod_center {R n m : Type*} [CommSemiring R] [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m] :
+  Set.center (Matrix n n R × Matrix m m R)
+    = (Submodule.span R {((1 : Matrix n n R), (0 : Matrix m m R)), (0, 1)}) :=
+by
+  simp_rw [Set.center_prod, Matrix.center]
+  ext x
+  simp only [Set.mem_prod, SetLike.mem_coe, Submodule.mem_span_pair,
+    Submodule.mem_span_singleton, Prod.smul_mk, smul_zero, Prod.mk_add_mk, zero_add,
+    add_zero]
+  nth_rw 3 [← Prod.eta x]
+  simp_rw [Prod.ext_iff, exists_and_left, exists_and_right]
+
 private theorem matrix.one_ne_zero {R : Type _} [Semiring R] [One R] [Zero R] [NeZero (1 : R)]
     [DecidableEq n] [hn : Nonempty n] : (1 : Matrix n n R) ≠ 0 :=
   by
@@ -354,5 +480,128 @@ theorem Algebra.autInner_eq_autInner_iff [DecidableEq n] (x y : Matrix n n 𝕜)
   simp_rw [this, AlgEquiv.ext_iff, Algebra.autInner_apply, ← Matrix.commutes_with_all_iff, Commute,
     SemiconjBy, invOf_eq_nonsing_inv, ← mul_inv_eq_iff_eq_mul_of_invertible,
     Matrix.mul_assoc, ← inv_mul_eq_iff_eq_mul_of_invertible, inv_inv_of_invertible]
+
+theorem Matrix.one_ne_zero_iff {𝕜 n : Type*} [DecidableEq n]
+  [Zero 𝕜] [One 𝕜] [NeZero (1 : 𝕜)] :
+  (1 : Matrix n n 𝕜) ≠ (0 : Matrix n n 𝕜) ↔ Nonempty n :=
+by
+  simp_rw [Ne.def, ← Matrix.ext_iff, one_apply, zero_apply, not_forall]
+  constructor
+  . rintro ⟨x, _, _⟩
+    use x
+  . intro h
+    obtain ⟨i⟩ := h
+    use i, i
+    simp only [↓reduceIte, one_ne_zero, not_false_iff]
+
+theorem Matrix.one_eq_zero_iff {𝕜 n : Type*} [DecidableEq n]
+  [Zero 𝕜] [One 𝕜] [NeZero (1 : 𝕜)] :
+  (1 : Matrix n n 𝕜) = (0 : Matrix n n 𝕜) ↔ IsEmpty n :=
+by rw [← not_nonempty_iff, ← @one_ne_zero_iff 𝕜 n, not_ne_iff]
+
+theorem AlgEquiv.matrix_prod {𝕜 n m : Type*} [Field 𝕜] [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
+  [Nonempty n] [Nonempty m]
+  (f : (Matrix n n 𝕜 × Matrix m m 𝕜) ≃ₐ[𝕜] (Matrix n n 𝕜 × Matrix m m 𝕜)) :
+  (f (1, 0) = (1, 0) ∧ f (0, 1) = (0, 1)) ∨ (f (1, 0) = (0, 1) ∧ f (0, 1) = (1, 0)) :=
+by
+  let e₁ : (Matrix n n 𝕜 × Matrix m m 𝕜) := (1, 0)
+  let e₂ : (Matrix n n 𝕜 × Matrix m m 𝕜) := (0, 1)
+  have he₁ : e₁ = (1, 0) := rfl
+  have he₂ : e₂ = (0, 1) := rfl
+  rw [← he₁, ← he₂]
+  have h₁ : e₁ + e₂ = 1 := by
+    rw [he₁, he₂]
+    simp only [Prod.mk_add_mk, add_zero, zero_add, Prod.mk_eq_one, and_self]
+  have h₂ : e₁ * e₂ = 0 := by
+    rw [he₁, he₂]
+    simp only [Prod.mk_mul_mk, mul_zero, mul_one, Prod.mk_eq_zero, and_self]
+  have h₃ : e₂ * e₁ = 0 := by
+    rw [he₁, he₂]
+    simp only [Prod.mk_mul_mk, mul_one, mul_zero, Prod.mk_eq_zero, and_self]
+  have h₄ : e₁ * e₁ = e₁ := by
+    rw [he₁]
+    simp only [Prod.mk_mul_mk, mul_one, mul_zero]
+  have h₅ : e₂ * e₂ = e₂ := by
+    rw [he₂]
+    simp only [Prod.mk_mul_mk, mul_zero, mul_one]
+  have h10 : ∀ a : 𝕜, a • e₁ = (a • 1, 0) := by
+    intro a
+    simp_rw [e₁, Prod.smul_mk, smul_zero]
+  have h11 : ∀ a : 𝕜, a • e₂ = (0, a • 1) := by
+    intro a
+    simp_rw [e₂, Prod.smul_mk, smul_zero]
+  have hf := AlgEquiv.image_center f
+  rw [Set.ext_iff] at hf
+  have he₁' : e₁ ∈ (Submodule.span 𝕜 {((1 : Matrix n n 𝕜), (0 : Matrix m m 𝕜)), (0, 1)} : Set _) := by
+    simp only [SetLike.mem_coe]
+    simp_rw [Submodule.mem_span_pair, ← he₁, ← he₂, h10, h11, Prod.mk_add_mk, add_zero]
+    use 1, 0
+    simp only [one_smul, zero_smul, add_zero]
+  have he₂' : e₂ ∈ (Submodule.span 𝕜 {((1 : Matrix n n 𝕜), (0 : Matrix m m 𝕜)), (0, 1)} : Set _) := by
+    simp only [SetLike.mem_coe]
+    simp_rw [Submodule.mem_span_pair, ← he₁, ← he₂, h10, h11, Prod.mk_add_mk, add_zero]
+    use 0, 1
+    simp only [one_smul, zero_smul, zero_add]
+  have : Set.center (Matrix n n 𝕜 × Matrix m m 𝕜) = Submodule.span 𝕜 {((1 : Matrix n n 𝕜), (0 : Matrix m m 𝕜)), (0, 1)} :=
+  Matrix.prod_center
+  rw [← this] at he₁' he₂'
+  have hf1 := (hf e₁).mpr he₁'
+  have hf2 := (hf e₂).mpr he₂'
+  simp only [Set.mem_image, SetLike.coe_mem] at hf1 hf2
+  have H : ∀ x : (Matrix n n 𝕜 × Matrix m m 𝕜),
+    x ∈ Set.center (Matrix n n 𝕜 × Matrix m m 𝕜) ↔ ∃ a b : 𝕜, a • e₁ + b • e₂ = f x := by
+      simp_rw [← Submodule.mem_span_pair]
+      intro x
+      have this1 : f x ∈ Submodule.span 𝕜 {e₁, e₂} ↔ f x ∈ (Submodule.span 𝕜 {e₁, e₂} : Set _) := by rfl
+      rw [this1, he₁, he₂, ← this]
+      nth_rw 2 [← hf]
+      simp only [Set.mem_image, EmbeddingLike.apply_eq_iff_eq, exists_eq_right, Subtype.coe_prop]
+  obtain ⟨α, β, h₆⟩ : ∃ a b : 𝕜, a • e₁ + b • e₂ = f e₁ := (H e₁).mp he₁'
+  obtain ⟨γ, ζ, h₇⟩ : ∃ a b : 𝕜, a • e₁ + b • e₂ = f e₂ := (H e₂).mp he₂'
+  obtain ⟨a, ha1, ha2⟩ := hf1
+  obtain ⟨b, hb1, hb2⟩ := hf2
+  simp_rw [this, SetLike.mem_coe, Submodule.mem_span_pair] at ha1 hb1
+  obtain ⟨c, d, hcd⟩ := ha1
+  obtain ⟨c₂, d₂, hcd2⟩ := hb1
+  have h₈ : f (e₁ * e₂) = 0 := by rw [h₂, f.map_zero]
+  have h₉ : f (e₁ + e₂) = 1 := by rw [h₁, f.map_one]
+  simp_rw [f.map_mul, ← h₆, ← h₇, add_mul, mul_add, smul_mul_smul, h₂, h₃, h₄, h₅, smul_zero,
+    add_zero, zero_add, h10, h11, Prod.mk_add_mk, add_zero, zero_add, Prod.zero_eq_mk,
+    Prod.ext_iff, smul_eq_zero, mul_eq_zero, one_ne_zero, or_false] at h₈
+  rw [f.map_add, ← h₆, ← h₇, add_add_add_comm] at h₉
+  simp_rw [← add_smul, Prod.one_eq_mk, h10, h11, Prod.mk_add_mk, add_zero, zero_add,
+    Prod.ext_iff, smul_one_eq_one_iff, not_isEmpty_of_nonempty, or_false] at h₉
+  by_cases hα : α ≠ 0
+  . simp_rw [hα, false_or] at h₈
+    rw [h₈.1, add_zero] at h₉
+    rw [h₉.1] at h₆
+    rw [h₈.1, zero_smul, zero_add] at h₇
+    have hζ : ζ ≠ 0 := by
+      intro hζ
+      simp_rw [hζ, zero_smul, @eq_comm _ (0 : Matrix n n 𝕜 × Matrix m m 𝕜),
+        AlgEquiv.map_eq_zero_iff, he₂, Prod.zero_eq_mk, Prod.ext_iff,
+        one_ne_zero, and_false] at h₇
+    simp_rw [hζ, or_false] at h₈
+    rw [h₈.2, zero_add] at h₉
+    rw [h₉.2, one_smul] at h₇
+    rw [one_smul, h₈.2, zero_smul, add_zero] at h₆
+    left
+    exact ⟨h₆.symm, h₇.symm⟩
+  . rw [not_ne_iff] at hα
+    rw [hα] at h₈ h₉ h₆
+    simp only [true_or, zero_add, true_and] at h₈ h₉
+    rw [zero_smul, zero_add] at h₆
+    rw [h₉.1, one_smul] at h₇
+    have hβ : β ≠ 0 := by
+      intro hβ
+      simp_rw [hβ, zero_smul, @eq_comm _ (0 : Matrix n n 𝕜 × Matrix m m 𝕜),
+        AlgEquiv.map_eq_zero_iff, he₁, Prod.zero_eq_mk, Prod.ext_iff,
+        one_ne_zero, false_and] at h₆
+    simp_rw [hβ, false_or] at h₈
+    rw [h₈, add_zero] at h₉
+    rw [h₉.2, one_smul] at h₆
+    rw [h₈, zero_smul, add_zero] at h₇
+    right
+    exact ⟨h₆.symm, h₇.symm⟩
 
 end Matrix
