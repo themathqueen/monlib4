@@ -81,7 +81,7 @@ variable {U V : Submodule R E} {p q : E →ₗ[R] E} (hp : IsIdempotentElem p) (
 /-- given idempotent linear operators $p,q$,
   we have $qp = p$ iff $p(E) \subseteq q(E)$ -/
 theorem IsIdempotentElem.comp_idempotent_iff : q.comp p = p ↔ map p ⊤ ≤ map q ⊤ := by
-  simp_rw [ext_iff, comp_apply, ← IsIdempotentElem.mem_range_iff hq, Submodule.map_top,
+  simp_rw [LinearMap.ext_iff, comp_apply, ← IsIdempotentElem.mem_range_iff hq, Submodule.map_top,
     SetLike.le_def, mem_range, forall_exists_index, forall_apply_eq_imp_iff]
 
 /-- if $p,q$ are idempotent operators and $pq = p = qp$,

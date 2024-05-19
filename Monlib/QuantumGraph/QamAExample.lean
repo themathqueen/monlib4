@@ -279,7 +279,7 @@ private theorem matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zer
   exact x.property this
 
 private theorem example_aux {x : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 }}
-    (hx : (x : Matrix (Fin 2) (Fin 2) ℂ).IsAlmostHermitian)
+    (hx : (x.val : Matrix (Fin 2) (Fin 2) ℂ).IsAlmostHermitian)
     (hh : (hx.matrix_isHermitian.eigenvalues 0 : ℂ) = -(hx.matrix_isHermitian.eigenvalues 1 : ℂ))
     (i : Fin 2) : (hx.matrix_isHermitian.eigenvalues i : ℂ) ≠ 0 :=
   by
@@ -425,6 +425,10 @@ private theorem matrix.is_almost_hermitian.eigenvalues_eq_zero_iff_aux
 theorem Matrix.diagonal_eq_zero_iff {x : n → ℂ} : diagonal x = 0 ↔ x = 0 := by
   simp_rw [← diagonal_zero, diagonal_eq_diagonal_iff, Function.funext_iff, Pi.zero_apply]
 
+theorem Matrix.unitaryGroup.star_mul_cancel_right {U₁ U₂ : unitaryGroup n ℂ} :
+  U₁ * star U₂ * U₂ = U₁ :=
+by simp only [mul_assoc, unitary.star_mul_self, mul_one]
+
 theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
     (hx1 : IsSelfAdjoint (qamA trace_isFaithfulPosMap x))
     (hx2 :
@@ -478,10 +482,8 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
     rw [Matrix.diagonal_eq_zero_iff, Matrix.IsAlmostHermitian.eigenvalues_eq_zero_iff] at this
     exact (Subtype.mem y) this
   refine'
-    ⟨Units.mk0 (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) (mul_ne_zero hx₁ (inv_ne_zero hy₁)),
-      ⟨Hx.eigenvectorMatrix, Hx.eigenvectorMatrix_mem_unitaryGroup⟩ *
-        ⟨Hy.eigenvectorMatrix, Hy.eigenvectorMatrix_mem_unitaryGroup⟩⁻¹,
-      _⟩
+    ⟨Units.mk0 (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) (mul_ne_zero hx₁ (inv_ne_zero hy₁)), _⟩
+  use ⟨Hx.eigenvectorMatrix, Hx.eigenvectorMatrix_mem_unitaryGroup⟩ * star (⟨Hy.eigenvectorMatrix, Hy.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup (Fin 2) ℂ)
   have :
     (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) • diagonal Hy.eigenvalues = diagonal Hx.eigenvalues :=
     by
@@ -489,7 +491,8 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
     simp only [smul_of, smul_cons, Algebra.id.smul_eq_mul, mul_neg, MulZeroClass.mul_zero,
       smul_empty, EmbeddingLike.apply_eq_iff_eq]
     simp only [inv_mul_cancel_right₀ hy₁]
-  simp_rw [inv_mul_cancel_right, Units.val_mk0, ← SMulHomClass.map_smul, ← HY, ← HX, this]
+  simp_rw [Matrix.unitaryGroup.star_mul_cancel_right, Units.val_mk0,
+    ← SMulHomClass.map_smul, ← HY, ← HX, this]
 
 theorem Qam.finTwoIsoOfSingleEdge {A B : Matrix (Fin 2) (Fin 2) ℂ →ₗ[ℂ] Matrix (Fin 2) (Fin 2) ℂ}
     (hx0 : RealQam trace_isFaithfulPosMap A) (hy0 : RealQam trace_isFaithfulPosMap B)
