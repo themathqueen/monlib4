@@ -173,6 +173,7 @@ noncomputable def Qam.Nontracial.Mul'CompMul'Adjoint.invertible [Nonempty p]
     LinearMap.ker_id]
   exact Qam.Nontracial.delta_ne_zero hφ₂
 
+set_option maxHeartbeats 0 in
 @[instance]
 noncomputable def Pi.Qam.Nontracial.Mul'CompMul'Adjoint.invertible [Nonempty p]
     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
@@ -212,6 +213,7 @@ theorem Qam.trivialGraph_eq [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)}
   · exact Qam.Nontracial.delta_ne_zero hφ₂
 
 set_option synthInstance.maxHeartbeats 0 in
+set_option maxHeartbeats 0 in
 theorem Pi.Qam.trivialGraph_eq [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
     Pi.Qam.trivialGraph hφ hφ₂ = δ⁻¹ • (1 : ℍ →ₗ[ℂ] ℍ) :=
@@ -229,7 +231,7 @@ theorem Qam.Nontracial.TrivialGraph.qam [Nonempty p] {φ : Module.Dual ℂ (Matr
     schurIdempotent (Qam.trivialGraph hφ hφ₂) (Qam.trivialGraph hφ hφ₂) = Qam.trivialGraph hφ hφ₂ :=
   by
   rw [Qam.trivialGraph_eq]
-  simp_rw [SMulHomClass.map_smul, LinearMap.smul_apply, smul_smul, schurIdempotent]
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, smul_smul, schurIdempotent]
   simp only [LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id, LinearMap.id_comp,
     LinearMap.mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul, mul_assoc]
@@ -243,7 +245,7 @@ theorem Pi.Qam.Nontracial.TrivialGraph.qam [Nonempty p] [∀ i, Nontrivial (n i)
       Pi.Qam.trivialGraph hφ hφ₂ :=
   by
   rw [Pi.Qam.trivialGraph_eq]
-  simp_rw [SMulHomClass.map_smul, LinearMap.smul_apply, smul_smul, schurIdempotent]
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, smul_smul, schurIdempotent]
   simp only [LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id, LinearMap.id_comp,
     LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul, mul_assoc]
@@ -279,7 +281,7 @@ theorem Qam.Nontracial.trivialGraph [Nonempty p] {φ : Module.Dual ℂ (Matrix p
     [hφ : φ.IsFaithfulPosMap] {δ : ℂ} (hφ₂ : φ.matrix⁻¹.trace = δ) :
     schurIdempotent (Qam.trivialGraph hφ hφ₂) 1 = 1 :=
   by
-  rw [Qam.trivialGraph_eq, SMulHomClass.map_smul, LinearMap.smul_apply]
+  rw [Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply]
   simp only [schurIdempotent, LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id,
     LinearMap.id_comp, LinearMap.mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul,
@@ -290,7 +292,7 @@ theorem Pi.Qam.Nontracial.trivialGraph [Nonempty p] [∀ i, Nontrivial (n i)] {�
     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
     schurIdempotent (Pi.Qam.trivialGraph hφ hφ₂) 1 = 1 :=
   by
-  rw [Pi.Qam.trivialGraph_eq, SMulHomClass.map_smul, LinearMap.smul_apply]
+  rw [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply]
   simp_rw [schurIdempotent_apply_apply, TensorProduct.map_one, LinearMap.one_eq_id,
     LinearMap.id_comp, LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul,
     inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, LinearMap.one_eq_id]
@@ -313,7 +315,7 @@ theorem Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
     (hφ₂ : φ.matrix⁻¹.trace = δ) (x : l(Matrix p p ℂ)) :
     schurIdempotent x 1 = 0 ↔ schurIdempotent (δ⁻¹ • (x + 1)) 1 = 1 :=
   by
-  simp_rw [SMulHomClass.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
     Qam.refl_idempotent_one_one_of_delta hφ₂, smul_add, smul_smul,
     inv_mul_cancel (Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
   rw [smul_eq_zero_iff_right (inv_ne_zero (Qam.Nontracial.delta_ne_zero hφ₂))]
@@ -323,7 +325,7 @@ theorem Pi.Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
     schurIdempotent x 1 = 0 ↔ schurIdempotent (δ⁻¹ • (x + 1)) 1 = 1 :=
   by
-  simp_rw [SMulHomClass.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
     Pi.Qam.refl_idempotent_one_one_of_delta hφ₂, smul_add, smul_smul,
     inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
   rw [smul_eq_zero_iff_right (inv_ne_zero (Pi.Qam.Nontracial.delta_ne_zero hφ₂))]
@@ -467,7 +469,7 @@ theorem Qam.complement''_is_irreflexive_iff [Nonempty p] {φ : Module.Dual ℂ (
   simp_rw [Qam.complement'', map_sub, LinearMap.sub_apply, t1, sub_sub]
   constructor <;> rintro ⟨h1, h2⟩ <;> refine' ⟨_, h2⟩
   all_goals
-    simp only [Qam.trivialGraph_eq, SMulHomClass.map_smul, LinearMap.smul_apply, h2,
+    simp only [Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply, h2,
       (schurIdempotent_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
     exact h1
 
@@ -484,9 +486,9 @@ theorem Pi.Qam.complement''_is_irreflexive_iff [Nonempty p] [∀ i, Nontrivial (
   simp_rw [Pi.Qam.complement'', map_sub, LinearMap.sub_apply, t1, sub_sub]
   constructor <;> rintro ⟨h1, h2⟩ <;> refine' ⟨_, h2⟩
   all_goals
-    simp only [Pi.Qam.trivialGraph_eq, SMulHomClass.map_smul, LinearMap.smul_apply, h2,
+    simp only [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply, h2,
       (Pi.schurIdempotent_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
-    exact h1
+    rw [h1]
 
 noncomputable def Pi.Qam.irreflexiveComplement [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     (hφ : ∀ i, (φ i).IsFaithfulPosMap) (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :

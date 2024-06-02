@@ -457,7 +457,7 @@ theorem innerAut_lm_rankOne [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
   by
   rw [← innerAut_adjoint_eq_iff] at hU
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
-    SMulHomClass.map_smul, ← hU, LinearMap.adjoint_inner_right, forall_true_iff]
+    _root_.map_smul, ← hU, LinearMap.adjoint_inner_right, forall_true_iff]
 
 local notation "e_{" x "," y "}" => Matrix.stdBasisMatrix x y (1 : ℂ)
 

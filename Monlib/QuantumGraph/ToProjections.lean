@@ -593,7 +593,7 @@ private theorem orthogonal_projection_of_dim_one {𝕜 E : Type _} [RCLike 𝕜]
   have hcc : (u 0 : E) ≠ 0 := by
     have := Basis.ne_zero u.toBasis 0
     simp_rw [OrthonormalBasis.coe_toBasis] at this
-    simp only [Ne.def, Submodule.coe_eq_zero]
+    simp only [ne_eq, Submodule.coe_eq_zero]
     exact this
   have : ‖(u 0 : E)‖ = 1 := by
     rw [@norm_eq_sqrt_inner 𝕜, Real.sqrt_eq_one]
@@ -620,10 +620,8 @@ theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
     let h' := h
     rw [← @Nat.cast_inj ℂ, RealQam.edges_eq hA] at h'
     rw [RealQam.edges] at h
-    let this : (edges.proof_1 hA : ((Qam.reflIdempotent hφ) A) A = A) = hA.toIdempotent := rfl
+    let this : (hA.toIdempotent : ((Qam.reflIdempotent hφ) A) A = A) = hA.toIdempotent := rfl
     rw [this] at h
-    let this' : (edges.proof_2 hA : (LinearMap.IsReal A)) = hA.toIsReal := rfl
-    rw [this'] at h
     obtain ⟨u, hu⟩ := orthogonal_projection_of_dim_one h
     let hu' : (u : ℍ) ≠ 0 := by
       exact u.property
@@ -631,7 +629,7 @@ theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
     use⟨u, hu'⟩
     let t1 := Qam.orthogonalProjection'_eq hA.toIdempotent hA.toIsReal
     simp_rw [← rankOne_toMatrix_transpose_psi_symm, ← LinearEquiv.map_smul,
-      ← LinearMap.map_smul, ← SMulHomClass.map_smul,
+      ← LinearMap.map_smul, ← _root_.map_smul,
       ← ContinuousLinearMap.coe_smul,
       Complex.ofReal'_eq_isROrC_ofReal, ← hu]
     simp_rw [LinearEquiv.eq_symm_apply, ← oneMapTranspose_symm_eq, StarAlgEquiv.eq_apply_iff_symm_eq,
@@ -649,7 +647,7 @@ theorem RealQam.edges_eq_one_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
       inv_mul_cancel_left_of_invertible, ugh, smul_eq_mul, one_div] at this ⊢
     have this' : ((‖(x : ℍ)‖ : ℝ) ^ 2 : ℂ) ≠ (0 : ℂ) :=
       by
-      simp_rw [Ne.def, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero']
+      simp_rw [ne_eq, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero']
       exact x.property
     -- exact set.mem_set_of.mp (subtype.mem x),
     --},

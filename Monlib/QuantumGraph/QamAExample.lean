@@ -57,6 +57,13 @@ theorem traceModuleDual_matrix {n : Type _} [Fintype n] [DecidableEq n] :
 
 open scoped BigOperators
 
+theorem Matrix.IsHermitian.eigenvectorMatrix_conjTranspose_mul
+  {x : ℍ} (hx : x.IsHermitian) :
+    hx.eigenvectorMatrixᴴ * hx.eigenvectorMatrix = 1 :=
+by
+  rw [eigenvectorUnitary_coe_eq_eigenvectorMatrix, ← star_eq_conjTranspose]
+  exact UnitaryGroup.star_mul_self _
+
 open scoped ComplexOrder
 theorem posDefOne_rpow (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
     (posDefOne : PosDef (1 : Matrix n n ℂ)).rpow r = 1 :=
@@ -67,12 +74,9 @@ theorem posDefOne_rpow (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq, one_mulVec]
-  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply, ←
-    IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
-    IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
-    star_eq_conjTranspose,
-    mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
+  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq', one_mulVec]
+  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply,
+    ← mul_apply, IsHermitian.eigenvectorMatrix_conjTranspose_mul, one_apply_eq,
     RCLike.one_re]
   exact (Real.one_rpow _).symm
 
@@ -88,13 +92,10 @@ private theorem PosDef_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
   rw [diagonal_eq_diagonal_iff]
   intro i
   simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq]
+  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq']
   simp_rw [traceModuleDual_matrix, one_mulVec, dotProduct, Pi.star_apply, transpose_apply, ←
-    conjTranspose_apply, ← IsHermitian.conjTranspose_eigenvectorMatrixInv, ← mul_apply, ←
-    IsHermitian.conjTranspose_eigenvectorMatrix, conjTranspose_conjTranspose, ←
-    star_eq_conjTranspose,
-    mem_unitaryGroup_iff'.mp (IsHermitian.eigenvectorMatrix_mem_unitaryGroup _), one_apply_eq,
-    RCLike.one_re]
+    conjTranspose_apply, ← mul_apply,
+    IsHermitian.eigenvectorMatrix_conjTranspose_mul, one_apply_eq, RCLike.one_re]
   exact (Real.one_rpow _).symm
 
 private theorem aux.ug :
@@ -184,7 +185,7 @@ private theorem linear_map.rsmul_adjoint {𝕜 E : Type _} [RCLike 𝕜] [Normed
 private noncomputable def inner_aut_inv.of_ne_zero (U : unitaryGroup n ℂ)
     (x : { x : Matrix n n ℂ // x ≠ 0 }) : { x : Matrix n n ℂ // x ≠ 0 } :=
   haveI : innerAut U⁻¹ (x : Matrix n n ℂ) ≠ 0 ↔ (x : ℍ) ≠ 0 := by
-    simp_rw [Ne.def, innerAut_eq_iff, innerAut_apply_zero]
+    simp_rw [ne_eq, innerAut_eq_iff, innerAut_apply_zero]
   (⟨innerAut U⁻¹ x, this.mpr (x.property)⟩ : { x : Matrix n n ℂ // x ≠ 0 })
 
 private theorem inner_aut_inv.of_ne_zero_eq (U : unitaryGroup n ℂ) (x : { x : ℍ // x ≠ 0 }) :
@@ -265,14 +266,14 @@ theorem Matrix.IsAlmostHermitian.spectrum {x : Matrix n n ℂ} (hx : x.IsAlmostH
   by
   nth_rw 1 [Matrix.IsAlmostHermitian.eq_smul_matrix hx]
   nth_rw 1 [(hx.matrix_isHermitian).spectral_theorem'']
-  simp_rw [← SMulHomClass.map_smul, innerAut.spectrum_eq, ← diagonal_smul, diagonal.spectrum,
+  simp_rw [← _root_.map_smul, innerAut.spectrum_eq, ← diagonal_smul, diagonal.spectrum,
     Pi.smul_apply, Function.comp_apply, Matrix.IsAlmostHermitian.eigenvalues]
 
 private theorem matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero
     {x : { x : ℍ // x ≠ 0 }} (hx : (x : ℍ).IsAlmostHermitian) :
     ((@RCLike.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues : n → ℂ) ≠ 0 :=
   by
-  rw [Ne.def, Matrix.IsHermitian.eigenvalues_eq_zero_iff]
+  rw [ne_eq, Matrix.IsHermitian.eigenvalues_eq_zero_iff]
   have := hx.eq_smul_matrix
   intro hh
   rw [hh, smul_zero] at this
@@ -284,10 +285,10 @@ private theorem example_aux {x : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 }}
     (i : Fin 2) : (hx.matrix_isHermitian.eigenvalues i : ℂ) ≠ 0 :=
   by
   have h := matrix.is_almost_hermitian.matrix_IsHermitian.eigenvalues_ne_zero hx
-  simp only [Ne.def, Function.funext_iff, Function.comp_apply, Pi.zero_apply] at h
+  simp only [ne_eq, Function.funext_iff, Function.comp_apply, Pi.zero_apply] at h
   simp only [Complex.ofReal'_eq_isROrC_ofReal] at *
   revert i
-  simp_rw [Fin.forall_fin_two, Ne.def, hh, neg_eq_zero, and_self_iff] at h ⊢
+  simp_rw [Fin.forall_fin_two, ne_eq, hh, neg_eq_zero, and_self_iff] at h ⊢
   exact h
 
 theorem spectra_fin_two {x : Matrix (Fin 2) (Fin 2) ℂ}
@@ -345,7 +346,7 @@ theorem spectra_fin_two_ext {α : Type _} (α₁ α₂ β₁ β₂ : α) :
     · rw [← h', eq_comm] at h2
       contradiction
   simp_rw [Multiset.insert_eq_cons, Multiset.cons_eq_cons, Multiset.singleton_inj,
-    Multiset.singleton_eq_cons_iff, Ne.def, h', false_and_iff, false_or_iff, not_false_iff,
+    Multiset.singleton_eq_cons_iff, ne_eq, h', false_and_iff, false_or_iff, not_false_iff,
     true_and_iff]
   simp only [exists_eq_right_right, and_true_iff, and_congr_right_iff, eq_comm]
   simp_rw [and_comm]
@@ -375,24 +376,27 @@ theorem Matrix.IsAlmostHermitian.trace {x : Matrix n n ℂ} (hx : x.IsAlmostHerm
     ← IsHermitian.trace_eq, ← trace_smul]
   rw [← IsAlmostHermitian.eq_smul_matrix hx]
 
+@[reducible]
+noncomputable def Matrix.IsAlmostHermitian.eigenvectorUnitary {x : Matrix n n ℂ}
+    (hx : x.IsAlmostHermitian) : unitaryGroup n ℂ :=
+hx.matrix_isHermitian.eigenvectorUnitary
+@[reducible]
 noncomputable def Matrix.IsAlmostHermitian.eigenvectorMatrix {x : Matrix n n ℂ}
-    (hx : x.IsAlmostHermitian) : Matrix n n ℂ :=
-  hx.matrix_isHermitian.eigenvectorMatrix
+  (hx : x.IsAlmostHermitian) : Matrix n n ℂ :=
+hx.matrix_isHermitian.eigenvectorMatrix
 
 theorem Matrix.IsAlmostHermitian.eigenvectorMatrix_eq {x : Matrix n n ℂ}
     (hx : x.IsAlmostHermitian) : hx.eigenvectorMatrix = hx.matrix_isHermitian.eigenvectorMatrix :=
   rfl
-
-theorem Matrix.IsAlmostHermitian.eigenvectorMatrix_mem_unitaryGroup {x : Matrix n n ℂ}
-    (hx : x.IsAlmostHermitian) : hx.eigenvectorMatrix ∈ unitaryGroup n ℂ :=
-  hx.matrix_isHermitian.eigenvectorMatrix_mem_unitaryGroup
+theorem Matrix.IsAlmostHermitian.eigenvectorUnitary_eq {x : Matrix n n ℂ}
+  (hx : x.IsAlmostHermitian) :
+  ↑hx.eigenvectorUnitary = hx.eigenvectorMatrix :=
+rfl
 
 theorem Matrix.IsAlmostHermitian.spectral_theorem' {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
     x =
       hx.scalar •
-        innerAut
-          ⟨hx.matrix_isHermitian.eigenvectorMatrix,
-            IsHermitian.eigenvectorMatrix_mem_unitaryGroup _⟩
+        innerAut hx.eigenvectorUnitary
           (diagonal ((@RCLike.ofReal ℂ _) ∘ hx.matrix_isHermitian.eigenvalues)) :=
   by rw [← Matrix.IsHermitian.spectral_theorem'', ← hx.eq_smul_matrix]
 
@@ -402,10 +406,9 @@ theorem Matrix.IsAlmostHermitian.eigenvalues_eq {x : Matrix n n ℂ} (hx : x.IsA
 
 theorem Matrix.IsAlmostHermitian.spectral_theorem {x : Matrix n n ℂ} (hx : x.IsAlmostHermitian) :
     x =
-      innerAut ⟨hx.eigenvectorMatrix, hx.eigenvectorMatrix_mem_unitaryGroup⟩
-        (diagonal hx.eigenvalues) :=
+      innerAut hx.eigenvectorUnitary (diagonal hx.eigenvalues) :=
   by
-  simp_rw [hx.eigenvalues_eq, diagonal_smul, SMulHomClass.map_smul, hx.eigenvectorMatrix_eq]
+  simp_rw [hx.eigenvalues_eq, diagonal_smul, _root_.map_smul]
   exact Matrix.IsAlmostHermitian.spectral_theorem' _
 
 theorem Matrix.IsAlmostHermitian.eigenvalues_eq_zero_iff {x : Matrix n n ℂ}
@@ -440,7 +443,7 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
       (qamA trace_isFaithfulPosMap y) :=
   by
   simp_rw [qamA.iso_iff, traceModuleDual_matrix, Commute.one_left, and_true_iff,
-    SMulHomClass.map_smul]
+    _root_.map_smul]
   rw [exists_comm]
   obtain ⟨Hx, _⟩ := (qamA.is_self_adjoint_iff x).mp hx1
   obtain ⟨Hy, _⟩ := (qamA.is_self_adjoint_iff y).mp hy1
@@ -483,7 +486,8 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
     exact (Subtype.mem y) this
   refine'
     ⟨Units.mk0 (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) (mul_ne_zero hx₁ (inv_ne_zero hy₁)), _⟩
-  use ⟨Hx.eigenvectorMatrix, Hx.eigenvectorMatrix_mem_unitaryGroup⟩ * star (⟨Hy.eigenvectorMatrix, Hy.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup (Fin 2) ℂ)
+  use Hx.eigenvectorUnitary * star Hy.eigenvectorUnitary
+  -- use ⟨Hx.eigenvectorMatrix, Hx.eigenvectorMatrix_mem_unitaryGroup⟩ * star (⟨Hy.eigenvectorMatrix, Hy.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup (Fin 2) ℂ)
   have :
     (Hx.eigenvalues 1 * (Hy.eigenvalues 1)⁻¹) • diagonal Hy.eigenvalues = diagonal Hx.eigenvalues :=
     by
@@ -492,7 +496,7 @@ theorem qamA.finTwoIso (x y : { x : Matrix (Fin 2) (Fin 2) ℂ // x ≠ 0 })
       smul_empty, EmbeddingLike.apply_eq_iff_eq]
     simp only [inv_mul_cancel_right₀ hy₁]
   simp_rw [Matrix.unitaryGroup.star_mul_cancel_right, Units.val_mk0,
-    ← SMulHomClass.map_smul, ← HY, ← HX, this]
+    ← _root_.map_smul, ← HY, ← HX, this]
 
 theorem Qam.finTwoIsoOfSingleEdge {A B : Matrix (Fin 2) (Fin 2) ℂ →ₗ[ℂ] Matrix (Fin 2) (Fin 2) ℂ}
     (hx0 : RealQam trace_isFaithfulPosMap A) (hy0 : RealQam trace_isFaithfulPosMap B)

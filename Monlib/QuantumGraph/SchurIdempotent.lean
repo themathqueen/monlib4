@@ -188,6 +188,7 @@ theorem schurIdempotent_adjoint {B : Type _} [NormedAddCommGroupOfRing B] [Inner
   simp_rw [schurIdempotent.apply_rankOne, ContinuousLinearMap.linearMap_adjoint, rankOne.adjoint,
     schurIdempotent.apply_rankOne]
 
+set_option maxHeartbeats 3000000 in
 theorem schurIdempotent_real
     -- {B : Type*}
     --   [normed_add_comm_group_of_ring B]
@@ -338,6 +339,7 @@ theorem pi_inner_aut_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) �
   simp_rw [← Module.Dual.IsFaithfulPosMap.sig_conjTranspose]
   rfl
 
+set_option maxHeartbeats 3000000 in
 theorem schurIdempotent_one_left_rankOne {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (a b : 𝔹) :
     schurIdempotent (1 : l(𝔹)) (|a⟩⟨b|) = (rmul a : l(𝔹)) * (LinearMap.adjoint (rmul b : l(𝔹))) :=

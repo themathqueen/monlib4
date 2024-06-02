@@ -94,7 +94,7 @@ set_option synthInstance.maxHeartbeats 0 in
 theorem ιMap_apply_rankOne [hφ : φ.IsFaithfulPosMap] (a b : ℍ) : ιMap hφ |a⟩⟨b| = hφ.sig (-1) bᴴ ⊗ₜ[ℂ] a :=
   by
   simp_rw [ιMap, LinearMap.coe_mk, LinearMap.mul'_adjoint, one_apply, boole_mul, ite_smul,
-    zero_smul, Finset.sum_ite_eq, Finset.mem_univ, if_true, map_sum, SMulHomClass.map_smul,
+    zero_smul, Finset.sum_ite_eq, Finset.mem_univ, if_true, map_sum, _root_.map_smul,
     TensorProduct.map_tmul, LinearMap.one_apply, AddHom.coe_mk, ContinuousLinearMap.coe_coe, rankOne_apply]
   have : ∀ i j, inner b (stdBasisMatrix i j 1) = (φ.matrix * bᴴ) j i :=
     by
@@ -165,10 +165,10 @@ private theorem phi_map_aux_smul (hφ : φ.IsFaithfulPosMap) (x : ℂ) (y : l(�
   intro a b
   rw [phi_map_aux, LinearMap.comp_apply, TensorProduct.map_smul, TensorProduct.smul_map,
     LinearMap.smul_apply, LinearMap.smul_comp, LinearMap.comp_smul, LinearMap.smul_apply,
-    SMulHomClass.map_smul]
+    _root_.map_smul]
   rfl
 
--- set_option maxHeartbeats 400000 in
+set_option maxHeartbeats 800000 in
 noncomputable def phiMap (hφ : φ.IsFaithfulPosMap) : l(ℍ) →ₗ[ℂ] l(ℍ ⊗[ℂ] ℍ)
     where
   toFun x := (id ⊗ₘ m) ∘ₗ υ ∘ₗ ((id ⊗ₘ x) ⊗ₘ id) ∘ₗ (LinearMap.adjoint m) ⊗ₘ id
@@ -190,7 +190,7 @@ theorem ιInvMap_mul_adjoint_eq_rmul [hφ : φ.IsFaithfulPosMap] : ιInvMap hφ 
   by
   simp_rw [LinearMap.ext_iff, ← Matrix.ext_iff]
   intro x a i j
-  simp_rw [LinearMap.comp_apply, LinearMap.mul'_adjoint, map_sum, SMulHomClass.map_smul, ιInvMap,
+  simp_rw [LinearMap.comp_apply, LinearMap.mul'_adjoint, map_sum, _root_.map_smul, ιInvMap,
     LinearMap.comp_apply, TensorProduct.map_tmul, tenSwap_apply, Module.Dual.IsFaithfulPosMap.psi,
     LinearEquiv.coe_coe, LinearEquiv.coe_symm_mk, Module.Dual.IsFaithfulPosMap.psiInvFun'_apply,
     unop_apply, op_apply, MulOpposite.unop_op, neg_zero, Module.Dual.IsFaithfulPosMap.sig_zero,
@@ -212,7 +212,7 @@ theorem psi_inv_0_0_mul_adjoint_eq_lmul [hφ : φ.IsFaithfulPosMap] :
   by
   simp_rw [LinearMap.ext_iff, ← Matrix.ext_iff]
   intro x a i j
-  simp_rw [LinearMap.comp_apply, LinearMap.mul'_adjoint, map_sum, SMulHomClass.map_smul,
+  simp_rw [LinearMap.comp_apply, LinearMap.mul'_adjoint, map_sum, _root_.map_smul,
     TensorProduct.map_tmul, Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_coe,
     LinearEquiv.coe_symm_mk, Module.Dual.IsFaithfulPosMap.psiInvFun'_apply, unop_op, neg_zero,
     Module.Dual.IsFaithfulPosMap.sig_zero, LinearMap.one_apply, stdBasisMatrix_conjTranspose,
@@ -298,6 +298,7 @@ theorem tensorOneMap_apply (x : ℍ) : tensorOneMap x = 1 ⊗ₜ x := by
     Algebra.algebraMap_eq_smul_one, one_smul]
 
 set_option synthInstance.maxHeartbeats 0 in
+set_option maxHeartbeats 0 in
 private theorem grad_apply_rank_one [hφ : φ.IsFaithfulPosMap] (x y : ℍ) :
     grad hφ (|x⟩⟨y|) =
       phiMap hφ (|x⟩⟨y| : l(ℍ)).real ∘ₗ tensorOneMap - phiMap hφ |x⟩⟨y| ∘ₗ oneTensorMap :=
@@ -427,6 +428,7 @@ theorem phiMap_of_real_Schur_idempotent [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)}
 --     (U : Submodule ℂ H) : CompleteSpace U :=
 --   FiniteDimensional.complete ℂ U
 
+set_option synthInstance.maxHeartbeats 0 in
 lemma phiMap_of_real_Schur_idempotent_orthogonal_projection [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx1 : x.IsReal)
     (hx2 : Qam.reflIdempotent hφ x x = x) :
     ∃ U : Submodule ℂ (ℍ ⊗[ℂ] ℍ), (orthogonalProjection' U : l(ℍ ⊗[ℂ] ℍ)) = phiMap hφ x :=
@@ -439,11 +441,18 @@ noncomputable def phiMap_of_real_Schur_idempotent.submodule [hφ : φ.IsFaithful
 -- (phiMap_of_real_Schur_idempotent_orthogonal_projection hx1 hx2).choose
 choose U _ using phiMap_of_real_Schur_idempotent_orthogonal_projection hx1 hx2; exact U
 
+instance phiMap_of_real_Schur_idempotent.submodule.complete
+  [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx1 : x.IsReal)
+  (hx2 : Qam.reflIdempotent hφ x x = x) :
+  CompleteSpace (phiMap_of_real_Schur_idempotent.submodule hx1 hx2) :=
+complete_of_proper
+
+-- set_option synthInstance.maxHeartbeats 0 in
 theorem phiMap_of_real_Schur_idempotent.orthogonal_projection_eq [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx1 : x.IsReal)
   (hx2 : Qam.reflIdempotent hφ x x = x) :
   (orthogonalProjection' (phiMap_of_real_Schur_idempotent.submodule hx1 hx2) : l(ℍ ⊗[ℂ] ℍ)) =
     phiMap hφ x :=
-phiMap_of_real_Schur_idempotent.submodule.proof_7 hx1 hx2
+phiMap_of_real_Schur_idempotent.submodule.proof_6 hx1 hx2
 
 theorem grad_apply_of_real_Schur_idempotent [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx1 : x.IsReal)
     (hx2 : Qam.reflIdempotent hφ x x = x) :
@@ -457,7 +466,7 @@ theorem grad_of_real_Schur_idempotent_range [hφ : φ.IsFaithfulPosMap] {x : l(�
   by
   rw [← grad_apply_of_real_Schur_idempotent hx1 hx2, ←
     phiMap_of_real_Schur_idempotent.orthogonal_projection_eq hx1 hx2]
-  rw [← orthogonalProjection.range (phiMap_of_real_Schur_idempotent.submodule hx1 hx2)]
+  nth_rw 2 [← orthogonalProjection.range (phiMap_of_real_Schur_idempotent.submodule hx1 hx2)]
   rw [LinearMap.range_le_iff_comap]
   -- rw [range_le_iff_comap],
   apply Submodule.ext
@@ -619,10 +628,10 @@ private theorem D_in_Schur_product_eq_ir_refl_rank_one [hφ : φ.IsFaithfulPosMa
       Qam.reflIdempotent hφ ((|a⟩⟨b| : l(ℍ)) ∘ₗ LinearMap.adjoint (|c⟩⟨d| : l(ℍ)).real) id :=
   by
   simp_rw [dIn_apply, rankOne_real_apply, ← rankOneLm_eq_rankOne, rankOneLm_adjoint,
-    rankOneLm_comp_rankOneLm, SMulHomClass.map_smul, LinearMap.smul_apply, rankOneLm_eq_rankOne]
+    rankOneLm_comp_rankOneLm, _root_.map_smul, LinearMap.smul_apply, rankOneLm_eq_rankOne]
   rw [Qam.RankOne.reflIdempotent_eq, Qam.reflexive_eq_rankOne, ← rankOneLm_eq_rankOne,
     rankOneLm_apply, Module.Dual.IsFaithfulPosMap.inner_right_conj, sig_neg_one,
-    conjTranspose_conjTranspose, Matrix.one_mul, SMulHomClass.map_smul, lmul_eq_mul]
+    conjTranspose_conjTranspose, Matrix.one_mul, _root_.map_smul, lmul_eq_mul]
 
 theorem dIn_Schur_product_eq_ir_refl [hφ : φ.IsFaithfulPosMap] (A B : l(ℍ)) :
     dIn (Qam.reflIdempotent hφ A B) = Qam.reflIdempotent hφ (A ∘ₗ LinearMap.adjoint B.real) id :=
@@ -637,8 +646,8 @@ private theorem D_out_Schur_product_eq_ir_refl'_rank_one [hφ : φ.IsFaithfulPos
       Qam.reflIdempotent hφ id (LinearMap.adjoint (|c⟩⟨d| : l(ℍ)) ∘ₗ (|a⟩⟨b| : l(ℍ)).real) :=
   by
   simp_rw [dOut_apply, rankOne_real_apply, Qam.RankOne.reflIdempotent_eq, ← rankOneLm_eq_rankOne,
-    rankOneLm_adjoint, rankOneLm_comp_rankOneLm, SMulHomClass.map_smul, rankOneLm_eq_rankOne,
-    Qam.reflexive'_eq_rankOne, ContinuousLinearMap.coe_coe, rankOne_apply, SMulHomClass.map_smul,
+    rankOneLm_adjoint, rankOneLm_comp_rankOneLm, _root_.map_smul, rankOneLm_eq_rankOne,
+    Qam.reflexive'_eq_rankOne, ContinuousLinearMap.coe_coe, rankOne_apply, _root_.map_smul,
     Module.Dual.IsFaithfulPosMap.sig_conjTranspose, conjTranspose_conjTranspose,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, add_neg_self, Module.Dual.IsFaithfulPosMap.sig_zero,
     Module.Dual.IsFaithfulPosMap.inner_left_hMul, Matrix.mul_one]
@@ -654,6 +663,7 @@ theorem dOut_Schur_product_eq_ir_refl' [hφ : φ.IsFaithfulPosMap] (A B : l(ℍ)
     LinearMap.sum_comp, D_out_Schur_product_eq_ir_refl'_rank_one]
   rw [Finset.sum_comm]
 
+set_option maxHeartbeats 0 in
 theorem grad_adjoint_grad [hφ : φ.IsFaithfulPosMap] (x : l(ℍ)) :
     LinearMap.adjoint (grad hφ x) ∘ₗ grad hφ x =
       dIn (Qam.reflIdempotent hφ x x.real) - Qam.reflIdempotent hφ x x -
@@ -805,7 +815,7 @@ theorem LinearMap.tensor_matrix_eq_rankOne [hφ : φ.IsFaithfulPosMap] (x : l(�
     symm
     congr 1
     exact @inner_conj_symm ℂ (ℍ ⊗[ℂ] ℍ) _ (TensorProduct.normedAddCommGroup) (TensorProduct.innerProductSpace) _ _
-  . simp_rw [map_sum, inner_sum, sum_inner, SMulHomClass.map_smul, inner_smul_right,
+  . simp_rw [map_sum, inner_sum, sum_inner, _root_.map_smul, inner_smul_right,
       inner_smul_left, @inner_conj_symm ℂ (ℍ ⊗[ℂ] ℍ) _ (TensorProduct.normedAddCommGroup) (TensorProduct.innerProductSpace)]
       -- Basis.tensorProduct_apply, starRingEnd_apply,
       -- mul_star, ← starRingEnd_apply, inner_conj_symm]
@@ -824,14 +834,14 @@ noncomputable def phiInvMap (hφ : φ.IsFaithfulPosMap) :
   toFun x := ιInvMap hφ ((x : l(ℍ ⊗[ℂ] ℍ)) 1)
   map_add' x y := by simp_rw [Submodule.coe_add, LinearMap.add_apply, map_add]
   map_smul' r x := by
-    simp only [Submodule.coe_smul, LinearMap.smul_apply, SMulHomClass.map_smul, RingHom.id_apply]
+    simp only [Submodule.coe_smul, LinearMap.smul_apply, _root_.map_smul, RingHom.id_apply]
 
 noncomputable def phiInv'Map (hφ : φ.IsFaithfulPosMap) : l(ℍ ⊗[ℂ] ℍ) →ₗ[ℂ] l(ℍ) :=
   { toFun := fun x => τ ∘ₗ (LinearMap.adjoint η ⊗ₘ id) ∘ₗ (x : l(ℍ ⊗[ℂ] ℍ)) ∘ₗ (id ⊗ₘ η) ∘ₗ ϰ⁻¹ ∘ₗ τ⁻¹
     map_add' := fun x y => by simp only [Submodule.coe_add, LinearMap.add_comp, LinearMap.comp_add]
     map_smul' := fun r x => by
       simp only [Submodule.coe_smul, LinearMap.comp_smul, LinearMap.smul_comp,
-        SMulHomClass.map_smul, RingHom.id_apply] }
+        _root_.map_smul, RingHom.id_apply] }
 
 noncomputable def phiInv'MapCoe (hφ : φ.IsFaithfulPosMap) :
     (LinearMap.IsBimoduleMaps.Submodule' : Submodule ℂ l(ℍ ⊗[ℂ] ℍ)) →ₗ[ℂ] l(ℍ) :=
@@ -842,7 +852,7 @@ noncomputable def phiInv'MapCoe (hφ : φ.IsFaithfulPosMap) :
         LinearMap.comp_add]
     map_smul' := fun r x => by
       simp only [phiInv'Map, LinearMap.coe_mk, AddHom.coe_mk, Submodule.coe_smul, LinearMap.comp_smul,
-        LinearMap.smul_comp, SMulHomClass.map_smul, RingHom.id_apply] }
+        LinearMap.smul_comp, _root_.map_smul, RingHom.id_apply] }
 
 theorem phiInv'Map_apply (hφ : φ.IsFaithfulPosMap) (x y : l(ℍ)) :
     phiInv'Map hφ (x ⊗ₘ y) = y ∘ₗ (|(1 : ℍ)⟩⟨(1 : ℍ)| : l(ℍ)) ∘ₗ x :=
@@ -854,7 +864,7 @@ theorem phiInv'Map_apply (hφ : φ.IsFaithfulPosMap) (x y : l(ℍ)) :
     TensorProduct.lid_tmul, ContinuousLinearMap.coe_coe, LinearMap.one_apply,
     Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one, Nontracial.unit_adjoint_eq,
     rankOne_apply, Module.Dual.IsFaithfulPosMap.inner_eq, conjTranspose_one, one_smul,
-    Matrix.one_mul, SMulHomClass.map_smul]
+    Matrix.one_mul, _root_.map_smul]
 
 theorem ιLinearEquiv_apply_eq (hφ : φ.IsFaithfulPosMap) (x : l(ℍ)) : ιLinearEquiv hφ x = ιMap hφ x :=
   rfl
@@ -875,7 +885,7 @@ noncomputable def phiMapCoe (hφ : φ.IsFaithfulPosMap) :
       simp only [LinearMap.add_apply, Submodule.coe_add, Subtype.coe_mk]
   map_smul' r x :=
     by
-      simp only [SMulHomClass.map_smul]
+      simp only [_root_.map_smul]
       ext
       simp only [LinearMap.smul_apply, Submodule.coe_smul, Subtype.coe_mk, RingHom.id_apply]
 
@@ -941,7 +951,7 @@ noncomputable def phiLinearEquiv (hφ : φ.IsFaithfulPosMap) :
       simp only [← LinearMap.comp_apply, phi_map_left_inverse, LinearMap.one_apply, Subtype.coe_mk]
     right_inv := fun x => by simp only [phi_map_right_inverse x, Subtype.coe_eta]
     map_add' := fun x y => by simp only [map_add, Subtype.coe_eta]
-    map_smul' := fun r x => by simp only [SMulHomClass.map_smul, RingHom.id_apply] }
+    map_smul' := fun r x => by simp only [_root_.map_smul, RingHom.id_apply] }
 
 theorem LinearEquiv.comp_inj {R M₁ M₂ M₃ : Type _} [Semiring R] [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid M₃] [Module R M₁] [Module R M₂] [Module R M₃]
@@ -1020,7 +1030,7 @@ theorem left_hand_twist_eq_sig_one [hφ : φ.IsFaithfulPosMap] :
   simp only [LinearMap.comp_apply, tensorOneMap_apply, TensorProduct.map_tmul, LinearEquiv.coe_coe,
     AlgEquiv.toLinearMap_apply, LinearMap.mul'_adjoint, one_apply, boole_mul, ite_smul, zero_smul,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, LinearMap.one_apply]
-  simp only [TensorProduct.sum_tmul, map_sum, ← TensorProduct.smul_tmul', SMulHomClass.map_smul,
+  simp only [TensorProduct.sum_tmul, map_sum, ← TensorProduct.smul_tmul', _root_.map_smul,
     TensorProduct.assoc_tmul, TensorProduct.map_tmul, LinearEquiv.coe_coe, TensorProduct.comm_tmul,
     TensorProduct.assoc_symm_tmul, TensorProduct.lid_tmul, LinearMap.comp_apply,
     LinearMap.mul'_apply, LinearMap.one_apply, Nontracial.unit_adjoint_eq]
@@ -1052,7 +1062,7 @@ theorem right_hand_twist_eq_sig_neg_one [hφ : φ.IsFaithfulPosMap] :
     AlgEquiv.toLinearMap_apply, LinearMap.mul'_adjoint, one_apply, boole_mul, ite_smul, zero_smul,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, LinearMap.one_apply]
   simp only [TensorProduct.tmul_sum, map_sum, ← TensorProduct.smul_tmul, ← TensorProduct.smul_tmul',
-    SMulHomClass.map_smul, TensorProduct.assoc_tmul, TensorProduct.map_tmul, LinearEquiv.coe_coe,
+    _root_.map_smul, TensorProduct.assoc_tmul, TensorProduct.map_tmul, LinearEquiv.coe_coe,
     TensorProduct.comm_tmul, TensorProduct.assoc_symm_tmul, TensorProduct.lid_tmul,
     LinearMap.comp_apply, LinearMap.mul'_apply, LinearMap.one_apply, Nontracial.unit_adjoint_eq]
   have : ∀ i j : p, φ (x * stdBasisMatrix i j 1) = (φ.matrix * x) j i :=

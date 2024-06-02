@@ -106,7 +106,7 @@ theorem Pi.symmMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   rw [← this]
   simp_rw [_root_.map_sum, map_tmul, LinearMap.one_apply, sum_tmul, _root_.map_sum, assoc_tmul,
     map_tmul, comm_tmul, lid_tmul, sum_inner, LinearMap.comp_apply, ContinuousLinearMap.coe_coe,
-    rankOne_apply, ← smul_tmul', SMulHomClass.map_smul, LinearMap.one_apply,
+    rankOne_apply, ← smul_tmul', _root_.map_smul, LinearMap.one_apply,
     Nontracial.Pi.unit_adjoint_eq, smul_eq_mul, LinearMap.mul'_apply]
   calc
     ∑ x_1, ⟪(⟪b x, β x_1⟫_ℂ * (Module.Dual.pi ψ) (a x * a_1 : 𝔹)) • α x_1, a_1⟫_ℂ =
@@ -124,7 +124,7 @@ theorem Pi.symmMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     _ = ⟪⟪star (a x), a_1⟫_ℂ • Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star (b x)), a_1⟫_ℂ :=
       by
       simp_rw [Module.Dual.pi.IsFaithfulPosMap.inner_left_conj', one_mul,
-        Module.Dual.pi.IsFaithfulPosMap.inner_eq, star_smul, smul_mul_assoc, SMulHomClass.map_smul,
+        Module.Dual.pi.IsFaithfulPosMap.inner_eq, star_smul, smul_mul_assoc, _root_.map_smul,
         star_star, starRingEnd_apply, smul_eq_mul]
 
 set_option maxHeartbeats 700000 in
@@ -151,7 +151,7 @@ theorem Pi.symmMap_symm_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   rw [← this]
   simp_rw [tmul_sum, _root_.map_sum, assoc_symm_tmul, map_tmul, LinearMap.one_apply, lid_tmul,
     sum_inner, LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply, ← smul_tmul, ←
-    smul_tmul', SMulHomClass.map_smul, Nontracial.Pi.unit_adjoint_eq, smul_eq_mul,
+    smul_tmul', _root_.map_smul, Nontracial.Pi.unit_adjoint_eq, smul_eq_mul,
     LinearMap.mul'_apply]
   calc
     ∑ x_1, inner ((inner (b p) (α x_1) * (Module.Dual.pi ψ) (x * a p)) • β x_1) x =

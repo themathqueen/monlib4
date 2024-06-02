@@ -86,7 +86,7 @@ theorem qamA.toMatrix [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ // x ≠ 0 }) :
         ((x : ℍ) * φ.matrix) ⊗ₖ
           (hφ.matrixIsPosDef.rpow (1 / 2) * (x : ℍ) * hφ.matrixIsPosDef.rpow (1 / 2))ᴴᵀ :=
   by
-  simp only [qamA_eq, SMulHomClass.map_smul, AlgEquiv.map_mul, LinearMap.mulLeft_toMatrix,
+  simp only [qamA_eq, _root_.map_smul, AlgEquiv.map_mul, LinearMap.mulLeft_toMatrix,
     LinearMap.matrix.mulRight_adjoint, LinearMap.mulRight_toMatrix,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, Matrix.conjTranspose_mul,
     hφ.matrixIsPosDef.1.eq, ← Matrix.mul_kronecker_mul, Matrix.one_mul,
@@ -131,7 +131,7 @@ set_option synthInstance.maxHeartbeats 60000 in
 theorem qamA.ne_zero [hφ : φ.IsFaithfulPosMap] (x : { x : Matrix n n ℂ // x ≠ 0 }) : qamA hφ x ≠ 0 :=
   by
   have hx := x.property
-  simp_rw [Ne.def, qamA, smul_eq_zero, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
+  simp_rw [ne_eq, qamA, smul_eq_zero, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
     Complex.ofReal_eq_zero, norm_eq_zero', hx, false_or_iff, ← rankOne_toMatrix_transpose_psi_symm,
     ← oneMapTranspose_symm_eq, LinearEquiv.map_eq_zero_iff, StarAlgEquiv.map_eq_zero_iff,
     AlgEquiv.map_eq_zero_iff, ContinuousLinearMap.coe_eq_zero, rankOne.eq_zero_iff, or_self_iff, hx,
@@ -148,7 +148,7 @@ theorem qamA.smul [hφ : φ.IsFaithfulPosMap] (x : { x : Matrix n n ℂ // x ≠
     smul_smul, Complex.mul_conj, Complex.ofReal_mul, mul_pow, ← one_div_mul_one_div_rev, mul_assoc,
     ← Complex.ofReal_pow, Complex.normSq_eq_abs, ← Complex.norm_eq_abs]
   rw [one_div_mul_cancel, mul_one]
-  · simp_rw [Ne.def, Complex.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
+  · simp_rw [ne_eq, Complex.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
     exact Units.ne_zero _
 
 private theorem kronecker_to_tensor_product_mul' (x y : Matrix (n × n) (n × n) ℂ) :
@@ -165,12 +165,12 @@ theorem qamA.is_idempotent [hφ : φ.IsFaithfulPosMap] (x : { x : Matrix n n ℂ
   by
   rw [← Function.Injective.eq_iff (hφ.psi 0 (1 / 2)).injective, Psi.reflIdempotent, qamA]
   simp only [← rankOne_toMatrix_transpose_psi_symm]
-  simp_rw [SMulHomClass.map_smul, LinearEquiv.apply_symm_apply, smul_mul_smul, ←
+  simp_rw [_root_.map_smul, LinearEquiv.apply_symm_apply, smul_mul_smul, ←
     oneMapTranspose_symm_eq, ← _root_.map_mul, ← rankOneLm_eq_rankOne, LinearMap.mul_eq_comp,
-    rankOneLm_comp_rankOneLm, SMulHomClass.map_smul, inner_self_eq_norm_sq_to_K, smul_smul,
+    rankOneLm_comp_rankOneLm, _root_.map_smul, inner_self_eq_norm_sq_to_K, smul_smul,
     mul_assoc]
   have : (‖(x : ℍ)‖ ^ 2 : ℂ) ≠ 0 :=
-  by simp_rw [Ne.def, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero]; exact x.property
+  by simp_rw [ne_eq, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero]; exact x.property
   have this' := one_div_mul_cancel this
   simp_rw [Complex.ofReal'_eq_isROrC_ofReal] at this' ⊢
   simp_rw [this', mul_one]
@@ -261,7 +261,7 @@ theorem one_map_transpose_psi_eq [hφ : φ.IsFaithfulPosMap] (A : l(ℍ)) :
     by
     intro x
     rw [kmul_representation x]
-    simp_rw [map_sum, SMulHomClass.map_smul, oneMapTranspose_symm_eq,
+    simp_rw [map_sum, _root_.map_smul, oneMapTranspose_symm_eq,
       kroneckerToTensorProduct_apply, TensorProduct.map_tmul, LinearMap.one_apply,
       AlgEquiv.toLinearMap_apply, AlgEquiv.symm_apply_apply]
   simp_rw [this]
@@ -305,7 +305,7 @@ private theorem qam_A_is_sa_iff_aux3 [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ 
     (h : ⟪(x : ℍ)ᴴ, (x : ℍ)ᴴ⟫_ℂ • (φ.matrix * (x : ℍ)ᴴ) = ⟪↑x, (x : ℍ)ᴴ⟫_ℂ • ((x : ℍ) * φ.matrix)) :
     ⟪↑x, (x : ℍ)ᴴ⟫_ℂ / ⟪(x : ℍ)ᴴ, (x : ℍ)ᴴ⟫_ℂ ≠ 0 :=
   by
-  simp_rw [Ne.def, div_eq_zero_iff, inner_self_eq_zero, ← star_eq_conjTranspose, star_eq_zero,
+  simp_rw [ne_eq, div_eq_zero_iff, inner_self_eq_zero, ← star_eq_conjTranspose, star_eq_zero,
     x.property, or_false_iff, star_eq_conjTranspose]
   intro h'
   simp_rw [h', zero_smul, smul_eq_zero, inner_self_eq_zero, ← star_eq_conjTranspose, star_eq_zero,
@@ -336,7 +336,7 @@ private theorem qam_A_is_sa_iff_aux4 [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ 
     _ = (x : ℍ)ᴴ :=
       by
       rw [div_self, one_smul, Matrix.mul_assoc, inv_mul_cancel_left_of_invertible]
-      simp_rw [Ne.def, inner_self_eq_zero, ← star_eq_conjTranspose, star_eq_zero]
+      simp_rw [ne_eq, inner_self_eq_zero, ← star_eq_conjTranspose, star_eq_zero]
       exact Subtype.mem x
 
 theorem sig_eq_lmul_rmul [hφ : φ.IsFaithfulPosMap] (t : ℝ) :
@@ -418,7 +418,7 @@ private theorem qam_A_is_sa_iff_aux2_aux6 [hφ : φ.IsFaithfulPosMap] (x : ℍ) 
   have hα : (((α : NNReal) : ℝ) : ℂ) ≠ 0 := by norm_cast; exact Units.ne_zero α
   letI gg : NoZeroSMulDivisors ℂ ℍ := Module.Free.noZeroSMulDivisors ℂ ℍ
   have h' := h
-  rw [sig_eq_iff_eq_sig_inv, SMulHomClass.map_smul] at h
+  rw [sig_eq_iff_eq_sig_inv, _root_.map_smul] at h
   symm
   calc
     (((α : NNReal) : ℝ) : ℂ) • φ.matrix * x = φ.matrix * ((((α : NNReal) : ℝ) : ℂ) • x) := by
@@ -456,7 +456,7 @@ private theorem qam_A_is_sa_iff_aux4_aux6 [hφ : φ.IsFaithfulPosMap] (x' : { x 
   let α' : NNReal := ⟨α, hα'⟩
   have hα : α' ≠ 0 :=
     by
-    simp_rw [α', ← NNReal.coe_ne_zero, Ne.def, NNReal.coe_mk, α, div_eq_zero_iff, sq_eq_zero_iff,
+    simp_rw [α', ← NNReal.coe_ne_zero, ne_eq, NNReal.coe_mk, α, div_eq_zero_iff, sq_eq_zero_iff,
       norm_eq_zero, sig_eq_iff_eq_sig_inv, map_zero, or_self_iff]
     exact hx
   exists Units.mk0 α' hα
@@ -500,7 +500,7 @@ private theorem qam_A_is_sa_iff_aux7 (x : { x : ℍ // x ≠ 0 }) (α : NNRealˣ
     Complex.ofReal_mul, ← Real.sqrt_mul hi, Real.sqrt_mul_self hi, ← Complex.ofReal_mul,
     Complex.ofReal_eq_one] at this
   exact this
-  simp_rw [Ne.def, inv_eq_zero, mul_eq_zero, Complex.ofReal_eq_zero, Real.sqrt_eq_zero hi,
+  simp_rw [ne_eq, inv_eq_zero, mul_eq_zero, Complex.ofReal_eq_zero, Real.sqrt_eq_zero hi,
     NNReal.coe_eq_zero, Units.ne_zero, or_false_iff, not_false_iff]
 
 private theorem qam_A_is_sa_iff_aux8 (α : NNRealˣ) (β : ℂˣ)
@@ -511,7 +511,7 @@ private theorem qam_A_is_sa_iff_aux8 (α : NNRealˣ) (β : ℂˣ)
   by
   let γ : ℂ := ((β : ℂ) * (((α : NNReal) : ℝ).sqrt : ℂ)) ^ ((2 : ℕ) : ℂ)⁻¹
   have hγ : γ ≠ 0 := by
-    simp only [Ne.def, γ, Complex.cpow_eq_zero_iff, Ne.def, inv_eq_zero, Units.mul_right_eq_zero,
+    simp only [ne_eq, γ, Complex.cpow_eq_zero_iff, ne_eq, inv_eq_zero, Units.mul_right_eq_zero,
       Complex.ofReal_eq_zero, Real.sqrt_eq_zero, NNReal.zero_le_coe, NNReal.coe_eq_zero,
       Units.ne_zero, not_false_iff, false_and_iff]
   have : γ ^ 2 = (β : ℂ) * (((α : NNReal) : ℝ).sqrt : ℂ) := by
@@ -639,12 +639,12 @@ theorem qamA.of_is_self_adjoint [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ // x 
     simp_rw [LinearMap.matrix.mulRight_adjoint, conjTranspose_mul, conjTranspose_conjTranspose,
       hφ.matrixIsPosDef.1.eq, sig_apply_matrix_hMul_posDef']
   nth_rw 1 [this] at h
-  simp_rw [← rankOne_psi_transpose_to_lin, ← oneMapTranspose_eq, ← SMulHomClass.map_smul] at h
+  simp_rw [← rankOne_psi_transpose_to_lin, ← oneMapTranspose_eq, ← _root_.map_smul] at h
   simp only [(AlgEquiv.injective _).eq_iff, (LinearEquiv.injective _).eq_iff,
     (StarAlgEquiv.injective _).eq_iff] at h
   have thisss : 1 / (‖(x : ℍ)‖ : ℂ) ^ 2 ≠ 0 :=
     by
-    simp_rw [Ne.def, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
+    simp_rw [ne_eq, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
       Complex.ofReal_eq_zero, norm_eq_zero]
     exact Subtype.mem x
   -- letI gg : NoZeroSMulDivisors ℂ l(ℍ) := LinearMap.noZeroSMulDivisors
@@ -671,7 +671,7 @@ theorem qamA.is_self_adjoint_of [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ // x 
   obtain ⟨α, y, ⟨hxy, hy⟩⟩ := hx₁
   have : 1 / (‖(x : ℍ)‖ : ℂ) ^ 2 ≠ 0 :=
     by
-    simp_rw [Ne.def, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
+    simp_rw [ne_eq, div_eq_zero_iff, one_ne_zero, false_or_iff, sq_eq_zero_iff,
       Complex.ofReal_eq_zero, norm_eq_zero]
     exact Subtype.mem x
   -- letI gg : NoZeroSMulDivisors ℂ l(ℍ) := LinearMap.noZeroSMulDivisors
@@ -708,7 +708,7 @@ theorem qamA.is_irreflexive_iff [hφ : φ.IsFaithfulPosMap]  [Nontrivial n] (x :
   by
   simp_rw [qamA, ← rankOne_toMatrix_transpose_psi_symm, ←
     Function.Injective.eq_iff (hφ.psi 0 (1 / 2)).injective, Psi.reflIdempotent,
-    SMulHomClass.map_smul, LinearEquiv.apply_symm_apply, Psi.one, smul_mul_assoc, ←
+    _root_.map_smul, LinearEquiv.apply_symm_apply, Psi.one, smul_mul_assoc, ←
     oneMapTranspose_symm_eq, ← _root_.map_mul, LinearEquiv.map_zero, smul_eq_zero, StarAlgEquiv.map_eq_zero_iff,
     AlgEquiv.map_eq_zero_iff, ← rankOneLm_eq_rankOne, one_div, inv_eq_zero, sq_eq_zero_iff,
     Complex.ofReal_eq_zero, norm_eq_zero, x.property, false_or_iff,
@@ -725,7 +725,7 @@ set_option synthInstance.maxHeartbeats 0 in
 theorem qamA.is_almost_injective [hφ : φ.IsFaithfulPosMap] (x y : { x : ℍ // x ≠ 0 }) :
     qamA hφ x = qamA hφ y ↔ ∃ α : ℂˣ, (x : ℍ) = (α : ℂ) • (y : ℍ) :=
   by
-  simp_rw [qamA, ← rankOne_toMatrix_transpose_psi_symm, ← SMulHomClass.map_smul, ←
+  simp_rw [qamA, ← rankOne_toMatrix_transpose_psi_symm, ← _root_.map_smul, ←
     oneMapTranspose_symm_eq]
   rw [Function.Injective.eq_iff (hφ.psi _ _).symm.injective,
     Function.Injective.eq_iff (oneMapTranspose : ℍ ⊗[ℂ] ℍᵐᵒᵖ ≃⋆ₐ[ℂ] _).symm.injective,
@@ -752,7 +752,7 @@ theorem qamA.is_almost_injective [hφ : φ.IsFaithfulPosMap] (x y : { x : ℍ //
       on_goal 2 => apply inv_ne_zero
       all_goals
         simp only [Complex.ofReal_ne_zero, norm_ne_zero_iff]
-        simp only [Ne.def, x.property, y.property, not_false_iff]
+        simp only [ne_eq, x.property, y.property, not_false_iff]
     use Units.mk0 β this
     simp_rw [Units.val_mk0, β, mul_assoc]
     rw [← smul_smul]
@@ -766,7 +766,7 @@ theorem qamA.is_almost_injective [hφ : φ.IsFaithfulPosMap] (x y : { x : ℍ //
       Complex.normSq_eq_abs, ← Complex.norm_eq_abs]
     simp only [Complex.ofReal_mul, one_div, mul_pow, _root_.mul_inv_rev, mul_assoc]
     rw [Complex.ofReal_pow, inv_mul_cancel, mul_one]
-    · simp only [Ne.def, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero]
+    · simp only [ne_eq, sq_eq_zero_iff, Complex.ofReal_eq_zero, norm_eq_zero]
       exact Units.ne_zero _
 
 set_option maxHeartbeats 400000 in
@@ -776,8 +776,8 @@ theorem qamA.is_reflexive_iff [hφ : φ.IsFaithfulPosMap]  [Nontrivial n] (x : {
   by
   simp_rw [qamA, ← rankOne_toMatrix_transpose_psi_symm, ←
     Function.Injective.eq_iff (hφ.psi 0 (1 / 2)).injective, Psi.reflIdempotent,
-    SMulHomClass.map_smul, LinearEquiv.apply_symm_apply, Psi.one, smul_mul_assoc, ←
-    oneMapTranspose_symm_eq, ← _root_.map_mul, ← SMulHomClass.map_smul]
+    _root_.map_smul, LinearEquiv.apply_symm_apply, Psi.one, smul_mul_assoc, ←
+    oneMapTranspose_symm_eq, ← _root_.map_mul, ← _root_.map_smul]
   rw [Function.Injective.eq_iff (oneMapTranspose : ℍ ⊗[ℂ] ℍᵐᵒᵖ ≃⋆ₐ[ℂ] _).symm.injective,
     Function.Injective.eq_iff hφ.toMatrix.injective]
   simp_rw [← rankOneLm_eq_rankOne, LinearMap.mul_eq_comp, rankOneLm_comp_rankOneLm, ←
@@ -797,10 +797,10 @@ theorem qamA.is_reflexive_iff [hφ : φ.IsFaithfulPosMap]  [Nontrivial n] (x : {
     have : 1 / ↑‖(x : ℍ)‖ ^ 2 * star (x : ℍ).trace ≠ 0 :=
       by
       apply mul_ne_zero
-      · simp only [one_div, inv_eq_zero, Ne.def, sq_eq_zero_iff, Complex.ofReal_eq_zero,
+      · simp only [one_div, inv_eq_zero, ne_eq, sq_eq_zero_iff, Complex.ofReal_eq_zero,
           norm_eq_zero]
         exact Subtype.mem x
-      · simp only [Ne.def, star_eq_zero]
+      · simp only [ne_eq, star_eq_zero]
         exact this
     use Units.mk0 _ (inv_ne_zero this)
     rw [Units.val_mk0, inv_mul_cancel this, one_smul]
@@ -816,7 +816,7 @@ theorem qamA.is_reflexive_iff [hφ : φ.IsFaithfulPosMap]  [Nontrivial n] (x : {
       Complex.ofReal_pow, ← Complex.ofReal_inv, ← Complex.ofReal_mul,
       mul_inv_cancel (PosDef.trace_ne_zero hφ.matrixIsPosDef.inv), mul_inv_cancel, one_mul,
       Complex.ofReal_one, one_smul]
-    simp only [Ne.def, sq_eq_zero_iff, norm_eq_zero, Units.ne_zero, not_false_iff]
+    simp only [ne_eq, sq_eq_zero_iff, norm_eq_zero, Units.ne_zero, not_false_iff]
 
 theorem qamA.of_trivialGraph [hφ : φ.IsFaithfulPosMap] [Nontrivial n] :
     qamA hφ ⟨φ.matrix⁻¹, hφ.matrixIsPosDef.inv.ne_zero⟩ = Qam.trivialGraph hφ rfl :=
@@ -929,12 +929,12 @@ theorem qamA.iso_iff [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     rw [unitary_commutes_with_hφ_matrix_iff_isIsometry] at hUU
     rw [LinearMap.comp_assoc, qamA.isometric_starAlgEquiv_conj _ hUU, qamA.is_almost_injective,
       Subtype.coe_mk] at hU
-    simp_rw [SMulHomClass.map_smul, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv]
+    simp_rw [_root_.map_smul, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv]
     exact hU
   · rintro ⟨U, ⟨hU, hUU⟩⟩
     refine' ⟨U, _, hUU⟩
     rw [unitary_commutes_with_hφ_matrix_iff_isIsometry] at hUU
     rw [LinearMap.comp_assoc, qamA.isometric_starAlgEquiv_conj _ hUU, qamA.is_almost_injective,
       Subtype.coe_mk]
-    simp_rw [SMulHomClass.map_smul, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv] at hU
+    simp_rw [_root_.map_smul, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv] at hU
     exact hU
