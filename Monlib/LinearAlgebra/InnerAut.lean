@@ -349,7 +349,7 @@ theorem innerAut_posDef_iff (U : unitaryGroup n 𝕜) {x : Matrix n n 𝕜} :
   have ugh' : ∀ (hi : unitaryGroup n 𝕜) (u : n → 𝕜), mulVec (hi : Matrix n n 𝕜) u ≠ 0 ↔ u ≠ 0 :=
     by
     intro hi u
-    rw [Ne.def, ← toLin'_apply, ← unitaryGroup.toLin'_eq, ← unitaryGroup.toLinearEquiv_eq,
+    rw [ne_eq, ← toLin'_apply, ← unitaryGroup.toLin'_eq, ← unitaryGroup.toLinearEquiv_eq,
       (injective_iff_map_eq_zero' _).mp (LinearEquiv.injective (UnitaryGroup.toLinearEquiv hi))]
   refine' ⟨fun ⟨h1, h2⟩ => ⟨h1, fun u hu => ?_⟩,
     fun ⟨h1, h2⟩ => ⟨h1, fun u hu => ?_⟩⟩
@@ -380,20 +380,10 @@ theorem IsAlmostHermitian.schur_decomp {𝕜 : Type _} [RCLike 𝕜] [DecidableE
     ∃ (D : n → 𝕜) (U : unitaryGroup n 𝕜), innerAut U (diagonal D) = A :=
   by
   rcases hA with ⟨α, B, ⟨rfl, hB⟩⟩
-  have : hB.eigenvectorMatrix ∈ unitaryGroup n 𝕜 := by
-    rw [mem_unitaryGroup_iff, star_eq_conjTranspose,
-      IsHermitian.conjTranspose_eigenvectorMatrix,
-      IsHermitian.eigenvectorMatrix_mul_inv]
-  let U : unitaryGroup n 𝕜 := ⟨_, this⟩
-  have hU : ⇑U = hB.eigenvectorMatrix := rfl
-  use α • RCLike.ofReal ∘ hB.eigenvalues
-  use U
-  simp_rw [diagonal_smul, SMulHomClass.map_smul, innerAut_apply,
-    UnitaryGroup.inv_apply, star_eq_conjTranspose]
-  rw [← hU, IsHermitian.conjTranspose_eigenvectorMatrix,
-    Matrix.mul_assoc, ← IsHermitian.spectral_theorem,
-    ← Matrix.mul_assoc, IsHermitian.eigenvectorMatrix_mul_inv,
-    Matrix.one_mul]
+  use α • RCLike.ofReal ∘ hB.eigenvalues, hB.eigenvectorUnitary
+  simp_rw [diagonal_smul, _root_.map_smul, innerAut_apply,
+    UnitaryGroup.inv_apply]
+  rw [← IsHermitian.spectral_theorem]
 
 lemma _root_.toEuclideanLin_one :
   toEuclideanLin (1 : Matrix n n 𝕜) = 1 :=
@@ -465,7 +455,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
   have this9 := (PosSemidef.invertible_iff_posDef this8).mp this7
   have this12 : (1 : n → 𝕜) ≠ 0 :=
     by
-    simp_rw [Ne.def, Function.funext_iff, Pi.one_apply, Pi.zero_apply, one_ne_zero]
+    simp_rw [ne_eq, Function.funext_iff, Pi.one_apply, Pi.zero_apply, one_ne_zero]
     simp only [Classical.not_forall, not_false_iff, exists_const]
   have this10 : α = RCLike.re α :=
     by
@@ -514,7 +504,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     apply inv_eq_left_inv
     simp_rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
     rw [inv_mul_cancel, one_smul, H, Hy.2]
-    · simp_rw [Ne.def, RCLike.ofReal_eq_zero, Real.rpow_eq_zero_iff_of_nonneg (le_of_lt this9),
+    · simp_rw [ne_eq, RCLike.ofReal_eq_zero, Real.rpow_eq_zero_iff_of_nonneg (le_of_lt this9),
         (NeZero.of_pos this9).out, false_and_iff]
       exact not_false
   use U
@@ -532,16 +522,14 @@ noncomputable def _root_.StarAlgEquiv.of_matrix_unitary
 
 lemma _root_.StarAlgEquiv.eq_innerAut (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜) :
     innerAutStarAlg f.of_matrix_unitary = f :=
-StarAlgEquiv.of_matrix_unitary.proof_2 _
+StarAlgEquiv.of_matrix_unitary.proof_1 _
 
 theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [RCLike 𝕜] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) :
-    x = innerAut ⟨_, hx.eigenvectorMatrix_mem_unitaryGroup⟩ (diagonal (RCLike.ofReal ∘ hx.eigenvalues)) :=
+    x = innerAut hx.eigenvectorUnitary (diagonal (RCLike.ofReal ∘ hx.eigenvalues)) :=
   by
-  rw [innerAut_apply, UnitaryGroup.inv_apply, Matrix.unitaryGroup.coe_mk, star_eq_conjTranspose,
-    IsHermitian.conjTranspose_eigenvectorMatrix]
-  simp_rw [Matrix.mul_assoc, ← IsHermitian.spectral_theorem hx, ← Matrix.mul_assoc,
-    IsHermitian.eigenvectorMatrix_mul_inv, Matrix.one_mul]
+  rw [innerAut_apply, UnitaryGroup.inv_apply, Matrix.unitaryGroup.coe_mk]
+  simp_rw [← IsHermitian.spectral_theorem hx]
 
 theorem coe_diagonal_eq_diagonal_coe {n 𝕜 : Type _} [RCLike 𝕜] [DecidableEq n] (x : n → ℝ) :
     (diagonal (RCLike.ofReal ∘ x) : Matrix n n 𝕜) = CoeTC.coe ∘ diagonal x :=
@@ -558,7 +546,7 @@ theorem diagonal.spectrum {𝕜 n : Type _} [Field 𝕜] [Fintype n] [DecidableE
   by
   simp_rw [Set.ext_iff, ← Module.End.hasEigenvalue_iff_mem_spectrum, ←
     Module.End.has_eigenvector_iff_hasEigenvalue, toLin'_apply, Function.funext_iff, mulVec,
-    diagonal_dotProduct, Pi.smul_apply, Algebra.id.smul_eq_mul, mul_eq_mul_right_iff, Ne.def,
+    diagonal_dotProduct, Pi.smul_apply, Algebra.id.smul_eq_mul, mul_eq_mul_right_iff, ne_eq,
     Set.mem_setOf_eq, Function.funext_iff, Pi.zero_apply, Classical.not_forall]
   intro x
   constructor
@@ -611,7 +599,7 @@ theorem innerAut_commutes_with_lid_comm (U : Matrix.unitaryGroup n 𝕜) :
   by
   simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply, TensorProduct.map_apply,
     LinearEquiv.coe_coe, TensorProduct.comm_tmul,
-    TensorProduct.lid_tmul, LinearMap.one_apply, SMulHomClass.map_smul,
+    TensorProduct.lid_tmul, LinearMap.one_apply, _root_.map_smul,
     forall₂_true_iff]
 
 theorem unitaryGroup.conj_mem {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]

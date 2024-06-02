@@ -137,14 +137,15 @@ theorem sq_mul_sq_eq_self_of_isSymmetric_and_nonneg_spectrum [DecidableEq 𝕜]
     simp only [zero_le_real, ofReal_re, true_and_iff] at hT1
     apply
       hT1
-        (Module.End.mem_spectrum_of_hasEigenvalue (hT.hasEigenvalue_eigenvalues hn i))
+        (Module.End.hasEigenvalue_iff_mem_spectrum.mp (hT.hasEigenvalue_eigenvalues hn i))
   calc
-    T v = ∑ i, ⟪e hT hn i, v⟫ • T (e hT hn i) := ?_
-    _ = ∑ i, (√ (α hT hn i) • √ (α hT hn i) : 𝕜) • ⟪e hT hn i, v⟫ • e hT hn i := ?_
-  simp_rw [← OrthonormalBasis.repr_apply_apply, ← map_smul_of_tower, ← map_sum,
-    OrthonormalBasis.sum_repr (e hT hn) v, IsSymmetric.apply_eigenvectorBasis, smul_smul,
-    real_smul_ofReal, ← ofReal_mul, ← Real.sqrt_mul (this _), Real.sqrt_mul_self (this _),
-    mul_comm]
+    T v = ∑ i, ⟪e hT hn i, v⟫ • T (e hT hn i) := by
+      simp_rw [← OrthonormalBasis.repr_apply_apply, ← map_smul_of_tower, ← map_sum,
+        OrthonormalBasis.sum_repr (e hT hn) v]
+    _ = ∑ i, (√ (α hT hn i) • √ (α hT hn i) : 𝕜) • ⟪e hT hn i, v⟫ • e hT hn i := by
+      simp_rw [IsSymmetric.apply_eigenvectorBasis, smul_smul,
+        real_smul_ofReal, ← ofReal_mul, ← Real.sqrt_mul (this _), Real.sqrt_mul_self (this _),
+        mul_comm]
 
 /-- given a symmetric linear map `T` and a real number `r`,
 we can define a linear map `S` such that `S = T ^ r` -/
@@ -327,7 +328,7 @@ theorem invertible_iff_inner_map_self_pos (hn : FiniteDimensional.finrank 𝕜 E
     rw [hS, mul_apply, adjoint_inner_left, inner_self_eq_norm_sq]
     suffices S v ≠ 0 by
       rw [← norm_ne_zero_iff] at this
-      exact (sq_pos_iff ‖S v‖).mpr this
+      exact sq_pos_iff.mpr this
     by_contra!
     rw [ext_iff] at hS
     specialize hS v
@@ -481,7 +482,8 @@ theorem LinearMap.IsPositive.nonneg_eigenvalue {E : Type _} [NormedAddCommGroup 
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) {α : ℝ}
     (hα : Module.End.HasEigenvalue T α) : 0 ≤ α :=
   by
-  have this := LinearMap.IsPositive.nonneg_spectrum T hT α (Module.End.mem_spectrum_of_hasEigenvalue hα)
+  have this := LinearMap.IsPositive.nonneg_spectrum T hT α
+    (Module.End.hasEigenvalue_iff_mem_spectrum.mp hα)
   rw [zero_le_real] at this
   exact this
 

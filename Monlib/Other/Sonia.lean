@@ -105,9 +105,9 @@ theorem nat_dvd_repr_iff_nat_dvd_sum_repr {a n : ℕ} (x : Fin n → ℤ) (ha : 
  the sum of its digits is divisible by `9`
 -/
 example {n : ℕ} (x : Fin n → ℤ) : 9 ∣ ∑ i, x i * 10 ^ (i : ℕ) ↔ 9 ∣ ∑ i, x i :=
-  nat_dvd_repr_iff_nat_dvd_sum_repr x Nat.one_lt_ofNat
+  nat_dvd_repr_iff_nat_dvd_sum_repr x (Nat.one_lt_succ_succ _)
 
 /-- so when the base is `8`, then a number in base `8` is divisible by `7`,
  if and only if the sum of its digits is divisible by `7` -/
 example {n : ℕ} (x : Fin n → ℤ) : 7 ∣ ∑ i, x i * 8 ^ (i : ℕ) ↔ 7 ∣ ∑ i, x i :=
-  nat_dvd_repr_iff_nat_dvd_sum_repr _ Nat.one_lt_ofNat
+  nat_dvd_repr_iff_nat_dvd_sum_repr _ (Nat.one_lt_succ_succ _)

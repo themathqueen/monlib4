@@ -85,7 +85,7 @@ theorem OrthonormalBasis.toMatrix_symm_apply' {n E : Type _} [Fintype n] [Decida
      LinearIsometryEquiv.toLinearEquiv_symm, LinearMap.comp_apply, LinearEquiv.coe_coe,
      LinearIsometryEquiv.coe_toLinearEquiv]
   rw [← OrthonormalBasis.sum_repr_symm]
-  simp_rw [inner_sum, inner_smul_right, toEuclideanLin_apply,
+  simp_rw [inner_sum, inner_smul_right, toEuclideanLin_apply',
     ← OrthonormalBasis.repr_apply_apply, OrthonormalBasis.repr_self,
     mulVec, dotProduct, EuclideanSpace.single_apply, mul_boole,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.mem_univ, if_true]
@@ -168,7 +168,7 @@ theorem Matrix.stdBasis_repr_eq_reshape : (Matrix.stdBasis R I J).equivFun = res
   · intro x y
     simp_rw [map_add]
   · intro c x
-    simp_rw [SMulHomClass.map_smul]
+    simp_rw [_root_.map_smul]
   · intro i
     ext j
     simp only [Finsupp.single_apply]
@@ -183,7 +183,7 @@ def LinearEquiv.innerConj {R E F : Type _} [CommSemiring R] [AddCommMonoid E] [A
   by
   apply AlgEquiv.ofLinearEquiv ϱ.conj _
     (fun _ _ => LinearEquiv.conj_hMul _ _ _)
-  simp only [Algebra.algebraMap_eq_smul_one, SMulHomClass.map_smul, LinearEquiv.conj_apply_one]
+  simp only [Algebra.algebraMap_eq_smul_one, _root_.map_smul, LinearEquiv.conj_apply_one]
 
 namespace LinearMap
 

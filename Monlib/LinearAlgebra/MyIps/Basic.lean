@@ -114,7 +114,7 @@ theorem LinearMap.adjoint_smul {K E : Type _} [RCLike K] [NormedAddCommGroup E]
     @ContinuousLinearMap.adjoint_smul K E _ _ _ (FiniteDimensional.complete K E)
       (toContinuousLinearMap φ) a
   simp_rw [← LinearMap.adjoint_toContinuousLinearMap] at this
-  rw [LinearMap.adjoint_eq_toCLM_adjoint, SMulHomClass.map_smul, this]
+  rw [LinearMap.adjoint_eq_toCLM_adjoint, _root_.map_smul, this]
   rfl
 
 theorem LinearMap.adjoint_one {K E : Type _} [RCLike K] [NormedAddCommGroup E]

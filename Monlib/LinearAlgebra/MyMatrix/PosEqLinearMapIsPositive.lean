@@ -142,13 +142,13 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     · simp_rw [Finset.mem_univ, true_and]
       suffices y *ᵥ v ≠ 0
         by
-        simp_rw [Ne.def, Function.funext_iff, Pi.zero_apply] at this
+        simp_rw [ne_eq, Function.funext_iff, Pi.zero_apply] at this
         push_neg at this
         cases' this with j hj
         rw [← norm_ne_zero_iff] at hj
         use j
         norm_cast
-        exact (sq_pos_iff _).mpr hj
+        exact sq_pos_iff.mpr hj
       by_contra!
       apply hv
       apply_fun (toLin' x)
@@ -196,7 +196,8 @@ theorem Matrix.IsHermitian.nonneg_eigenvalues_of_posSemidef [Fintype n] [Decidab
     {A : Matrix n n 𝕜} (hA : A.PosSemidef) (i : n) : 0 ≤ hA.1.eigenvalues i :=
   Matrix.nonneg_eigenvalues_of_posSemidef (hA.1.eigenvalues_hasEigenvalue _) hA
 
-lemma Matrix.invertible_of_bij_toLin' [Fintype n] [DecidableEq n] {Q : Matrix n n 𝕜}
+noncomputable
+def Matrix.invertible_of_bij_toLin' [Fintype n] [DecidableEq n] {Q : Matrix n n 𝕜}
   (h : Function.Bijective (toLin' Q)) :
     Invertible Q :=
   by
@@ -404,7 +405,7 @@ theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).Pos
   cases' h with i hi
   use i
   simp_rw [Finset.mem_univ, true_and_iff]
-  simp_rw [Ne.def] at hi
+  simp_rw [ne_eq] at hi
   contrapose! hi
   simp_rw [inner_self_eq_norm_sq_to_K, ← RCLike.ofReal_pow, RCLike.zero_lt_real] at hi
   push_neg at hi
@@ -439,14 +440,14 @@ theorem Matrix.PosDef.trace_ne_zero [Fintype n] [DecidableEq n] [Nonempty n] {x 
 
 open scoped ComplexOrder
 
-lemma toEuclideanLin_apply {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) (v : EuclideanSpace 𝕜 n) :
+lemma Matrix.toEuclideanLin_apply' {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) (v : EuclideanSpace 𝕜 n) :
     toEuclideanLin x v = x.mulVec v := rfl
 
 theorem PosSemidef.complex [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
     x.PosSemidef ↔ ∀ y : n → ℂ, 0 ≤ star y ⬝ᵥ x.mulVec y :=
   by
   simp_rw [posSemidef_eq_linearMap_positive x, LinearMap.complex_isPositive,
-    toEuclideanLin_apply, @RCLike.nonneg_def' ℂ]
+    toEuclideanLin_apply', @RCLike.nonneg_def' ℂ]
   rfl
 
 theorem StdBasisMatrix.sum_eq_one [Fintype n] [DecidableEq n] (a : 𝕜) : ∑ k : n, stdBasisMatrix k k a = a • 1 :=
@@ -488,7 +489,7 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
       by
       rw [inv_mul_eq_one₀]
       · rfl
-      · simp only [Ne.def, Nat.cast_eq_zero, Fintype.card_ne_zero]
+      · simp only [ne_eq, Nat.cast_eq_zero, Fintype.card_ne_zero]
         exact not_false
     constructor
     · intro h
@@ -518,13 +519,13 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
           simp_rw [this, one_mul]
         · simp_rw [h.1]
         ·
-          simp_rw [stdBasisMatrix_hMul, one_mul, SMulHomClass.map_smul, smul_eq_mul, boole_mul,
+          simp_rw [stdBasisMatrix_hMul, one_mul, _root_.map_smul, smul_eq_mul, boole_mul,
             Finset.sum_ite_irrel, Finset.sum_const_zero, map_sum]
         · simp_rw [StdBasisMatrix.sum_eq_one, one_smul]
         · simp_rw [h.2]
       rw [LinearMap.smul_apply, Matrix.traceLinearMap_apply]
       nth_rw 1 [matrix_eq_sum_std_basis x]
-      simp_rw [Matrix.smul_stdBasisMatrix' _ _ (x _ _), map_sum, SMulHomClass.map_smul]
+      simp_rw [Matrix.smul_stdBasisMatrix' _ _ (x _ _), map_sum, _root_.map_smul]
       calc
         ∑ x_1, ∑ x_2, x x_1 x_2 • φ (stdBasisMatrix x_1 x_2 1) =
             ∑ x_1, ∑ x_2, x x_1 x_2 • (1 / (Fintype.card n : 𝕜)) • ite (x_2 = x_1) (1 : 𝕜) 0 :=
@@ -576,7 +577,7 @@ theorem Matrix.PosDef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
       Finset.sum_ite_eq, Finset.mem_univ, if_true] at h'
     let g : n → 𝕜 := fun p => ite (i = p) 1 0
     have : g ≠ 0 := by
-      rw [Ne.def, Function.funext_iff, Classical.not_forall]
+      rw [ne_eq, Function.funext_iff, Classical.not_forall]
       simp_rw [Pi.zero_apply]
       use i
       simp_rw [g, if_true]
@@ -599,7 +600,7 @@ theorem Matrix.PosDef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
       @RCLike.conj_mul 𝕜 _ (y _), ← RCLike.ofReal_pow]
     apply Finset.sum_pos'
       (fun i _ => mul_nonneg (le_of_lt (h i)) (RCLike.zero_le_real.mpr (sq_nonneg _)))
-    simp_rw [Ne.def, Function.funext_iff, Pi.zero_apply, Classical.not_forall] at hy
+    simp_rw [ne_eq, Function.funext_iff, Pi.zero_apply, Classical.not_forall] at hy
     obtain ⟨i, hi⟩ := hy
     exact ⟨i, Finset.mem_univ _, mul_pos (h _) (by simp only [RCLike.ofReal_pow, gt_iff_lt,
       RCLike.zero_lt_real, norm_pos_iff, ne_eq, hi, not_false_eq_true, pow_pos])⟩

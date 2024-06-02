@@ -644,7 +644,7 @@ theorem rankOne.isMinimalProjection [InnerProductSpace ℂ E] [CompleteSpace E] 
   simp_rw [finrank_eq_one_iff']
   constructor
   · use⟨x, Submodule.mem_span_singleton_self x⟩
-    simp_rw [Ne.def, Submodule.mk_eq_zero, SetLike.mk_smul_mk]
+    simp_rw [ne_eq, Submodule.mk_eq_zero, SetLike.mk_smul_mk]
     refine' ⟨norm_ne_zero_iff.mp (by rw [h]; exact one_ne_zero), fun w => _⟩
     cases' Submodule.mem_span_singleton.mp (SetLike.coe_mem w) with r hr
     use r
@@ -664,7 +664,7 @@ theorem normalize_op [InnerProductSpace ℂ E] (x : E) :
   · right
     exact A
   · have B : ‖x‖ ≠ 0 := by
-      simp only [Ne.def, norm_eq_zero]
+      simp only [ne_eq, norm_eq_zero]
       exact A
     left
     use ((1 / ‖x‖) • x)
@@ -695,7 +695,7 @@ theorem rankOne.isMinimalProjection' [InnerProductSpace ℂ E] [CompleteSpace E]
       by
       rw [Submodule.span_singleton_smul_eq _]
       refine' Ne.isUnit _
-      rw [Ne.def]
+      rw [ne_eq]
       rw [← pow_eq_zero_iff two_ne_zero]
       norm_cast
     rw [← Complex.coe_smul, this]

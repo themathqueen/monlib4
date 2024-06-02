@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Data.Finset.Basic
-import Mathlib.Algebra.BigOperators.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset
 
 #align_import preq.finset
 

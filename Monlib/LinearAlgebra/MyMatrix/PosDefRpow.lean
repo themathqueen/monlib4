@@ -24,19 +24,20 @@ variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
 
 open scoped Matrix BigOperators ComplexOrder MatrixOrder
 
+-- noncomputable def IsHermitian.rpow {Q : Matrix n n 𝕜} (hQ : IsHermitian Q) (r : ℝ) :
+--   Matrix n n 𝕜 :=
+--   Matrix.innerAut hQ.eigenvectorUnitary
+--     (Matrix.diagonal (RCLike.ofReal ∘ (hQ.eigenvalues ^ r : n → ℝ) : n → 𝕜))
+
 noncomputable def PosDef.rpow {Q : Matrix n n 𝕜} (hQ : PosDef Q) (r : ℝ) :
   Matrix n n 𝕜 :=
-  Matrix.innerAut
-    (⟨(IsHermitian.eigenvectorMatrix hQ.1 : Matrix n n 𝕜),
-    hQ.1.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup n 𝕜)
+  Matrix.innerAut hQ.1.eigenvectorUnitary
     (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ r : n → ℝ) : n → 𝕜))
 
 noncomputable def PosSemidef.rpow {Q : Matrix n n 𝕜} (hQ : PosSemidef Q) (r : NNReal) :
   Matrix n n 𝕜 :=
-  Matrix.innerAut
-    (⟨(IsHermitian.eigenvectorMatrix hQ.1 : Matrix n n 𝕜),
-    hQ.1.eigenvectorMatrix_mem_unitaryGroup⟩ : unitaryGroup n 𝕜)
-    (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ (r : ℝ) : n → ℝ) : n → 𝕜))
+Matrix.innerAut hQ.1.eigenvectorUnitary
+  (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ (r : ℝ) : n → ℝ) : n → 𝕜))
 
 theorem PosDef.rpow_mul_rpow (r₁ r₂ : ℝ) {Q : Matrix n n 𝕜} (hQ : PosDef Q) :
     hQ.rpow r₁ * hQ.rpow r₂ = hQ.rpow (r₁ + r₂) :=
@@ -151,7 +152,7 @@ theorem PosDef.inv {𝕜 n : Type _} [Fintype n] [RCLike 𝕜] {Q : Matrix n n �
 
 theorem PosDef.rpow_ne_zero [Nonempty n] {Q : Matrix n n ℂ} (hQ : Q.PosDef) {r : ℝ} :
     hQ.rpow r ≠ 0 := by
-  simp_rw [Matrix.PosDef.rpow, Ne.def, innerAut_eq_iff, innerAut_apply_zero,
+  simp_rw [Matrix.PosDef.rpow, ne_eq, innerAut_eq_iff, innerAut_apply_zero,
     ← Matrix.ext_iff, Matrix.diagonal, Matrix.zero_apply, of_apply,
     ite_eq_right_iff, Function.comp_apply, RCLike.ofReal_eq_zero, Pi.pow_apply,
     Real.rpow_eq_zero_iff_of_nonneg (le_of_lt (hQ.pos_eigenvalues _)),

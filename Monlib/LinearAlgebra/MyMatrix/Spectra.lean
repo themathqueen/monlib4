@@ -109,7 +109,7 @@ theorem IsAlmostHermitian.of_innerAut {A : Matrix n n 𝕜} (hA : A.IsAlmostHerm
   by
   obtain ⟨α, y, rfl, hy⟩ := hA
   refine' ⟨α, innerAut U y, _, hy.of_innerAut _⟩
-  simp_rw [SMulHomClass.map_smul]
+  simp_rw [_root_.map_smul]
 
 theorem isAlmostHermitian_iff_of_innerAut {A : Matrix n n 𝕜} (U : unitaryGroup n 𝕜) :
     A.IsAlmostHermitian ↔ (innerAut U A).IsAlmostHermitian :=
@@ -117,7 +117,7 @@ theorem isAlmostHermitian_iff_of_innerAut {A : Matrix n n 𝕜} (U : unitaryGrou
   refine' ⟨fun h => h.of_innerAut _, _⟩
   rintro ⟨α, y, h, hy⟩
   rw [eq_comm, innerAut_eq_iff] at h
-  rw [h, SMulHomClass.map_smul]
+  rw [h, _root_.map_smul]
   clear h
   revert α
   rw [← isAlmostHermitian_iff_smul]

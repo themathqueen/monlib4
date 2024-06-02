@@ -46,6 +46,7 @@ class QuantumSet (A : Type _) where
 toNormedAddCommGroupOfRing : NormedAddCommGroupOfRing A
 toInnerProductSpace : InnerProductSpace ℂ A
 toPartialOrder : PartialOrder A
+toStarRing : StarRing A
 toStarOrderedRing : StarOrderedRing A
 toSmulCommClass : SMulCommClass ℂ A A
 toIsScalarTower : IsScalarTower ℂ A A

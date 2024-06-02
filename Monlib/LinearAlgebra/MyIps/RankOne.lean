@@ -410,4 +410,4 @@ theorem LinearMap.comp_rankOne {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGro
     u ∘ₗ ((rankOne x y : E →L[𝕜] E) : E →ₗ[𝕜] E) = (rankOne (u x) y : E →L[𝕜] E) :=
   by
   ext
-  simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply, SMulHomClass.map_smul]
+  simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply, _root_.map_smul]

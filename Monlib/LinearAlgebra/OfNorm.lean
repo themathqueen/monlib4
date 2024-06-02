@@ -21,7 +21,7 @@ theorem cs_aux {x y : E} (hy : y ≠ 0) :
   by
   have : ((‖y‖ ^ 2 : ℝ) : 𝕜) ≠ 0 :=
     by
-    rw [Ne.def, RCLike.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
+    rw [ne_eq, RCLike.ofReal_eq_zero, sq_eq_zero_iff, norm_eq_zero]
     exact hy
   rw [← @inner_self_eq_norm_sq 𝕜]
   simp only [inner_sub_sub_self, inner_smul_left, inner_smul_right, _root_.map_mul, inner_conj_symm,
@@ -60,7 +60,7 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
       rw [h', norm_zero, eq_comm, mul_eq_zero] at h
       simp_rw [norm_eq_zero, hx, hy, false_or_iff] at h
     have hy' : ‖y‖ ^ 2 ≠ 0 := by
-      rw [Ne.def, sq_eq_zero_iff, norm_eq_zero]
+      rw [ne_eq, sq_eq_zero_iff, norm_eq_zero]
       exact hy
     rw [← sq_eq_sq (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)), mul_pow, eq_comm, ←
       eq_mul_inv_iff_mul_eq₀ hy', ← sub_eq_zero, ← cs_aux hy, sq_eq_zero_iff, norm_eq_zero,
@@ -68,7 +68,7 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
     use Units.mk0 ((inner y x : 𝕜) * ((‖y‖ : 𝕜) ^ 2)⁻¹)
           (mul_ne_zero this
             (by
-              rw [Ne.def, inv_eq_zero, sq_eq_zero_iff, RCLike.ofReal_eq_zero, norm_eq_zero]
+              rw [ne_eq, inv_eq_zero, sq_eq_zero_iff, RCLike.ofReal_eq_zero, norm_eq_zero]
               exact hy))
     norm_cast at h ⊢
   · rintro ⟨α, rfl⟩
@@ -244,7 +244,7 @@ theorem LinearMap.ker_coe_def {R E F : Type _} [Semiring R] [AddCommMonoid E] [A
 theorem exists_dual_vector_of_ne {X : Type _} [NormedAddCommGroup X] [NormedSpace 𝕜 X] {x y : X}
     (h : x ≠ y) : ∃ f : NormedSpace.Dual 𝕜 X, f x ≠ f y :=
   by
-  rw [Ne.def, ← sub_eq_zero] at h
+  rw [ne_eq, ← sub_eq_zero] at h
   obtain ⟨f, ⟨_, hxy⟩⟩ := @exists_dual_vector 𝕜 _ X _ _ _ h
   rw [map_sub] at hxy
   use f
@@ -652,7 +652,7 @@ open NormedSpace in
   map_add' := λ x y => by
     simp only [map_add, Dual.transpose_apply]
   map_smul' := λ c x => by
-    simp only [SMulHomClass.map_smul, Dual.transpose_apply, RingHom.id_apply]
+    simp only [_root_.map_smul, Dual.transpose_apply, RingHom.id_apply]
   norm_map' := λ x => by
     simp only [coe_mk]
     exact (AddMonoidHomClass.isometry_iff_norm _).mp Dual.transpose_isometry _ }

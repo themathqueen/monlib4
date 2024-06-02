@@ -13,6 +13,7 @@ import Monlib.Preq.Set
 import Monlib.Preq.Submodule
 import Monlib.Preq.StarAlgEquiv
 import Monlib.LinearAlgebra.MyMatrix.PiMat
+import Monlib.LinearAlgebra.LmulRmul
 
 #align_import rep_theory.aut_mat
 
@@ -88,12 +89,12 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
   -- there exists a vector `z ∈ 𝕜ⁿ` such that `f (col u * ) z ≠ 0`
   have : ∃ z : n → R, (f (vecMulVec u y)) *ᵥ z ≠ 0 :=
     by
-    simp_rw [Ne.def, ← Classical.not_forall]
+    simp_rw [ne_eq, ← Classical.not_forall]
     suffices ¬f (vecMulVec u y) = 0
       by
       simp_rw [mulVec_eq, zero_mulVec] at this
       exact this
-    rw [← Ne.def, f_ne_zero_iff]
+    rw [← ne_eq, f_ne_zero_iff]
     exact vecMulVec_ne_zero hu hy
   -- let `z ∈ 𝕜ⁿ` such that `f (uy⋆) z ≠ 0`
   cases' this with z hz
@@ -234,6 +235,35 @@ theorem Algebra.autInner_symm_apply {R E : Type _} [CommSemiring R] [Semiring E]
     (x : E) [Invertible x] (y : E) : (Algebra.autInner x : E ≃ₐ[R] E).symm y = ⅟ x * y * x :=
   rfl
 
+theorem Algebra.coe_autInner_eq_rmul_comp_lmul {R E : Type _} [CommSemiring R] [Semiring E]
+  [Algebra R E] (x : E) [Invertible x] :
+  (Algebra.autInner x : E ≃ₐ[R] E) = (_root_.lmul x : E →ₗ[R] E) ∘ (_root_.rmul (⅟ x) : E →ₗ[R] E) :=
+by
+  ext a
+  simp only [autInner_apply, _root_.lmul_apply, rmul_apply, Function.comp_apply, mul_assoc]
+theorem Algebra.coe_autInner_symm_eq_rmul_comp_lmul {R E : Type _} [CommSemiring R] [Semiring E]
+  [Algebra R E] (x : E) [Invertible x] :
+  (Algebra.autInner x : E ≃ₐ[R] E).symm
+    = (_root_.lmul (⅟ x) : E →ₗ[R] E) ∘ (_root_.rmul x : E →ₗ[R] E) :=
+by
+  ext a
+  simp only [autInner_symm_apply, _root_.lmul_apply, rmul_apply, Function.comp_apply, mul_assoc]
+theorem _root_.lmul_comp_rmul_eq_mulLeftRight {R E : Type _} [CommSemiring R]
+  [NonUnitalSemiring E] [Module R E] [SMulCommClass R E E] [IsScalarTower R E E] (a b : E) :
+  (_root_.lmul a : E →ₗ[R] E) ∘ₗ (_root_.rmul b : E →ₗ[R] E)
+    = LinearMap.mulLeftRight R (a, b) :=
+by
+  ext _
+  simp only [LinearMap.mulLeftRight_apply, _root_.lmul_apply, _root_.rmul_apply,
+    LinearMap.comp_apply, mul_assoc]
+theorem _root_.lmul_comp_rmul_eq_coe_mulLeftRight {R E : Type _} [CommSemiring R]
+  [NonUnitalSemiring E] [Module R E] [SMulCommClass R E E] [IsScalarTower R E E] (a b : E) :
+  (_root_.lmul a : E →ₗ[R] E) ∘ (_root_.rmul b : E →ₗ[R] E) = LinearMap.mulLeftRight R (a, b) :=
+by
+  rw [← lmul_comp_rmul_eq_mulLeftRight]
+  rfl
+
+
 theorem Algebra.autInner_hMul_autInner {R E : Type _} [CommSemiring R] [Semiring E] [Algebra R E]
     (x y : E) [hx : Invertible x] [hy : Invertible y] :
     (Algebra.autInner x : E ≃ₐ[R] E) * Algebra.autInner y =
@@ -242,10 +272,10 @@ theorem Algebra.autInner_hMul_autInner {R E : Type _} [CommSemiring R] [Semiring
   ext
   simp_rw [AlgEquiv.mul_apply, Algebra.autInner_apply, invOf_mul, mul_assoc]
 
-@[pp_dot] def AlgEquiv.IsInner {R E : Type*} [CommSemiring R] [Semiring E]
+def AlgEquiv.IsInner {R E : Type*} [CommSemiring R] [Semiring E]
   [Algebra R E]
   (f : E ≃ₐ[R] E) : Prop :=
-∃ (a : E) (ha : Invertible a), f = Algebra.autInner a
+∃ (a : E) (_ : Invertible a), f = Algebra.autInner a
 
 @[simps] def AlgEquiv.prod_map {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   [Semiring R₁] [Semiring R₂] [Semiring R₃] [Semiring R₄]
@@ -333,16 +363,16 @@ theorem AlgEquiv.pi_isInner_iff_pi_map {K ι : Type*} {R : ι → Type*} [CommSe
   AlgEquiv.IsInner f
     ↔ ∃ (a : Π i, R i) (ha : Π i, Invertible (a i)),
       f = AlgEquiv.Pi (λ i => Algebra.autInner (a i)) :=
-by
-  constructor
-  . rintro ⟨a, ha, h⟩
-    use (λ i => a i), by infer_instance
-    rw [h]
-    rfl
-  . rintro ⟨a, ha, h⟩
-    use (λ i => a i), by infer_instance
-    rw [h]
-    rfl
+by constructor <;> exact λ ⟨a, ha, h⟩ => ⟨(λ i => a i), by infer_instance, by rw [h]; rfl⟩
+
+theorem AlgEquiv.pi_isInner_iff_pi_map' {K ι : Type*} {n : ι → Type*} [CommSemiring K]
+  [Fintype ι] [Π i,Fintype (n i)] [Π i, DecidableEq (n i)]
+  (f : PiMat K ι n ≃ₐ[K] PiMat K ι n) :
+  AlgEquiv.IsInner f
+    ↔ ∃ (a : PiMat K ι n) (_ : Π i, Invertible (a i)),
+      f = AlgEquiv.Pi (λ i => Algebra.autInner (a i)) :=
+AlgEquiv.pi_isInner_iff_pi_map _
+
 
 private theorem automorphism_matrix_inner''' [DecidableEq n] [Nonempty n] (f : (M n) ≃ₐ[𝕜] M n) :
     ∃ T : (n → 𝕜) ≃ₗ[𝕜] n → 𝕜,
@@ -448,6 +478,21 @@ by
   nth_rw 3 [← Prod.eta x]
   simp_rw [Prod.ext_iff, exists_and_left, exists_and_right]
 
+private def E_i {R ι : Type*} [CommSemiring R] [DecidableEq ι]
+  [Fintype ι] {n : ι → Type*} [Π i, DecidableEq (n i)] [Π i, Fintype (n i)] (i : ι) :
+  PiMat R ι n :=
+Pi.single i 1
+
+private lemma mem_span_pi {R ι : Type*} [CommSemiring R] [DecidableEq ι]
+  [Fintype ι] {n : ι → Type*} [Π i, DecidableEq (n i)] [Π i, Fintype (n i)] (i : ι)
+  (x : PiMat R ι n) :
+  x ∈ Submodule.span R { (E_i i : PiMat R ι n) }
+  ↔
+  ∃ α : R, x = Pi.single i (α • 1) :=
+by
+  simp only [Submodule.mem_span_singleton, E_i, ← Pi.single_smul, eq_comm]
+
+
 lemma _root_.Matrix.pi_center {R ι : Type*} [CommSemiring R] [DecidableEq ι]
   [Fintype ι] {n : ι → Type*}
   [Π i, DecidableEq (n i)] [Π i, Fintype (n i)] :
@@ -467,7 +512,7 @@ Matrix.pi_center
 private theorem matrix.one_ne_zero {R : Type _} [Semiring R] [One R] [Zero R] [NeZero (1 : R)]
     [DecidableEq n] [hn : Nonempty n] : (1 : Matrix n n R) ≠ 0 :=
   by
-  simp_rw [Ne.def, ← Matrix.eq_zero, Matrix.one_apply, ite_eq_right_iff, _root_.one_ne_zero, imp_false,
+  simp_rw [ne_eq, ← Matrix.eq_zero, Matrix.one_apply, ite_eq_right_iff, _root_.one_ne_zero, imp_false,
     Classical.not_forall, Classical.not_not]
   exact ⟨hn.some, hn.some, rfl⟩
 
@@ -503,7 +548,7 @@ theorem Matrix.one_ne_zero_iff {𝕜 n : Type*} [DecidableEq n]
   [Zero 𝕜] [One 𝕜] [NeZero (1 : 𝕜)] :
   (1 : Matrix n n 𝕜) ≠ (0 : Matrix n n 𝕜) ↔ Nonempty n :=
 by
-  simp_rw [Ne.def, ← Matrix.ext_iff, one_apply, zero_apply, not_forall]
+  simp_rw [ne_eq, ← Matrix.ext_iff, one_apply, zero_apply, not_forall]
   constructor
   . rintro ⟨x, _, _⟩
     use x
@@ -805,5 +850,35 @@ by
   have := LinearEquiv.finrank_eq f'.toLinearEquiv
   simp [FiniteDimensional.finrank_matrix, ← pow_two] at this
   exact this.symm
+
+def perm_perm_aux {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) (x : PiMat R ι n) (i : ι) :
+  PiMat R ι n :=
+λ j => if (i = σ.symm j) then (x j) else 0
+@[simps]
+def _root_.Pi.perm_of_perm {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) :
+  PiMat R ι n ≃ₐ[R] PiMat R ι n :=
+{ toFun := λ x => ∑ i, perm_perm_aux σ x i
+  invFun := λ x => ∑ i, perm_perm_aux σ.symm x i
+  left_inv := λ x => by
+    ext1 i
+    simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  right_inv := λ x => by
+    ext1 i
+    simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+  map_add' := λ x y => by
+    ext1 i
+    simp only [Finset.sum_apply, perm_perm_aux, Pi.add_apply]
+    simp only [Finset.sum_add_distrib, ite_add_zero]
+  map_mul' := λ x y => by
+    ext1 i
+    simp only [Finset.sum_apply, perm_perm_aux, Pi.mul_apply]
+    simp only [Finset.sum_mul, Finset.mul_sum, ite_mul, zero_mul, mul_ite, mul_zero,
+      Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
+  commutes' := λ r => by
+    ext1 i
+    simp only [Finset.sum_apply, perm_perm_aux, Pi.smul_apply, Algebra.algebraMap_eq_smul_one]
+    simp only [Pi.one_apply, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte] }
 
 end Matrix

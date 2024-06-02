@@ -77,7 +77,7 @@ def StarAlgEquiv.pi {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [Fintype k] [Deci
     simp only [Pi.add_apply, map_add]
     rfl
   map_smul' r a := by
-    simp only [Pi.smul_apply, SMulHomClass.map_smul]
+    simp only [Pi.smul_apply, _root_.map_smul]
     rfl
   map_mul' a b := by
     simp only [Pi.mul_apply, _root_.map_mul]

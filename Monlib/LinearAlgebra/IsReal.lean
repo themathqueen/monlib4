@@ -31,7 +31,7 @@ def LinearMap.real (φ : E →ₗ[K] F) : E →ₗ[K] F
     where
   toFun x := star (φ (star x))
   map_add' x y := by simp only [star_add, map_add]
-  map_smul' r x := by simp only [star_smul, SMulHomClass.map_smul, star_star, RingHom.id_apply]
+  map_smul' r x := by simp only [star_smul, _root_.map_smul, star_star, RingHom.id_apply]
 
 theorem LinearMap.isReal_iff (φ : E →ₗ[K] F) : φ.IsReal ↔ φ.real = φ := by
   simp_rw [LinearMap.IsReal, LinearMap.ext_iff, LinearMap.real_apply,

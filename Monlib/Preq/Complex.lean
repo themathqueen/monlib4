@@ -175,7 +175,7 @@ theorem abs_of_sum_sq_eq_sum_abs_sq_iff'' {n : Type _} [Fintype n] (α : n → �
       intros
       use 0
       simp_rw [H, Pi.zero_apply, MulZeroClass.zero_mul]
-    · have : ∃ i : n, α i ≠ 0 := by simp_rw [Ne.def, ← not_forall, ← Function.funext_iff]; exact H
+    · have : ∃ i : n, α i ≠ 0 := by simp_rw [ne_eq, ← not_forall, ← Function.funext_iff]; exact H
       have := this
       cases' this with i hi
       cases' this with j hj

@@ -40,7 +40,7 @@ noncomputable def PiNormedAddCommGroupOfRing {ι : Type _} [Fintype ι] {B : ι 
     where
   toNorm := PiLp.instNorm 2 B
   toRing := Pi.ring
-  toMetricSpace := PiLp.instMetricSpacePiLp 2 B
+  toMetricSpace := PiLp.instMetricSpace 2 B
   dist_eq x y := by
     have : 0 < (2 : ENNReal).toReal := by norm_num
     simp_rw [PiLp.norm_eq_sum this, PiLp.dist_eq_sum this, dist_eq_norm]

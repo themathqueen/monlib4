@@ -46,7 +46,7 @@ theorem mulVec_eq {R m n : Type _} [CommSemiring R] [Fintype n] [DecidableEq n]
 /-- a vector is nonzero iff one of its elements are nonzero -/
 theorem vec_ne_zero {R n : Type _} [Semiring R] (a : n → R) : (∃ i, a i ≠ 0) ↔ a ≠ 0 :=
   by
-  simp_rw [Ne.def, ← Classical.not_forall]
+  simp_rw [ne_eq, ← Classical.not_forall]
   constructor
   · intro h h2
     simp_rw [h2, Pi.zero_apply, imp_true_iff, not_true] at h
@@ -66,7 +66,7 @@ theorem ext_vec {𝕜 n : Type _} (α β : n → 𝕜) : α = β ↔ ∀ i : n, 
 theorem vecMulVec_ne_zero {R n : Type _} [Semiring R] [NoZeroDivisors R] {α β : n → R} (hα : α ≠ 0)
     (hβ : β ≠ 0) : vecMulVec α β ≠ 0 :=
   by
-  rw [Ne.def, ← ext_iff]
+  rw [ne_eq, ← ext_iff]
   rw [← vec_ne_zero] at hα hβ
   cases' hβ with i hiy
   cases' hα with j hju
@@ -123,37 +123,64 @@ example (A : l(ℍ)) (B : l(ℍ₂)) :
 
 open LinearMap
 
+noncomputable def Matrix.IsHermitian.eigenvectorMatrix
+  {n 𝕜 : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  {A : Matrix n n 𝕜} (hA : A.IsHermitian) : Matrix n n 𝕜 :=
+(PiLp.basisFun _ 𝕜 n).toMatrix hA.eigenvectorBasis.toBasis
+
+lemma Matrix.IsHermitian.eigenvectorUnitary_coe_eq_eigenvectorMatrix
+  {n 𝕜 : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  {A : Matrix n n 𝕜} (hA : A.IsHermitian) :
+  hA.eigenvectorMatrix = hA.eigenvectorUnitary :=
+rfl
+
+open scoped Matrix
+lemma Matrix.IsHermitian.eigenvalues_eq'
+  {n 𝕜 : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  {A : Matrix n n 𝕜} (hA : A.IsHermitian) (i : n) :
+  hA.eigenvalues i =
+    RCLike.re (star (hA.eigenvectorMatrixᵀ i) ⬝ᵥ A *ᵥ hA.eigenvectorMatrixᵀ i) :=
+hA.eigenvalues_eq _
+
+lemma Matrix.IsHermitian.eigenvectorMatrix_conjTranspose
+  {n 𝕜 : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  {A : Matrix n n 𝕜} (hA : A.IsHermitian) :
+  hA.eigenvectorMatrixᴴ = (eigenvectorBasis hA).toBasis.toMatrix (PiLp.basisFun _ 𝕜 n) :=
+by
+  ext i j
+  simp_rw [conjTranspose_apply, eigenvectorMatrix, Basis.toMatrix_apply,
+    OrthonormalBasis.coe_toBasis_repr_apply, OrthonormalBasis.repr_apply_apply,
+    PiLp.basisFun_apply, WithLp.equiv_symm_single,
+    EuclideanSpace.inner_single_right, one_mul, RCLike.star_def]
+  rfl
+
+theorem Matrix.IsHermitian.eigenvectorMatrix_mul_conjTranspose
+  {n 𝕜 : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  {A : Matrix n n 𝕜} (hA : A.IsHermitian) :
+  hA.eigenvectorMatrix * hA.eigenvectorMatrixᴴ = 1 :=
+by
+  simp_rw [eigenvectorMatrix_conjTranspose]
+  apply Basis.toMatrix_mul_toMatrix_flip
+
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i y) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i y) -/
 /-- the trace of a Hermitian matrix is the sum of its eigenvalues -/
 theorem Matrix.IsHermitian.trace_eq [DecidableEq n] [DecidableEq 𝕜] {A : 𝕂 n} (hA : A.IsHermitian) :
     A.trace = ∑ i : n, hA.eigenvalues i :=
   by
-  simp_rw [hA.eigenvalues_eq, Matrix.trace, Matrix.diag, Matrix.dotProduct, Pi.star_apply,
-    Matrix.mulVec, Matrix.transpose_apply, Matrix.dotProduct, Matrix.transpose_apply,
-    Matrix.IsHermitian.eigenvectorMatrix_apply, ← hA.eigenvectorMatrixInv_apply, Finset.mul_sum, ←
-    hA.eigenvectorMatrix_apply, mul_comm _ (_ * _), mul_assoc, _root_.map_sum]
-  norm_cast
-  rw [Finset.sum_comm]
-  have :=
-    calc
-      ∑ y : n, ∑ x : n, ∑ i : n,
-            RCLike.re (A y i * (hA.eigenvectorMatrix i x * hA.eigenvectorMatrixInv x y)) =
-          ∑ i : n, ∑ y : n,
-            RCLike.re
-              (A y i * ∑ x : n, hA.eigenvectorMatrix i x * hA.eigenvectorMatrixInv x y) :=
-        by simp_rw [Finset.mul_sum, _root_.map_sum]; rw [Finset.sum_sum_sum]
-      _ = ∑ i : n, ∑ y : n, RCLike.re (A y i * (1 : 𝕂 n) i y) := by
-        simp_rw [← Matrix.mul_apply, Matrix.IsHermitian.eigenvectorMatrix_mul_inv]
-      _ = ∑ y : n, RCLike.re (∑ i : n, A y i * (1 : 𝕂 n) i y) :=
-        by simp_rw [← _root_.map_sum]; rw [Finset.sum_comm]
-      _ = ∑ y : n, RCLike.re ((A * (1 : Matrix n n 𝕜)) y y) :=
-        by simp_rw [← Matrix.mul_apply]
-      _ = ∑ y : n, RCLike.re (A y y) := by rw [Matrix.mul_one]
-  · rw [this, RCLike.ofReal_sum]
-    congr
-    ext1 i
-    rw [hA.coe_re_apply_self i]
+  simp_rw [hA.eigenvalues_eq', Matrix.trace, Matrix.diag, Matrix.dotProduct, Pi.star_apply,
+    Matrix.mulVec, transpose_apply, Matrix.dotProduct,
+    transpose_apply,
+    ← conjTranspose_apply,
+    Finset.mul_sum, ← mul_assoc, mul_comm (_ᴴ _ _ * _), ← mul_assoc, ← map_sum]
+  nth_rw 1 [← Finset.sum_rotate]
+  simp_rw [← Finset.sum_mul, ← mul_apply, eigenvectorMatrix_mul_conjTranspose,
+    one_apply, boole_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true, map_sum,
+    RCLike.ofReal_sum]
+  congr
+  ext i
+  symm
+  rw [← RCLike.conj_eq_iff_re, starRingEnd_apply, ← conjTranspose_apply, hA.eq]
 
 theorem LinearMap.IsSymmetric.eigenvalue_mem_spectrum [DecidableEq 𝕜]
     (hn : FiniteDimensional.finrank 𝕜 ℍ = Fintype.card n) {A : l(ℍ)} (hA : A.IsSymmetric)
@@ -249,11 +276,11 @@ theorem Matrix.kronecker.transpose {n : Type _} (x y : Matrix n n 𝕜) : (x ⊗
 theorem Matrix.kronecker.conj {n : Type _} (x y : Matrix n n 𝕜) : (x ⊗ₖ y)ᴴᵀ = xᴴᵀ ⊗ₖ yᴴᵀ := by
   rw [Matrix.conj, Matrix.kronecker_conjTranspose, Matrix.kronecker.transpose]; rfl
 
-theorem Matrix.IsHermitian.eigenvectorMatrix_mem_unitaryGroup {𝕜 : Type _} [RCLike 𝕜]
-    [DecidableEq 𝕜] [DecidableEq n] {x : Matrix n n 𝕜} (hx : x.IsHermitian) :
-    hx.eigenvectorMatrix ∈ Matrix.unitaryGroup n 𝕜 := by
-  simp_rw [mem_unitaryGroup_iff, star_eq_conjTranspose,
-    IsHermitian.conjTranspose_eigenvectorMatrix, IsHermitian.eigenvectorMatrix_mul_inv]
+-- theorem Matrix.IsHermitian.eigenvectorMatrix_mem_unitaryGroup {𝕜 : Type _} [RCLike 𝕜]
+--     [DecidableEq 𝕜] [DecidableEq n] {x : Matrix n n 𝕜} (hx : x.IsHermitian) :
+--     hx.eigenvectorMatrix ∈ Matrix.unitaryGroup n 𝕜 := by
+--   simp_rw [mem_unitaryGroup_iff, star_eq_conjTranspose,
+--     IsHermitian.conjTranspose_eigenvectorMatrix, IsHermitian.eigenvectorMatrix_mul_inv]
 
 theorem Matrix.unitaryGroup.coe_mk [DecidableEq n] (x : Matrix n n 𝕜)
     (hx : x ∈ Matrix.unitaryGroup n 𝕜) : ⇑(⟨x, hx⟩ : Matrix.unitaryGroup n 𝕜) = x :=

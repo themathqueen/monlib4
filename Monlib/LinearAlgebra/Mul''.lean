@@ -29,7 +29,7 @@ theorem commutes_with_unit_iff (f : A →ₗ[R] B) :
     f ∘ₗ Algebra.linearMap R A = Algebra.linearMap R B ↔ f 1 = 1 :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, Algebra.linearMap_apply,
-    Algebra.algebraMap_eq_smul_one, SMulHomClass.map_smul]
+    Algebra.algebraMap_eq_smul_one, _root_.map_smul]
   refine' ⟨fun h => _, fun h x => by rw [h]⟩
   · specialize h 1
     simp_rw [one_smul] at h
@@ -52,7 +52,7 @@ theorem Matrix.KroneckerProduct.ext_iff {R P n₁ n₂ : Type _} [Fintype n₁] 
   rw [LinearMap.ext_iff]
   intro x
   rw [kmul_representation x]
-  simp_rw [map_sum, SMulHomClass.map_smul, h _ _]
+  simp_rw [map_sum, _root_.map_smul, h _ _]
 
 private def mul_map_aux (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRing X] [NormedSpace 𝕜 X]
     [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X] : X →ₗ[𝕜] X →L[𝕜] X
@@ -68,7 +68,7 @@ private def mul_map_aux (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRin
     rfl
   map_smul' r x := by
     ext
-    simp_rw [SMulHomClass.map_smul, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk,
+    simp_rw [_root_.map_smul, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk,
       LinearMap.smul_apply, ContinuousLinearMap.smul_apply]
     rfl
 
@@ -77,7 +77,7 @@ def LinearMap.mulToClm (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRing
     where
   toFun := mul_map_aux 𝕜 X
   map_add' := map_add _
-  map_smul' := SMulHomClass.map_smul _
+  map_smul' := _root_.map_smul _
   cont := by
     simp only [LinearMap.mk_coe]
     exact map_continuous _

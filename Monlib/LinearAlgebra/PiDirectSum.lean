@@ -57,7 +57,7 @@ noncomputable def directSumTensorToFun {R : Type _} [CommSemiring R] {ι₁ : Ty
     rfl
   map_smul' r x :=
     by
-    simp only [SMulHomClass.map_smul, DirectSum.tensor_coe_smul, RingHom.id_apply]
+    simp only [_root_.map_smul, DirectSum.tensor_coe_smul, RingHom.id_apply]
     rfl
 
 theorem directSumTensorToFun_apply {R : Type _} [CommSemiring R] {ι₁ : Type _} {ι₂ : Type _}
@@ -79,7 +79,7 @@ noncomputable def directSumTensorInvFun {R : Type _} [CommRing R] {ι₁ : Type 
   map_add' x y := by simp only [map_add, Pi.add_apply, Finset.sum_add_distrib]
   map_smul' r x :=
     by
-    simp only [SMulHomClass.map_smul, Pi.smul_apply, RingHom.id_apply]
+    simp only [_root_.map_smul, Pi.smul_apply, RingHom.id_apply]
     rw [← Finset.smul_sum]
 
 theorem Function.sum_update_eq_self {ι₁ : Type _} [DecidableEq ι₁] [Fintype ι₁] {M₁ : ι₁ → Type _}
@@ -165,7 +165,7 @@ noncomputable def directSumTensor {R : Type _} [CommRing R] {ι₁ : Type _} {ι
   left_inv x := directSumTensorInvFun_apply_to_fun x
   right_inv x := directSumTensorToFun_apply_inv_fun x
   map_add' _ _ := map_add _ _ _
-  map_smul' _ _ := SMulHomClass.map_smul _ _ _
+  map_smul' _ _ := _root_.map_smul _ _ _
 
 theorem directSumTensor_apply {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
     [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
@@ -283,7 +283,7 @@ def LinearMap.piPiProd (R : Type _) {ι₁ ι₂ : Type _} [Semiring R] (φ : ι
   rfl
   · rw [LinearMap.ext_iff]
     intro x
-    simp only [LinearMap.coe_comp, LinearMap.coe_mk, Function.comp_apply, LinearMap.id_coe, id.def]
+    simp only [LinearMap.coe_comp, LinearMap.coe_mk, Function.comp_apply, LinearMap.id_coe, id_eq]
     rfl
 
 @[simps!]

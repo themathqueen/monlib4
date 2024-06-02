@@ -47,7 +47,7 @@ theorem Module.Dual.tensorMul_apply' (φ₁ : Module.Dual ℂ (Matrix n n ℂ))
         (TensorProduct.toKronecker x) (i, k) (j, l) *
           (φ₁ (stdBasisMatrix i j (1 : ℂ)) * φ₂ (stdBasisMatrix k l (1 : ℂ))) :=
   by
-  simp_rw [← Module.Dual.tensorMul_apply, ← smul_eq_mul, ← SMulHomClass.map_smul, ← map_sum]
+  simp_rw [← Module.Dual.tensorMul_apply, ← smul_eq_mul, ← _root_.map_smul, ← map_sum]
   rw [← x.matrix_eq_sum_std_basis]
 
 theorem Module.Dual.tensorMul_apply'' (φ₁ : Module.Dual ℂ (Matrix n n ℂ))
@@ -100,7 +100,7 @@ theorem Matrix.kroneckerToTensorProduct_adjoint [hφ : φ.IsFaithfulPosMap]
   apply @ext_inner_left ℂ _ _
   intro a
   rw [TensorProduct.toKronecker_apply, LinearMap.adjoint_inner_right, kmul_representation a]
-  simp_rw [map_sum, SMulHomClass.map_smul, sum_inner, inner_smul_left]
+  simp_rw [map_sum, _root_.map_smul, sum_inner, inner_smul_left]
   apply Finset.sum_congr rfl
   intros x_1 _
   apply Finset.sum_congr rfl
@@ -184,7 +184,7 @@ theorem frobenius_equation [hφ : φ.IsFaithfulPosMap] :
   rw [TensorProduct.ext_iff]
   intro x y
   simp_rw [LinearMap.comp_apply, TensorProduct.map_tmul, LinearMap.mul'_adjoint,
-    TensorProduct.tmul_sum, TensorProduct.tmul_smul, map_sum, SMulHomClass.map_smul,
+    TensorProduct.tmul_sum, TensorProduct.tmul_smul, map_sum, _root_.map_smul,
     LinearMap.one_apply, LinearEquiv.coe_coe, TensorProduct.assoc_symm_tmul]
   simp only [TensorProduct.map_tmul, LinearMap.mul'_apply, LinearMap.one_apply]
   -- kroneckerToTensorProduct_apply, linear_equiv.coe_to_linear_map,
@@ -192,7 +192,7 @@ theorem frobenius_equation [hφ : φ.IsFaithfulPosMap] :
   rw [←
     Function.Injective.eq_iff
       (AlgEquiv.injective (AlgEquiv.symm kroneckerToTensor))]
-  simp_rw [map_sum, SMulHomClass.map_smul, kroneckerToTensor, AlgEquiv.symm_symm, tensorToKronecker,
+  simp_rw [map_sum, _root_.map_smul, kroneckerToTensor, AlgEquiv.symm_symm, tensorToKronecker,
     AlgEquiv.coe_mk, TensorProduct.toKronecker_apply, ← Matrix.ext_iff, Matrix.sum_apply,
     Matrix.smul_apply, kroneckerMap, of_apply, mul_apply, stdBasisMatrix, mul_boole,
     smul_ite, smul_zero, ite_and, Finset.smul_sum, smul_ite, smul_zero]
@@ -265,7 +265,7 @@ noncomputable def directSumTensorToKronecker :
   map_add' x y := by simp only [map_add, Pi.add_apply]; rfl
   map_smul' r x :=
     by
-    simp only [SMulHomClass.map_smul, Pi.smul_apply, RingHom.id_apply]
+    simp only [_root_.map_smul, Pi.smul_apply, RingHom.id_apply]
     rfl
 
 set_option maxHeartbeats 0 in

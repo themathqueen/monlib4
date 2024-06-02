@@ -81,7 +81,7 @@ theorem inner_stdBasisMatrix_stdBasisMatrix [hφ : φ.IsFaithfulPosMap] (i j k l
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_5 x_6) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 set_option synthInstance.maxHeartbeats 300000 in
-set_option maxHeartbeats 350000 in
+set_option maxHeartbeats 500000 in
 /-- we can expres the nontracial adjoint of `linear_map.mul'` by
   $$m^*(x) = \sum_{i,j,k,l} x_{il}Q^{-1}_{kj}(e_{ij} \otimes_t e_{kl})$$ -/
 theorem LinearMap.mul'_adjoint [hφ : φ.IsFaithfulPosMap] (x : Matrix n n ℂ) :
@@ -92,7 +92,7 @@ theorem LinearMap.mul'_adjoint [hφ : φ.IsFaithfulPosMap] (x : Matrix n n ℂ) 
   apply @ext_inner_left ℂ _ _
   intro v
   rw [LinearMap.adjoint_inner_right, v.matrix_eq_sum_std_basis]
-  simp_rw [map_sum, SMulHomClass.map_smul, LinearMap.mul'_apply, sum_inner, inner_sum,
+  simp_rw [map_sum, _root_.map_smul, LinearMap.mul'_apply, sum_inner, inner_sum,
     stdBasisMatrix_hMul, inner_smul_left, inner_smul_right, starRingEnd_apply, star_ite, one_mul,
     star_one, star_zero, TensorProduct.inner_tmul, inner_stdBasisMatrix_stdBasisMatrix]
   simp only [boole_mul, mul_ite, ite_mul, zero_mul, mul_zero, one_mul, mul_one]
@@ -116,7 +116,7 @@ theorem LinearMap.mul'_adjoint [hφ : φ.IsFaithfulPosMap] (x : Matrix n n ℂ) 
       _ = (φ.matrix⁻¹ * φ.matrix) x_3 x_2 * (x * φ.matrix) x_1 x_4 :=
         by simp_rw [← Matrix.mul_apply]
   haveI hm := hφ.matrixIsPosDef.invertible
-  simp_rw [this, inv_mul_of_invertible, Matrix.one_apply, boole_mul, mul_ite, mul_zero,
+  simp only [this, inv_mul_of_invertible, Matrix.one_apply, boole_mul, mul_ite, mul_zero,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
 
 theorem Matrix.linearMap_ext_iff_inner_map [hφ : φ.IsFaithfulPosMap] {x y : l(ℍ)} :
@@ -176,7 +176,7 @@ theorem Qam.Nontracial.mul_comp_mul_adjoint [hφ : φ.IsFaithfulPosMap] :
     LinearMap.mul' ℂ ℍ ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) = trace (φ.matrix⁻¹) • 1 :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, ← Matrix.ext_iff, LinearMap.mul'_adjoint,
-    map_sum, SMulHomClass.map_smul, LinearMap.mul'_apply,
+    map_sum, _root_.map_smul, LinearMap.mul'_apply,
     Matrix.sum_apply, LinearMap.smul_apply, Matrix.smul_apply,
     smul_eq_mul, LinearMap.one_apply, mul_apply, stdBasisMatrix,
     boole_mul, Finset.mul_sum, mul_ite, MulZeroClass.mul_zero, mul_one, ite_and]
@@ -200,7 +200,7 @@ theorem rankOne_toMatrix [hφ : φ.IsFaithfulPosMap] (a b : Matrix n n ℂ) :
   -- letI := hφ.normed_add_comm_group,
   ext i j
   simp_rw [IsFaithfulPosMap.toMatrix, LinearMap.toMatrixAlgEquiv_apply,
-    ContinuousLinearMap.coe_coe, rankOne_apply, SMulHomClass.map_smul, Finsupp.smul_apply,
+    ContinuousLinearMap.coe_coe, rankOne_apply, _root_.map_smul, Finsupp.smul_apply,
     IsFaithfulPosMap.basis_repr_apply, ← inner_conj_symm b,
     Module.Dual.IsFaithfulPosMap.inner_coord', smul_eq_mul, mul_comm, conjTranspose_col, ←
     vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply, RCLike.star_def]
@@ -248,7 +248,7 @@ noncomputable def Module.Dual.IsFaithfulPosMap.psiToFun' (hφ : φ.IsFaithfulPos
         hφ.sig t (hφ.basis (i, j)) ⊗ₜ (op : ℍ →ₗ[ℂ] ℍᵐᵒᵖ) (hφ.sig s (hφ.basis (k, l)))ᴴ
   map_add' x y := by simp_rw [map_add, Matrix.add_apply, add_smul, Finset.sum_add_distrib]
   map_smul' r x := by
-    simp_rw [SMulHomClass.map_smul, Matrix.smul_apply, smul_assoc, RingHom.id_apply, Finset.smul_sum]
+    simp_rw [_root_.map_smul, Matrix.smul_apply, smul_assoc, RingHom.id_apply, Finset.smul_sum]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_conjTranspose (hφ : φ.IsFaithfulPosMap) (t : ℝ) (x : ℍ) :
     (hφ.sig t x)ᴴ = hφ.sig (-t) xᴴ := by
@@ -262,11 +262,11 @@ theorem Module.Dual.IsFaithfulPosMap.psiToFun'_apply [hφ : φ.IsFaithfulPosMap]
   simp_rw [Module.Dual.IsFaithfulPosMap.psiToFun', LinearMap.coe_mk,
     AddHom.coe_mk, IsFaithfulPosMap.toMatrix,
     LinearMap.toMatrixAlgEquiv_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
-    SMulHomClass.map_smul, Finsupp.smul_apply, ← inner_conj_symm y, ←
+    _root_.map_smul, Finsupp.smul_apply, ← inner_conj_symm y, ←
     IsFaithfulPosMap.basis_repr_apply]
   simp_rw [← TensorProduct.tmul_smul, smul_eq_mul, mul_comm (starRingEnd ℂ _), ← smul_smul, ←
     TensorProduct.tmul_sum, ← Finset.smul_sum, ← TensorProduct.smul_tmul, ← TensorProduct.sum_tmul,
-    ← SMulHomClass.map_smul, starRingEnd_apply, ← conjTranspose_smul, ← SMulHomClass.map_smul, ←
+    ← _root_.map_smul, starRingEnd_apply, ← conjTranspose_smul, ← _root_.map_smul, ←
     map_sum, ← conjTranspose_sum, ← map_sum, ← Finset.sum_product', Prod.mk.eta,
     Finset.univ_product_univ]
   simp only [IsFaithfulPosMap.basis_repr_apply, ← rankOne_apply, ← ContinuousLinearMap.sum_apply,
@@ -336,7 +336,7 @@ theorem Module.Dual.IsFaithfulPosMap.psiInvFun'_apply [hφ : φ.IsFaithfulPosMap
       ContinuousLinearMap.sum_apply, LinearMap.sum_apply, Finset.univ_product_univ,
       eq_self_iff_true, forall_true_iff]
   simp_rw [← rank_one_s ((unop (op y') * hφ.matrixIsPosDef.rpow (1/2)) _ _), ← s_rank_one, ←
-    rank_one_sumz, ← sumz_rank_one, ← SMulHomClass.map_smul, ← map_sum, starRingEnd_apply, ←
+    rank_one_sumz, ← sumz_rank_one, ← _root_.map_smul, ← map_sum, starRingEnd_apply, ←
     conjTranspose_smul, ← conjTranspose_sum, ← IsFaithfulPosMap.inner_coord,
     IsFaithfulPosMap.basis_apply, ← IsFaithfulPosMap.orthonormalBasis_apply, ←
     OrthonormalBasis.repr_apply_apply, OrthonormalBasis.sum_repr]
@@ -395,7 +395,7 @@ noncomputable def Module.Dual.IsFaithfulPosMap.psi (hφ : φ.IsFaithfulPosMap) (
   left_inv x := hφ.Psi_left_inv' t s x
   right_inv x := by
     rw [foo_eq hφ x]
-    simp_rw [map_sum, SMulHomClass.map_smul, Module.Dual.IsFaithfulPosMap.Psi_right_inv']
+    simp_rw [map_sum, _root_.map_smul, Module.Dual.IsFaithfulPosMap.Psi_right_inv']
 
 set_option synthInstance.maxHeartbeats 60000 in
 theorem Module.Dual.IsFaithfulPosMap.psi_0_0_eq [hφ : φ.IsFaithfulPosMap] (x : l(ℍ)) :
@@ -410,14 +410,14 @@ theorem Module.Dual.IsFaithfulPosMap.psi_0_0_eq [hφ : φ.IsFaithfulPosMap] (x :
     simp_rw [map_sum, this, TensorProduct.sum_map, LinearMap.sum_apply]
   intro a b
   simp_rw [LinearMap.mul'_adjoint, one_apply, ite_mul, one_mul, MulZeroClass.zero_mul, ite_smul,
-    zero_smul, Finset.sum_ite_eq, Finset.mem_univ, if_true, map_sum, SMulHomClass.map_smul,
+    zero_smul, Finset.sum_ite_eq, Finset.mem_univ, if_true, map_sum, _root_.map_smul,
     TensorProduct.map_tmul, ContinuousLinearMap.coe_coe, rankOne_apply, ← inner_conj_symm b,
     inner_stdBasisMatrix_left, starRingEnd_apply, ← conjTranspose_apply, conjTranspose_mul, ←
     TensorProduct.smul_tmul', smul_smul]
   rw [Finset.sum_rotate]
   simp_rw [← Finset.sum_smul, ← mul_apply, hφ.matrixIsPosDef.1.eq,
     @inv_mul_cancel_left_of_invertible n n ℂ _ _ _ φ.matrix bᴴ hφ.matrixIsPosDef.invertible,
-    ← TensorProduct.tmul_smul, ← TensorProduct.tmul_sum, ← SMulHomClass.map_smul, ← map_sum, ←
+    ← TensorProduct.tmul_smul, ← TensorProduct.tmul_sum, ← _root_.map_smul, ← map_sum, ←
     smul_stdBasisMatrix']
   rw [← matrix_eq_sum_std_basis bᴴ, Module.Dual.IsFaithfulPosMap.psi_apply,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply]
@@ -629,7 +629,7 @@ theorem LinearMap.pi_mul'_adjoint [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x : Pi
   simp_rw [map_sum, LinearMap.pi_mul'_adjoint_single_block]
   apply Finset.sum_congr rfl; intros
   rw [LinearMap.mul'_adjoint]
-  simp_rw [map_sum, SMulHomClass.map_smul, TensorProduct.map_tmul,
+  simp_rw [map_sum, _root_.map_smul, TensorProduct.map_tmul,
     includeBlock_apply_stdBasisMatrix, pi.matrixBlock_apply]
 
 theorem LinearMap.pi_mul'_apply_includeBlock {i : k} (x : (ℍ_ i) ⊗[ℂ] ℍ_ i) :
@@ -650,7 +650,7 @@ private theorem linear_map.pi_mul'_comp_mul_adjoint_aux [hψ : ∀ i, (ψ i).IsF
   by
   rw [LinearMap.pi_mul'_adjoint_single_block, LinearMap.pi_mul'_apply_includeBlock]
   simp_rw [← LinearMap.comp_apply, Qam.Nontracial.mul_comp_mul_adjoint, LinearMap.comp_apply,
-    LinearMap.smul_apply, SMulHomClass.map_smul, LinearMap.one_apply]
+    LinearMap.smul_apply, _root_.map_smul, LinearMap.one_apply]
 
 set_option synthInstance.maxHeartbeats 0 in
 theorem LinearMap.pi_mul'_comp_mul'_adjoint [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x : PiMat ℂ k s) :
@@ -981,7 +981,7 @@ noncomputable def Module.Dual.pi.IsFaithfulPosMap.psiToFun' (hψ : ∀ i, (ψ i)
                 ((Module.Dual.pi.IsFaithfulPosMap.basis hψ) b)))
   map_add' x y := by simp_rw [map_add, Matrix.add_apply, add_smul, Finset.sum_add_distrib]
   map_smul' r x := by
-    simp_rw [SMulHomClass.map_smul, Matrix.smul_apply, smul_eq_mul, ← smul_smul, ← Finset.smul_sum,
+    simp_rw [_root_.map_smul, Matrix.smul_apply, smul_eq_mul, ← smul_smul, ← Finset.smul_sum,
       RingHom.id_apply]
 
 theorem Pi.IsFaithfulPosMap.ToMatrix.rankOne_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
@@ -1018,8 +1018,8 @@ theorem Module.Dual.pi.IsFaithfulPosMap.psiToFun'_apply [hψ : ∀ i, (ψ i).IsF
   simp_rw [Module.Dual.pi.IsFaithfulPosMap.psiToFun', LinearMap.coe_mk,
     AddHom.coe_mk,
     Pi.IsFaithfulPosMap.ToMatrix.rankOne_apply, conjTranspose_col, ← vecMulVec_eq,
-    vecMulVec_apply, ← TensorProduct.smul_tmul_smul, ← SMulHomClass.map_smul, Pi.star_apply, ←
-    star_smul, ← SMulHomClass.map_smul, ← TensorProduct.tmul_sum, ← TensorProduct.sum_tmul, ←
+    vecMulVec_apply, ← TensorProduct.smul_tmul_smul, ← _root_.map_smul, Pi.star_apply, ←
+    star_smul, ← _root_.map_smul, ← TensorProduct.tmul_sum, ← TensorProduct.sum_tmul, ←
     map_sum, reshape_apply, ← star_sum, ← map_sum, ← Module.Dual.IsFaithfulPosMap.inner_coord', ←
     IsFaithfulPosMap.basis_repr_apply,
     -- ← Module.Dual.pi.IsFaithfulPosMap.basis_repr_apply_apply,
@@ -1113,7 +1113,7 @@ noncomputable def Module.Dual.pi.IsFaithfulPosMap.psiInvFun' (hψ : ∀ i, (ψ i
               (star (pi.IsFaithfulPosMap.basis hψ b))|
   map_add' x y := by simp_rw [map_add, Finsupp.add_apply, add_smul, Finset.sum_add_distrib]
   map_smul' r x := by
-    simp_rw [SMulHomClass.map_smul, Finsupp.smul_apply, smul_eq_mul, ← smul_smul, ← Finset.smul_sum,
+    simp_rw [_root_.map_smul, Finsupp.smul_apply, smul_eq_mul, ← smul_smul, ← Finset.smul_sum,
       RingHom.id_apply]
 
 theorem rankOne_smul_smul {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
@@ -1154,7 +1154,7 @@ theorem Module.Dual.pi.IsFaithfulPosMap.psiInvFun'_apply [hψ : ∀ i, (ψ i).Is
   simp_rw [Module.Dual.pi.IsFaithfulPosMap.psiInvFun', LinearMap.coe_mk,
     AddHom.coe_mk,
     Basis.tensorProduct_repr_tmul_apply, ← rankOne_lm_smul_smul, ← rankOne_lm_sum_sum, ←
-    SMulHomClass.map_smul, ← star_smul, Basis.mulOpposite_repr_apply, ← map_sum, ← star_sum,
+    _root_.map_smul, ← star_smul, Basis.mulOpposite_repr_apply, ← map_sum, ← star_sum,
     Basis.sum_repr]
 
 theorem Module.Dual.pi.IsFaithfulPosMap.Psi_left_inv [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
@@ -1195,7 +1195,7 @@ noncomputable def Module.Dual.pi.IsFaithfulPosMap.psi (hψ : ∀ i, (ψ i).IsFai
       simp only [Module.Dual.pi.IsFaithfulPosMap.Psi_right_inv, map_sum]
     map_add' := fun x y => by simp_rw [map_add]
     map_smul' := fun r x => by
-      simp_rw [SMulHomClass.map_smul]
+      simp_rw [_root_.map_smul]
       rfl }
 
 theorem Pi.inner_symm [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :

@@ -89,7 +89,7 @@ theorem Module.Dual.apply (φ : Module.Dual R (Matrix n n R)) (a : Matrix n n R)
   simp_rw [Matrix.sum_mul, Matrix.smul_mul, trace_sum, trace_smul, Matrix.trace, Matrix.diag,
     mul_apply, stdBasisMatrix_eq, boole_mul, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, ← ite_and, smul_eq_mul, mul_comm (φ _) _, ←
-    smul_eq_mul, ← SMulHomClass.map_smul, ← map_sum]
+    smul_eq_mul, ← _root_.map_smul, ← map_sum]
   have :
     ∀ ⦃i : n⦄ ⦃j : n⦄ ⦃a : R⦄,
       stdBasisMatrix i j (a : R) = fun k l => ite (i = k ∧ j = l) (a : R) (0 : R) :=
@@ -106,7 +106,7 @@ def Module.Dual.pi {k : Type _} [Fintype k] {s : k → Type _}
   toFun a := ∑ i : k, φ i (a i)
   map_add' x y := by simp only [map_add, Pi.add_apply, Finset.sum_add_distrib]
   map_smul' r x := by
-    simp only [SMulHomClass.map_smul, Pi.smul_apply, Finset.smul_sum, RingHom.id_apply]
+    simp only [_root_.map_smul, Pi.smul_apply, Finset.smul_sum, RingHom.id_apply]
 
 @[simps!]
 def Module.Dual.pi_of {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
@@ -742,7 +742,7 @@ theorem Module.Dual.isFaithfulPosMap_iff_isInner_of_matrix (φ : Module.Dual ℂ
     by
     simp only [ip]
     simp_rw [conjTranspose_add, Matrix.add_mul, map_add, conjTranspose_smul, Matrix.smul_mul,
-      SMulHomClass.map_smul, Complex.star_def, smul_eq_mul, forall₃_true_iff,
+      _root_.map_smul, Complex.star_def, smul_eq_mul, forall₃_true_iff,
       true_and_iff]
   simp_rw [IsInner, ← hip, Hip, forall₃_true_iff, true_and_iff, and_true_iff]
   constructor

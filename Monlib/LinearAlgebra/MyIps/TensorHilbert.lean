@@ -42,6 +42,7 @@ theorem TensorProduct.inner_tmul (x z : E) (y w : F) :
   simp_rw [inner, Basis.tensorProduct_repr_tmul_apply, OrthonormalBasis.coe_toBasis_repr_apply,
     star_mul', RCLike.star_def, OrthonormalBasis.repr_apply_apply,
     inner_conj_symm, mul_mul_mul_comm, ← Finset.mul_sum, ← Finset.sum_mul, OrthonormalBasis.sum_inner_mul_inner]
+  rfl
 
 protected theorem TensorProduct.inner_add_left (x y z : E ⊗[𝕜] F) :
     (inner (x + y) z : 𝕜) = inner x z + inner y z := by

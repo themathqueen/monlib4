@@ -48,7 +48,7 @@ noncomputable def AlgEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A B 
       AlgEquiv.comp_symm, Algebra.TensorProduct.map_id, AlgHom.id_apply]
   map_add' x y := by simp_rw [map_add]
   map_mul' x y := by simp_rw [_root_.map_mul]
-  commutes' r := by simp_rw [Algebra.algebraMap_eq_smul_one, SMulHomClass.map_smul, _root_.map_one]
+  commutes' r := by simp_rw [Algebra.algebraMap_eq_smul_one, _root_.map_smul, _root_.map_one]
 
 @[simps]
 noncomputable def LinearEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A B C D : Type _} [AddCommMonoid A]
@@ -65,5 +65,5 @@ noncomputable def LinearEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A
       LinearEquiv.refl_toLinearMap, TensorProduct.map_id, LinearMap.id_apply]
   map_add' x y := by simp_rw [map_add]
   map_smul' r x := by
-    simp_rw [SMulHomClass.map_smul]
+    simp_rw [_root_.map_smul]
     rfl

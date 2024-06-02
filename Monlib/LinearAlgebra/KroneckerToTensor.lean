@@ -120,17 +120,18 @@ theorem TensorProduct.matrix_eq_sum_std_basis (x : Matrix m m R ⊗[R] Matrix n 
             toKronecker x (i, k) (j, l) •
               stdBasisMatrix i j (1 : R) ⊗ₖ
                 stdBasisMatrix k l (1 : R)) :=
-      by simp_rw [map_sum, SMulHomClass.map_smul]
+      by simp_rw [map_sum, _root_.map_smul]
     _ = kroneckerToTensorProduct (toKronecker x) := by rw [← Matrix.kronecker_eq_sum_std_basis]
     _ = x := TensorProduct.toKronecker_to_tensorProduct _
 
+set_option maxHeartbeats 500000 in
 theorem TensorProduct.toKronecker_hMul (x y : Matrix m m R ⊗[R] Matrix n n R) :
     toKronecker (x * y) = toKronecker x * toKronecker y :=
   by
   nth_rw 1 [x.matrix_eq_sum_std_basis]
   nth_rw 1 [y.matrix_eq_sum_std_basis]
   simp_rw [Finset.sum_mul, Finset.mul_sum, smul_mul_smul, map_sum]
-  simp only [SMulHomClass.map_smul, Algebra.TensorProduct.tmul_mul_tmul,
+  simp only [_root_.map_smul, Algebra.TensorProduct.tmul_mul_tmul,
     TensorProduct.toKronecker_apply, Matrix.mul_kronecker_mul, ← smul_mul_smul, ← Finset.mul_sum, ← Finset.sum_mul]
   rw [← x.toKronecker.kronecker_eq_sum_std_basis, ← y.toKronecker.kronecker_eq_sum_std_basis]
 

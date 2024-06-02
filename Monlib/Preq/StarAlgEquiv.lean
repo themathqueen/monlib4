@@ -43,7 +43,7 @@ def StarAlgEquiv.toAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring A] [Semi
   right_inv x := f.right_inv x
   map_add' x y := f.map_add' x y
   map_mul' x y := f.map_mul' x y
-  commutes' r := by simp_rw [Algebra.algebraMap_eq_smul_one, SMulHomClass.map_smul, _root_.map_one]
+  commutes' r := by simp_rw [Algebra.algebraMap_eq_smul_one, map_smul, _root_.map_one]
 
 @[simp]
 theorem StarAlgEquiv.coe_toAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
@@ -148,21 +148,25 @@ lemma AlgEquiv.apply_eq_iff_eq {R A B : Type*} [CommSemiring R] [Semiring A] [Al
   f x = f y ↔ x = y :=
 Equiv.apply_eq_iff_eq f.toEquiv
 
+lemma _root_.NonUnitalSemiring.mem_center_iff {A : Type*} [NonUnitalSemiring A] (a : A) :
+  a ∈ Set.center A ↔ ∀ y : A, a * y = y * a :=
+by
+  simp only [Set.mem_center_iff, isMulCentral_iff, mul_assoc, forall_const, and_self, and_true]
+
 lemma AlgEquiv.image_center {R A : Type*} [CommRing R] [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
   f '' (Set.center A) = Set.center A :=
 by
   ext x
-  simp only [Set.mem_image, Set.mem_center_iff, isMulCentral_iff,
-    mul_assoc, forall_const, and_self, and_true]
-  constructor
-  . rintro ⟨y, hy, rfl⟩ a
-    let b : A := f.symm a
-    have hb : a = f b := by simp only [b, AlgEquiv.apply_symm_apply]
-    simp_rw [hb, ← f.map_mul, hy]
-  . rintro hx
-    refine ⟨f.symm x, λ a => ?_, f.apply_symm_apply x⟩
-    apply_fun f using f.injective
-    simp_rw [f.map_mul, AlgEquiv.apply_symm_apply, hx]
+  symm
+  calc x ∈ Set.center A ↔ ∀ y, x * y = y * x := NonUnitalSemiring.mem_center_iff _
+    _ ↔ ∀ y, f.symm x * f.symm y = f.symm y * f.symm x :=
+      by simp only [AlgEquiv.apply_eq_iff_eq, ← map_mul]
+    _ ↔ ∀ y, f.symm x * y = y * f.symm x := by
+        refine ⟨λ h y => ?_, λ h y => h _⟩
+        specialize h (f y)
+        simp_all only [AlgEquiv.symm_apply_apply]
+    _ ↔ f.symm x ∈ Set.center A := (NonUnitalSemiring.mem_center_iff _).symm
+    _ ↔ x ∈ f '' Set.center A := Set.mem_image_equiv.symm
 
 lemma AlgEquiv.image_span_center {R A : Type*} [CommRing R]
   [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :

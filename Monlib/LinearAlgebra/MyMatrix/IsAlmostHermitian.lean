@@ -65,19 +65,19 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
     --   ∀ i j k l : n, x i j ≠ 0 → x k l ≠ 0 → x i j / star (x j i) = x k l / star (x l k) :=
     --   by
     --   intro m₁ m₂ m₃ m₄ hx₁ hx₂
-    --   rw [Ne.def, this] at hx₁ hx₂
+    --   rw [ne_eq, this] at hx₁ hx₂
     --   simp_rw [div_eq_div_iff (star_ne_zero.mpr hx₁) (star_ne_zero.mpr hx₂), mul_comm _ (star _),
     --     RCLike.star_def]
     --   exact h (_, _) (_, _)
     have nonzero_ : ∃ i j : n, x i j ≠ 0 :=
       by
-      simp_rw [Ne.def, ← Classical.not_forall, eq_zero]
+      simp_rw [ne_eq, ← Classical.not_forall, eq_zero]
       exact h'
     rcases nonzero_ with ⟨i, k, hik⟩
     let α := x i k / star (x k i)
     have hα' : α ≠ 0 :=
       by
-      simp_rw [α, div_ne_zero_iff, star_ne_zero, Ne.def, this k i]
+      simp_rw [α, div_ne_zero_iff, star_ne_zero, ne_eq, this k i]
       exact ⟨hik, hik⟩
     have Hα : α⁻¹ = conj α := by
       simp_rw [α, ← RCLike.star_def, star_div', star_star, inv_div, RCLike.star_def,
@@ -100,7 +100,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       exact Complex.cpow_nat_inv_pow α two_ne_zero
     cases' this with β hβ
     have hβ' : β ≠ 0 := by
-      rw [Ne.def, ← sq_eq_zero_iff, hβ]
+      rw [ne_eq, ← sq_eq_zero_iff, hβ]
       exact hα'
     have hβ'' : β⁻¹ = conj β :=
       by

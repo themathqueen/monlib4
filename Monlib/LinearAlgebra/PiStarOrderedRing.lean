@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Algebra.Star.Order
-import Mathlib.GroupTheory.Subgroup.Basic
+import Mathlib.Algebra.Group.Subgroup.Basic
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Algebra.Star.Pi
 import Mathlib.Data.Complex.Basic
@@ -93,7 +93,7 @@ theorem AddSubmonoid.closure_pi {ι : Type _} {B : ι → Type _} [DecidableEq �
   exact h (fun y hy j K hK => hK (hy j)) i S hS
 
 theorem Pi.StarOrderedRing.nonneg_def {ι : Type _} {α : ι → Type _} [∀ i, NonUnitalSemiring (α i)]
-    [∀ i, PartialOrder (α i)] [∀ i, StarOrderedRing (α i)]
+    [∀ i, PartialOrder (α i)] [∀ i, StarRing (α i)] [∀ i, StarOrderedRing (α i)]
     (h : ∀ (i : ι) (x : α i), 0 ≤ x ↔ ∃ y, star y * y = x) (x : ∀ i, α i) :
     0 ≤ x ↔ ∃ y, star y * y = x :=
   by
@@ -103,12 +103,12 @@ theorem Pi.StarOrderedRing.nonneg_def {ι : Type _} {α : ι → Type _} [∀ i,
     fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩
 
 instance {ι : Type _} {α : ι → Type _} [∀ i, Ring (α i)]
-    [∀ i, PartialOrder (α i)] [∀ i, StarOrderedRing (α i)] :
+    [∀ i, PartialOrder (α i)] [∀ i, StarRing (α i)] [∀ i, StarOrderedRing (α i)] :
   CovariantClass ((i : ι) → α i) ((i : ι) → α i) (Function.swap fun x x_1 ↦ x + x_1) fun x x_1 ↦ x ≤ x_1 :=
 ⟨fun x y z h j => by simp_rw [Function.swap, Pi.add_apply, add_le_add_iff_right, h j]⟩
 
 theorem Pi.StarOrderedRing.le_def {ι : Type _} {α : ι → Type _} [∀ i, Ring (α i)]
-    [∀ i, PartialOrder (α i)] [∀ i, StarOrderedRing (α i)]
+    [∀ i, PartialOrder (α i)] [∀ i, StarRing (α i)] [∀ i, StarOrderedRing (α i)]
     (h : ∀ (i : ι) (x : α i), 0 ≤ x ↔ ∃ y, star y * y = x) (x y : ∀ i, α i) :
     x ≤ y ↔ ∃ z, star z * z = y - x :=
   by
@@ -119,9 +119,10 @@ theorem Pi.StarOrderedRing.le_def {ι : Type _} {α : ι → Type _} [∀ i, Rin
   exact h
 
 def Pi.starOrderedRing {ι : Type _} {B : ι → Type _} [∀ i, Ring (B i)] [∀ i, PartialOrder (B i)]
-    [∀ i, StarOrderedRing (B i)] (h : ∀ (i : ι) (x : B i), 0 ≤ x ↔ ∃ y, star y * y = x) :
+    [∀ i, StarRing (B i)] [∀ i, StarOrderedRing (B i)]
+    (h : ∀ (i : ι) (x : B i), 0 ≤ x ↔ ∃ y, star y * y = x) :
     StarOrderedRing (∀ i, B i) :=
-StarOrderedRing.ofLEIff
+StarOrderedRing.of_le_iff
   (fun a b => by
     rw [Pi.StarOrderedRing.le_def h]
     simp_rw [eq_sub_iff_add_eq', eq_comm])

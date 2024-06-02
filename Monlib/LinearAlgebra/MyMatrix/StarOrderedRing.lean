@@ -51,10 +51,6 @@ theorem eq_zero_iff {n : Type _} [Fintype n] [DecidableEq n] {x : Matrix n n ℂ
     _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x *ᵥ a = 0 := by rfl
     _ ↔ ∀ a : n → ℂ, star a ⬝ᵥ x *ᵥ a = 0 := by rfl
 
-theorem toEuclideanLin_apply {n : Type _} [Fintype n] [DecidableEq n] (x : Matrix n n ℂ)
-    (a : n → ℂ) : toEuclideanLin x a = x.mulVec a :=
-  rfl
-
 @[reducible]
 protected def LE {n : Type _} [Fintype n] [DecidableEq n] :
   LE (Matrix n n ℂ) :=
@@ -95,12 +91,12 @@ theorem NegSemidef.nonpos_eigenvalues {𝕜 n : Type _}
   [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
   (hx : x.NegSemidef) (i : n) :
   hx.1.eigenvalues i ≤ 0 := by
-    rw [hx.1.eigenvalues_eq, hx.1.transpose_eigenvectorMatrix_apply]
+    rw [hx.1.eigenvalues_eq']
     exact (RCLike.nonpos_def.mp (hx.2 _)).1
 
 theorem NegDef.neg_eigenvalues {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
     (hx : x.NegDef) (i : n) : hx.1.eigenvalues i < 0 := by
-  rw [hx.1.eigenvalues_eq, hx.1.transpose_eigenvectorMatrix_apply]
+  rw [hx.1.eigenvalues_eq']
   exact hx.re_dotProduct_neg <| hx.1.eigenvectorBasis.orthonormal.ne_zero i
 
 theorem IsHermitian.eigenvalues_eq_zero_iff {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
@@ -109,7 +105,8 @@ theorem IsHermitian.eigenvalues_eq_zero_iff {𝕜 n : Type _} [RCLike 𝕜] [Fin
   by
   constructor
   · intro h
-    rw [hx.spectral_theorem', h, Pi.zero_def, diagonal_zero, mul_zero, zero_mul]
+    rw [Matrix.IsHermitian.spectral_theorem hx, h,
+      Pi.zero_def, diagonal_zero, mul_zero, zero_mul]
   · rintro rfl
     ext
     simp only [Function.comp_apply, hx.eigenvalues_eq, zero_mulVec, dotProduct_zero, map_zero,
@@ -181,7 +178,7 @@ theorem diagonal_posDef_iff {𝕜 n : Type _}
       mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, norm_one,
       RCLike.ofReal_one, one_pow, mul_one] at h2
     apply h2
-    simp_rw [Ne.def, Function.funext_iff, not_forall]
+    simp_rw [ne_eq, Function.funext_iff, not_forall]
     use i
     simp only [↓reduceIte, Pi.zero_apply, one_ne_zero, not_false_eq_true]
   . intro h
@@ -192,14 +189,14 @@ theorem diagonal_posDef_iff {𝕜 n : Type _}
     simp_rw [RCLike.conj_eq_iff_re] at h
     rw [← (h i).2, ← RCLike.ofReal_pow, ← RCLike.ofReal_mul, RCLike.zero_le_real]
     apply mul_nonneg (le_of_lt (h i).1) (sq_nonneg _)
-    simp_rw [Ne.def, Function.funext_iff, not_forall, Pi.zero_apply] at hx
+    simp_rw [ne_eq, Function.funext_iff, not_forall, Pi.zero_apply] at hx
     obtain ⟨i, hi⟩ := hx
     use i
     simp only [Finset.mem_univ, true_and, ← RCLike.ofReal_pow]
     simp_rw [RCLike.conj_eq_iff_im, ← RCLike.pos_def] at h
     apply mul_pos (h i)
     simp_rw [RCLike.zero_lt_real]
-    exact sq_pos_of_ne_zero _ (norm_ne_zero_iff.mpr hi)
+    exact sq_pos_of_ne_zero (norm_ne_zero_iff.mpr hi)
 
 theorem diagonal_negDef_iff {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] (x : n → 𝕜) :
     (diagonal x).NegDef ↔ ∀ i, x i < 0 := by
@@ -325,13 +322,13 @@ theorem posDef_of_posSemidef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] [Decida
     (hx : x.PosSemidef) :
     x.PosDef ↔ ∀ i, hx.1.eigenvalues i ≠ 0 := by
   rw [posDef_iff_of_isHermitian hx.1]
-  simp_rw [lt_iff_le_and_ne, Ne.def, IsHermitian.nonneg_eigenvalues_of_posSemidef hx, true_and, eq_comm]
+  simp_rw [lt_iff_le_and_ne, ne_eq, IsHermitian.nonneg_eigenvalues_of_posSemidef hx, true_and, eq_comm]
 
 theorem negDef_of_negSemidef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
     (hx : x.NegSemidef) :
     x.NegDef ↔ ∀ i, hx.1.eigenvalues i ≠ 0 := by
   rw [negDef_iff_of_isHermitian hx.1]
-  simp_rw [lt_iff_le_and_ne, Ne.def, NegSemidef.nonpos_eigenvalues hx, true_and]
+  simp_rw [lt_iff_le_and_ne, ne_eq, NegSemidef.nonpos_eigenvalues hx, true_and]
 
 @[reducible]
 def partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix n n ℂ)
@@ -377,7 +374,7 @@ theorem le_iff {n : Type _} [Fintype n] [DecidableEq n] {x y : Matrix n n ℂ} :
 @[reducible]
 noncomputable def starOrderedRing {n : Type _} [Fintype n] [DecidableEq n] :
     StarOrderedRing (Matrix n n ℂ) :=
-StarOrderedRing.ofLEIff (fun a b => by
+StarOrderedRing.of_le_iff (fun a b => by
   constructor
   · intro hab
     simp_rw [Matrix.le_iff] at hab
@@ -405,7 +402,7 @@ theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι
 noncomputable def PiStarOrderedRing {ι : Type _} [Fintype ι] [DecidableEq ι]
     {n : ι → Type _} [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] :
     StarOrderedRing (PiMat ℂ ι n) :=
-StarOrderedRing.ofLEIff
+StarOrderedRing.of_le_iff
   (fun a b => by simp_rw [Pi.le_iff_sub_nonneg])
 
 scoped[MatrixOrder] attribute [instance] Matrix.PiStarOrderedRing

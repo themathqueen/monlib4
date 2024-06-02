@@ -90,10 +90,10 @@ theorem Bimodule.one_rsmul (x : H₂) : (1 : H₁ ⊗[R] H₂) •ᵣ x = 1 ⊗�
   rw [Algebra.TensorProduct.one_def, Bimodule.rsmul_apply, one_mul]
 
 theorem Bimodule.lsmul_smul (α : R) (x : H₁) (a : H₁ ⊗[R] H₂) : x •ₗ α • a = α • (x •ₗ a) := by
-  simp_rw [Bimodule.lsmul, SMulHomClass.map_smul]
+  simp_rw [Bimodule.lsmul, _root_.map_smul]
 
 theorem Bimodule.smul_rsmul (α : R) (x : H₂) (a : H₁ ⊗[R] H₂) : α • a •ᵣ x = α • (a •ᵣ x) := by
-  simp_rw [Bimodule.rsmul, SMulHomClass.map_smul]
+  simp_rw [Bimodule.rsmul, _root_.map_smul]
 
 theorem Bimodule.lsmul_lsmul (x y : H₁) (a : H₁ ⊗[R] H₂) : x •ₗ (y •ₗ a) = (x * y) •ₗ a := by
   simp_rw [Bimodule.lsmul, ← LinearMap.comp_apply, ← TensorProduct.map_comp,
@@ -257,7 +257,7 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
     intro hx
     rw [hx, TensorProduct.zero_map] at h
     contradiction
-  simp_rw [Ne.def, LinearMap.ext_iff, LinearMap.zero_apply, Classical.not_forall] at hx hy
+  simp_rw [ne_eq, LinearMap.ext_iff, LinearMap.zero_apply, Classical.not_forall] at hx hy
   refine' ⟨fun hxy => _, fun hxy a b c d => by rw [hxy.1, hxy.2]⟩
   obtain ⟨a, ha⟩ := hx
   obtain ⟨b, hb⟩ := hy
