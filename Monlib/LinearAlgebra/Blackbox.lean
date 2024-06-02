@@ -120,6 +120,7 @@ theorem IsAlmostHermitian.spectrum_eq_iff [DecidableEq 𝕜] {A₁ A₂ : Matrix
   · rintro ⟨U, rfl⟩
     simp_rw [IsAlmostHermitian.innerAut_spectra]
 
+set_option synthInstance.maxHeartbeats 0 in
 /-- two matrices are _almost similar_ if there exists some
   $0\neq\beta\in\mathbb{C}$ such that $x$ and $\beta y$ are similar -/
 def IsAlmostSimilarTo [Fintype n] [DecidableEq n] [RCLike 𝕜] (x y : Matrix n n 𝕜) : Prop :=
