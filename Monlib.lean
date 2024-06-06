@@ -64,5 +64,6 @@ import Monlib.LinearAlgebra.MyMatrix.Reshape
 import Monlib.LinearAlgebra.MyMatrix.Spectra
 import Monlib.LinearAlgebra.MyMatrix.StarOrderedRing
 import Monlib.LinearAlgebra.tensorProduct
+import Monlib.LinearAlgebra.CoalgebraLemmas
 
 #align_import all
