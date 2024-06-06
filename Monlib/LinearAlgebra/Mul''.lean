@@ -7,6 +7,7 @@ import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Monlib.LinearAlgebra.MyTensorProduct
 import Monlib.LinearAlgebra.Nacgor
+import Monlib.LinearAlgebra.MyIps.TensorHilbert
 
 #align_import linear_algebra.mul''
 
@@ -23,9 +24,12 @@ open Matrix
 
 open scoped Matrix Kronecker BigOperators
 
-variable {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+section
 
-theorem commutes_with_unit_iff (f : A →ₗ[R] B) :
+variable {R A B : Type _} [CommSemiring R]
+
+theorem commutes_with_unit_iff [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A →ₗ[R] B) :
     f ∘ₗ Algebra.linearMap R A = Algebra.linearMap R B ↔ f 1 = 1 :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, Algebra.linearMap_apply,
@@ -35,12 +39,76 @@ theorem commutes_with_unit_iff (f : A →ₗ[R] B) :
     simp_rw [one_smul] at h
     exact h
 
-theorem commutes_with_mul'_iff (f : A →ₗ[R] B) :
+theorem commutes_with_mul'_iff [NonUnitalNonAssocSemiring A] [Module R A]
+    [SMulCommClass R A A] [IsScalarTower R A A]
+    [NonUnitalNonAssocSemiring B] [Module R B] [SMulCommClass R B B] [IsScalarTower R B B]
+    (f : A →ₗ[R] B) :
     LinearMap.mul' R B ∘ₗ TensorProduct.map f f = f ∘ₗ LinearMap.mul' R A ↔
       ∀ x y : A, f (x * y) = f x * f y :=
   by
   simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply, TensorProduct.map_apply,
     LinearMap.mul'_apply, eq_comm]
+
+end
+
+theorem LinearMap.adjoint_commutes_with_mul_adjoint_iff {𝕜 X Y : Type*} [RCLike 𝕜] [NormedAddCommGroupOfRing X]
+    [NormedAddCommGroupOfRing Y]
+    [InnerProductSpace 𝕜 X] [InnerProductSpace 𝕜 Y] [SMulCommClass 𝕜 X X] [SMulCommClass 𝕜 Y Y]
+    [IsScalarTower 𝕜 X X] [IsScalarTower 𝕜 Y Y] [FiniteDimensional 𝕜 X] [FiniteDimensional 𝕜 Y]
+    (f : X →ₗ[𝕜] Y) :
+    (TensorProduct.map (LinearMap.adjoint f) (LinearMap.adjoint f)) ∘ₗ (LinearMap.adjoint (LinearMap.mul' 𝕜 Y))
+      = (LinearMap.adjoint (LinearMap.mul' 𝕜 X)) ∘ₗ (LinearMap.adjoint f)
+    ↔
+      ∀ x y : X, f (x * y) = f x * f y :=
+by
+  simp_rw [← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp, ← commutes_with_mul'_iff]
+  refine ⟨λ h => ?_, λ h => by rw [h]⟩
+  apply_fun LinearMap.adjoint at h
+  simpa only [LinearMap.adjoint_adjoint] using h
+
+lemma LinearMap.commutes_with_mul_adjoint_iff {𝕜 X Y : Type*} [RCLike 𝕜] [NormedAddCommGroupOfRing X]
+    [NormedAddCommGroupOfRing Y] [InnerProductSpace 𝕜 X] [InnerProductSpace 𝕜 Y] [SMulCommClass 𝕜 X X]
+    [SMulCommClass 𝕜 Y Y] [IsScalarTower 𝕜 X X] [IsScalarTower 𝕜 Y Y] [FiniteDimensional 𝕜 X]
+    [FiniteDimensional 𝕜 Y] (f : X →ₗ[𝕜] Y) :
+    (TensorProduct.map f f) ∘ₗ (LinearMap.adjoint (LinearMap.mul' 𝕜 X))
+      = (LinearMap.adjoint (LinearMap.mul' 𝕜 Y)) ∘ₗ f
+    ↔
+      ∀ x y : Y, (adjoint f) (x * y) = (adjoint f) x * (adjoint f) y :=
+by
+  simp_rw [← commutes_with_mul'_iff]
+  constructor <;>
+  . intro h
+    apply_fun LinearMap.adjoint at h
+    simpa only [adjoint_comp, TensorProduct.map_adjoint, adjoint_adjoint] using h
+
+lemma LinearIsometryEquiv.commutes_with_mul_adjoint_iff_of_surjective_isometry {𝕜 X Y : Type*} [RCLike 𝕜] [NormedAddCommGroupOfRing X]
+    [NormedAddCommGroupOfRing Y] [InnerProductSpace 𝕜 X] [InnerProductSpace 𝕜 Y] [SMulCommClass 𝕜 X X]
+    [SMulCommClass 𝕜 Y Y] [IsScalarTower 𝕜 X X] [IsScalarTower 𝕜 Y Y] [FiniteDimensional 𝕜 X]
+    [FiniteDimensional 𝕜 Y] (f : X ≃ₗᵢ[𝕜] Y) :
+    (TensorProduct.map (f.toLinearMap : X →ₗ[𝕜] Y) (f.toLinearMap : X →ₗ[𝕜] Y)) ∘ₗ (LinearMap.adjoint (LinearMap.mul' 𝕜 X))
+      = (LinearMap.adjoint (LinearMap.mul' 𝕜 Y)) ∘ₗ f.toLinearMap
+    ↔
+      ∀ x y : X, f (x * y) = f x * f y :=
+by
+  simp_rw [LinearMap.commutes_with_mul_adjoint_iff]
+  haveI : CompleteSpace X := FiniteDimensional.complete 𝕜 _
+  haveI : CompleteSpace Y := FiniteDimensional.complete 𝕜 _
+  have : LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap := by
+    calc LinearMap.adjoint f.toLinearMap = ContinuousLinearMap.adjoint (LinearIsometry.toContinuousLinearMap f.toLinearIsometry) := rfl
+      _ = LinearIsometry.toContinuousLinearMap f.symm.toLinearIsometry := by
+        simp only [ContinuousLinearMap.coe_inj]
+        exact adjoint_eq_symm _
+      _ = f.symm.toLinearMap := rfl
+  rw [this]
+  constructor
+  . intro h x y
+    specialize h (f x) (f y)
+    simp only [LinearEquiv.coe_coe, coe_toLinearEquiv, symm_apply_apply] at h
+    rw [← h, apply_symm_apply]
+  . intro h x y
+    specialize h (f.symm x) (f.symm y)
+    simp only [LinearEquiv.coe_coe, coe_toLinearEquiv, apply_symm_apply] at h ⊢
+    rw [← h, symm_apply_apply]
 
 -- MOVE:
 theorem Matrix.KroneckerProduct.ext_iff {R P n₁ n₂ : Type _} [Fintype n₁] [Fintype n₂]
