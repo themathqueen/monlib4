@@ -105,7 +105,7 @@ theorem Qam.Nontracial.CompleteGraph.isReal {φ : Module.Dual ℂ (Matrix p p �
 
 theorem Qam.Nontracial.CompleteGraph.is_symm {φ : Module.Dual ℂ (Matrix p p ℂ)}
     [hφ : φ.IsFaithfulPosMap] :
-    LinearEquiv.symmMap ℂ (Matrix p p ℂ) (Qam.completeGraph (Matrix p p ℂ)) =
+    LinearEquiv.symmMap ℂ (Matrix p p ℂ) _ (Qam.completeGraph (Matrix p p ℂ)) =
       Qam.completeGraph (Matrix p p ℂ) :=
   by simp_rw [Qam.completeGraph, Qam.RankOne.symmetric_eq, conjTranspose_one, _root_.map_one]
 
@@ -115,7 +115,7 @@ theorem Pi.Qam.Nontracial.CompleteGraph.isReal [hφ : ∀ i, (φ i).IsFaithfulPo
     star_one, _root_.map_one]
 
 theorem Pi.Qam.Nontracial.CompleteGraph.is_symm [hφ : ∀ i, (φ i).IsFaithfulPosMap] :
-    LinearEquiv.symmMap ℂ ℍ (Qam.completeGraph ℍ) = Qam.completeGraph ℍ := by
+    LinearEquiv.symmMap ℂ ℍ _ (Qam.completeGraph ℍ) = Qam.completeGraph ℍ := by
   simp_rw [Qam.completeGraph, LinearEquiv.symmMap_rankOne_apply, star_one, _root_.map_one]
 
 theorem Qam.Nontracial.CompleteGraph.is_reflexive {E : Type _} [NormedAddCommGroupOfRing E]

@@ -993,7 +993,7 @@ theorem rsmul_module_map_of_real_lsmul_module_map {n : Type _} [Fintype n] {f : 
     conjTranspose_conjTranspose]
 
 theorem lsmul_module_map_iff_symm_eq_rsmul_module_map [hφ : φ.IsFaithfulPosMap] {f : l(ℍ)} :
-    f = rmul (f 1) ↔ LinearEquiv.symmMap ℂ ℍ f = lmul (f 1) :=
+    f = rmul (f 1) ↔ LinearEquiv.symmMap ℂ ℍ _ f = lmul (f 1) :=
   by
   rw [← LinearEquiv.eq_symm_apply, LinearEquiv.symmMap_symm_apply,
     @lmul_adjoint _ _ _ _ _ _ _ φ fun x y => by

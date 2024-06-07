@@ -101,17 +101,24 @@ theorem ContinuousLinearMap.inner_map_self_eq_zero [InnerProductSpace ℂ E] {p 
     ← LinearMap.ext_iff, coe_zero]
   exact @_root_.inner_map_self_eq_zero E _ _ _
 
-theorem ContinuousLinearMap.adjoint_smul {K E : Type _} [RCLike K] [NormedAddCommGroup E]
-    [InnerProductSpace K E] [CompleteSpace E] (φ : E →L[K] E) (a : K) :
+theorem ContinuousLinearMap.adjoint_smul {K E₁ E₂ : Type _} [RCLike K] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂]
+    [InnerProductSpace K E₁] [InnerProductSpace K E₂] [CompleteSpace E₁] [CompleteSpace E₂]
+    (φ : E₁ →L[K] E₂) (a : K) :
     adjoint (a • φ) = starRingEnd K a • adjoint φ := by
-  simp_rw [← ContinuousLinearMap.star_eq_adjoint, star_smul, starRingEnd_apply]
+  ext x
+  apply ext_inner_left K
+  intro y
+  simp_rw [adjoint_inner_right, smul_apply, inner_smul_left, inner_smul_right, adjoint_inner_right]
 
-theorem LinearMap.adjoint_smul {K E : Type _} [RCLike K] [NormedAddCommGroup E]
-    [InnerProductSpace K E] [FiniteDimensional K E] (φ : E →ₗ[K] E) (a : K) :
+theorem LinearMap.adjoint_smul {K E₁ E₂ : Type _} [RCLike K] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂]
+    [InnerProductSpace K E₁] [InnerProductSpace K E₂] [FiniteDimensional K E₁]
+    [FiniteDimensional K E₂] (φ : E₁ →ₗ[K] E₂) (a : K) :
     adjoint (a • φ) = starRingEnd K a • adjoint φ :=
   by
   have :=
-    @ContinuousLinearMap.adjoint_smul K E _ _ _ (FiniteDimensional.complete K E)
+    @ContinuousLinearMap.adjoint_smul K E₁ E₂ _ _ _ _ _ (FiniteDimensional.complete K E₁) (FiniteDimensional.complete K E₂)
       (toContinuousLinearMap φ) a
   simp_rw [← LinearMap.adjoint_toContinuousLinearMap] at this
   rw [LinearMap.adjoint_eq_toCLM_adjoint, _root_.map_smul, this]

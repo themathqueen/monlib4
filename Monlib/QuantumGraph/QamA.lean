@@ -353,11 +353,11 @@ private theorem qam_A_is_sa_iff_aux5 [hφ : φ.IsFaithfulPosMap] (x : { x : ℍ 
     (h :
       (LinearMap.mulLeft ℂ φ.matrix).comp (|(x : ℍ)ᴴ⟩⟨(x : ℍ)ᴴ| : l(ℍ)) =
         (LinearMap.mulRight ℂ φ.matrix).comp (|(x : ℍ)⟩⟨(x : ℍ)| : l(ℍ))) :
-    LinearEquiv.symmMap ℂ ℍ |(x : ℍ)⟩⟨(x : ℍ)| = |(x : ℍ)⟩⟨(x : ℍ)| :=
+    LinearEquiv.symmMap ℂ ℍ ℍ |(x : ℍ)⟩⟨(x : ℍ)| = |(x : ℍ)⟩⟨(x : ℍ)| :=
   by
   haveI := hφ.matrixIsPosDef.invertible
   calc
-    LinearEquiv.symmMap ℂ ℍ |(x : ℍ)⟩⟨(x : ℍ)| =
+    LinearEquiv.symmMap ℂ ℍ ℍ |(x : ℍ)⟩⟨(x : ℍ)| =
         (hφ.sig (-1)).toLinearMap ∘ₗ (|(x : ℍ)ᴴ⟩⟨(x : ℍ)ᴴ| : l(ℍ)) :=
       ?_
     _ =
@@ -541,7 +541,7 @@ private theorem qam_A_is_sa_iff_aux5_aux6 [hφ : φ.IsFaithfulPosMap] (x' : { x 
     (this :
       ⟪(x' : ℍ), (x' : ℍ)⟫_ℂ • hφ.sig 1 (x' : ℍ) =
         ⟪hφ.sig 1 (x' : ℍ), (x' : ℍ)⟫_ℂ • (x' : ℍ))
-    (h : LinearEquiv.symmMap ℂ ℍ |(x' : ℍ)⟩⟨(x' : ℍ)| = |(x' : ℍ)⟩⟨(x' : ℍ)|)
+    (h : LinearEquiv.symmMap ℂ ℍ ℍ |(x' : ℍ)⟩⟨(x' : ℍ)| = |(x' : ℍ)⟩⟨(x' : ℍ)|)
     (hh : (x' : ℍ).IsAlmostHermitian) : Commute φ.matrix x' :=
   by
   obtain ⟨α, hα⟩ := qam_A_is_sa_iff_aux4_aux6 x' this
@@ -570,7 +570,7 @@ private theorem qam_A_is_sa_iff_aux5_aux6 [hφ : φ.IsFaithfulPosMap] (x' : { x 
   exact hα
 
 private theorem qam_A_is_sa_iff_aux6 [hφ : φ.IsFaithfulPosMap] (x' : { x : ℍ // x ≠ 0 })
-    (h : LinearEquiv.symmMap ℂ ℍ |(x' : ℍ)⟩⟨(x' : ℍ)| = |(x' : ℍ)⟩⟨(x' : ℍ)|) :
+    (h : LinearEquiv.symmMap ℂ ℍ ℍ |(x' : ℍ)⟩⟨(x' : ℍ)| = |(x' : ℍ)⟩⟨(x' : ℍ)|) :
     (x' : ℍ).IsAlmostHermitian ∧ Commute φ.matrix x' :=
   by
   let x : ℍ := (x' : ℍ)

@@ -4,9 +4,12 @@ import Monlib.LinearAlgebra.MyIps.Nontracial
 #align_import quantum_graph.symm
 
 @[simps]
-noncomputable def LinearEquiv.symmMap (R : Type _) [RCLike R] (M : Type _) [NormedAddCommGroup M]
-    [InnerProductSpace R M] [StarAddMonoid M] [StarModule R M] [FiniteDimensional R M] :
-    (M →ₗ[R] M) ≃ₗ[R] M →ₗ[R] M
+noncomputable def LinearEquiv.symmMap (R : Type _) [RCLike R] (M₁ M₂ : Type _) [NormedAddCommGroup M₁]
+  [NormedAddCommGroup M₂]
+    [InnerProductSpace R M₁] [InnerProductSpace R M₂] [StarAddMonoid M₁]
+    [StarAddMonoid M₂] [StarModule R M₁] [StarModule R M₂] [FiniteDimensional R M₁]
+    [FiniteDimensional R M₂] :
+    (M₁ →ₗ[R] M₂) ≃ₗ[R] M₂ →ₗ[R] M₁
     where
   toFun f := LinearMap.adjoint (LinearMap.real f)
   invFun f := (LinearMap.adjoint f).real
@@ -19,8 +22,8 @@ noncomputable def LinearEquiv.symmMap (R : Type _) [RCLike R] (M : Type _) [Norm
 
 theorem LinearEquiv.symmMap_real {R : Type _} [RCLike R] {M : Type _} [NormedAddCommGroup M]
     [InnerProductSpace R M] [StarAddMonoid M] [StarModule R M] [FiniteDimensional R M] :
-    LinearMap.real (LinearEquiv.symmMap R M : (M →ₗ[R] M) →ₗ[R] M →ₗ[R] M) =
-      (LinearEquiv.symmMap R M).symm :=
+    LinearMap.real (LinearEquiv.symmMap R M M : (M →ₗ[R] M) →ₗ[R] M →ₗ[R] M) =
+      (LinearEquiv.symmMap R M M).symm :=
   by
   ext1 f
   simp_rw [LinearMap.real_apply, LinearEquiv.coe_coe, LinearMap.star_eq_adjoint,
@@ -62,14 +65,14 @@ local notation "τ⁻¹" x =>
 local notation "id" x => (1 : x →ₗ[ℂ] x)
 
 theorem LinearEquiv.symmMap_rankOne_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (a b : 𝔹) :
-    LinearEquiv.symmMap _ _ (|a⟩⟨b| : 𝔹 →ₗ[ℂ] 𝔹) =
+    LinearEquiv.symmMap _ _ _ (|a⟩⟨b| : 𝔹 →ₗ[ℂ] 𝔹) =
       |Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star b)⟩⟨star a| :=
   by
   rw [LinearEquiv.symmMap_apply, ← rankOneLm_eq_rankOne, Pi.rankOneLm_real_apply, rankOneLm_adjoint]
   rfl
 
 theorem LinearEquiv.symmMap_symm_rankOne_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (a b : 𝔹) :
-    (LinearEquiv.symmMap _ _).symm (|a⟩⟨b| : 𝔹 →ₗ[ℂ] 𝔹) =
+    (LinearEquiv.symmMap _ _ _).symm (|a⟩⟨b| : 𝔹 →ₗ[ℂ] 𝔹) =
       |star b⟩⟨Module.Dual.pi.IsFaithfulPosMap.sig hψ (-1) (star a)| :=
   by
   rw [LinearEquiv.symmMap_symm_apply, ← rankOneLm_eq_rankOne, rankOneLm_adjoint,
@@ -84,7 +87,7 @@ set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Pi.symmMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (f : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
-    (LinearEquiv.symmMap ℂ (PiMat ℂ n s)) f =
+    (LinearEquiv.symmMap ℂ (PiMat ℂ n s) _) f =
       (τ 𝔹) ∘ₗ
         (𝔹 ϰ ℂ) ∘ₗ
           ((id 𝔹) ⊗ₘ LinearMap.adjoint (Algebra.linearMap ℂ 𝔹) ∘ₗ m 𝔹) ∘ₗ
@@ -131,7 +134,7 @@ set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Pi.symmMap_symm_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (f : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
-    (LinearEquiv.symmMap ℂ _).symm f =
+    (LinearEquiv.symmMap ℂ _ _).symm f =
       (τ 𝔹) ∘ₗ
         ((LinearMap.adjoint (η 𝔹) ∘ₗ m 𝔹) ⊗ₘ id 𝔹) ∘ₗ
           (((id 𝔹) ⊗ₘ f) ⊗ₘ id 𝔹) ∘ₗ
@@ -179,7 +182,7 @@ theorem Pi.symmMap_symm_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
 
 theorem Pi.symmMap_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (A : 𝔹 →ₗ[ℂ] 𝔹) :
     List.TFAE
-      [LinearEquiv.symmMap _ _ A = A, (LinearEquiv.symmMap _ _).symm A = A, A.real = LinearMap.adjoint A,
+      [LinearEquiv.symmMap _ _ _ A = A, (LinearEquiv.symmMap _ _ _).symm A = A, A.real = LinearMap.adjoint A,
         ∀ x y, Module.Dual.pi ψ (A x * y) = Module.Dual.pi ψ (x * A y)] :=
   by
   tfae_have 1 ↔ 2
@@ -230,7 +233,7 @@ theorem Pi.commute_sig_pos_neg [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r : ℝ) 
 
 theorem Pi.symmMap_apply_eq_symmMap_symm_apply_iff [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    LinearEquiv.symmMap ℂ (PiMat ℂ n s) A = (LinearEquiv.symmMap ℂ _).symm A ↔
+    LinearEquiv.symmMap ℂ (PiMat ℂ n s) _ A = (LinearEquiv.symmMap ℂ _ _).symm A ↔
       Commute A (Module.Dual.pi.IsFaithfulPosMap.sig hψ 1).toLinearMap :=
   by
   rw [LinearEquiv.symmMap_apply, LinearEquiv.symmMap_symm_apply, LinearMap.pi.adjoint_real_eq, ←
@@ -296,7 +299,7 @@ theorem Psi.adjoint_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : �
     op_apply, sub_eq_add_neg, add_assoc, add_neg_cancel_comm_assoc, neg_add_self, add_zero]
 
 theorem Psi.symmMap_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearEquiv.symmMap _ _ A) =
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearEquiv.symmMap _ _ _ A) =
       ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ + r₂ - 1)).toLinearMap ⊗ₘ
           op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (-r₁ - r₂)).toLinearMap ∘ₗ unop)
         (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A)) :=
@@ -314,7 +317,7 @@ theorem Psi.symmMap_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : �
     neg_add_cancel_comm, add_assoc, add_neg_cancel_comm_assoc]
 
 theorem Psi.symmMap_symm_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ ((LinearEquiv.symmMap _ _).symm A) =
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ ((LinearEquiv.symmMap _ _ _).symm A) =
       ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ + r₂)).toLinearMap ⊗ₘ
           op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (1 - r₁ - r₂)).toLinearMap ∘ₗ unop)
         (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A)) :=

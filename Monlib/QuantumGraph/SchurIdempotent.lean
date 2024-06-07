@@ -75,11 +75,14 @@ noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
   dist_eq := NormedAddCommGroup.dist_eq
 
 @[simps]
-noncomputable def schurIdempotent {B : Type _} [NormedAddCommGroupOfRing B] [InnerProductSpace ℂ B]
-    [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] : l(B) →ₗ[ℂ] l(B) →ₗ[ℂ] l(B)
+noncomputable def schurIdempotent {B C : Type _} [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
+  [SMulCommClass ℂ B B] [SMulCommClass ℂ C C] [IsScalarTower ℂ B B] [IsScalarTower ℂ C C]
+  [FiniteDimensional ℂ B] [FiniteDimensional ℂ C] :
+  (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C)
     where
   toFun x :=
-    { toFun := fun y => (m B) ∘ₗ (x ⊗ₘ y) ∘ₗ LinearMap.adjoint (m B)
+    { toFun := fun y => (m C) ∘ₗ (x ⊗ₘ y) ∘ₗ LinearMap.adjoint (m B)
       map_add' := fun x y => by
         simp only [TensorProduct.map_apply, TensorProduct.map_add_right, LinearMap.add_comp,
           LinearMap.comp_add]
@@ -97,9 +100,12 @@ noncomputable def schurIdempotent {B : Type _} [NormedAddCommGroupOfRing B] [Inn
       LinearMap.ext_iff, LinearMap.smul_apply, LinearMap.coe_mk, RingHom.id_apply]
     intro _ _; rfl
 
+scoped[schurIdempotent] infix:100 " •ₛ " => schurIdempotent
+open scoped schurIdempotent
+
 theorem schurIdempotent.apply_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (a b c d : B) : schurIdempotent ↑|a⟩⟨b| ↑|c⟩⟨d| = (|a * c⟩⟨b * d| : B →ₗ[ℂ] B) :=
+    (a b c d : B) : (↑|a⟩⟨b|) •ₛ (↑|c⟩⟨d|) = (|a * c⟩⟨b * d| : B →ₗ[ℂ] B) :=
   by
   rw [schurIdempotent, LinearMap.ext_iff_inner_map]
   intro x
@@ -134,14 +140,14 @@ theorem schurIdempotent.apply_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
 -- end
 theorem schurIdempotent_one_one_right {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (A : l(B)) : schurIdempotent (A : l(B)) (|(1 : B)⟩⟨(1 : B)| : l(B)) = A :=
+    (A : l(B)) : A •ₛ (|(1 : B)⟩⟨(1 : B)| : l(B)) = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, LinearMap.sum_apply, schurIdempotent.apply_rankOne, mul_one]
 
 theorem schurIdempotent_one_one_left {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (A : l(B)) : schurIdempotent (|(1 : B)⟩⟨(1 : B)| : l(B)) A = A :=
+    (A : l(B)) : (|(1 : B)⟩⟨(1 : B)| : l(B)) •ₛ A = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, schurIdempotent.apply_rankOne, one_mul]
@@ -177,16 +183,21 @@ theorem ContinuousLinearMap.linearMap_adjoint {𝕜 B C : Type _} [RCLike 𝕜] 
         (FiniteDimensional.complete 𝕜 C) x :=
   rfl
 
-theorem schurIdempotent_adjoint {B : Type _} [NormedAddCommGroupOfRing B] [InnerProductSpace ℂ B]
-    [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B] (x y : l(B)) :
-    LinearMap.adjoint (schurIdempotent x y) = schurIdempotent (LinearMap.adjoint x) (LinearMap.adjoint y) :=
+theorem schurIdempotent_adjoint {B C : Type _} [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
+  [SMulCommClass ℂ B B] [SMulCommClass ℂ C C] [IsScalarTower ℂ B B] [IsScalarTower ℂ C C]
+  [FiniteDimensional ℂ B] [FiniteDimensional ℂ C] (x y : B →ₗ[ℂ] C) :
+    LinearMap.adjoint (x •ₛ y) = (LinearMap.adjoint x) •ₛ (LinearMap.adjoint y) :=
   by
-  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
-  obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne y
-  simp only [map_sum, LinearMap.sum_apply]
-  repeat' apply Finset.sum_congr rfl; intros
-  simp_rw [schurIdempotent.apply_rankOne, ContinuousLinearMap.linearMap_adjoint, rankOne.adjoint,
-    schurIdempotent.apply_rankOne]
+  -- obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
+  -- obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne y
+  -- simp only [map_sum, LinearMap.sum_apply]
+  -- repeat' apply Finset.sum_congr rfl; intros
+  -- simp_rw [schurIdempotent.apply_rankOne, ContinuousLinearMap.linearMap_adjoint, rankOne.adjoint,
+    -- schurIdempotent.apply_rankOne]
+  simp_rw [schurIdempotent]
+  simp only [LinearMap.coe_mk, AddHom.coe_mk, LinearMap.adjoint_comp, LinearMap.adjoint_adjoint,
+    TensorProduct.map_adjoint, LinearMap.comp_assoc]
 
 set_option maxHeartbeats 3000000 in
 theorem schurIdempotent_real
@@ -201,7 +212,7 @@ theorem schurIdempotent_real
     -- {ψ : module.dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b))
     {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : l(𝔹)) :
-    LinearMap.real (schurIdempotent x y : l(𝔹)) = schurIdempotent (LinearMap.real y) (LinearMap.real x) :=
+    LinearMap.real (x •ₛ y : l(𝔹)) = (LinearMap.real y) •ₛ (LinearMap.real x) :=
   by
   obtain ⟨α, β, rfl⟩ := x.exists_sum_rankOne
   obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rankOne
@@ -213,7 +224,7 @@ theorem schurIdempotent_real
 theorem schurIdempotent_one_right_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
     [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
     [StarMul B] {ψ : Module.Dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b)) (a b : B) :
-    schurIdempotent (↑|a⟩⟨b|) 1 = lmul a * (LinearMap.adjoint (lmul b : l(B))) :=
+    (↑|a⟩⟨b|) •ₛ 1 = lmul a * (LinearMap.adjoint (lmul b : l(B))) :=
   by
   simp_rw [LinearMap.ext_iff_inner_map]
   intro u
@@ -342,7 +353,7 @@ theorem pi_inner_aut_toMatrix {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) �
 set_option maxHeartbeats 3000000 in
 theorem schurIdempotent_one_left_rankOne {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (a b : 𝔹) :
-    schurIdempotent (1 : l(𝔹)) (|a⟩⟨b|) = (rmul a : l(𝔹)) * (LinearMap.adjoint (rmul b : l(𝔹))) :=
+    (1 : l(𝔹)) •ₛ (|a⟩⟨b|) = (rmul a : l(𝔹)) * (LinearMap.adjoint (rmul b : l(𝔹))) :=
   by
   simp_rw [← ext_inner_map]
   intro u
@@ -356,16 +367,16 @@ theorem schurIdempotent_one_left_rankOne {ψ : ∀ i, Module.Dual ℂ (Matrix (s
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem Psi.symm_map {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+theorem Psi.schurIdempotent {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ)
     (f g : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (schurIdempotent f g) =
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (f •ₛ g) =
       Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ f *
         Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ g :=
   by
   suffices
     ∀ a b c d : 𝔹,
-      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (schurIdempotent (↑|a⟩⟨b| : l(𝔹)) |c⟩⟨d|) =
+      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ ((↑|a⟩⟨b| : l(𝔹)) •ₛ |c⟩⟨d|) =
         Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |a⟩⟨b| *
           Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |c⟩⟨d|
     by

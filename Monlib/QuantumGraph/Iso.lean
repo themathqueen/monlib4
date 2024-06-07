@@ -208,8 +208,8 @@ theorem unitary_commutes_with_hφ_matrix_iff_isIsometry (hφ : φ.IsFaithfulPosM
 
 theorem Qam.symm_apply_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)} (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-    LinearEquiv.symmMap ℂ (Matrix n n ℂ) (f.toAlgEquiv.toLinearMap ∘ₗ A ∘ₗ f.symm.toAlgEquiv.toLinearMap) =
-      f.toAlgEquiv.toLinearMap ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) A ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
+    LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ (f.toAlgEquiv.toLinearMap ∘ₗ A ∘ₗ f.symm.toAlgEquiv.toLinearMap) =
+      f.toAlgEquiv.toLinearMap ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
   by
   have := List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 4 1
   rw [StarAlgEquiv.IsIsometry, isometry_iff_norm_aux, this] at hf
@@ -221,8 +221,8 @@ theorem Qam.symm_apply_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial
 
 theorem InnerAut.symmetric_eq [hφ : φ.IsFaithfulPosMap] [Nontrivial n] (A : l((Matrix n n ℂ)))
     {U : Matrix.unitaryGroup n ℂ} (hU : Commute φ.matrix U) :
-    LinearEquiv.symmMap ℂ (Matrix n n ℂ) (f_{U} ∘ₗ A ∘ₗ f_{star U}) =
-      f_{U} ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) A ∘ₗ f_{star U} :=
+    LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ (f_{U} ∘ₗ A ∘ₗ f_{star U}) =
+      f_{U} ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f_{star U} :=
   by
   rw [← innerAut_inv_eq_star, ← innerAutStarAlg_equiv_symm_toLinearMap, ←
     innerAutStarAlg_equiv_toLinearMap]
