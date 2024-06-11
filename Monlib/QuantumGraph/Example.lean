@@ -22,15 +22,18 @@ open scoped TensorProduct BigOperators Kronecker Matrix Functional
 
 variable {p : Type _} [Fintype p] [DecidableEq p] {n : p → Type _} [∀ i, Fintype (n i)]
   [∀ i, DecidableEq (n i)]
+  {p₂ : Type*} [Fintype p₂] [DecidableEq p₂] {n₂ : p₂ → Type*} [∀ i, Fintype (n₂ i)]
+  [∀ i, DecidableEq (n₂ i)]
 
 local notation "ℍ" => PiMat ℂ p n
+local notation "ℍ₂" => PiMat ℂ p₂ n₂
 
 -- local notation `⊗K` := matrix (n × n) (n × n) ℂ
 local notation "l(" x ")" => x →ₗ[ℂ] x
 
-variable {φ : Π i : p, Module.Dual ℂ (Matrix (n i) (n i) ℂ)}
+variable {φ : Π i : p, Module.Dual ℂ (Matrix (n i) (n i) ℂ)} {ψ : Π i, Module.Dual ℂ (Matrix (n₂ i) (n₂ i) ℂ)}
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ ℍ
 
@@ -58,17 +61,21 @@ local notation "τ⁻¹" =>
 
 local notation "id" => (1 : ℍ →ₗ[ℂ] ℍ)
 
-noncomputable def Qam.completeGraph (E : Type _) [One E] [NormedAddCommGroup E]
-    [InnerProductSpace ℂ E] : E →ₗ[ℂ] E :=
-  |(1 : E)⟩⟨(1 : E)|
+noncomputable def Qam.completeGraph (E₁ E₂ : Type _) [One E₁] [One E₂] [NormedAddCommGroup E₁]
+    [NormedAddCommGroup E₂] [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] :
+    E₂ →ₗ[ℂ] E₁ :=
+  |(1 : E₁)⟩⟨(1 : E₂)|
 
-theorem Qam.completeGraph_eq {E : Type _} [One E] [NormedAddCommGroup E] [InnerProductSpace ℂ E] :
-    Qam.completeGraph E = |(1 : E)⟩⟨(1 : E)| :=
+theorem Qam.completeGraph_eq {E₁ E₂ : Type _} [One E₁] [One E₂] [NormedAddCommGroup E₁]
+    [NormedAddCommGroup E₂] [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] :
+    Qam.completeGraph E₁ E₂ = |(1 : E₁)⟩⟨(1 : E₂)| :=
   rfl
 
-theorem Qam.completeGraph_eq' {φ : Module.Dual ℂ (Matrix p p ℂ)} [hφ : φ.IsFaithfulPosMap] :
-    Qam.completeGraph (Matrix p p ℂ) =
-      Algebra.linearMap ℂ (Matrix p p ℂ) ∘ₗ LinearMap.adjoint (Algebra.linearMap ℂ (Matrix p p ℂ)) :=
+theorem Qam.completeGraph_eq' {φ : Module.Dual ℂ (Matrix p p ℂ)}
+  {ψ : Module.Dual ℂ (Matrix p₂ p₂ ℂ)}
+  [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap] :
+    Qam.completeGraph (Matrix p p ℂ) (Matrix p₂ p₂ ℂ) =
+      Algebra.linearMap ℂ (Matrix p p ℂ) ∘ₗ LinearMap.adjoint (Algebra.linearMap ℂ (Matrix p₂ p₂ ℂ)) :=
   by
   rw [LinearMap.ext_iff]
   intro x
@@ -77,10 +84,11 @@ theorem Qam.completeGraph_eq' {φ : Module.Dual ℂ (Matrix p p ℂ)} [hφ : φ.
     Matrix.one_mul]
   simp only [Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one]
 
-theorem Pi.Qam.completeGraph_eq'
-  [hφ : Π i, (φ i).IsFaithfulPosMap] :
-  Qam.completeGraph (PiMat ℂ p n)
-    = (Algebra.linearMap ℂ (PiMat ℂ p n)) ∘ₗ (LinearMap.adjoint (Algebra.linearMap ℂ (PiMat ℂ p n))) :=
+theorem Pi.Qam.completeGraph_eq' {φ : Π i, Module.Dual ℂ (Matrix (n i) (n i) ℂ)}
+  {ψ : Π i, Module.Dual ℂ (Matrix (n₂ i) (n₂ i) ℂ)}
+  [hφ : Π i, (φ i).IsFaithfulPosMap] [hψ : Π i, (ψ i).IsFaithfulPosMap] :
+  Qam.completeGraph (PiMat ℂ p n) (PiMat ℂ p₂ n₂)
+    = (Algebra.linearMap ℂ (PiMat ℂ p n)) ∘ₗ (LinearMap.adjoint (Algebra.linearMap ℂ (PiMat ℂ p₂ n₂))) :=
   by
   rw [LinearMap.ext_iff]
   intro x
@@ -88,39 +96,57 @@ theorem Pi.Qam.completeGraph_eq'
     Nontracial.Pi.unit_adjoint_eq, Module.Dual.pi.IsFaithfulPosMap.inner_eq, star_one, one_mul,
     Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one]
 
-theorem Qam.Nontracial.CompleteGraph.qam {E : Type _} [NormedAddCommGroupOfRing E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E] :
-    schurIdempotent (Qam.completeGraph E) (Qam.completeGraph E) = Qam.completeGraph E := by
-  rw [Qam.completeGraph, schurIdempotent.apply_rankOne, one_mul]
+theorem Qam.Nontracial.CompleteGraph.qam {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂] [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂]
+    [FiniteDimensional ℂ E₁] [FiniteDimensional ℂ E₂]
+    [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂]
+    [SMulCommClass ℂ E₁ E₁] [SMulCommClass ℂ E₂ E₂] :
+    schurIdempotent (Qam.completeGraph E₁ E₂) (Qam.completeGraph E₁ E₂) = Qam.completeGraph E₁ E₂ := by
+  simp_rw [Qam.completeGraph, schurIdempotent.apply_rankOne, one_mul]
+
+lemma Qam.Nontracial.CompleteGraph.adjoint_eq {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂] [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂]
+    [FiniteDimensional ℂ E₁] [FiniteDimensional ℂ E₂]
+    [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂]
+    [SMulCommClass ℂ E₁ E₁] [SMulCommClass ℂ E₂ E₂] :
+  LinearMap.adjoint (Qam.completeGraph E₁ E₂) = Qam.completeGraph E₂ E₁ :=
+rankOneLm_adjoint _ _
 
 theorem Qam.Nontracial.CompleteGraph.isSelfAdjoint {E : Type _} [One E] [NormedAddCommGroup E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] : _root_.IsSelfAdjoint (Qam.completeGraph E) := by
+    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] : _root_.IsSelfAdjoint (Qam.completeGraph E E) := by
   simp_rw [_root_.IsSelfAdjoint, Qam.completeGraph, LinearMap.star_eq_adjoint, ←
     rankOneLm_eq_rankOne, rankOneLm_adjoint]
 
 theorem Qam.Nontracial.CompleteGraph.isReal {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] : (Qam.completeGraph (Matrix p p ℂ)).IsReal := by
-  rw [Qam.completeGraph, LinearMap.isReal_iff, rankOne_real_apply, conjTranspose_one,
+    {ψ : Module.Dual ℂ (Matrix p₂ p₂ ℂ)} [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap] :
+    (Qam.completeGraph (Matrix p p ℂ) (Matrix p₂ p₂ ℂ)).IsReal := by
+  simp_rw [Qam.completeGraph, LinearMap.isReal_iff, rankOne_real_apply, conjTranspose_one,
     _root_.map_one]
 
-theorem Qam.Nontracial.CompleteGraph.is_symm {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] :
-    LinearEquiv.symmMap ℂ (Matrix p p ℂ) _ (Qam.completeGraph (Matrix p p ℂ)) =
-      Qam.completeGraph (Matrix p p ℂ) :=
+theorem Qam.Nontracial.CompleteGraph.symm_eq {φ : Module.Dual ℂ (Matrix p p ℂ)}
+  {ψ : Module.Dual ℂ (Matrix p₂ p₂ ℂ)} [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap] :
+    LinearEquiv.symmMap ℂ (Matrix p₂ p₂ ℂ) _ (Qam.completeGraph (Matrix p p ℂ) (Matrix p₂ p₂ ℂ)) =
+      Qam.completeGraph (Matrix p₂ p₂ ℂ) (Matrix p p ℂ) :=
   by simp_rw [Qam.completeGraph, Qam.RankOne.symmetric_eq, conjTranspose_one, _root_.map_one]
+theorem Qam.Nontracial.CompleteGraph.is_symm
+  {φ : Module.Dual ℂ (Matrix p p ℂ)} [φ.IsFaithfulPosMap] :
+    LinearEquiv.symmMap ℂ (Matrix p p ℂ) _ (Qam.completeGraph (Matrix p p ℂ) (Matrix p p ℂ)) =
+      Qam.completeGraph (Matrix p p ℂ) (Matrix p p ℂ) :=
+Qam.Nontracial.CompleteGraph.symm_eq
 
-theorem Pi.Qam.Nontracial.CompleteGraph.isReal [hφ : ∀ i, (φ i).IsFaithfulPosMap] :
-    (Qam.completeGraph ℍ).IsReal := by
-  rw [Qam.completeGraph, ← rankOneLm_eq_rankOne, LinearMap.isReal_iff, Pi.rankOneLm_real_apply,
+theorem Pi.Qam.Nontracial.CompleteGraph.isReal
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap] [hψ : ∀ i, (ψ i).IsFaithfulPosMap] :
+    (Qam.completeGraph ℍ ℍ₂).IsReal := by
+  simp_rw [Qam.completeGraph, ← rankOneLm_eq_rankOne, LinearMap.isReal_iff, Pi.rankOneLm_real_apply,
     star_one, _root_.map_one]
 
 theorem Pi.Qam.Nontracial.CompleteGraph.is_symm [hφ : ∀ i, (φ i).IsFaithfulPosMap] :
-    LinearEquiv.symmMap ℂ ℍ _ (Qam.completeGraph ℍ) = Qam.completeGraph ℍ := by
+    LinearEquiv.symmMap ℂ ℍ _ (Qam.completeGraph ℍ ℍ) = Qam.completeGraph ℍ ℍ := by
   simp_rw [Qam.completeGraph, LinearEquiv.symmMap_rankOne_apply, star_one, _root_.map_one]
 
 theorem Qam.Nontracial.CompleteGraph.is_reflexive {E : Type _} [NormedAddCommGroupOfRing E]
     [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E] :
-    schurIdempotent (Qam.completeGraph E) 1 = 1 :=
+    schurIdempotent (Qam.completeGraph E E) 1 = 1 :=
   by
   obtain ⟨α, β, hαβ⟩ := (1 : l(E)).exists_sum_rankOne
   nth_rw 1 [hαβ]
@@ -330,23 +356,36 @@ theorem Pi.Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
     inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
   rw [smul_eq_zero_iff_right (inv_ne_zero (Pi.Qam.Nontracial.delta_ne_zero hφ₂))]
 
-theorem Qam.refl_idempotent_completeGraph_left {E : Type _} [NormedAddCommGroupOfRing E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E]
-    (x : l(E)) : schurIdempotent (Qam.completeGraph E) x = x :=
+theorem Qam.refl_idempotent_completeGraph_left {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂]
+    (x : E₂ →ₗ[ℂ] E₁) : schurIdempotent (Qam.completeGraph E₁ E₂) x = x :=
   schurIdempotent_one_one_left _
 
-theorem Qam.refl_idempotent_completeGraph_right {E : Type _} [NormedAddCommGroupOfRing E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E]
-    (x : l(E)) : schurIdempotent x (Qam.completeGraph E) = x :=
+theorem Qam.refl_idempotent_completeGraph_right {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂]
+    (x : E₂ →ₗ[ℂ] E₁) : schurIdempotent x (Qam.completeGraph E₁ E₂) = x :=
   schurIdempotent_one_one_right _
 
-noncomputable def Qam.complement' {E : Type _} [NormedAddCommGroupOfRing E] [InnerProductSpace ℂ E]
-    [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E] (x : l(E)) : l(E) :=
-  Qam.completeGraph E - x
+noncomputable def Qam.complement' {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂]
+    (x : E₂ →ₗ[ℂ] E₁) : E₂ →ₗ[ℂ] E₁ :=
+  Qam.completeGraph E₁ E₂ - x
 
-theorem Qam.Nontracial.Complement'.qam {E : Type _} [NormedAddCommGroupOfRing E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E]
-    (x : l(E)) :
+theorem Qam.Nontracial.Complement'.qam {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂]
+    (x : E₁ →ₗ[ℂ] E₂) :
     schurIdempotent x x = x ↔
       schurIdempotent (Qam.complement' x) (Qam.complement' x) = Qam.complement' x :=
   by
@@ -357,22 +396,28 @@ theorem Qam.Nontracial.Complement'.qam {E : Type _} [NormedAddCommGroupOfRing E]
   simp only [sub_eq_zero, @eq_comm _ x]
 
 theorem Qam.Nontracial.Complement'.qam.isReal {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] (x : l(Matrix p p ℂ)) : x.IsReal ↔ (Qam.complement' x).IsReal :=
+    {ψ : Module.Dual ℂ (Matrix p₂ p₂ ℂ)}
+    [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap]
+    (x : (Matrix p p ℂ) →ₗ[ℂ] (Matrix p₂ p₂ ℂ)) : x.IsReal ↔ (Qam.complement' x).IsReal :=
   by
   simp only [Qam.complement', LinearMap.isReal_iff, LinearMap.real_sub,
-    (LinearMap.isReal_iff _).mp (@Qam.Nontracial.CompleteGraph.isReal p _ _ φ _)]
+    (LinearMap.isReal_iff _).mp (@Qam.Nontracial.CompleteGraph.isReal p₂ _ _ p _ _ ψ φ _ _)]
   simp only [sub_right_inj]
 
 theorem Pi.Qam.Nontracial.Complement'.Qam.isReal [hφ : ∀ i, (φ i).IsFaithfulPosMap]
-    (x : l(ℍ)) : x.IsReal ↔ (Qam.complement' x).IsReal :=
+  [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
+  (x : ℍ →ₗ[ℂ] ℍ₂) : x.IsReal ↔ (Qam.complement' x).IsReal :=
   by
   simp only [Qam.complement', LinearMap.isReal_iff, LinearMap.real_sub,
-    (LinearMap.isReal_iff _).mp (@Pi.Qam.Nontracial.CompleteGraph.isReal p _ n _ _ φ _)]
+    (LinearMap.isReal_iff _).mp (@Pi.Qam.Nontracial.CompleteGraph.isReal p₂ _ n₂ _ _ p _ _ n _ _ _ _ _ _)]
   simp only [sub_right_inj]
 
-theorem Qam.complement'_complement' {E : Type _} [NormedAddCommGroupOfRing E]
-    [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E]
-    (x : l(E)) : Qam.complement' (Qam.complement' x) = x :=
+theorem Qam.complement'_complement' {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂]
+    (x : E₁ →ₗ[ℂ] E₂) : Qam.complement' (Qam.complement' x) = x :=
   sub_sub_cancel _ _
 
 theorem Qam.Nontracial.Complement'.ir_reflexive {E : Type _} [NormedAddCommGroupOfRing E]
@@ -493,12 +538,12 @@ theorem Pi.Qam.complement''_is_irreflexive_iff [Nonempty p] [∀ i, Nontrivial (
 noncomputable def Pi.Qam.irreflexiveComplement [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     (hφ : ∀ i, (φ i).IsFaithfulPosMap) (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
     l(ℍ) :=
-  Qam.completeGraph ℍ - Pi.Qam.trivialGraph hφ hφ₂ - x
+  Qam.completeGraph ℍ ℍ - Pi.Qam.trivialGraph hφ hφ₂ - x
 
 noncomputable def Pi.Qam.reflexiveComplement [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     (hφ : ∀ i, (φ i).IsFaithfulPosMap) (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
     l(ℍ) :=
-  Qam.completeGraph ℍ + Pi.Qam.trivialGraph hφ hφ₂ - x
+  Qam.completeGraph ℍ ℍ + Pi.Qam.trivialGraph hφ hφ₂ - x
 
 theorem Qam.Nontracial.trivialGraph.isReal [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)}
     [hφ : φ.IsFaithfulPosMap] {δ : ℂ} (hφ₂ : φ.matrix⁻¹.trace = δ) :
@@ -524,7 +569,7 @@ theorem Pi.Qam.irreflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i
     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
     (hx : x.IsReal) : (Pi.Qam.irreflexiveComplement hφ hφ₂ x).IsReal := by
   rw [LinearMap.isReal_iff, Pi.Qam.irreflexiveComplement, LinearMap.real_sub, LinearMap.real_sub,
-    (LinearMap.isReal_iff (Qam.completeGraph ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
+    (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
     (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
       (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
     (LinearMap.isReal_iff x).mp hx]
@@ -533,7 +578,7 @@ theorem Pi.Qam.reflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i)]
     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
     (hx : x.IsReal) : (Pi.Qam.reflexiveComplement hφ hφ₂ x).IsReal := by
   rw [LinearMap.isReal_iff, Pi.Qam.reflexiveComplement, LinearMap.real_sub, LinearMap.real_add,
-    (LinearMap.isReal_iff (Qam.completeGraph ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
+    (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
     (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
       (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
     (LinearMap.isReal_iff x).mp hx]
@@ -551,18 +596,21 @@ theorem Pi.Qam.reflexiveComplement_reflexiveComplement [Nonempty p] [∀ i, Nont
 theorem Pi.Qam.trivialGraph_reflexiveComplement_eq_completeGraph [Nonempty p]
     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
-    Pi.Qam.reflexiveComplement hφ hφ₂ (Pi.Qam.trivialGraph hφ hφ₂) = Qam.completeGraph ℍ :=
+    Pi.Qam.reflexiveComplement hφ hφ₂ (Pi.Qam.trivialGraph hφ hφ₂) = Qam.completeGraph ℍ ℍ :=
 by simp_rw [reflexiveComplement, add_sub_cancel_right]
 
 theorem Pi.Qam.completeGraph_reflexiveComplement_eq_trivialGraph [Nonempty p]
     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
-    Pi.Qam.reflexiveComplement hφ hφ₂ (Qam.completeGraph ℍ) = Pi.Qam.trivialGraph hφ hφ₂ :=
+    Pi.Qam.reflexiveComplement hφ hφ₂ (Qam.completeGraph ℍ ℍ) = Pi.Qam.trivialGraph hφ hφ₂ :=
   add_sub_cancel' _ _
 
-theorem Qam.complement'_eq {E : Type _} [NormedAddCommGroupOfRing E] [InnerProductSpace ℂ E]
-    [FiniteDimensional ℂ E] [IsScalarTower ℂ E E] [SMulCommClass ℂ E E] (a : l(E)) :
-    Qam.complement' a = Qam.completeGraph E - a :=
+theorem Qam.complement'_eq {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
+    [NormedAddCommGroupOfRing E₂]
+    [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂] [FiniteDimensional ℂ E₁]
+    [FiniteDimensional ℂ E₂] [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂] [SMulCommClass ℂ E₁ E₁]
+    [SMulCommClass ℂ E₂ E₂] (a : E₂ →ₗ[ℂ] E₁) :
+    Qam.complement' a = Qam.completeGraph E₁ E₂ - a :=
   rfl
 
 theorem Pi.Qam.irreflexiveComplement_is_irreflexive_qam_iff_irreflexive_qam [Nonempty p]

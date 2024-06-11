@@ -41,7 +41,7 @@ open scoped Matrix
 
 open Matrix
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ ℍ
 

@@ -5,7 +5,13 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Star.BigOperators
-import Monlib.LinearAlgebra.InnerAut
+-- import Monlib.LinearAlgebra.InnerAut
+import Mathlib.Algebra.Algebra.Spectrum
+import Monlib.LinearAlgebra.End
+import Monlib.Preq.StarAlgEquiv
+import Mathlib.Analysis.RCLike.Basic
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Algebra.Algebra.Bilinear
 import Mathlib.Algebra.Algebra.Basic
 
 #align_import linear_algebra.is_real
@@ -27,11 +33,11 @@ variable {E F K : Type _} [AddCommMonoid E] [StarAddMonoid E] [AddCommMonoid F] 
   [Semiring K] [Module K E] [Module K F] [InvolutiveStar K] [StarModule K E] [StarModule K F]
 
 @[simps]
-def LinearMap.real (φ : E →ₗ[K] F) : E →ₗ[K] F
-    where
+def LinearMap.real (φ : E →ₗ[K] F) :
+    E →ₗ[K] F where
   toFun x := star (φ (star x))
-  map_add' x y := by simp only [star_add, map_add]
-  map_smul' r x := by simp only [star_smul, _root_.map_smul, star_star, RingHom.id_apply]
+  map_add' _ _ := by simp only [star_add, map_add]
+  map_smul' _ _ := by simp only [star_smul, _root_.map_smul, star_star, RingHom.id_apply]
 
 theorem LinearMap.isReal_iff (φ : E →ₗ[K] F) : φ.IsReal ↔ φ.real = φ := by
   simp_rw [LinearMap.IsReal, LinearMap.ext_iff, LinearMap.real_apply,

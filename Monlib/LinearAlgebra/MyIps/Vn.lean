@@ -67,7 +67,7 @@ theorem elem_idempotent_iff_ker_and_range_invariantUnder_commutant (M : VonNeuma
     rw [← VonNeumannAlgebra.commutant_commutant M]
     intro m hm; ext x
     obtain ⟨v, w, hvw, _⟩ :=
-      Submodule.existsUnique_add_of_isCompl (LinearMap.IsIdempotent.isCompl_range_ker e.toLinearMap (IsIdempotentElem.clm_to_lm.mp h)) x
+      Submodule.existsUnique_add_of_isCompl (IsIdempotentElem.isCompl_range_ker (IsIdempotentElem.clm_to_lm.mp h)) x
     obtain ⟨y, hy⟩ := SetLike.coe_mem w
     -- let hvv := SetLike.coe_mem v
     -- let hvv : H := (@Subtype.val H (fun x ↦ x ∈ ↑(LinearMap.ker ↑e)) v : H)

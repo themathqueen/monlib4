@@ -45,7 +45,7 @@ open scoped Matrix
 
 open Matrix
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ ℍ
 
@@ -186,7 +186,7 @@ private theorem matrix.stdBasisMatrix.transpose' {R n p : Type _} [DecidableEq n
 --     tidy, },
 --      }
 
-set_option maxHeartbeats 300000 in
+set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem rankOne_toMatrix_transpose_psi_symm [hφ : φ.IsFaithfulPosMap]
   (x y : ℍ) :
@@ -244,21 +244,23 @@ private theorem is_idempotent_elem_to_clm {𝕜 E : Type _} [RCLike 𝕜] [Norme
     IsIdempotentElem p ↔ IsIdempotentElem (toContinuousLinearMap p) := by
   simp_rw [IsIdempotentElem, lm_to_clm_comp, Function.Injective.eq_iff (LinearEquiv.injective _)]
 
+open scoped FiniteDimensional
 open LinearMap in
 private theorem is_self_adjoint_to_clm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] [CompleteSpace E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
+    [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
     IsSelfAdjoint p ↔ IsSelfAdjoint (toContinuousLinearMap p) := by
   simp_rw [_root_.IsSelfAdjoint, ContinuousLinearMap.star_eq_adjoint, ←
     LinearMap.adjoint_toContinuousLinearMap, Function.Injective.eq_iff (LinearEquiv.injective _),
     LinearMap.star_eq_adjoint]
 
 open LinearMap in
+set_option synthInstance.maxHeartbeats 300000 in
 theorem orthogonal_projection_iff_lm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] [CompleteSpace E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
+    [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {p : E →ₗ[𝕜] E} :
     (∃ U : Submodule 𝕜 E, (orthogonalProjection' U : E →ₗ[𝕜] E) = p) ↔
       IsSelfAdjoint p ∧ IsIdempotentElem p :=
   by
-  have := @orthogonal_projection_iff 𝕜 E _ _ _ _ _ (toContinuousLinearMap p)
+  have := @orthogonal_projection_iff 𝕜 E _ _ _ _ (toContinuousLinearMap p)
   simp_rw [is_idempotent_elem_to_clm, is_self_adjoint_to_clm] at this ⊢
   rw [← this]
   constructor
@@ -271,11 +273,11 @@ theorem orthogonal_projection_iff_lm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddC
     rfl
 
 theorem Matrix.conj_eq_transpose_conjTranspose {R n₁ n₂ : Type _} [Star R] (A : Matrix n₁ n₂ R) :
-    Aᴴᵀ = Aᵀᴴ :=
+    Aᴴᵀ = (Aᵀ)ᴴ :=
   rfl
 
 theorem Matrix.conj_eq_conjTranspose_transpose {R n₁ n₂ : Type _} [Star R] (A : Matrix n₁ n₂ R) :
-    Aᴴᵀ = Aᴴᵀ :=
+    Aᴴᵀ = (Aᴴ)ᵀ :=
   rfl
 
 set_option synthInstance.maxHeartbeats 50000 in
@@ -482,13 +484,13 @@ theorem RealQam.edges_eq [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : RealQam 
   simp_rw [trace_sum, ← Matrix.mul_assoc, this, Finset.sum_const, Finset.card_fin,
     Nat.smul_one_eq_coe]
 
-theorem completeGraphRealQam [hφ : φ.IsFaithfulPosMap] : RealQam hφ (Qam.completeGraph ℍ) :=
+theorem completeGraphRealQam [hφ : φ.IsFaithfulPosMap] : RealQam hφ (Qam.completeGraph ℍ ℍ) :=
 ⟨Qam.Nontracial.CompleteGraph.qam, Qam.Nontracial.CompleteGraph.isReal⟩
 
 theorem Qam.completeGraph_edges [hφ : φ.IsFaithfulPosMap] :
   (@completeGraphRealQam p _ _ φ hφ).edges = FiniteDimensional.finrank ℂ (⊤ : Submodule ℂ ℍ) :=
 by
-  have this : (RealQam.edges completeGraphRealQam : ℂ) = (Qam.completeGraph ℍ φ.matrix⁻¹).trace := RealQam.edges_eq _
+  have this : (RealQam.edges completeGraphRealQam : ℂ) = (Qam.completeGraph ℍ ℍ φ.matrix⁻¹).trace := RealQam.edges_eq _
   haveI ig := hφ.matrixIsPosDef.invertible
   simp_rw [Qam.completeGraph, ContinuousLinearMap.coe_coe, rankOne_apply,
     Module.Dual.IsFaithfulPosMap.inner_eq', conjTranspose_one, Matrix.mul_one,
@@ -580,6 +582,7 @@ theorem RealQam.edges_eq_dim_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA : 
   rw [← this'', AlgEquiv.toLinearMap_apply, MulEquivClass.map_eq_one_iff] at this'
   exact this'
 
+set_option synthInstance.maxHeartbeats 300000 in
 private theorem orthogonal_projection_of_dim_one {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {U : Submodule 𝕜 E}
     (hU : FiniteDimensional.finrank 𝕜 U = 1) :

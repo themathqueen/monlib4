@@ -417,6 +417,7 @@ theorem aut_mat_inner_trace_preserving [DecidableEq n] (f : (M n) ≃ₐ[𝕜] M
     (f x).trace = x.trace := by
   obtain ⟨T, rfl⟩ := aut_mat_inner' f
   rw [Algebra.autInner_apply, trace_mul_comm, Matrix.invOf_mul_self_assoc]
+alias AlgEquiv.apply_matrix_trace := aut_mat_inner_trace_preserving
 
 /-- if a matrix commutes with all matrices, then it is equal to a scalar
   multiplied by the identity -/
@@ -851,34 +852,56 @@ by
   simp [FiniteDimensional.finrank_matrix, ← pow_two] at this
   exact this.symm
 
-def perm_perm_aux {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) (x : PiMat R ι n) (i : ι) :
-  PiMat R ι n :=
-λ j => if (i = σ.symm j) then (x j) else 0
-@[simps]
-def _root_.Pi.perm_of_perm {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) :
-  PiMat R ι n ≃ₐ[R] PiMat R ι n :=
-{ toFun := λ x => ∑ i, perm_perm_aux σ x i
-  invFun := λ x => ∑ i, perm_perm_aux σ.symm x i
-  left_inv := λ x => by
-    ext1 i
-    simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-  right_inv := λ x => by
-    ext1 i
-    simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
-  map_add' := λ x y => by
-    ext1 i
-    simp only [Finset.sum_apply, perm_perm_aux, Pi.add_apply]
-    simp only [Finset.sum_add_distrib, ite_add_zero]
-  map_mul' := λ x y => by
-    ext1 i
-    simp only [Finset.sum_apply, perm_perm_aux, Pi.mul_apply]
-    simp only [Finset.sum_mul, Finset.mul_sum, ite_mul, zero_mul, mul_ite, mul_zero,
-      Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
-  commutes' := λ r => by
-    ext1 i
-    simp only [Finset.sum_apply, perm_perm_aux, Pi.smul_apply, Algebra.algebraMap_eq_smul_one]
-    simp only [Pi.one_apply, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte] }
+-- def perm_perm_aux {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
+--   (σ : Equiv.Perm ι)
+--   -- (hσ : ∀ i, n (σ i) = n i)
+--  (i : ι) :
+--   Type u_3 :=
+-- n (σ i)
+-- have hσ' : ∀ i, n (σ.symm i) = n i := λ j => by
+  -- rw [← hσ, Equiv.apply_symm_apply]
+
+-- @[simps]
+-- def _root_.Pi.perm_of_perm {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
+--   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) :
+--   -- haveI : Π i, Fintype ((n ∘ σ) i) := λ i => by
+--   --   simp [Function.comp_apply]
+--   --   infer_instance
+--   -- haveI : Π i, DecidableEq ((n ∘ σ) i) := λ i => by infer_instance
+--   -- -- haveI : Semiring (PiMat R ι (n ∘ ⇑σ)) := by
+--   --   -- infer_instance
+--   -- -- haveI : Π i, Semiring (Matrix ((n ∘ ⇑σ) i) ((n ∘ σ) i) R) := by infer_instance
+--   -- haveI : Π i, Algebra R (Matrix ((n ∘ ⇑σ) i) ((n ∘ σ) i) R) := by
+--   --   intro i
+--   --   infer_instance
+--   -- haveI : Algebra R (PiMat R ι (n ∘ ⇑σ)) := Pi.algebra _ _
+--   -- -- (hσ : ∀ i, n (σ i) = n i) :
+--   PiMat R ι n ≃ₐ[R] σ (PiMat R ι n) :=
+-- -- have hσ' : ∀ i, n (σ.symm i) = n i := λ j => by
+-- --   rw [← hσ, Equiv.apply_symm_apply]
+-- { toFun := λ x => ∑ i, perm_perm_aux σ x i
+--   invFun := λ x => ∑ i, perm_perm_aux σ.symm x i
+--   left_inv := λ x => by
+--     ext1 i
+--     simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+--     -- simp only [Equiv.symm_symm_apply, eq_mpr_eq_cast, cast_cast]
+--     -- simp_all [hσ, hσ', Equiv.symm_apply_apply, cast_eq_iff_heq]
+
+--   right_inv := λ x => by
+--     ext1 i
+--     simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+--   map_add' := λ x y => by
+--     ext1 i
+--     simp only [Finset.sum_apply, perm_perm_aux, Pi.add_apply]
+--     simp only [Finset.sum_add_distrib, ite_add_zero]
+--   map_mul' := λ x y => by
+--     ext1 i
+--     simp only [Finset.sum_apply, perm_perm_aux, Pi.mul_apply]
+--     simp only [Finset.sum_mul, Finset.mul_sum, ite_mul, zero_mul, mul_ite, mul_zero,
+--       Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
+--   commutes' := λ r => by
+--     ext1 i
+--     simp only [Finset.sum_apply, perm_perm_aux, Pi.smul_apply, Algebra.algebraMap_eq_smul_one]
+--     simp only [Pi.one_apply, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte] }
 
 end Matrix

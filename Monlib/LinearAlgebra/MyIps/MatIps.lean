@@ -401,7 +401,7 @@ protected theorem basis_apply (hφ : φ.IsFaithfulPosMap) (ij : n × n) :
     hφ.basis ij = stdBasisMatrix ij.1 ij.2 (1 : ℂ) * hφ.matrixIsPosDef.rpow (-(1 / 2 : ℝ)) := by
   rw [IsFaithfulPosMap.basis, Basis.mk_apply]
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 protected noncomputable def toMatrix (hφ : φ.IsFaithfulPosMap) :
     (Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) ≃ₐ[ℂ] Matrix (n × n) (n × n) ℂ :=
@@ -501,14 +501,14 @@ protected theorem toMatrix_symm_apply (hφ : φ.IsFaithfulPosMap)
 
 end Module.Dual.IsFaithfulPosMap
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 theorem Module.Dual.eq_rankOne_of_faithful_pos_map (hφ : φ.IsFaithfulPosMap)
     (x : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) :
     x =
       ∑ i : n, ∑ j : n, ∑ k : n, ∑ l : n,
-         hφ.toMatrix x (i, j) (k, l) • | hφ.basis (i, j)⟩⟨ hφ.basis (k, l)| :=
+         hφ.toMatrix x (i, j) (k, l) • |hφ.basis (i, j)⟩⟨ hφ.basis (k, l)| :=
   by rw [← Module.Dual.IsFaithfulPosMap.toMatrix_symm_apply, AlgEquiv.symm_apply_apply]
 
 end SingleBlock

@@ -28,6 +28,7 @@ variable {n p : Type _} [Fintype n] [Fintype p] [DecidableEq n] [DecidableEq p]
 open scoped TensorProduct BigOperators Kronecker
 
 local notation "ℍ" => Matrix n n ℂ
+local notation "ℍ₂" => Matrix p p ℂ
 
 local notation "⊗K" => Matrix (n × n) (n × n) ℂ
 
@@ -43,7 +44,7 @@ open scoped Matrix
 
 open Matrix
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ ℍ
 
@@ -93,12 +94,13 @@ open TensorProduct
 theorem Finset.sum_fin_one {α : Type _} [AddCommMonoid α] (f : Fin 1 → α) : ∑ i, f i = f 0 := by
   simp only [Fintype.univ_ofSubsingleton, Fin.mk_zero, Finset.sum_singleton]
 
-theorem rankOne_real_apply [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
-    (|a⟩⟨b| : ℍ →ₗ[ℂ] ℍ).real = |aᴴ⟩⟨hφ.sig (-1) bᴴ| :=
+theorem rankOne_real_apply [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap] (a : ℍ) (b : ℍ₂) :
+    (|a⟩⟨b| : ℍ₂ →ₗ[ℂ] ℍ).real = |aᴴ⟩⟨hψ.sig (-1) bᴴ| :=
   by
   have :=
-    @Pi.rankOneLm_real_apply _ _ _ _ _ (fun _ : Fin 1 => φ) (fun _ => hφ) (fun _ : Fin 1 => a)
-      fun _ : Fin 1 => b
+    @Pi.rankOneLm_real_apply _ _ _ _ _ (fun _ : Fin 1 => φ)
+      _ _ _ _ _ _ (fun _ : Fin 1 => ψ) (fun _ => hφ) (fun _ => hψ) (fun _ : Fin 1 => a)
+      (fun _ : Fin 1 => b)
   simp only [LinearMap.ext_iff, Function.funext_iff, Fin.forall_fin_one, ← rankOneLm_eq_rankOne,
     rankOneLm_apply, LinearMap.real_apply] at this ⊢
   simp only [Pi.star_apply, Pi.smul_apply, inner,
@@ -106,12 +108,14 @@ theorem rankOne_real_apply [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
   intros x
   exact this (fun _ => x)
 
-theorem Qam.RankOne.symmetric_eq [hφ : φ.IsFaithfulPosMap] (a b : ℍ) :
-    (LinearEquiv.symmMap ℂ ℍ ℍ) |a⟩⟨b| = |hφ.sig (-1) bᴴ⟩⟨aᴴ| := by
+theorem Qam.RankOne.symmetric_eq [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap]
+  (a : ℍ) (b : ℍ₂) :
+    (LinearEquiv.symmMap ℂ ℍ₂ ℍ) |a⟩⟨b| = |hψ.sig (-1) bᴴ⟩⟨aᴴ| := by
   simp_rw [LinearEquiv.symmMap_apply, rankOne_real_apply, ← rankOneLm_eq_rankOne, rankOneLm_adjoint]
 
-theorem Qam.RankOne.symmetric'_eq [hφ : φ.IsFaithfulPosMap]  (a b : ℍ) :
-    (LinearEquiv.symmMap ℂ ℍ ℍ).symm |a⟩⟨b| = |bᴴ⟩⟨hφ.sig (-1) aᴴ| := by
+theorem Qam.RankOne.symmetric'_eq [hφ : φ.IsFaithfulPosMap] [hψ : ψ.IsFaithfulPosMap]
+  (a : ℍ) (b : ℍ₂) :
+    (LinearEquiv.symmMap ℂ ℍ ℍ₂).symm |a⟩⟨b| = |bᴴ⟩⟨hφ.sig (-1) aᴴ| := by
   simp_rw [LinearEquiv.symmMap_symm_apply, ← rankOneLm_eq_rankOne, rankOneLm_adjoint,
     rankOneLm_eq_rankOne, rankOne_real_apply]
 

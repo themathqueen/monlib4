@@ -27,7 +27,7 @@ local notation "l(" x ")" => x →ₗ[ℂ] x
 
 variable {φ : Module.Dual ℂ (Matrix n n ℂ)} {ψ : Module.Dual ℂ (Matrix p p ℂ)}
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ (Matrix n n ℂ)
 

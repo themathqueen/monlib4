@@ -39,7 +39,7 @@ end
 
 variable {E 𝕜 : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
-theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpace K] :
+theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] :
     (orthogonalProjection K : E →ₗ[𝕜] K) =
       Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace :=
   by
@@ -49,15 +49,15 @@ theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpa
   rw [ContinuousLinearMap.coe_coe, map_add, orthogonalProjection_mem_subspace_eq_self,
     orthogonalProjection_mem_subspace_orthogonalComplement_eq_zero (Submodule.coe_mem _), add_zero]
 
-theorem orthogonalProjection_eq_linear_proj'' {K : Submodule 𝕜 E} [CompleteSpace K] (x : E) :
+theorem orthogonalProjection_eq_linear_proj'' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] (x : E) :
     orthogonalProjection K x =
       Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace x :=
   by rw [← orthogonalProjection_eq_linear_proj]
 
-noncomputable def orthogonalProjection' (U : Submodule 𝕜 E) [CompleteSpace U] : E →L[𝕜] E :=
+noncomputable def orthogonalProjection' (U : Submodule 𝕜 E) [HasOrthogonalProjection U] : E →L[𝕜] E :=
   U.subtypeL.comp (orthogonalProjection U)
 
-theorem orthogonalProjection'_apply (U : Submodule 𝕜 E) [CompleteSpace U] (x : E) :
+theorem orthogonalProjection'_apply (U : Submodule 𝕜 E) [HasOrthogonalProjection U] (x : E) :
     orthogonalProjection' U x = orthogonalProjection U x :=
   rfl
 
@@ -66,24 +66,25 @@ local notation "P" => orthogonalProjection
 local notation "↥P" => orthogonalProjection'
 
 @[simp]
-theorem ContinuousLinearMap.range_toLinearMap {p : E →L[𝕜] E} : LinearMap.range (p.toLinearMap) = LinearMap.range p :=
+theorem ContinuousLinearMap.range_toLinearMap {F : Type*} [NormedAddCommGroup F]
+  [InnerProductSpace 𝕜 F] {p : E →L[𝕜] F} : LinearMap.range (p.toLinearMap) = LinearMap.range p :=
   rfl
 
 open ContinuousLinearMap
 
 @[simp]
-theorem orthogonalProjection.range (U : Submodule 𝕜 E) [CompleteSpace U] :
+theorem orthogonalProjection.range (U : Submodule 𝕜 E) [HasOrthogonalProjection U] :
     LinearMap.range (↥P U) = U := by
   simp_rw [orthogonalProjection', ← range_toLinearMap, coe_comp,
     orthogonalProjection_eq_linear_proj', Submodule.coe_subtypeL, LinearMap.range_comp,
     Submodule.linearProjOfIsCompl_range, Submodule.map_subtype_top]
 
 @[simp]
-theorem orthogonalProjection'_eq (U : Submodule 𝕜 E) [CompleteSpace U] :
+theorem orthogonalProjection'_eq (U : Submodule 𝕜 E) [HasOrthogonalProjection U] :
     ↥P U = U.subtypeL.comp (P U) :=
   rfl
 
-theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [CompleteSpace K] :
+theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [HasOrthogonalProjection K] :
     (K.subtypeL.comp (orthogonalProjection K) : E →ₗ[𝕜] E) =
      (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) :=
@@ -92,7 +93,7 @@ theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [CompleteSp
   simp_rw [ContinuousLinearMap.coe_coe, LinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     Submodule.subtypeL_apply, Submodule.subtype_apply, orthogonalProjection_eq_linear_proj'']
 
-theorem orthogonalProjection'_eq_linear_proj' {K : Submodule 𝕜 E} [CompleteSpace K] (x : E) :
+theorem orthogonalProjection'_eq_linear_proj' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] (x : E) :
     (orthogonalProjection' K : E →ₗ[𝕜] E) x =
       (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) x :=

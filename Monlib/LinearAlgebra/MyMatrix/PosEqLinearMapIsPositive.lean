@@ -89,10 +89,8 @@ theorem Matrix.posSemidef_eq_linearMap_positive [Fintype n] [DecidableEq n] (x :
 theorem Matrix.posSemidef_iff [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) :
     x.PosSemidef ↔ ∃ y : Matrix n n 𝕜, x = yᴴ * y :=
   by
-  have : FiniteDimensional.finrank 𝕜 (PiLp 2 fun _x : n => 𝕜) = Fintype.card n := by
-    simp_rw [finrank_euclideanSpace]
   simp_rw [Matrix.posSemidef_eq_linearMap_positive,
-    LinearMap.isPositive_iff_exists_adjoint_hMul_self _ this,
+    LinearMap.isPositive_iff_exists_adjoint_hMul_self,
     ← LinearEquiv.eq_symm_apply]
   have thisor : ∀ x y : (PiLp 2 fun _x : n => 𝕜) →ₗ[𝕜] (PiLp 2 fun _x : n => 𝕜),
     toEuclideanLin.symm (x * y) = (toEuclideanLin.symm x) * (toEuclideanLin.symm y) := λ x y => by
@@ -121,7 +119,8 @@ theorem Matrix.dotProduct_eq_inner {n : Type _} [Fintype n] (x y : n → 𝕜) :
   rfl
 
 theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [DecidableEq n]
-    {x : Matrix n n 𝕜} (hx : x.PosSemidef) : Function.Bijective (toLin' x) ↔ x.PosDef :=
+    {x : Matrix n n 𝕜} (hx : x.PosSemidef) :
+  Function.Bijective (toLin' x) ↔ x.PosDef :=
   by
   simp_rw [Matrix.PosDef, hx.1, true_and_iff]
   cases' (Matrix.posSemidef_iff x).mp hx with y hy
@@ -261,8 +260,7 @@ theorem Matrix.posSemidef_iff_eq_rankOne [Fintype n] [DecidableEq n] {x : Matrix
             LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
                 EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
   by
-  have : FiniteDimensional.finrank 𝕜 (EuclideanSpace 𝕜 n) = Fintype.card n := FiniteDimensional.finrank_pi _
-  simp_rw [posSemidef_eq_linearMap_positive, LinearMap.isPositive_iff_eq_sum_rankOne this,
+  simp_rw [posSemidef_eq_linearMap_positive, LinearMap.isPositive_iff_eq_sum_rankOne,
     toEuclideanLin_eq_toLin, Matrix.toLin_piLp_eq_toLin', ← map_sum]
   constructor <;> rintro ⟨m, y, hy⟩ <;> refine' ⟨m, y, _⟩
   · rw [← hy]
@@ -272,18 +270,15 @@ theorem Matrix.posSemidef_iff_eq_rankOne [Fintype n] [DecidableEq n] {x : Matrix
 theorem Matrix.posSemidef_iff_eq_rankOne' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
       ∃ (m : ℕ) (v : Fin m → (n → 𝕜)),
-        x =
-          ∑ i : Fin m,
-            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
-                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+        x = ∑ i : Fin m,
+          LinearMap.toMatrix' (rankOneLm (v i) (v i) : (EuclideanSpace 𝕜 n) →ₗ[𝕜] (EuclideanSpace 𝕜 n)) :=
 Matrix.posSemidef_iff_eq_rankOne
 theorem Matrix.posSemidef_iff_eq_rankOne'' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
       ∃ (m : Type) (hm : Fintype m) (v : m → (n → 𝕜)),
         x =
           ∑ i : m,
-            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
-                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+            LinearMap.toMatrix' (rankOneLm (v i) (v i) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
 by
   rw [Matrix.posSemidef_iff_eq_rankOne']
   constructor
@@ -299,8 +294,7 @@ by
 
 theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
     [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
-    toEuclideanLin.symm ((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
-      EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n)) =
+    toEuclideanLin.symm (rankOne x y : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) =
       col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
   by
   simp_rw [← Matrix.ext_iff, toEuclideanLin_eq_toLin, toLin_symm, LinearMap.toMatrix_apply,
@@ -314,15 +308,12 @@ theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [RCLike 𝕜]
 
 theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
     [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
-    LinearMap.toMatrix' (((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
-      EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n))
-        : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
+    LinearMap.toMatrix' ((rankOne x y).toLinearMap : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
       col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _
 theorem rankOne.Pi.toMatrix'' {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
     [DecidableEq n] (x y : n → 𝕜) :
-    LinearMap.toMatrix' (((@rankOne 𝕜 (EuclideanSpace 𝕜 n) _ _ _ x y :
-      EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n))
+    LinearMap.toMatrix' (((rankOneLm x y) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n)
         : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
       col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _
@@ -380,11 +371,11 @@ def LinearMap.PositiveMap (T : (M₁ →ₗ[ℂ] M₁) →ₗ[ℂ] M₂ →ₗ[�
   ∀ x : M₁ →ₗ[ℂ] M₁, x.IsPositive → (T x).IsPositive
 
 /-- a $^*$-homomorphism from $L(M_1)$ to $L(M_2)$ is a positive map -/
-theorem LinearMap.PositiveMap.starHom {n₁ : ℕ} [FiniteDimensional ℂ M₁] [FiniteDimensional ℂ M₂]
-    (hn₁ : FiniteDimensional.finrank ℂ M₁ = n₁) (φ : StarAlgHom ℂ (M₁ →ₗ[ℂ] M₁) (M₂ →ₗ[ℂ] M₂)) :
+theorem LinearMap.PositiveMap.starHom [FiniteDimensional ℂ M₁] [FiniteDimensional ℂ M₂]
+    (φ : StarAlgHom ℂ (M₁ →ₗ[ℂ] M₁) (M₂ →ₗ[ℂ] M₂)) :
     φ.toAlgHom.toLinearMap.PositiveMap := by
   intro x hx
-  rcases(LinearMap.isPositive_iff_exists_adjoint_hMul_self x hn₁).mp hx with ⟨w, rfl⟩
+  rcases(LinearMap.isPositive_iff_exists_adjoint_hMul_self x).mp hx with ⟨w, rfl⟩
   have : ∀ h, φ.toAlgHom.toLinearMap h = φ h := fun h => rfl
   simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, this, _root_.map_mul, ←
     LinearMap.star_eq_adjoint, map_star, LinearMap.mul_apply, LinearMap.star_eq_adjoint,

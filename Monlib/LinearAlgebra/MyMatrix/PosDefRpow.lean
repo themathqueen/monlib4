@@ -46,7 +46,7 @@ theorem PosDef.rpow_mul_rpow (r₁ r₂ : ℝ) {Q : Matrix n n 𝕜} (hQ : PosDe
     Function.comp_apply, ← RCLike.ofReal_mul, ← Real.rpow_add (hQ.pos_eigenvalues _)]
   rfl
 
-theorem PosSemidef.rpow_mul_rpow (r₁ r₂ : NNRealˣ) (h : r₁ + (r₂ : NNReal) ≠ 0)
+theorem PosSemidef.rpow_mul_rpow (r₁ r₂ : NNRealˣ)
   {Q : Matrix n n 𝕜} (hQ : PosSemidef Q) :
     hQ.rpow r₁ * hQ.rpow r₂ = hQ.rpow (r₁ + r₂) :=
   by

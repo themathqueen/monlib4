@@ -47,7 +47,7 @@ open scoped Matrix
 
 open Matrix
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" => LinearMap.mul' ℂ ℍ
 
@@ -460,13 +460,14 @@ theorem grad_apply_of_real_Schur_idempotent [hφ : φ.IsFaithfulPosMap] {x : l(�
   simp_rw [grad_apply, (LinearMap.isReal_iff _).mp hx1, ← LinearMap.comp_sub, ←
     LinearMap.comp_assoc, ← phiMap_mul, hx2]
 
+-- open scoped FiniteDimensional
 theorem grad_of_real_Schur_idempotent_range [hφ : φ.IsFaithfulPosMap] {x : l(ℍ)} (hx1 : x.IsReal)
     (hx2 : Qam.reflIdempotent hφ x x = x) :
     LinearMap.range (grad hφ x) ≤ phiMap_of_real_Schur_idempotent.submodule hx1 hx2 :=
   by
+  nth_rw 1 [← orthogonalProjection.range (phiMap_of_real_Schur_idempotent.submodule hx1 hx2)]
   rw [← grad_apply_of_real_Schur_idempotent hx1 hx2, ←
     phiMap_of_real_Schur_idempotent.orthogonal_projection_eq hx1 hx2]
-  nth_rw 2 [← orthogonalProjection.range (phiMap_of_real_Schur_idempotent.submodule hx1 hx2)]
   rw [LinearMap.range_le_iff_comap]
   -- rw [range_le_iff_comap],
   apply Submodule.ext
@@ -897,7 +898,7 @@ theorem phi_map_left_inverse [hφ : φ.IsFaithfulPosMap] : phiInvMap hφ ∘ₗ 
     phiInvMap, LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [LinearMap.comp_apply]
   simp_rw [← ιLinearEquiv_apply_eq, ← ιLinearEquiv_symm_apply_eq, LinearEquiv.symm_apply_apply]
-  have : (ιLinearEquiv hφ).symm 1 = Qam.completeGraph ℍ :=
+  have : (ιLinearEquiv hφ).symm 1 = Qam.completeGraph ℍ ℍ :=
     by
     simp_rw [ιLinearEquiv_symm_apply_eq, Algebra.TensorProduct.one_def, ιInvMap_apply,
       conjTranspose_one, _root_.map_one]

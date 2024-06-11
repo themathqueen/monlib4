@@ -10,7 +10,7 @@ import Monlib.LinearAlgebra.MyMatrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.MyTensorProduct
 import Monlib.RepTheory.AutMat
 import Monlib.Preq.StarAlgEquiv
-import Mathlib.Tactic.Explode
+-- import Mathlib.Tactic.Explode
 
 #align_import linear_algebra.innerAut
 

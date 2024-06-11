@@ -24,10 +24,13 @@ import Monlib.LinearAlgebra.Nacgor
 
 variable {n : Type _} [Fintype n] [DecidableEq n] {s : n → Type _} [∀ i, Fintype (s i)]
   [∀ i, DecidableEq (s i)]
+  {n₂ : Type _} [Fintype n₂] [DecidableEq n₂] {s₂ : n₂ → Type _} [∀ i, Fintype (s₂ i)]
+  [∀ i, DecidableEq (s₂ i)]
 
 open scoped TensorProduct BigOperators Kronecker
 
 local notation "𝔹" => PiMat ℂ n s
+local notation "𝔹₂" => PiMat ℂ n₂ s₂
 
 local notation "l(" x ")" => x →ₗ[ℂ] x
 
@@ -37,7 +40,7 @@ open scoped Matrix
 
 open Matrix
 
-local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ x y
+local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" x => LinearMap.mul' ℂ x
 
@@ -103,15 +106,19 @@ noncomputable def schurIdempotent {B C : Type _} [NormedAddCommGroupOfRing B]
 scoped[schurIdempotent] infix:100 " •ₛ " => schurIdempotent
 open scoped schurIdempotent
 
-theorem schurIdempotent.apply_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
-    [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (a b c d : B) : (↑|a⟩⟨b|) •ₛ (↑|c⟩⟨d|) = (|a * c⟩⟨b * d| : B →ₗ[ℂ] B) :=
+theorem schurIdempotent.apply_rankOne {B C : Type _} [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
+  [SMulCommClass ℂ B B] [SMulCommClass ℂ C C] [IsScalarTower ℂ B B] [IsScalarTower ℂ C C]
+  [FiniteDimensional ℂ B] [FiniteDimensional ℂ C]
+    (a : B) (b : C) (c : B) (d : C) : (↑|a⟩⟨b|) •ₛ (↑|c⟩⟨d|) = (|a * c⟩⟨b * d| : C →ₗ[ℂ] B) :=
   by
-  rw [schurIdempotent, LinearMap.ext_iff_inner_map]
+  rw [schurIdempotent, LinearMap.ext_iff]
   intro x
+  apply ext_inner_right ℂ
+  intro u
   simp only [ContinuousLinearMap.coe_coe, LinearMap.coe_mk, AddHom.coe_mk,
     rankOne_apply, LinearMap.comp_apply]
-  obtain ⟨α, β, h⟩ := TensorProduct.eq_span ((LinearMap.adjoint (LinearMap.mul' ℂ B)) x)
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span ((LinearMap.adjoint (LinearMap.mul' ℂ C)) x)
   rw [← h]
   simp_rw [map_sum, TensorProduct.map_tmul, ContinuousLinearMap.coe_coe, rankOne_apply,
     LinearMap.mul'_apply, smul_mul_smul, ← TensorProduct.inner_tmul, ← Finset.sum_smul, ← inner_sum,
@@ -138,16 +145,20 @@ theorem schurIdempotent.apply_rankOne {B : Type _} [NormedAddCommGroupOfRing B]
 --     { simp only [equiv.apply_symm_apply, eq_self_iff_true, forall_true_iff], },
 --   end,
 -- end
-theorem schurIdempotent_one_one_right {B : Type _} [NormedAddCommGroupOfRing B]
-    [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (A : l(B)) : A •ₛ (|(1 : B)⟩⟨(1 : B)| : l(B)) = A :=
+theorem schurIdempotent_one_one_right {B C : Type _} [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
+  [SMulCommClass ℂ B B] [SMulCommClass ℂ C C] [IsScalarTower ℂ B B] [IsScalarTower ℂ C C]
+  [FiniteDimensional ℂ B] [FiniteDimensional ℂ C]
+    (A : C →ₗ[ℂ] B) : A •ₛ (|(1 : B)⟩⟨(1 : C)| : C →ₗ[ℂ] B) = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, LinearMap.sum_apply, schurIdempotent.apply_rankOne, mul_one]
 
-theorem schurIdempotent_one_one_left {B : Type _} [NormedAddCommGroupOfRing B]
-    [InnerProductSpace ℂ B] [SMulCommClass ℂ B B] [IsScalarTower ℂ B B] [FiniteDimensional ℂ B]
-    (A : l(B)) : (|(1 : B)⟩⟨(1 : B)| : l(B)) •ₛ A = A :=
+theorem schurIdempotent_one_one_left {B C : Type _} [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
+  [SMulCommClass ℂ B B] [SMulCommClass ℂ C C] [IsScalarTower ℂ B B] [IsScalarTower ℂ C C]
+  [FiniteDimensional ℂ B] [FiniteDimensional ℂ C]
+    (A : C →ₗ[ℂ] B) : (|(1 : B)⟩⟨(1 : C)| : C →ₗ[ℂ] B) •ₛ A = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, schurIdempotent.apply_rankOne, one_mul]
@@ -211,8 +222,10 @@ theorem schurIdempotent_real
     --   [star_module ℂ B]
     -- {ψ : module.dual ℂ B} (hψ : ∀ a b, ⟪a, b⟫_ℂ = ψ (star a * b))
     {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : l(𝔹)) :
-    LinearMap.real (x •ₛ y : l(𝔹)) = (LinearMap.real y) •ₛ (LinearMap.real x) :=
+    {φ : ∀ i, Module.Dual ℂ (Matrix (s₂ i) (s₂ i) ℂ)}
+    [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (x y : 𝔹 →ₗ[ℂ] 𝔹₂) :
+    LinearMap.real (x •ₛ y : 𝔹 →ₗ[ℂ] 𝔹₂) = (LinearMap.real y) •ₛ (LinearMap.real x) :=
   by
   obtain ⟨α, β, rfl⟩ := x.exists_sum_rankOne
   obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rankOne
