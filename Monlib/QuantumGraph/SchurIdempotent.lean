@@ -44,39 +44,12 @@ local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
 local notation "m" x => LinearMap.mul' ℂ x
 
--- local notation `η` x := algebra.linear_map ℂ x
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
--- local notation `υ` B :=
---   ((tensor_product.assoc ℂ B B B) : (B ⊗[ℂ] B ⊗[ℂ] B) →ₗ[ℂ] B ⊗[ℂ] (B ⊗[ℂ] B))
--- local notation `υ⁻¹` B :=
---   ((tensor_product.assoc ℂ B B B).symm : B ⊗[ℂ] (B ⊗[ℂ] B) →ₗ[ℂ] (B ⊗[ℂ] B ⊗[ℂ] B))
--- local notation x`ϰ`y := (↑(tensor_product.comm ℂ x y) : (x ⊗[ℂ] y) →ₗ[ℂ] (y ⊗[ℂ] x))
--- local notation x`ϰ⁻¹`y := ((tensor_product.comm ℂ x y).symm : (y ⊗[ℂ] x) →ₗ[ℂ] (x ⊗[ℂ] y))
--- local notation `τ` x  := ((tensor_product.lid ℂ x) : (ℂ ⊗[ℂ] x) →ₗ[ℂ] x)
--- local notation `τ⁻¹` x := ((tensor_product.lid ℂ x).symm : x →ₗ[ℂ] (ℂ ⊗[ℂ] x))
--- local notation `id` x := (1 : x →ₗ[ℂ] x)
 open scoped Functional
 
-
-set_option synthInstance.checkSynthOrder false in
-noncomputable instance Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fintype n]
-    [DecidableEq n] (ψ : Module.Dual ℂ (Matrix n n ℂ)) [ψ.IsFaithfulPosMap] :
-    NormedAddCommGroupOfRing (Matrix n n ℂ)
-    where
-  toNorm := NormedAddCommGroup.toNorm
-  toMetricSpace := NormedAddCommGroup.toMetricSpace
-  dist_eq := NormedAddCommGroup.dist_eq
-
-set_option synthInstance.checkSynthOrder false in
-noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
-    {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [∀ i, (ψ i).IsFaithfulPosMap] :
-    NormedAddCommGroupOfRing 𝔹
-    where
-  toNorm := NormedAddCommGroup.toNorm
-  toMetricSpace := NormedAddCommGroup.toMetricSpace
-  dist_eq := NormedAddCommGroup.dist_eq
-
+/-- Schur product `⬝ •ₛ ⬝ : (B → C) → (B → C) → (B → C)` given by
+  `x •ₛ y := m ∘ (x ⊗ y) ∘ comul`  -/
 @[simps]
 noncomputable def schurIdempotent {B C : Type _} [NormedAddCommGroupOfRing B]
   [NormedAddCommGroupOfRing C] [InnerProductSpace ℂ B] [InnerProductSpace ℂ C]
@@ -103,6 +76,7 @@ noncomputable def schurIdempotent {B C : Type _} [NormedAddCommGroupOfRing B]
       LinearMap.ext_iff, LinearMap.smul_apply, LinearMap.coe_mk, RingHom.id_apply]
     intro _ _; rfl
 
+@[inherit_doc schurIdempotent]
 scoped[schurIdempotent] infix:100 " •ₛ " => schurIdempotent
 open scoped schurIdempotent
 
@@ -381,17 +355,18 @@ theorem schurIdempotent_one_left_rankOne {ψ : ∀ i, Module.Dual ℂ (Matrix (s
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem Psi.schurIdempotent {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ)
-    (f g : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n s) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (f •ₛ g) =
-      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ f *
-        Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ g :=
+  {φ : ∀ i, Module.Dual ℂ (Matrix (s₂ i) (s₂ i) ℂ)}
+    [hψ : ∀ i, (ψ i).IsFaithfulPosMap] [hφ : ∀ i, (φ i).IsFaithfulPosMap] (r₁ r₂ : ℝ)
+    (f g : (PiMat ℂ n s) →ₗ[ℂ] PiMat ℂ n₂ s₂) :
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ (f •ₛ g) =
+      Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ f *
+        Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ g :=
   by
   suffices
-    ∀ a b c d : 𝔹,
-      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ ((↑|a⟩⟨b| : l(𝔹)) •ₛ |c⟩⟨d|) =
-        Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |a⟩⟨b| *
-          Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |c⟩⟨d|
+    ∀ (a c : 𝔹₂) (b d : 𝔹),
+      Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ ((↑|a⟩⟨b|) •ₛ |c⟩⟨d|) =
+        Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ |a⟩⟨b| *
+          Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ |c⟩⟨d|
     by
     obtain ⟨α, β, rfl⟩ := f.exists_sum_rankOne
     obtain ⟨γ, δ, rfl⟩ := g.exists_sum_rankOne
@@ -400,61 +375,3 @@ theorem Psi.schurIdempotent {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ
   simp_rw [Module.Dual.pi.IsFaithfulPosMap.psi_apply, schurIdempotent.apply_rankOne,
     Module.Dual.pi.IsFaithfulPosMap.psiToFun'_apply, Algebra.TensorProduct.tmul_mul_tmul, op_apply,
     ← MulOpposite.op_mul, ← StarMul.star_mul, ← _root_.map_mul]
-
--- lemma pi.qam.symm_adjoint_eq_symm'_of_adjoint [h℘ : Π i, fact (℘ i).is_faithful_pos_map] (x : l(𝔹)) :
---   (qam.symm (λ i, (h℘ i).elim) x).adjoint = qam.symm' (λ i, (h℘ i).elim) (x.adjoint) :=
--- begin
---   obtain ⟨α, β, rfl⟩ := linear_map.exists_sum_rank_one x,
---   simp_rw [map_sum, ← rank_one_lm_eq_rank_one, rank_one_lm_adjoint, rank_one_lm_eq_rank_one,
---     qam.rank_one.symmetric_eq, qam.rank_one.symmetric'_eq, ← rank_one_lm_eq_rank_one,
---     rank_one_lm_adjoint],
--- end
--- private lemma commute.adjoint_adjoint {K E : Type*} [is_R_or_C K] [normed_add_comm_group E]
---   [inner_product_space K E] [complete_space E] {f g : E →L[K] E} :
---   commute f.adjoint g.adjoint ↔ commute f g :=
--- commute_star_star
--- private lemma commute.adjoint_adjoint_lm {K E : Type*} [is_R_or_C K] [normed_add_comm_group E]
---   [inner_product_space K E] [finite_dimensional K E] {f g : E →ₗ[K] E} :
---   commute f.adjoint g.adjoint ↔ commute f g :=
--- commute_star_star
--- @[instance] def B.star_module :
---   star_module ℂ 𝔹 :=
--- by {
---   apply @pi.star_module _ _ ℂ _ _ _ _,
---   exact λ i, matrix.star_module,
--- }
--- lemma linear_map.direct_sum.is_real.adjoint_is_real_iff_commute_with_sig
---   [h℘ : Π i, fact (℘ i).is_faithful_pos_map] {f : 𝔹 →ₗ[ℂ] 𝔹} (hf : f.is_real) :
---   (f.adjoint).is_real ↔
---   commute f (linear_map.is_faithful_pos_map.direct_sum.sig h℘ 1).to_linear_map :=
--- begin
---   rw linear_map.is_real_iff at hf,
---   have : commute f (linear_map.is_faithful_pos_map.direct_sum.sig h℘ 1).to_linear_map
---     ↔ commute (f.adjoint) (linear_map.is_faithful_pos_map.direct_sum.sig h℘ 1).to_linear_map,
---   { simp_rw [linear_map.is_faithful_pos_map.direct_sum.sig h℘],
---     nth_rewrite_rhs 0 ← linear_map.is_faithful_pos_map.direct_sum.sig_adjoint,
---     rw commute.adjoint_adjoint_lm, },
---   rw this,
---   clear this,
---   rw [linear_map.is_real_iff, linear_map.direct_sum.adjoint_real_eq, hf, ← linear_map.comp_assoc,
---     direct_sum.comp_sig_eq, neg_neg],
---   simp_rw [commute, semiconj_by, linear_map.mul_eq_comp, @eq_comm _ _ ((linear_map.is_faithful_pos_map.direct_sum.sig h℘ 1).to_linear_map ∘ₗ _)],
--- end
--- lemma direct_sum.sig_apply_pos_def_matrix [h℘ : Π i, fact (℘ i).is_faithful_pos_map]
---   (t s : ℝ) :
---   (linear_map.is_faithful_pos_map.direct_sum.sig h℘) t (pi.pos_def.rpow (linear_map.is_faithful_pos_map.direct_sum.matrix_is_pos_def h℘) s)
---   = pi.pos_def.rpow (linear_map.is_faithful_pos_map.direct_sum.matrix_is_pos_def h℘) s :=
--- begin
---   simp_rw [linear_map.is_faithful_pos_map.direct_sum.sig_apply h℘, pi.pos_def.rpow_mul_rpow,
---     neg_add_cancel_comm],
--- end
--- -- lemma direct_sum.sig_apply_pos_def_matrix' [h℘ : Π i, fact (℘ i).is_faithful_pos_map] (t : ℝ) :
--- --   (linear_map.is_faithful_pos_map.direct_sum.sig h℘) t (linear_map.direct_sum_matrix_block ℘) = linear_map.direct_sum_matrix_block ℘ :=
--- -- begin
--- --   have : linear_map.direct_sum_matrix_block ℘ = λ i, (℘ i).matrix :=
--- --   by { ext1 i, simp only [linear_map.direct_sum_matrix_block_apply], },
--- --   rw [this],
--- --   nth_rewrite_rhs 0 [← pi.pos_def.rpow_one_eq_self (linear_map.is_faithful_pos_map.direct_sum.matrix_is_pos_def h℘)],
--- --   rw [← direct_sum.sig_apply_pos_def_matrix t (1 : ℝ)],
--- --   rw [← this],
--- -- end

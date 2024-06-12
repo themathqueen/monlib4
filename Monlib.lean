@@ -65,5 +65,6 @@ import Monlib.LinearAlgebra.MyMatrix.Spectra
 import Monlib.LinearAlgebra.MyMatrix.StarOrderedRing
 import Monlib.LinearAlgebra.tensorProduct
 import Monlib.LinearAlgebra.CoalgebraLemmas
+import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
 
 #align_import all

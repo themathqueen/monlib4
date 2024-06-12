@@ -848,7 +848,7 @@ private theorem star_alg_equiv.is_isometry_iff [hφ : φ.IsFaithfulPosMap] [Nont
     StarAlgEquiv.IsIsometry f ↔ f φ.matrix = φ.matrix := by
   simp_rw [List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f)
       0 4,
-    StarAlgEquiv.IsIsometry, isometry_iff_norm_aux]
+    StarAlgEquiv.IsIsometry, isometry_iff_norm]
 
 theorem qamA.isometric_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial n] (x : { x : ℍ // x ≠ 0 }) {f : ℍ ≃⋆ₐ[ℂ] ℍ}
     (hf : StarAlgEquiv.IsIsometry f) :
@@ -908,7 +908,7 @@ theorem qamA.isometric_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial
         have : (1 : ℝ) + -(1 / 2 : ℝ) = 1 / 2 := by norm_num
         rw [this]
   simp only [this, Subtype.coe_mk]
-  rw [StarAlgEquiv.IsIsometry, isometry_iff_norm_aux] at hf'
+  rw [StarAlgEquiv.IsIsometry, isometry_iff_norm] at hf'
   simp_rw [hf', innerAutStarAlg_apply, Matrix.mul_assoc, hU.eq,
     UnitaryGroup.inv_apply]
   rfl

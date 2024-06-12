@@ -238,7 +238,7 @@ theorem Qam.iso_preserves_ir_reflexive [Nontrivial n] {φ : Module.Dual ℂ ℍ}
   obtain ⟨f, hf, h⟩ := hxhy
   rw [StarAlgEquiv.comp_eq_iff, LinearMap.comp_assoc] at hf
   have := List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 0 4
-  rw [this, ← isometry_iff_norm_aux] at h
+  rw [this, ← isometry_iff_norm] at h
   rw [hf, qam_ir_reflexive_starAlgEquiv_conj h, ← LinearMap.comp_assoc, StarAlgEquiv.comp_eq_iff,
     StarAlgEquiv.symm_symm, StarAlgEquiv.eq_comp_iff]
   simp only [ite_comp, comp_ite, LinearMap.zero_comp, LinearMap.one_comp, LinearMap.comp_zero,

@@ -1,4 +1,4 @@
-import Mathlib.RingTheory.Coalgebra.Hom
+import Mathlib.RingTheory.Coalgebra.Basic
 import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.MyTensorProduct
 

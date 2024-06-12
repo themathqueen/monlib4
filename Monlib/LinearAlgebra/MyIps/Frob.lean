@@ -7,6 +7,7 @@ import Monlib.LinearAlgebra.MyIps.TensorHilbert
 import Monlib.LinearAlgebra.MyIps.Nontracial
 import Monlib.LinearAlgebra.DirectSumFromTo
 import Monlib.LinearAlgebra.PiDirectSum
+import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
 
 #align_import linear_algebra.my_ips.frob
 
@@ -175,31 +176,71 @@ local notation "τ⁻¹" =>
 
 local notation "id" => (1 : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
 
-set_option maxHeartbeats 0 in
-set_option synthInstance.maxHeartbeats 0 in
+set_option synthInstance.checkSynthOrder false in
+-- @[default_instance]
+noncomputable instance Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fintype n]
+    [DecidableEq n] (ψ : Module.Dual ℂ (Matrix n n ℂ)) [ψ.IsFaithfulPosMap] :
+    NormedAddCommGroupOfRing (Matrix n n ℂ)
+    where
+  toNorm := NormedAddCommGroup.toNorm
+  toMetricSpace := NormedAddCommGroup.toMetricSpace
+  dist_eq := NormedAddCommGroup.dist_eq
+
+set_option synthInstance.checkSynthOrder false in
+-- @[default_instance]
+noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
+    (ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)) [∀ i, (ψ i).IsFaithfulPosMap] :
+    NormedAddCommGroupOfRing (PiMat ℂ k s)
+    where
+  toNorm := NormedAddCommGroup.toNorm
+  toMetricSpace := NormedAddCommGroup.toMetricSpace
+  dist_eq := NormedAddCommGroup.dist_eq
+
+set_option synthInstance.checkSynthOrder false in
+-- @[default_instance]
+noncomputable
+instance Module.Dual.isNormedAddCommGroupOfStarRing {n : Type _} [Fintype n]
+    [DecidableEq n]
+    {φ : Module.Dual ℂ (Matrix n n ℂ)} [φ.IsFaithfulPosMap] :
+    NormedAddCommGroupOfStarRing (Matrix n n ℂ) where
+    toNormedAddCommGroupOfRing := Module.Dual.isNormedAddCommGroupOfRing φ
+
+set_option synthInstance.checkSynthOrder false in
+-- @[default_instance]
+noncomputable
+instance Pi.module.Dual.isNormedAddCommGroupOfStarRing
+  {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [∀ i, (ψ i).IsFaithfulPosMap] :
+    NormedAddCommGroupOfStarRing (PiMat ℂ k s) where
+    toNormedAddCommGroupOfRing := Pi.module.Dual.isNormedAddCommGroupOfRing ψ
+
+theorem Module.Dual.inner_eq_counit (φ : Module.Dual ℂ (Matrix n n ℂ)) [hφ : φ.IsFaithfulPosMap] (x y : ℍ) :
+  ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y) :=
+by
+  simp_rw [Coalgebra.counit, Module.Dual.IsFaithfulPosMap.inner_eq,
+    ← Nontracial.unit_adjoint_eq, star_eq_conjTranspose]
+  congr 2
+  rw [LinearMap.ext_iff]
+  intro
+  simp_rw [Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one]
+theorem Module.Dual.pi.inner_eq_counit (ψ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ))
+  [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :
+  ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y) :=
+by
+  simp_rw [Coalgebra.counit, Module.Dual.pi.IsFaithfulPosMap.inner_eq,
+    ← Nontracial.Pi.unit_adjoint_eq]
+  congr 2
+  rw [LinearMap.ext_iff]
+  intro
+  simp_rw [Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one]
+
+set_option maxHeartbeats 400000 in
+-- set_option synthInstance.maxHeartbeats 0 in
 theorem frobenius_equation [hφ : φ.IsFaithfulPosMap] :
     (LinearMap.mul' ℂ ℍ ⊗ₘ id) ∘ₗ (υ⁻¹) ∘ₗ (id ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ))) =
       (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.mul' ℂ ℍ :=
-  by
-  rw [TensorProduct.ext_iff]
-  intro x y
-  simp_rw [LinearMap.comp_apply, TensorProduct.map_tmul, LinearMap.mul'_adjoint,
-    TensorProduct.tmul_sum, TensorProduct.tmul_smul, map_sum, _root_.map_smul,
-    LinearMap.one_apply, LinearEquiv.coe_coe, TensorProduct.assoc_symm_tmul]
-  simp only [TensorProduct.map_tmul, LinearMap.mul'_apply, LinearMap.one_apply]
-  -- kroneckerToTensorProduct_apply, linear_equiv.coe_to_linear_map,
-  -- tensor_product.assoc_symm_tmul, linear_map.mul'_apply, linear_equiv.coe_coe],
-  rw [←
-    Function.Injective.eq_iff
-      (AlgEquiv.injective (AlgEquiv.symm kroneckerToTensor))]
-  simp_rw [map_sum, _root_.map_smul, kroneckerToTensor, AlgEquiv.symm_symm, tensorToKronecker,
-    AlgEquiv.coe_mk, TensorProduct.toKronecker_apply, ← Matrix.ext_iff, Matrix.sum_apply,
-    Matrix.smul_apply, kroneckerMap, of_apply, mul_apply, stdBasisMatrix, mul_boole,
-    smul_ite, smul_zero, ite_and, Finset.smul_sum, smul_ite, smul_zero]
-  simp only [Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.sum_ite_eq',
-    Finset.mem_univ, if_true]
-  simp_rw [smul_eq_mul, mul_one, ← mul_apply, mul_rotate _ _ (x _ _), mul_assoc, ← Finset.mul_sum, ←
-    mul_apply, mul_comm _ ((x * y) _ _), forall₂_true_iff]
+by
+  apply FiniteDimensionalCoAlgebra.rTensor_mul_comp_lTensor_mul_adjoint
+    (Module.Dual.inner_eq_counit φ)
 
 local notation "l(" x ")" => x →ₗ[ℂ] x
 
@@ -246,7 +287,7 @@ theorem LinearMap.pi_mul'_apply_includeBlock' {i j : k} :
 
 noncomputable def directSumTensorMatrix :
     ((PiMat ℂ k s) ⊗[ℂ] PiMat ℂ k s) ≃ₗ[ℂ]
-      ∀ i : k × k, (ℍ_ i.1) ⊗[ℂ] ℍ_ i.2 :=
+      Π i : k × k, (ℍ_ i.1) ⊗[ℂ] ℍ_ i.2 :=
   @directSumTensor ℂ _ k k _ _ _ _ (fun i => Matrix (s i) (s i) ℂ) (fun i => Matrix (s i) (s i) ℂ) _
     _ (fun _ => Matrix.module) fun _ => Matrix.module
 
@@ -257,152 +298,33 @@ noncomputable def directSumTensorToKronecker :
     -- ∀ i : k × k, Matrix (s i.fst × s i.snd) (s i.fst × s i.snd) ℂ
     where
   toFun x i := TensorProduct.toKronecker (directSumTensorMatrix x i)
-  invFun x := directSumTensorMatrix.symm fun i => kroneckerToTensorProduct (x i)
+  invFun x := directSumTensorMatrix.symm (fun i => kroneckerToTensorProduct (x i))
   left_inv x := by
     simp only [TensorProduct.toKronecker_to_tensorProduct, LinearEquiv.symm_apply_apply]
   right_inv x := by
     simp only [LinearEquiv.apply_symm_apply, kroneckerToTensorProduct_toKronecker]
-  map_add' x y := by simp only [map_add, Pi.add_apply]; rfl
+  map_add' x y := by
+    ext1 i
+    simp only [Pi.add_apply, LinearEquiv.map_add, map_add]
   map_smul' r x :=
     by
-    simp only [_root_.map_smul, Pi.smul_apply, RingHom.id_apply]
-    rfl
-
-set_option maxHeartbeats 0 in
-set_option synthInstance.maxHeartbeats 0 in
-theorem frobenius_equation_direct_sum_aux [hθ : ∀ i, (θ i).IsFaithfulPosMap] (x y : (PiMat ℂ k s))
-    (i j : k) :
-    ((LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s)))) ∘ₗ
-          ↑(TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm ∘ₗ
-            (1 : l((PiMat ℂ k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat ℂ k s)) : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))
-        (includeBlock (x i) ⊗ₜ[ℂ] includeBlock (y j)) =
-      if i = j then
-        ((includeBlock ⊗ₘ includeBlock) ∘ₗ
-            LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) ∘ₗ LinearMap.mul' ℂ (ℍ_ j))
-          (x j ⊗ₜ[ℂ] y j)
-      else 0 :=
-  by
-  have :=
-    calc
-      ((LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s)))) ∘ₗ
-              ↑(TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm ∘ₗ
-                (1 : l((PiMat ℂ k s))) ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat ℂ k s)) : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))
-            (includeBlock (x i) ⊗ₜ[ℂ] includeBlock (y j)) =
-          (LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
-            ((TensorProduct.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
-              ((includeBlock ⊗ₘ includeBlock ⊗ₘ includeBlock)
-                (x i ⊗ₜ[ℂ] LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) (y j)))) :=
-        ?_
-      _ =
-          (LinearMap.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
-            (((includeBlock ⊗ₘ includeBlock) ⊗ₘ includeBlock)
-              ((TensorProduct.assoc ℂ (ℍ_ i) (ℍ_ j) (ℍ_ j)).symm
-                (x i ⊗ₜ[ℂ] LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) (y j)))) :=
-        ?_
-      _ =
-          if i = j then
-            (((includeBlock : (ℍ_ j) →ₗ[ℂ] (PiMat ℂ k s)) ⊗ₘ includeBlock) ∘ₗ
-                (LinearMap.mul' ℂ (ℍ_ j) ⊗ₘ (1 : l(ℍ_ j))) ∘ₗ
-                  (TensorProduct.assoc ℂ (ℍ_ j) (ℍ_ j) (ℍ_ j)).symm ∘ₗ
-                    (1 : l(ℍ_ j)) ⊗ₘ LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)))
-              (x j ⊗ₜ[ℂ] y j)
-          else 0 :=
-        ?_
-  · simp only [this, @frobenius_equation (s j)]
-  ·
-    simp only [LinearMap.comp_apply, LinearEquiv.coe_coe, TensorProduct.map_tmul,
-      LinearMap.one_apply, LinearMap.pi_mul'_adjoint_single_block]
-  · congr
-    simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply, TensorProduct.assoc_includeBlock]
-  · simp_rw [← LinearMap.comp_apply, ← TensorProduct.map_comp,
-      LinearMap.pi_mul'_apply_includeBlock', LinearMap.comp_apply, TensorProduct.ite_map,
-      ite_apply_lm, TensorProduct.zero_map, LinearMap.zero_apply, TensorProduct.map_tmul,
-      LinearEquiv.coe_coe, LinearMap.one_apply]
-    obtain ⟨α, β, hαβ⟩ := TensorProduct.eq_span (LinearMap.adjoint (LinearMap.mul' ℂ (ℍ_ j)) (y j))
-    rw [← hαβ]
-    simp only [TensorProduct.tmul_sum, map_sum, TensorProduct.assoc_symm_tmul,
-      TensorProduct.map_tmul, LinearMap.comp_apply, LinearMap.one_apply]
-    split_ifs with h
-    · apply Finset.sum_congr rfl
-      intros
-      rw [h, matrixDirectSumFromTo, directSumFromTo_apply_same, LinearMap.one_apply]
-    · rfl
+    ext1 i
+    simp only [_root_.map_smul, Pi.smul_apply, RingHom.id_apply, LinearEquiv.map_smul]
 
 theorem directSumTensorToKronecker_apply (x y : (PiMat ℂ k s)) (r : k × k) (a b : s r.1 × s r.2) :
     (directSumTensorToKronecker (x ⊗ₜ[ℂ] y)) r a b = x r.1 a.1 b.1 * y r.2 a.2 b.2 := by
   simp_rw [directSumTensorToKronecker, LinearEquiv.coe_mk, directSumTensorMatrix,
     directSumTensor_apply, TensorProduct.toKronecker_apply, kroneckerMap, of_apply]
 
--- lemma pi_frobenius_equation [hθ : Π i, fact (θ i).is_faithful_pos_map] :
---   ((linear_map.mul' ℂ (PiMat ℂ k s)  ⊗ₘ (1 : l((PiMat ℂ k s))))
---     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
---       ∘ₗ ((1 : l((PiMat ℂ k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] ((PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))))
---     = (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ (linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s))) :=
--- begin
---   apply tensor_product.ext',
---   intros x y,
---   rw [← sum_includeBlock x, ← sum_includeBlock y],
---   calc
---   ((linear_map.mul' ℂ (PiMat ℂ k s) ⊗ₘ (1 : l((PiMat ℂ k s))))
---     ∘ₗ ↑(tensor_product.assoc ℂ (PiMat ℂ k s) (PiMat ℂ k s) (PiMat ℂ k s)).symm
---       ∘ₗ ((1 : l((PiMat ℂ k s))) ⊗ₘ ((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] ((PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)))))
---         ((∑ i, includeBlock (x i)) ⊗ₜ[ℂ] (∑ j, includeBlock (y j)))
---   =
---   ∑ i j, if (i = j) then (
---       ((includeBlock ⊗ₘ includeBlock) ∘ₗ
---         ((linear_map.mul' ℂ (ℍ_ j)).adjoint ∘ₗ (linear_map.mul' ℂ (ℍ_ j))))
---         ((x j) ⊗ₜ[ℂ] (y j))) else 0 :
---   by { simp_rw [tensor_product.sum_tmul, tensor_product.tmul_sum, map_sum],
---     repeat { apply finset.sum_congr rfl, intros },
---     rw [frobenius_equation_direct_sum_aux], }
---   .. =
---   ∑ j, ((includeBlock ⊗ₘ includeBlock)
---       ((linear_map.mul' ℂ (ℍ_ j)).adjoint
---       ((linear_map.mul' ℂ (ℍ_ j))
---       ((x j) ⊗ₜ[ℂ] (y j))))) :
---   by { simp_rw [finset.sum_ite_eq, finset.mem_univ, if_true,
---     linear_map.comp_apply], }
---   .. =
---   ∑ j, (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s))
---     ∘ₗ (includeBlock ∘ₗ (linear_map.mul' ℂ (ℍ_ j))))
---       ((x j) ⊗ₜ[ℂ] (y j)) :
---   by { simp_rw [linear_map.comp_apply, linear_map.pi_mul'_adjoint_single_block], }
---   .. =
---   ∑ i j, ite (i = j)
---   ((((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ
---   (includeBlock.comp ((linear_map.mul' ℂ (matrix (s j) (s j) ℂ)).comp (matrix_direct_sum_from_to i j ⊗ₘ 1))))
---      (x i ⊗ₜ[ℂ] y j)
---   )
---    0 :
---   by { simp_rw [finset.sum_ite_eq, finset.mem_univ, if_true,
---     matrix_direct_sum_from_to_same, tensor_product.map_one, linear_map.comp_one], }
---   .. =
---   ∑ j, (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s))
---     ((linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s))
---      (includeBlock (x j) ⊗ₜ[ℂ] includeBlock (y j)))) :
---   by { simp_rw [← linear_map.pi_mul'_apply_includeBlock'], }
---   .. =
---   (((linear_map.mul' ℂ (PiMat ℂ k s)).adjoint : (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s)) ∘ₗ (linear_map.mul' ℂ (PiMat ℂ k s) : (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) →ₗ[ℂ] (PiMat ℂ k s)))
---   ((∑ i, includeBlock (x i)) ⊗ₜ[ℂ] (∑ j, includeBlock (y j))) :
---   by {  },
--- end
-
 theorem frobenius_equation' [hφ : φ.IsFaithfulPosMap] :
     ((id ⊗ₘ LinearMap.mul' ℂ ℍ) ∘ₗ υ ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ⊗ₘ id) =
       LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ LinearMap.mul' ℂ ℍ :=
-  by
-  have := @frobenius_equation n _ _ φ _
-  apply_fun LinearMap.adjoint at this
-  simp_rw [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint] at this
-  rw [← this, LinearMap.eq_adjoint_iff]
-  intro x y
-  simp_rw [LinearMap.comp_apply]
-  have this1 : LinearMap.adjoint (id ⊗ₘ LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) = id ⊗ₘ LinearMap.mul' ℂ ℍ :=
-  by rw [TensorProduct.map_adjoint, LinearMap.adjoint_adjoint, LinearMap.adjoint_one]
-  have this2 : LinearMap.adjoint ((LinearMap.mul' ℂ ℍ) ⊗ₘ id) = LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ⊗ₘ id :=
-  by rw [TensorProduct.map_adjoint, LinearMap.adjoint_one]
-  rw [← this1, LinearMap.adjoint_inner_left, ← TensorProduct.assoc_symm_adjoint,
-    LinearMap.adjoint_inner_left, ← this2, LinearMap.adjoint_inner_left]
+by
+  apply FiniteDimensionalCoAlgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
+  let σ : ℍ ≃ₐ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
+  refine ⟨σ, λ _ _ _ => ?_⟩
+  simp only [σ, hφ.sig_apply, neg_neg, Matrix.PosDef.rpow_one_eq_self,
+    Matrix.PosDef.rpow_neg_one_eq_inv_self, star_eq_conjTranspose, hφ.inner_right_conj]
 
 theorem LinearMap.mul'_assoc :
     (LinearMap.mul' ℂ (Matrix n n ℂ) ∘ₗ LinearMap.mul' ℂ (Matrix n n ℂ) ⊗ₘ id) =
@@ -410,40 +332,32 @@ theorem LinearMap.mul'_assoc :
         (id ⊗ₘ LinearMap.mul' ℂ (Matrix n n ℂ)) ∘ₗ
           (↑(TensorProduct.assoc ℂ (Matrix n n ℂ) (Matrix n n ℂ) (Matrix n n ℂ) : _ ≃ₗ[ℂ] _) :
             _ →ₗ[ℂ] _) :=
-  by
-  apply TensorProduct.ext_threefold
-  intro x y z
-  simp only [LinearMap.comp_apply, TensorProduct.map_tmul, LinearMap.mul'_apply,
-    LinearMap.one_apply, LinearEquiv.coe_coe, TensorProduct.assoc_tmul, mul_assoc]
+Algebra.assoc
 
+noncomputable
+def Matrix.Coalgebra [hφ : φ.IsFaithfulPosMap] :
+  Coalgebra ℂ (Matrix n n ℂ) :=
+by infer_instance
+
+section
+
+set_option synthInstance.checkSynthOrder false in
+-- attribute [local instance] Matrix.Coalgebra
 theorem LinearMap.mul'_coassoc [hφ : φ.IsFaithfulPosMap] :
-    (LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ⊗ₘ id) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) =
-      υ⁻¹ ∘ₗ (id ⊗ₘ LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) :=
-  by
-  rw [← TensorProduct.assoc_adjoint]
-  nth_rw 1 [← LinearMap.adjoint_one]
-  rw [← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp, LinearMap.mul'_assoc,
-    LinearMap.adjoint_comp, LinearMap.adjoint_comp, TensorProduct.map_adjoint, LinearMap.adjoint_one,
-    LinearMap.comp_assoc]
+    rTensor ℍ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) =
+      υ⁻¹ ∘ₗ lTensor ℍ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) :=
+by simp_rw [← FiniteDimensionalCoAlgebra.comul_eq_mul_adjoint, Coalgebra.coassoc_symm.symm]
+
+end
 
 --  m(η ⊗ id) = τ
-theorem LinearMap.mul'_comp_unit_map_id_eq_lid : (LinearMap.mul' ℂ ℍ ∘ₗ η ⊗ₘ id) = τ :=
-  by
-  rw [TensorProduct.ext_iff]
-  intro α x
-  simp_rw [LinearMap.comp_apply, TensorProduct.map_tmul, Algebra.linearMap_apply,
-    Algebra.algebraMap_eq_smul_one, LinearMap.mul'_apply, LinearEquiv.coe_coe,
-    TensorProduct.lid_tmul, LinearMap.one_apply, smul_mul_assoc, one_mul]
+theorem LinearMap.mul'_comp_unit_map_id_eq_lid : LinearMap.mul' ℂ ℍ ∘ₗ (η ⊗ₘ id) = τ :=
+Algebra.mul_comp_rTensor_unit
 
 -- m(id ⊗ η)κ⁻¹ = τ
 theorem LinearMap.mul'_comp_id_map_unit_assoc_eq_lid :
-  LinearMap.mul' ℂ ℍ ∘ₗ (id ⊗ₘ η) ∘ₗ ϰ⁻¹ = τ :=
-  by
-  rw [TensorProduct.ext_iff]
-  intro α x
-  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe, TensorProduct.comm_symm_tmul,
-    TensorProduct.map_tmul, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
-    LinearMap.one_apply, LinearMap.mul'_apply, TensorProduct.lid_tmul, mul_smul_one]
+  LinearMap.mul' ℂ ℍ ∘ₗ (id ⊗ₘ η) = TensorProduct.rid ℂ ℍ :=
+Algebra.mul_comp_lTensor_unit
 
 -- set_option synthInstance.maxHeartbeats 0 in
 private theorem linear_map.id_map_mul'_comp_unit_eq [hφ : φ.IsFaithfulPosMap] :
@@ -453,15 +367,16 @@ private theorem linear_map.id_map_mul'_comp_unit_eq [hφ : φ.IsFaithfulPosMap] 
 
 -- (m ⊗ id)υ⁻¹(id ⊗ m⋆η)κ⁻¹τ⁻¹ = m⋆
 theorem LinearMap.mul'_adjoint_eq' [hφ : φ.IsFaithfulPosMap] :
-    (LinearMap.mul' ℂ ℍ ⊗ₘ id) ∘ₗ υ⁻¹ ∘ₗ (id ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ η)) ∘ₗ ϰ⁻¹ ∘ₗ τ⁻¹ =
+    (LinearMap.mul' ℂ ℍ ⊗ₘ id) ∘ₗ υ⁻¹ ∘ₗ (id ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ η)) ∘ₗ (TensorProduct.rid ℂ ℍ).symm =
       (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) :=
   by
   rw [linear_map.id_map_mul'_comp_unit_eq]
   have := @frobenius_equation n _ _ φ _
   simp_rw [← LinearMap.comp_assoc] at this ⊢
   rw [this]
-  simp_rw [LinearMap.comp_assoc, ← LinearMap.comp_assoc _ ϰ⁻¹, ← LinearMap.comp_assoc _ (_ ∘ₗ ϰ⁻¹),
-    LinearMap.mul'_comp_id_map_unit_assoc_eq_lid, LinearEquiv.comp_coe, LinearEquiv.symm_trans_self,
+  simp_rw [LinearMap.comp_assoc, ← LinearMap.comp_assoc (TensorProduct.rid ℂ ℍ).symm.toLinearMap,
+    LinearMap.mul'_comp_id_map_unit_assoc_eq_lid, LinearMap.comp_assoc,
+    LinearEquiv.comp_coe, LinearEquiv.symm_trans_self,
     LinearEquiv.refl_toLinearMap, LinearMap.comp_id]
 
 private theorem linear_map.mul'_comp_unit_map_id_eq [hφ : φ.IsFaithfulPosMap] :

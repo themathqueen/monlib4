@@ -249,23 +249,24 @@ theorem Pi.symmMap_apply_eq_symmMap_symm_apply_iff [hψ : ∀ i, (ψ i).IsFaithf
 
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem Psi.real_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A.real =
-      ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (2 * r₁)).toLinearMap ⊗ₘ
+theorem Psi.real_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+  (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹₂) :
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ A.real =
+      ((Module.Dual.pi.IsFaithfulPosMap.sig hφ (2 * r₁)).toLinearMap ⊗ₘ
           (op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (1 - 2 * r₂)).toLinearMap) ∘ₗ unop)
-        (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A)) :=
+        (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ A)) :=
   by
   suffices
-    ∀ a b : 𝔹,
-      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearMap.real |a⟩⟨b|) =
-        ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (2 * r₁)).toLinearMap ⊗ₘ
+    ∀ (a : 𝔹₂) (b : 𝔹),
+      Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ (LinearMap.real |a⟩⟨b|) =
+        ((Module.Dual.pi.IsFaithfulPosMap.sig hφ (2 * r₁)).toLinearMap ⊗ₘ
             (op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (1 - 2 * r₂)).toLinearMap) ∘ₗ unop)
-          (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |a⟩⟨b|))
+          (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ |a⟩⟨b|))
     by
     obtain ⟨α, β, rfl⟩ := A.exists_sum_rankOne
-    letI this11 : StarAddMonoid 𝔹ᵐᵒᵖ := by infer_instance
-    letI this12 : StarModule ℂ 𝔹ᵐᵒᵖ := by infer_instance
-    let this1 : StarAddMonoid (𝔹 ⊗[ℂ] 𝔹ᵐᵒᵖ) := by infer_instance
+    -- letI this11 : StarAddMonoid 𝔹ᵐᵒᵖ := by infer_instance
+    -- letI this12 : StarModule ℂ 𝔹ᵐᵒᵖ := by infer_instance
+    -- let this1 : StarAddMonoid (𝔹 ⊗[ℂ] 𝔹ᵐᵒᵖ) := by infer_instance
     simp only [map_sum, LinearMap.real_sum, star_sum, this]
   intro a b
   simp_rw [← rankOneLm_eq_rankOne, Pi.rankOneLm_real_apply, rankOneLm_eq_rankOne,
@@ -277,23 +278,24 @@ theorem Psi.real_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) 
 
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem Psi.adjoint_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearMap.adjoint A) =
+theorem Psi.adjoint_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+  (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹₂) :
+    Module.Dual.pi.IsFaithfulPosMap.psi hφ hψ r₁ r₂ (LinearMap.adjoint A) =
       ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ - r₂)).toLinearMap ⊗ₘ
-          op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ - r₂)).toLinearMap ∘ₗ unop)
-        (tenSwap (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A))) :=
+          op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hφ (r₁ - r₂)).toLinearMap ∘ₗ unop)
+        (tenSwap (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ A))) :=
   by
   suffices
-    ∀ a b : 𝔹,
-      Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearMap.adjoint ↑|a⟩⟨b|) =
+    ∀ (a : 𝔹₂) (b : 𝔹),
+      Module.Dual.pi.IsFaithfulPosMap.psi hφ hψ r₁ r₂ (LinearMap.adjoint ↑|a⟩⟨b|) =
         ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ - r₂)).toLinearMap ⊗ₘ
-            op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ - r₂)).toLinearMap ∘ₗ unop)
-          (tenSwap (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ |a⟩⟨b|)))
+            op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hφ (r₁ - r₂)).toLinearMap ∘ₗ unop)
+          (tenSwap (star (Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ |a⟩⟨b|)))
     by
     obtain ⟨α, β, rfl⟩ := A.exists_sum_rankOne
-    letI this11 : StarAddMonoid 𝔹ᵐᵒᵖ := by infer_instance
-    letI this12 : StarModule ℂ 𝔹ᵐᵒᵖ := by infer_instance
-    let this1 : StarAddMonoid (𝔹 ⊗[ℂ] 𝔹ᵐᵒᵖ) := by infer_instance
+    -- letI this11 : StarAddMonoid 𝔹ᵐᵒᵖ := by infer_instance
+    -- letI this12 : StarModule ℂ 𝔹ᵐᵒᵖ := by infer_instance
+    -- let this1 : StarAddMonoid (𝔹 ⊗[ℂ] 𝔹ᵐᵒᵖ) := by infer_instance
     simp only [map_sum, star_sum, this]
   intro a b
   simp_rw [← rankOneLm_eq_rankOne, rankOneLm_adjoint, rankOneLm_eq_rankOne,
@@ -303,11 +305,11 @@ theorem Psi.adjoint_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : �
     Module.Dual.pi.IsFaithfulPosMap.sig_star, Module.Dual.pi.IsFaithfulPosMap.sig_apply_sig,
     op_apply, sub_eq_add_neg, add_assoc, add_neg_cancel_comm_assoc, neg_add_self, add_zero]
 
-theorem Psi.symmMap_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ (LinearEquiv.symmMap _ _ _ A) =
+theorem Psi.symmMap_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] [hφ : ∀ i, (φ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹₂) :
+    Module.Dual.pi.IsFaithfulPosMap.psi hφ hψ r₁ r₂ (LinearEquiv.symmMap _ _ _ A) =
       ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ + r₂ - 1)).toLinearMap ⊗ₘ
-          op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (-r₁ - r₂)).toLinearMap ∘ₗ unop)
-        (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A)) :=
+          op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hφ (-r₁ - r₂)).toLinearMap ∘ₗ unop)
+        (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ A)) :=
   by
   simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply]
   revert A
@@ -321,11 +323,12 @@ theorem Psi.symmMap_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : �
     Module.Dual.pi.IsFaithfulPosMap.sig_apply_sig, star_star, op_apply, sub_eq_add_neg,
     neg_add_cancel_comm, add_assoc, add_neg_cancel_comm_assoc]
 
-theorem Psi.symmMap_symm_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (r₁ r₂ : ℝ) (A : 𝔹 →ₗ[ℂ] 𝔹) :
-    Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ ((LinearEquiv.symmMap _ _ _).symm A) =
-      ((Module.Dual.pi.IsFaithfulPosMap.sig hψ (r₁ + r₂)).toLinearMap ⊗ₘ
+theorem Psi.symmMap_symm_apply [hψ : ∀ i, (ψ i).IsFaithfulPosMap] [hφ : ∀ i, (φ i).IsFaithfulPosMap] (r₁ r₂ : ℝ)
+  (A : 𝔹₂ →ₗ[ℂ] 𝔹) :
+    Module.Dual.pi.IsFaithfulPosMap.psi hψ hφ r₁ r₂ ((LinearEquiv.symmMap _ _ _).symm A) =
+      ((Module.Dual.pi.IsFaithfulPosMap.sig hφ (r₁ + r₂)).toLinearMap ⊗ₘ
           op ∘ₗ (Module.Dual.pi.IsFaithfulPosMap.sig hψ (1 - r₁ - r₂)).toLinearMap ∘ₗ unop)
-        (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hψ r₁ r₂ A)) :=
+        (tenSwap (Module.Dual.pi.IsFaithfulPosMap.psi hφ hψ r₁ r₂ A)) :=
   by
   simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply]
   revert A

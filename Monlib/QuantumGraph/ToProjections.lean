@@ -74,7 +74,7 @@ noncomputable def blockDiag'KroneckerEquiv {φ : ∀ i, Module.Dual ℂ (ℍ_ i)
       { x : Matrix (Σ i, n i) (Σ i, n i) ℂ // x.IsBlockDiagonal } ⊗[ℂ]
         { x : Matrix (Σ i, n i) (Σ i, n i) ℂ // x.IsBlockDiagonal } :=
   ((Module.Dual.pi.IsFaithfulPosMap.toMatrix fun i => (hφ i)).symm.toLinearEquiv.trans
-        ((Module.Dual.pi.IsFaithfulPosMap.psi hφ 0 0).trans
+        ((Module.Dual.pi.IsFaithfulPosMap.psi hφ hφ 0 0).trans
           (LinearEquiv.TensorProduct.map (1 : (∀ i, Matrix (n i) (n i) ℂ) ≃ₗ[ℂ] _)
             (Pi.transposeAlgEquiv p n : _ ≃ₐ[ℂ] _ᵐᵒᵖ).symm.toLinearEquiv))).trans
     (LinearEquiv.TensorProduct.map isBlockDiagonalPiAlgEquiv.symm.toLinearEquiv

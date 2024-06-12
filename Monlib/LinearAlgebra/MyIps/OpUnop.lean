@@ -56,28 +56,29 @@ theorem unop_star_apply [Star A] (a : Aᵐᵒᵖ) :
 
 open scoped TensorProduct
 
-noncomputable def tenSwap : A ⊗[R] Aᵐᵒᵖ →ₗ[R] A ⊗[R] Aᵐᵒᵖ :=
-  TensorProduct.map (unop : Aᵐᵒᵖ →ₗ[R] A) (op : A →ₗ[R] Aᵐᵒᵖ) ∘ₗ
-    (TensorProduct.comm R A Aᵐᵒᵖ).toLinearMap
+variable {B : Type*} [AddCommMonoid B] [Module R B]
+noncomputable def tenSwap : A ⊗[R] Bᵐᵒᵖ →ₗ[R] B ⊗[R] Aᵐᵒᵖ :=
+  TensorProduct.map (unop : Bᵐᵒᵖ →ₗ[R] B) (op : A →ₗ[R] Aᵐᵒᵖ) ∘ₗ
+    (TensorProduct.comm R A Bᵐᵒᵖ).toLinearMap
 
-theorem tenSwap_apply (x : A) (y : Aᵐᵒᵖ) :
+theorem tenSwap_apply (x : A) (y : Bᵐᵒᵖ) :
     tenSwap (x ⊗ₜ[R] y) = MulOpposite.unop y ⊗ₜ[R] MulOpposite.op x :=
   rfl
 
-theorem tenSwap_apply' (x y : A) : tenSwap (x ⊗ₜ MulOpposite.op y) = y ⊗ₜ[R] MulOpposite.op x :=
+theorem tenSwap_apply' (x : A) (y : B) : tenSwap (x ⊗ₜ MulOpposite.op y) = y ⊗ₜ[R] MulOpposite.op x :=
   rfl
 
-theorem tenSwap_tenSwap : tenSwap ∘ₗ tenSwap = (1 : A ⊗[R] Aᵐᵒᵖ →ₗ[R] A ⊗[R] Aᵐᵒᵖ) :=
+theorem tenSwap_tenSwap : tenSwap ∘ₗ tenSwap = (1 : A ⊗[R] Bᵐᵒᵖ →ₗ[R] A ⊗[R] Bᵐᵒᵖ) :=
   by
   apply TensorProduct.ext'
   intros
   simp only [LinearMap.comp_apply, tenSwap_apply, MulOpposite.unop_op, MulOpposite.op_unop,
     LinearMap.one_apply]
 
-theorem tenSwap_apply_tenSwap (x : A ⊗[R] Aᵐᵒᵖ) : tenSwap (tenSwap x) = x := by
+theorem tenSwap_apply_tenSwap (x : A ⊗[R] Bᵐᵒᵖ) : tenSwap (tenSwap x) = x := by
   rw [← LinearMap.comp_apply, tenSwap_tenSwap, LinearMap.one_apply]
 
-def tenSwap_injective : Function.Injective (tenSwap : A ⊗[R] Aᵐᵒᵖ →ₗ[R] A ⊗[R] Aᵐᵒᵖ) :=
+def tenSwap_injective : Function.Injective (tenSwap : A ⊗[R] Bᵐᵒᵖ →ₗ[R] B ⊗[R] Aᵐᵒᵖ) :=
   by
   intro a b h
   rw [← tenSwap_apply_tenSwap a, h, tenSwap_apply_tenSwap]
