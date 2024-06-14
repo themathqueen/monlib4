@@ -202,9 +202,12 @@ theorem rankOne_toMatrix [hφ : φ.IsFaithfulPosMap] (a b : Matrix n n ℂ) :
     Module.Dual.IsFaithfulPosMap.inner_coord', smul_eq_mul, mul_comm, conjTranspose_col, ←
     vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply, RCLike.star_def]
 
+-- attribute [-instance] Matrix.instAlgebra
+-- attribute [instance] Algebra.ofIsScalarTowerSmulCommClass
+
+@[simps]
 noncomputable def Module.Dual.IsFaithfulPosMap.sig (hφ : φ.IsFaithfulPosMap) (z : ℝ) :
-    Matrix n n ℂ ≃ₐ[ℂ] Matrix n n ℂ
-    where
+    ℍ ≃ₗ[ℂ] ℍ where
   toFun a := hφ.matrixIsPosDef.rpow (-z) * a * hφ.matrixIsPosDef.rpow z
   invFun a := hφ.matrixIsPosDef.rpow z * a * hφ.matrixIsPosDef.rpow (-z)
   left_inv a := by
@@ -214,20 +217,17 @@ noncomputable def Module.Dual.IsFaithfulPosMap.sig (hφ : φ.IsFaithfulPosMap) (
     simp_rw [Matrix.mul_assoc, PosDef.rpow_mul_rpow, ← Matrix.mul_assoc, PosDef.rpow_mul_rpow,
       neg_add_self, PosDef.rpow_zero, Matrix.one_mul, Matrix.mul_one]
   map_add' x y := by simp_rw [Matrix.mul_add, Matrix.add_mul]
-  commutes' r := by
-    simp_rw [Algebra.algebraMap_eq_smul_one, Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_one,
-      PosDef.rpow_mul_rpow, neg_add_self, PosDef.rpow_zero]
-  map_mul' a b := by
-    simp_rw [Matrix.mul_assoc, ← Matrix.mul_assoc (hφ.matrixIsPosDef.rpow _),
-      PosDef.rpow_mul_rpow, add_neg_self, PosDef.rpow_zero, Matrix.one_mul]
+  map_smul' r x := by
+    simp only [Algebra.mul_smul_comm, Algebra.smul_mul_assoc, RingHom.id_apply]
+  -- commutes' r := by
+  --   simp_rw [Algebra.algebraMap_eq_smul_one, Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_one,
+  --     PosDef.rpow_mul_rpow, neg_add_self, PosDef.rpow_zero]
 
-theorem Module.Dual.IsFaithfulPosMap.sig_apply (hφ : φ.IsFaithfulPosMap) (z : ℝ) (x : ℍ) :
-    hφ.sig z x = hφ.matrixIsPosDef.rpow (-z) * x * hφ.matrixIsPosDef.rpow z :=
-  rfl
-
-theorem Module.Dual.IsFaithfulPosMap.sig_symm_apply (hφ : φ.IsFaithfulPosMap) (z : ℝ) (x : ℍ) :
-    (hφ.sig z).symm x = hφ.matrixIsPosDef.rpow z * x * hφ.matrixIsPosDef.rpow (-z) :=
-  rfl
+lemma Module.Dual.IsFaithfulPosMap.sig.map_mul' [hφ : φ.IsFaithfulPosMap] {z : ℝ} (a b : ℍ) :
+  hφ.sig z (a * b) = hφ.sig z a * hφ.sig z b :=
+by
+  simp_rw [hφ.sig_apply, Matrix.mul_assoc, ← Matrix.mul_assoc (hφ.matrixIsPosDef.rpow _),
+    PosDef.rpow_mul_rpow, add_neg_self, PosDef.rpow_zero, Matrix.one_mul]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_symm_eq (hφ : φ.IsFaithfulPosMap) (z : ℝ) :
     (hφ.sig z).symm = hφ.sig (-z) := by
@@ -472,12 +472,12 @@ theorem Nontracial.inner_symm [hφ : φ.IsFaithfulPosMap] (x y : ℍ) :
   rw [inner_conj_symm]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_adjoint [hφ : φ.IsFaithfulPosMap] {t : ℝ} :
-    LinearMap.adjoint (hφ.sig t : ℍ ≃ₐ[ℂ] ℍ).toLinearMap = (hφ.sig t).toLinearMap :=
+    LinearMap.adjoint (hφ.sig t : ℍ ≃ₗ[ℂ] ℍ).toLinearMap = (hφ.sig t).toLinearMap :=
   by
   rw [LinearMap.ext_iff_inner_map]
   intro x
   simp_rw [LinearMap.adjoint_inner_left, Module.Dual.IsFaithfulPosMap.inner_eq',
-    AlgEquiv.toLinearMap_apply, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
+    LinearEquiv.coe_toLinearMap, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
     Module.Dual.IsFaithfulPosMap.sig_apply, neg_neg]
   let hQ := hφ.matrixIsPosDef
   let Q := φ.matrix
@@ -496,8 +496,8 @@ theorem Module.Dual.IsFaithfulPosMap.sig_adjoint [hφ : φ.IsFaithfulPosMap] {t 
 theorem Nontracial.inner_symm' [hφ : φ.IsFaithfulPosMap] (x y : ℍ) :
     ⟪x, y⟫_ℂ = ⟪hφ.sig (-(1 / 2 : ℝ)) yᴴ, hφ.sig (-(1 / 2 : ℝ)) xᴴ⟫_ℂ :=
   by
-  simp_rw [← AlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_left,
-    Module.Dual.IsFaithfulPosMap.sig_adjoint, AlgEquiv.toLinearMap_apply,
+  simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.adjoint_inner_left,
+    Module.Dual.IsFaithfulPosMap.sig_adjoint, LinearEquiv.coe_toLinearMap,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig]
   rw [Nontracial.inner_symm]
   norm_num
@@ -516,15 +516,20 @@ theorem sig_apply_pos_def_matrix' [hφ : Module.Dual.IsFaithfulPosMap φ] (t : �
   nth_rw 2 [← PosDef.rpow_one_eq_self hφ.matrixIsPosDef]
   rw [← sig_apply_pos_def_matrix t (1 : ℝ), PosDef.rpow_one_eq_self]
 
+lemma sig_trace_preserving [hφ : Module.Dual.IsFaithfulPosMap φ] (t : ℝ) (x : ℍ) :
+  (hφ.sig t x).trace = x.trace :=
+by
+  rw [hφ.sig_apply, trace_mul_cycle, PosDef.rpow_mul_rpow, add_neg_self, PosDef.rpow_zero, one_mul]
+
 theorem linear_functional_comp_sig [hφ : Module.Dual.IsFaithfulPosMap φ] (t : ℝ) : φ ∘ₗ (hφ.sig t).toLinearMap = φ :=
   by
   ext1 x
-  simp_rw [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, φ.apply]
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, φ.apply]
   nth_rw 1 [← sig_apply_pos_def_matrix' t]
-  rw [← _root_.map_mul, aut_mat_inner_trace_preserving]
+  rw [← Module.Dual.IsFaithfulPosMap.sig.map_mul', sig_trace_preserving]
 
 theorem linear_functional_apply_sig [hφ : Module.Dual.IsFaithfulPosMap φ] (t : ℝ) (x : ℍ) : φ (hφ.sig t x) = φ x := by
-  rw [← AlgEquiv.toLinearMap_apply, ← LinearMap.comp_apply, linear_functional_comp_sig]
+  rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply, linear_functional_comp_sig]
 
 end SingleBlock
 
@@ -1213,7 +1218,7 @@ theorem Module.Dual.pi.IsFaithfulPosMap.sig_adjoint [hψ : ∀ i, (ψ i).IsFaith
   intro x
   simp_rw [LinearMap.adjoint_inner_left, AlgEquiv.toLinearMap_apply,
     Module.Dual.pi.IsFaithfulPosMap.inner_eq', ← Module.Dual.IsFaithfulPosMap.inner_eq',
-    Module.Dual.pi.IsFaithfulPosMap.sig_eq_pi_blocks, ← AlgEquiv.toLinearMap_apply, ←
+    Module.Dual.pi.IsFaithfulPosMap.sig_eq_pi_blocks, ← LinearEquiv.coe_toLinearMap, ←
     LinearMap.adjoint_inner_left, Module.Dual.IsFaithfulPosMap.sig_adjoint]
 
 theorem Module.Dual.IsFaithfulPosMap.norm_eq {ψ : Module.Dual ℂ (Matrix n n ℂ)}

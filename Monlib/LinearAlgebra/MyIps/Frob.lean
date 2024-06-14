@@ -176,9 +176,9 @@ local notation "τ⁻¹" =>
 
 local notation "id" => (1 : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
 
-set_option synthInstance.checkSynthOrder false in
 -- @[default_instance]
-noncomputable instance Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fintype n]
+@[reducible]
+noncomputable def Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fintype n]
     [DecidableEq n] (ψ : Module.Dual ℂ (Matrix n n ℂ)) [ψ.IsFaithfulPosMap] :
     NormedAddCommGroupOfRing (Matrix n n ℂ)
     where
@@ -187,8 +187,12 @@ noncomputable instance Module.Dual.isNormedAddCommGroupOfRing {n : Type _} [Fint
   dist_eq := NormedAddCommGroup.dist_eq
 
 set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Module.Dual.isNormedAddCommGroupOfRing
+
+
 -- @[default_instance]
-noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
+@[reducible]
+noncomputable def Pi.module.Dual.isNormedAddCommGroupOfRing
     (ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)) [∀ i, (ψ i).IsFaithfulPosMap] :
     NormedAddCommGroupOfRing (PiMat ℂ k s)
     where
@@ -197,21 +201,28 @@ noncomputable instance Pi.module.Dual.isNormedAddCommGroupOfRing
   dist_eq := NormedAddCommGroup.dist_eq
 
 set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Pi.module.Dual.isNormedAddCommGroupOfRing
+
 -- @[default_instance]
+@[reducible]
 noncomputable
-instance Module.Dual.isNormedAddCommGroupOfStarRing {n : Type _} [Fintype n]
+def Module.Dual.isNormedAddCommGroupOfStarRing {n : Type _} [Fintype n]
     [DecidableEq n]
     {φ : Module.Dual ℂ (Matrix n n ℂ)} [φ.IsFaithfulPosMap] :
     NormedAddCommGroupOfStarRing (Matrix n n ℂ) where
     toNormedAddCommGroupOfRing := Module.Dual.isNormedAddCommGroupOfRing φ
 
 set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Module.Dual.isNormedAddCommGroupOfStarRing
+
 -- @[default_instance]
 noncomputable
-instance Pi.module.Dual.isNormedAddCommGroupOfStarRing
+def Pi.module.Dual.isNormedAddCommGroupOfStarRing
   {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [∀ i, (ψ i).IsFaithfulPosMap] :
     NormedAddCommGroupOfStarRing (PiMat ℂ k s) where
     toNormedAddCommGroupOfRing := Pi.module.Dual.isNormedAddCommGroupOfRing ψ
+set_option synthInstance.checkSynthOrder false in
+scoped[Functional] attribute [instance] Module.Dual.isNormedAddCommGroupOfStarRing
 
 theorem Module.Dual.inner_eq_counit (φ : Module.Dual ℂ (Matrix n n ℂ)) [hφ : φ.IsFaithfulPosMap] (x y : ℍ) :
   ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y) :=
@@ -321,7 +332,7 @@ theorem frobenius_equation' [hφ : φ.IsFaithfulPosMap] :
       LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ LinearMap.mul' ℂ ℍ :=
 by
   apply Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
-  let σ : ℍ ≃ₐ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
+  let σ : ℍ ≃ₗ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
   refine ⟨σ, λ _ _ _ => ?_⟩
   simp only [σ, hφ.sig_apply, neg_neg, Matrix.PosDef.rpow_one_eq_self,
     Matrix.PosDef.rpow_neg_one_eq_inv_self, star_eq_conjTranspose, hφ.inner_right_conj]

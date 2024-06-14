@@ -240,52 +240,52 @@ theorem QuantumSet.modAut_real (r : ℝ) :
 by
   rw [LinearMap.ext_iff]
   intro
-  simp_rw [LinearMap.real_apply, AlgEquiv.toLinearMap_apply, modAut_star, star_star]
+  simp_rw [LinearMap.real_apply, LinearEquiv.coe_toLinearMap, modAut_star, star_star]
 
-theorem _root_.AlgEquiv.linearMap_comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-    [AddCommGroup E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
-    (f : E₁ ≃ₐ[R] E₂) (x : E₂ →ₗ[R] E₃) (y : E₁ →ₗ[R] E₃) :
+theorem _root_.LinearEquiv.linearMap_comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [AddCommMonoid E₁] [AddCommMonoid E₂]
+    [AddCommMonoid E₃] [Module R E₁] [Module R E₂] [Module R E₃]
+    (f : E₁ ≃ₗ[R] E₂) (x : E₂ →ₗ[R] E₃) (y : E₁ →ₗ[R] E₃) :
     x ∘ₗ f.toLinearMap = y ↔ x = y ∘ₗ f.symm.toLinearMap :=
   by
   constructor
   · intro h
     ext1
     rw [← h]
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.apply_symm_apply]
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, LinearEquiv.apply_symm_apply]
   · rintro rfl
     ext1
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.symm_apply_apply]
-theorem _root_.AlgEquiv.comp_linearMap_eq_iff
-  {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-  [AddCommGroup E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
-  (f : E₁ ≃ₐ[R] E₂) (x : E₃ →ₗ[R] E₁) (y : E₃ →ₗ[R] E₂) :
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, LinearEquiv.symm_apply_apply]
+theorem _root_.LinearEquiv.comp_linearMap_eq_iff
+  {R E₁ E₂ E₃ : Type _} [CommSemiring R] [AddCommMonoid E₁] [AddCommMonoid E₂]
+  [AddCommMonoid E₃] [Module R E₁] [Module R E₂] [Module R E₃]
+  (f : E₁ ≃ₗ[R] E₂) (x : E₃ →ₗ[R] E₁) (y : E₃ →ₗ[R] E₂) :
   f.toLinearMap ∘ₗ x = y ↔ x = f.symm.toLinearMap ∘ₗ y :=
   by
   constructor
   · intro h
     ext1
     rw [← h]
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.symm_apply_apply]
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, LinearEquiv.symm_apply_apply]
   · rintro rfl
     ext1
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.apply_symm_apply]
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, LinearEquiv.apply_symm_apply]
 
 @[simp]
 theorem QuantumSet.modAut_symm (r : ℝ) :
   (hA.modAut r).symm = hA.modAut (-r) :=
 by
   ext
-  apply_fun (hA.modAut r)
-  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_right_neg, modAut_zero,
-    AlgEquiv.one_apply]
+  apply_fun (hA.modAut r) using LinearEquiv.injective _
+  simp only [LinearEquiv.apply_symm_apply, modAut_apply_modAut, add_right_neg, modAut_zero]
+  rfl
 
 theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
     Commute x (hB.modAut r).toLinearMap ↔
       Commute x (hB.modAut (-r)).toLinearMap :=
   by
   simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp]
-  rw [AlgEquiv.linearMap_comp_eq_iff, ← QuantumSet.modAut_symm]
-  nth_rw 1 [← AlgEquiv.comp_linearMap_eq_iff]
+  rw [LinearEquiv.linearMap_comp_eq_iff, ← QuantumSet.modAut_symm]
+  nth_rw 1 [← LinearEquiv.comp_linearMap_eq_iff]
   rw [eq_comm]
   simp_rw [LinearMap.comp_assoc]
 
@@ -302,7 +302,7 @@ theorem symmMap_apply_eq_symmMap_symm_apply_iff (f : B →ₗ[ℂ] B) :
   simp_rw [LinearMap.star_eq_adjoint, hB.modAut_real,
     LinearMap.isSelfAdjoint_iff'.mp (hB.modAut_isSelfAdjoint _),
     ← linearMap_commute_modAut_pos_neg 1]
-  simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp, AlgEquiv.linearMap_comp_eq_iff,
+  simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp, LinearEquiv.linearMap_comp_eq_iff,
     LinearMap.comp_assoc, hB.modAut_symm]
 
 theorem Psi.real_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
@@ -322,7 +322,7 @@ by
     simp only [map_sum, LinearMap.real_sum, star_sum, this]
   intro a b
   simp_rw [rankOne_real, hA.Psi_apply, hA.Psi_toFun_apply,
-    star_tmul, map_tmul, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, unop_apply, op_apply, ←
+    star_tmul, map_tmul, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, unop_apply, op_apply, ←
     MulOpposite.op_star, MulOpposite.unop_op, star_star, QuantumSet.modAut_star,
     QuantumSet.modAut_apply_modAut, star_star, two_mul, neg_neg, sub_eq_add_neg,
     add_assoc, neg_add, add_neg_cancel_comm_assoc, neg_add_cancel_comm, add_comm]
@@ -347,7 +347,7 @@ theorem Psi.adjoint_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
   intro a b
   simp_rw [rankOneLm_adjoint, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
     star_tmul, ← MulOpposite.op_star, tenSwap_apply', star_star, map_tmul,
-    LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, unop_apply, MulOpposite.unop_op,
+    LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, unop_apply, MulOpposite.unop_op,
     QuantumSet.modAut_star, QuantumSet.modAut_apply_modAut,
     op_apply, sub_eq_add_neg, add_assoc, add_neg_cancel_comm_assoc, neg_add_self, add_zero]
 
@@ -364,7 +364,7 @@ theorem Psi.symmMap_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
   intro a b
   simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe, symmMap_rankOne_apply,
     QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
-    tenSwap_apply', map_tmul, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
+    tenSwap_apply', map_tmul, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
     unop_apply, MulOpposite.unop_op, QuantumSet.modAut_star,
     QuantumSet.modAut_apply_modAut, star_star, op_apply, sub_eq_add_neg,
     neg_add_cancel_comm, add_assoc, add_neg_cancel_comm_assoc]
@@ -382,7 +382,7 @@ theorem Psi.symmMap_symm_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
   intro a b
   simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe, symmMap_symm_rankOne_apply,
     QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
-    tenSwap_apply', map_tmul, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
+    tenSwap_apply', map_tmul, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
     unop_apply, MulOpposite.unop_op, QuantumSet.modAut_star,
     QuantumSet.modAut_apply_modAut, star_star, op_apply, sub_eq_add_neg, add_assoc,
     neg_add_cancel_comm_assoc, add_neg_self, add_zero, neg_neg, add_comm]

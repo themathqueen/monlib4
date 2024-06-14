@@ -60,15 +60,14 @@ local notation "id" => (1 : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
 
 private theorem commutes_with_mul''_adjoint [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)} (hf : f φ.matrix = φ.matrix) :
-    TensorProduct.map (f.toAlgEquiv.toLinearMap : (Matrix n n ℂ) →ₗ[ℂ] (Matrix n n ℂ))
-          (f.toAlgEquiv.toLinearMap : (Matrix n n ℂ) →ₗ[ℂ] (Matrix n n ℂ)) ∘ₗ
-        (LinearMap.adjoint m : (Matrix n n ℂ) →ₗ[ℂ] ((Matrix n n ℂ) ⊗[ℂ] (Matrix n n ℂ))) =
-      (LinearMap.adjoint m : (Matrix n n ℂ) →ₗ[ℂ] ((Matrix n n ℂ) ⊗[ℂ] (Matrix n n ℂ))) ∘ₗ f.toAlgEquiv.toLinearMap :=
+    TensorProduct.map f.toAlgEquiv.toLinearMap f.toAlgEquiv.toLinearMap
+      ∘ₗ Coalgebra.comul =
+    Coalgebra.comul ∘ₗ f.toAlgEquiv.toLinearMap :=
   by
   -- rw [LinearMap.comp_assoc]
   symm
   nth_rw 1 [←
-    LinearMap.adjoint_adjoint ((LinearMap.adjoint m : (Matrix n n ℂ) →ₗ[ℂ] (Matrix n n ℂ) ⊗[ℂ] (Matrix n n ℂ)) ∘ₗ f.toAlgEquiv.toLinearMap)]
+    LinearMap.adjoint_adjoint (Coalgebra.comul ∘ₗ f.toAlgEquiv.toLinearMap)]
   have :=
     (List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 0
           1).mp
@@ -78,7 +77,7 @@ private theorem commutes_with_mul''_adjoint [hφ : φ.IsFaithfulPosMap] [Nontriv
       f.symm.toAlgEquiv.toLinearMap (x * y) =
         f.symm.toAlgEquiv.toLinearMap x * f.symm.toAlgEquiv.toLinearMap y :=
     fun x y => by simp_rw [AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, _root_.map_mul]
-  rw [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, this, ←
+  rw [LinearMap.adjoint_comp, this,LinearMap.adjoint_adjoint, this, ←
     (commutes_with_mul'_iff _).mpr this', LinearMap.adjoint_comp, map_adjoint, ← this,
     LinearMap.adjoint_adjoint]
 

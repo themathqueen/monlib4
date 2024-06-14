@@ -18,9 +18,9 @@ import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
 #align_import quantum_graph.schur_idempotent
 
 /-!
- # Schur idempotent operator
+ # Schur product operator
 
- In this file we define the Schur idempotent operator and prove some basic properties.
+ In this file we define the Schur product operator and prove some basic properties.
 -/
 
 open scoped TensorProduct BigOperators
@@ -105,7 +105,7 @@ theorem schurMul_real (x y : A →ₗ[ℂ] B) :
   obtain ⟨α, β, rfl⟩ := x.exists_sum_rankOne
   obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rankOne
   simp only [map_sum, LinearMap.real_sum, LinearMap.sum_apply, schurMul.apply_rankOne]
-  simp_rw [rankOne_real, schurMul.apply_rankOne, ← _root_.map_mul, ← StarMul.star_mul]
+  simp_rw [rankOne_real, schurMul.apply_rankOne, ← QuantumSet.modAut_map_mul, ← StarMul.star_mul]
   rw [Finset.sum_comm]
 
 theorem schurMul_one_right_rankOne (a b : B) :
@@ -147,4 +147,4 @@ theorem Psi.schurMul (r₁ r₂ : ℝ)
   intro a b c d
   simp_rw [hA.Psi_apply, hA.Psi_toFun_apply, schurMul.apply_rankOne,
     hA.Psi_toFun_apply, Algebra.TensorProduct.tmul_mul_tmul,
-    ← MulOpposite.op_mul, ← StarMul.star_mul, ← _root_.map_mul]
+    ← MulOpposite.op_mul, ← StarMul.star_mul, ← QuantumSet.modAut_map_mul]

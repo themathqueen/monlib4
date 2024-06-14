@@ -36,27 +36,34 @@ The quantum set is also equipped with a `trace` functional on `A` such that `φ 
 
 -/
 
-attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
+-- attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 open Coalgebra in
 @[reducible]
 class QuantumSet (A : Type _)
   extends
     NormedAddCommGroupOfRing A,
-    -- PartialOrder A,
     InnerProductSpace ℂ A,
-    -- Coalgebra ℂ A,
-    -- Semiring A,
     StarRing A,
     StarModule ℂ A,
-    SMulCommClass ℂ A A, IsScalarTower ℂ A A,
-    -- StarOrderedRing A,
-    -- Algebra ℂ A
+    SMulCommClass ℂ A A,
+    IsScalarTower ℂ A A,
     Module.Finite ℂ A
-  where
+    -- PartialOrder A,
+    -- Algebra ℂ A,
+    -- Coalgebra ℂ A,
+    -- Semiring A,
+    -- StarOrderedRing A,
+    -- Algebra ℂ A,
+      where
+    -- isScalarTower ℂ A A
     -- /-- the inner product is given by `⟪·,·⟫ := counit (star · * ·)` -/
     -- inner_eq : ∀ x y : A, ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y)
-    /-- the modular automorphism `σ _` as an algebra isomorphism `A ≃ₐ[ℂ] A` -/
-    modAut : Π _ : ℝ, A ≃ₐ[ℂ] A
+    /-- the modular automorphism `σ _` as a linear isomorphism `A ≃ₗ[ℂ] A` -/
+    modAut : Π _ : ℝ, A ≃ₗ[ℂ] A
+    /-- the module automorphism is also an algebra isomorphism -/
+    modAut_map_mul : ∀ (r : ℝ) (x y : A), modAut r (x * y) = modAut r x * modAut r y
+    modAut_map_one : ∀ r, modAut r 1 = 1
+    -- modAux :=
     /-- the modular automorphism is an additive homomorphism from `ℝ` to
       `(A ≃ₐ[ℂ] A, add := · * ·, zero := 1)` -/
     modAut_mul : ∀ r s, modAut (r + s) = modAut r * modAut s
@@ -64,14 +71,17 @@ class QuantumSet (A : Type _)
     /-- applying star to `modAut r x` will give `modAut (-r) (star x)` -/
     modAut_star : ∀ r x, star (modAut r x) = modAut (-r) (star x)
     /-- the modular automorphism is also a coalgebra homomorphism -/
-    modAut_isAlgHom : ∀ r, (modAut r).toLinearMap.IsCoalgHom
+    modAut_isCoalgHom : ∀ r, (modAut r).toLinearMap.IsCoalgHom
     /-- the modular automorphism is symmetric with respect to the inner product,
       in other words, it is self-adjoint -/
     modAut_isSymmetric : ∀ r x y, ⟪modAut r x, y⟫_ℂ = ⟪x, modAut r y⟫_ℂ
     inner_star_left : ∀ x y z : A, ⟪x * y, z⟫_ℂ = ⟪y, star x * z⟫_ℂ
     inner_conj_left : ∀ x y z : A, ⟪x * y, z⟫_ℂ = ⟪x, z * modAut (-1) (star y)⟫_ℂ
+    n : Type*
+    n_isFintype : Fintype n
+    n_isDecidableEq : DecidableEq n
     /-- fix an orthonormal basis on `A` -/
-    onb : OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ A)) ℂ A
+    onb : OrthonormalBasis n ℂ A
 
 attribute [instance] QuantumSet.toNormedAddCommGroupOfRing
 attribute [instance] QuantumSet.toInnerProductSpace
@@ -79,17 +89,23 @@ attribute [instance] QuantumSet.toInnerProductSpace
 -- attribute [instance] QuantumSet.toStarOrderedRing
 attribute [instance] QuantumSet.toSMulCommClass
 attribute [instance] QuantumSet.toIsScalarTower
+attribute [instance] QuantumSet.n_isFintype
+attribute [instance] QuantumSet.n_isDecidableEq
 -- attribute [instance] QuantumSet.toCoalgebra
 -- attribute [simp] QuantumSet.inner_eq
 attribute [simp] QuantumSet.modAut_mul
+attribute [simp] QuantumSet.modAut_map_mul
+attribute [simp] QuantumSet.modAut_map_one
 attribute [simp] QuantumSet.modAut_zero
 attribute [simp] QuantumSet.inner_star_left
 attribute [simp] QuantumSet.inner_conj_left
 attribute [simp] QuantumSet.modAut_isSymmetric
 
+export QuantumSet (modAut n onb)
+
 instance QuantumSet.toAlgebra {A : Type*} [QuantumSet A] :
   Algebra ℂ A :=
-by infer_instance
+Algebra.ofIsScalarTowerSmulCommClass
 
 -- instance QuantumSet.toFiniteDimensionalHilbertAlgebra {A : Type*} [QuantumSet A] :
 --   FiniteDimensionalHilbertAlgebra ℂ A :=
@@ -197,20 +213,23 @@ theorem Psi_invFun_apply (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
 @[simp]
 theorem modAut_apply_modAut (t r : ℝ) (a : A) :
   hA.modAut t (hA.modAut r a) = hA.modAut (t + r) a :=
-by simp only [modAut_mul, AlgEquiv.mul_apply]
+by
+  simp only [modAut_mul, ← LinearMap.mul_apply, ← LinearEquiv.coe_toLinearMap]
+  simp only [LinearMap.mul_apply, LinearEquiv.coe_coe, LinearEquiv.coe_toLinearMap_mul]
 
 theorem Psi_left_inv (t r : ℝ) (x : A) (y : B) :
     Psi_invFun t r (Psi_toFun t r |x⟩⟨y|) = (|x⟩⟨y|).toLinearMap :=
   by
   simp_rw [Psi_toFun_apply, Psi_invFun_apply, MulOpposite.unop_op, star_star, modAut_apply_modAut,
-    add_left_neg, modAut_zero, AlgEquiv.one_apply]
+    add_left_neg, modAut_zero]
+  simp only [LinearEquiv.coe_one, id_eq]
 
 theorem Psi_right_inv (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
     Psi_toFun t r (Psi_invFun t r (x ⊗ₜ[ℂ] y)) = x ⊗ₜ[ℂ] y :=
   by
   rw [Psi_invFun_apply, Psi_toFun_apply]
-  simp_rw [modAut_apply_modAut, add_neg_self, modAut_zero, AlgEquiv.one_apply, star_star,
-    MulOpposite.op_unop]
+  simp_rw [modAut_apply_modAut, add_neg_self, modAut_zero]
+  simp only [LinearEquiv.coe_one, id_eq, star_star, MulOpposite.op_unop]
 
 @[simps]
 noncomputable def Psi
@@ -241,7 +260,7 @@ theorem LinearMap.adjoint_real_eq (f : A →ₗ[ℂ] B) :
   intro x
   apply ext_inner_right ℂ
   intro u
-  simp_rw [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply]
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap]
   nth_rw 1 [inner_conj']
   simp_rw [LinearMap.real_apply, star_star, LinearMap.adjoint_inner_right, modAut_isSymmetric,
     LinearMap.adjoint_inner_left, LinearMap.real_apply, modAut_star]

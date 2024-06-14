@@ -29,14 +29,14 @@ import Monlib.Preq.RCLikeLe
 import Monlib.Preq.Ites
 import Monlib.Preq.StarAlgEquiv
 import Monlib.QuantumGraph.Example
-import Monlib.QuantumGraph.Iso
-import Monlib.QuantumGraph.Mess
+-- import Monlib.QuantumGraph.Iso
+-- import Monlib.QuantumGraph.Mess
 import Monlib.QuantumGraph.Nontracial
-import Monlib.QuantumGraph.QamA
-import Monlib.QuantumGraph.QamAExample
+-- import Monlib.QuantumGraph.QamA
+-- import Monlib.QuantumGraph.QamAExample
 import Monlib.QuantumGraph.SchurMul
 import Monlib.QuantumGraph.Symm
-import Monlib.QuantumGraph.ToProjections
+-- import Monlib.QuantumGraph.ToProjections
 import Monlib.RepTheory.AutMat
 import Monlib.LinearAlgebra.MyIps.Basic
 import Monlib.LinearAlgebra.MyIps.Frob
