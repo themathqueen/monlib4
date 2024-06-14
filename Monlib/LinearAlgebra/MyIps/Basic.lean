@@ -15,6 +15,14 @@ This files provides some useful and obvious results for linear maps and continuo
 
 -/
 
+theorem _root_.ext_inner_left_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+    (x y : E) : x = y ↔ ∀ v : E, inner x v = (inner y v : 𝕜) :=
+  by
+  constructor
+  · intro h v
+    simp_rw [h]
+  · rw [← sub_eq_zero, ← @inner_self_eq_zero 𝕜, inner_sub_left, sub_eq_zero]
+    intro h; exact h _
 
 theorem inner_self_re {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     (x : E) : (RCLike.re (inner x x : 𝕜) : 𝕜) = inner x x := by simp only [inner_self_ofReal_re]

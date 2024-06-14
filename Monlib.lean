@@ -2,7 +2,7 @@
 -- Import modules here that should be built as part of the library.
 
 import Monlib.LinearAlgebra.End
-import Monlib.LinearAlgebra.Blackbox
+-- import Monlib.LinearAlgebra.Blackbox
 import Monlib.LinearAlgebra.DirectSumFromTo
 import Monlib.LinearAlgebra.InnerAut
 import Monlib.LinearAlgebra.InvariantSubmodule
@@ -34,7 +34,7 @@ import Monlib.QuantumGraph.Mess
 import Monlib.QuantumGraph.Nontracial
 import Monlib.QuantumGraph.QamA
 import Monlib.QuantumGraph.QamAExample
-import Monlib.QuantumGraph.SchurIdempotent
+import Monlib.QuantumGraph.SchurMul
 import Monlib.QuantumGraph.Symm
 import Monlib.QuantumGraph.ToProjections
 import Monlib.RepTheory.AutMat

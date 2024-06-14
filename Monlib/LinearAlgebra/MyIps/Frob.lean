@@ -239,7 +239,7 @@ theorem frobenius_equation [hφ : φ.IsFaithfulPosMap] :
     (LinearMap.mul' ℂ ℍ ⊗ₘ id) ∘ₗ (υ⁻¹) ∘ₗ (id ⊗ₘ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ))) =
       (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.mul' ℂ ℍ :=
 by
-  apply FiniteDimensionalCoAlgebra.rTensor_mul_comp_lTensor_mul_adjoint
+  apply Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint
     (Module.Dual.inner_eq_counit φ)
 
 local notation "l(" x ")" => x →ₗ[ℂ] x
@@ -320,7 +320,7 @@ theorem frobenius_equation' [hφ : φ.IsFaithfulPosMap] :
     ((id ⊗ₘ LinearMap.mul' ℂ ℍ) ∘ₗ υ ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ⊗ₘ id) =
       LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ LinearMap.mul' ℂ ℍ :=
 by
-  apply FiniteDimensionalCoAlgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
+  apply Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
   let σ : ℍ ≃ₐ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
   refine ⟨σ, λ _ _ _ => ?_⟩
   simp only [σ, hφ.sig_apply, neg_neg, Matrix.PosDef.rpow_one_eq_self,
@@ -346,7 +346,7 @@ set_option synthInstance.checkSynthOrder false in
 theorem LinearMap.mul'_coassoc [hφ : φ.IsFaithfulPosMap] :
     rTensor ℍ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) =
       υ⁻¹ ∘ₗ lTensor ℍ (LinearMap.adjoint (LinearMap.mul' ℂ ℍ)) ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) :=
-by simp_rw [← FiniteDimensionalCoAlgebra.comul_eq_mul_adjoint, Coalgebra.coassoc_symm.symm]
+by simp_rw [← Coalgebra.comul_eq_mul_adjoint, Coalgebra.coassoc_symm.symm]
 
 end
 

@@ -346,15 +346,6 @@ theorem invertible_iff_inner_map_self_pos
     rw [ha.1, inner_zero_left, zero_re', lt_self_iff_false] at h
     exact h
 
-theorem _root_.ext_inner_left_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x y : E) : x = y ↔ ∀ v : E, inner x v = (inner y v : 𝕜) :=
-  by
-  constructor
-  · intro h v
-    simp_rw [h]
-  · rw [← sub_eq_zero, ← @inner_self_eq_zero 𝕜, inner_sub_left, sub_eq_zero]
-    intro h; exact h _
-
 theorem invertiblePos (T : E →ₗ[𝕜] E) [hTi : Invertible T]
     (hT : T.IsPositive) : IsPositive (⅟ T) :=
   by

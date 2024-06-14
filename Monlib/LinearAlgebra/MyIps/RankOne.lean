@@ -436,3 +436,33 @@ theorem LinearMap.comp_rankOne  {𝕜 E₁ E₂ E₃ : Type _} [RCLike 𝕜] [No
   by
   ext
   simp_rw [LinearMap.comp_apply, ContinuousLinearMap.coe_coe, rankOne_apply, _root_.map_smul]
+
+
+theorem _root_.rankOne_smul_smul {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂]
+    (x : E₁) (y : E₂) (r₁ r₂ : 𝕜) :
+    rankOne (r₁ • x) (star r₂ • y) = (r₁ * r₂) • (rankOne x y : _ →L[𝕜] _) := by
+  simp only [rankOne.smul_apply, rankOne.apply_smul, smul_smul, starRingEnd_apply, star_star, mul_comm]
+
+theorem _root_.rankOne_lm_smul_smul {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂]
+    (x : E₁) (y : E₂) (r₁ r₂ : 𝕜) :
+    (rankOne (r₁ • x) (star r₂ • y) : _ →L[𝕜] _).toLinearMap =
+      (r₁ * r₂) • ((rankOne x y : _ →L[𝕜] _) : _ →ₗ[𝕜] _) :=
+  by rw [rankOne_smul_smul, ContinuousLinearMap.coe_smul]
+
+/- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
+theorem _root_.rankOne_lm_sum_sum {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂]
+    {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (f : ι₁ → E₁) (g : ι₂ → E₂) :
+    (rankOne (∑ i, f i) (∑ i, g i) : _ →L[𝕜] _).toLinearMap =
+      ∑ i, ∑ j, ((rankOne (f i) (g j) : _ →L[𝕜] _) : _ →ₗ[𝕜] _) :=
+  by simp_rw [sum_rankOne, rankOne_sum, ContinuousLinearMap.coe_sum]
+
+theorem ContinuousLinearMap.linearMap_adjoint {𝕜 B C : Type _} [RCLike 𝕜] [NormedAddCommGroup B]
+    [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
+    [FiniteDimensional 𝕜 C] (x : B →L[𝕜] C) :
+    LinearMap.adjoint (x : B →ₗ[𝕜] C) =
+      @ContinuousLinearMap.adjoint 𝕜 _ _ _ _ _ _ _ (FiniteDimensional.complete 𝕜 B)
+        (FiniteDimensional.complete 𝕜 C) x :=
+  rfl

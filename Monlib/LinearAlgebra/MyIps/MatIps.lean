@@ -59,6 +59,28 @@ theorem inner_pi_eq_sum [∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :
     ⟪x, y⟫_ℂ = ∑ i, ⟪x i, y i⟫_ℂ :=
   rfl
 
+theorem blockDiagonal'_includeBlock_trace' {R k : Type _} [CommSemiring R] [Fintype k]
+    [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+    (j : k) (x : Matrix (s j) (s j) R) :
+    (blockDiagonal' (includeBlock x)).trace = x.trace :=
+  by
+  calc
+    (blockDiagonal' (includeBlock x)).trace
+      = ∑ i, (includeBlock x i).trace :=
+      by simp_rw [Matrix.trace, Matrix.diag, blockDiagonal'_apply, dif_pos,
+      Finset.sum_sigma']; rfl
+    _ = ∑ i, ∑ a, includeBlock x i a a := rfl
+    _ = ∑ i, ∑ a, dite (j = i) (fun h => by rw [← h]; exact x)
+      (fun _ => (0 : Matrix (s i) (s i) R)) a a :=
+      by simp_rw [includeBlock_apply]; rfl
+    _ = ∑ i, ∑ a, dite (j = i) (fun h =>
+        (by rw [← h]; exact x : Matrix (s i) (s i) R) a a)
+      (fun _ => (0 : R)) := by congr; ext; congr; ext; aesop
+    _ = x.trace := by
+        simp_rw [Finset.sum_dite_irrel, Finset.sum_const_zero,
+          Finset.sum_dite_eq, Finset.mem_univ, if_true]
+        rfl
+
 theorem Module.Dual.pi.matrixBlock_apply {i : k} : Module.Dual.pi.matrixBlock ψ i = (ψ i).matrix :=
   by
   simp only [Module.Dual.pi.matrixBlock, Finset.sum_apply, includeBlock_apply, Finset.sum_dite_eq',
@@ -923,55 +945,11 @@ lemma _root_.isometry_iff_inner_norm'
   (f : E →ₗ[R] F) :
   (∀ x, ‖f x‖ = ‖x‖) ↔ ∀ x y, ⟪f x, f y⟫_R = ⟪x, y⟫_R :=
 by rw [← isometry_iff_inner, isometry_iff_norm]
+
 lemma _root_.seminormedAddGroup_norm_eq_norm_NormedAddCommGroup
   {E : Type _} [_root_.NormedAddCommGroup E] (x : E) :
-  @norm E SeminormedAddGroup.toNorm x = @norm E NormedAddCommGroup.toNorm x :=
+  @norm E SeminormedAddGroup.toNorm x = @norm E _root_.NormedAddCommGroup.toNorm x :=
 rfl
-
-lemma _root_.LinearMap.apply_eq_id {R M : Type*} [Semiring R] [AddCommMonoid M]
-  [Module R M] {f : M →ₗ[R] M} :
-  (∀ x, f x = x) ↔ f = 1 :=
-by simp_rw [LinearMap.ext_iff, LinearMap.one_apply]
-
-theorem general_starAlgEquiv_is_isometry_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
-    (f : PiMat ℂ k s ≃⋆ₐ[ℂ] PiMat ℂ k s) :
-    List.TFAE
-      [LinearMap.adjoint f.toAlgEquiv.toLinearMap =
-          f.symm.toAlgEquiv.toLinearMap,
-        Module.Dual.pi ψ ∘ₗ f.toAlgEquiv.toLinearMap = Module.Dual.pi ψ,
-        ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
-        ∀ x : PiMat ℂ k s, ‖f x‖ = ‖x‖] :=
-by
-  tfae_have 4 ↔ 1
-  · have : ∀ x : PiMat ℂ k s, ‖x‖ = Real.sqrt (RCLike.re ⟪x, x⟫_ℂ) :=
-    fun x => norm_eq_sqrt_inner _
-    have this' : ∀ x : PiMat ℂ k s, (RCLike.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ :=
-    fun x => inner_self_re _
-    simp_rw [this, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
-      ← Complex.ofReal_inj, this', ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
-    have :
-      ∀ x y,
-        ⟪f x, f y⟫_ℂ - ⟪x, y⟫_ℂ =
-          ⟪(LinearMap.adjoint f.toAlgEquiv.toLinearMap ∘ₗ f.toAlgEquiv.toLinearMap - 1) x, y⟫_ℂ :=
-      by
-      intro x y
-      simp only [LinearMap.sub_apply, LinearMap.one_apply, inner_sub_left, LinearMap.comp_apply,
-        LinearMap.adjoint_inner_left, StarAlgEquiv.coe_toAlgEquiv, AlgEquiv.toLinearMap_apply]
-    simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
-      LinearMap.one_comp]
-  rw [tfae_4_iff_1]
-  tfae_have 3 ↔ 2
-  · simp_rw [inner_eq, ← map_star f, ← _root_.map_mul f,
-      LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-      StarAlgEquiv.coe_toAlgEquiv]
-    refine' ⟨fun h x => _, fun h x y => h _⟩
-    rw [← one_mul x, ← star_one]
-    exact h _ _
-  rw [← tfae_3_iff_2]
-  simp_rw [← StarAlgEquiv.coe_toAlgEquiv, ← AlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_left,
-    ← ext_inner_left_iff, ← LinearMap.comp_apply, _root_.LinearMap.apply_eq_id,
-    StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
-  tfae_finish
 
 theorem starAlgEquiv_is_isometry_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     [∀ i, Nontrivial (s i)] (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ) :
