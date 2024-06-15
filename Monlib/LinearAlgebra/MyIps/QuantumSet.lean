@@ -66,7 +66,7 @@ class QuantumSet (A : Type _)
     -- modAux :=
     /-- the modular automorphism is an additive homomorphism from `ℝ` to
       `(A ≃ₐ[ℂ] A, add := · * ·, zero := 1)` -/
-    modAut_mul : ∀ r s, modAut (r + s) = modAut r * modAut s
+    modAut_trans : ∀ r s, modAut r ≪≫ₗ modAut s = modAut (r + s)
     modAut_zero : modAut 0 = 1
     /-- applying star to `modAut r x` will give `modAut (-r) (star x)` -/
     modAut_star : ∀ r x, star (modAut r x) = modAut (-r) (star x)
@@ -93,7 +93,7 @@ attribute [instance] QuantumSet.n_isFintype
 attribute [instance] QuantumSet.n_isDecidableEq
 -- attribute [instance] QuantumSet.toCoalgebra
 -- attribute [simp] QuantumSet.inner_eq
-attribute [simp] QuantumSet.modAut_mul
+attribute [simp] QuantumSet.modAut_trans
 attribute [simp] QuantumSet.modAut_map_mul
 attribute [simp] QuantumSet.modAut_map_one
 attribute [simp] QuantumSet.modAut_zero
@@ -214,8 +214,8 @@ theorem Psi_invFun_apply (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
 theorem modAut_apply_modAut (t r : ℝ) (a : A) :
   hA.modAut t (hA.modAut r a) = hA.modAut (t + r) a :=
 by
-  simp only [modAut_mul, ← LinearMap.mul_apply, ← LinearEquiv.coe_toLinearMap]
-  simp only [LinearMap.mul_apply, LinearEquiv.coe_coe, LinearEquiv.coe_toLinearMap_mul]
+  simp only [modAut_trans, ← LinearMap.comp_apply, ← LinearEquiv.coe_toLinearMap,
+    LinearEquiv.comp_coe, add_comm]
 
 theorem Psi_left_inv (t r : ℝ) (x : A) (y : B) :
     Psi_invFun t r (Psi_toFun t r |x⟩⟨y|) = (|x⟩⟨y|).toLinearMap :=

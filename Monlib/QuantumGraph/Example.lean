@@ -235,18 +235,18 @@ theorem Qam.Nontracial.TrivialGraph.qam [Nonempty p] {φ : Module.Dual ℂ (Matr
   exact Qam.Nontracial.delta_ne_zero hφ₂
 
 -- -- set_option synthInstance.maxHeartbeats 50000 in
--- theorem Pi.Qam.Nontracial.TrivialGraph.qam [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
---     (Pi.Qam.trivialGraph hφ hφ₂) •ₛ (Pi.Qam.trivialGraph hφ hφ₂) =
---       (Pi.Qam.trivialGraph hφ hφ₂) :=
---   by
---   rw [Pi.Qam.trivialGraph_eq]
---   simp_rw [_root_.map_smul, LinearMap.smul_apply, smul_smul, schurMul]
---   simp only [LinearMap.coe_mk, AddHom.coe_mk]
---   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id, LinearMap.id_comp,
---     LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul, mul_assoc]
---   rw [inv_mul_cancel _, mul_one, LinearMap.one_eq_id]
---   exact Pi.Qam.Nontracial.delta_ne_zero hφ₂
+theorem Pi.Qam.Nontracial.TrivialGraph.qam [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
+    (Pi.Qam.trivialGraph hφ hφ₂) •ₛ (Pi.Qam.trivialGraph hφ hφ₂) =
+      (Pi.Qam.trivialGraph hφ hφ₂) :=
+  by
+  rw [Pi.Qam.trivialGraph_eq]
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, smul_smul, schurMul]
+  simp only [LinearMap.coe_mk, AddHom.coe_mk]
+  simp_rw [TensorProduct.map_one, LinearMap.one_eq_id, LinearMap.id_comp,
+    LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form _ hφ₂, smul_smul, mul_assoc]
+  rw [inv_mul_cancel _, mul_one, LinearMap.one_eq_id]
+  exact Pi.Qam.Nontracial.delta_ne_zero hφ₂
 
 theorem Qam.Nontracial.TrivialGraph.qam.is_self_adjoint [Nonempty p]
     {φ : Module.Dual ℂ (Matrix p p ℂ)} [hφ : φ.IsFaithfulPosMap] {δ : ℂ}
@@ -284,14 +284,14 @@ theorem Qam.Nontracial.trivialGraph [Nonempty p] {φ : Module.Dual ℂ (Matrix p
     inv_mul_cancel (Qam.Nontracial.delta_ne_zero hφ₂), one_smul, LinearMap.one_eq_id]
 
 -- set_option synthInstance.maxHeartbeats 50000 in
--- theorem Pi.Qam.Nontracial.trivialGraph [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
---     (Pi.Qam.trivialGraph hφ hφ₂) •ₛ 1 = (1 : ℍ →ₗ[ℂ] ℍ) :=
---   by
---   rw [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply]
---   simp_rw [schurIdempotent_apply_apply, TensorProduct.map_one, LinearMap.one_eq_id,
---     LinearMap.id_comp, LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form hφ₂, smul_smul,
---     inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, LinearMap.one_eq_id]
+theorem Pi.Qam.Nontracial.trivialGraph [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
+    (Pi.Qam.trivialGraph hφ hφ₂) •ₛ 1 = (1 : ℍ →ₗ[ℂ] ℍ) :=
+  by
+  rw [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply]
+  simp_rw [schurMul_apply_apply, TensorProduct.map_one, LinearMap.one_eq_id,
+    LinearMap.id_comp, LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form _ hφ₂, smul_smul,
+    inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, LinearMap.one_eq_id]
 
 theorem Qam.refl_idempotent_one_one_of_delta [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)}
     [hφ : φ.IsFaithfulPosMap] {δ : ℂ} (hφ₂ : φ.matrix⁻¹.trace = δ) :
@@ -299,11 +299,11 @@ theorem Qam.refl_idempotent_one_one_of_delta [Nonempty p] {φ : Module.Dual ℂ 
   simp_rw [schurMul_apply_apply, TensorProduct.map_one, LinearMap.one_comp,
     LinearMap.mul'_comp_mul'_adjoint_of_delta_form _ hφ₂]
 
--- theorem Pi.Qam.refl_idempotent_one_one_of_delta [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
---     schurIdempotent (1 : l(ℍ)) (1 : l(ℍ)) = δ • (1 : l(ℍ)) := by
---   simp_rw [schurIdempotent_apply_apply, TensorProduct.map_one, LinearMap.one_comp,
---     LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form hφ₂]
+theorem Pi.Qam.refl_idempotent_one_one_of_delta [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
+    schurMul (1 : l(ℍ)) (1 : l(ℍ)) = δ • (1 : l(ℍ)) := by
+  simp_rw [schurMul_apply_apply, TensorProduct.map_one, LinearMap.one_comp,
+    LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form _ hφ₂]
 
 -- set_option synthInstance.maxHeartbeats 50000 in
 theorem Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
@@ -316,15 +316,15 @@ theorem Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
     inv_mul_cancel (Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
   rw [smul_eq_zero_iff_right (inv_ne_zero (Qam.Nontracial.delta_ne_zero hφ₂))]
 
--- theorem Pi.Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
---     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
---     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
---     schurIdempotent x 1 = 0 ↔ schurIdempotent (δ⁻¹ • (x + 1)) 1 = 1 :=
---   by
---   simp_rw [_root_.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
---     Pi.Qam.refl_idempotent_one_one_of_delta hφ₂, smul_add, smul_smul,
---     inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
---   rw [smul_eq_zero_iff_right (inv_ne_zero (Pi.Qam.Nontracial.delta_ne_zero hφ₂))]
+theorem Pi.Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [Nonempty p]
+    [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+    (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
+    schurMul x 1 = 0 ↔ schurMul (δ⁻¹ • (x + 1)) 1 = 1 :=
+  by
+  simp_rw [_root_.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
+    Pi.Qam.refl_idempotent_one_one_of_delta hφ₂, smul_add, smul_smul,
+    inv_mul_cancel (Pi.Qam.Nontracial.delta_ne_zero hφ₂), one_smul, add_left_eq_self]
+  rw [smul_eq_zero_iff_right (inv_ne_zero (Pi.Qam.Nontracial.delta_ne_zero hφ₂))]
 
 theorem Qam.refl_idempotent_completeGraph_left
   (x : A →ₗ[ℂ] B) : (Qam.completeGraph B A) •ₛ x = x :=
@@ -432,20 +432,20 @@ noncomputable def Pi.Qam.complement'' [Nonempty p] [∀ i, Nontrivial (n i)] {δ
     l(ℍ) :=
   x - Pi.Qam.trivialGraph hφ hφ₂
 
-theorem single_schurIdempotent_real {φ : Module.Dual ℂ (Matrix p p ℂ)}
+theorem single_schurMul_real {φ : Module.Dual ℂ (Matrix p p ℂ)}
   [φ.IsFaithfulPosMap] (x y : l(Matrix p p ℂ)) :
     (x •ₛ y).real = y.real •ₛ x.real :=
 schurMul_real _ _
 
-theorem schurIdempotent_reflexive_of_isReal {φ : Module.Dual ℂ (Matrix p p ℂ)}
+theorem schurMul_reflexive_of_isReal {φ : Module.Dual ℂ (Matrix p p ℂ)}
     [hφ : φ.IsFaithfulPosMap] {x : l(Matrix p p ℂ)} (hx : x.IsReal) :
     x •ₛ 1 = 1 ↔ 1 •ₛ x = 1 :=
 by
-  rw [LinearMap.real_inj_eq, single_schurIdempotent_real, LinearMap.real_one, x.isReal_iff.mp hx]
+  rw [LinearMap.real_inj_eq, single_schurMul_real, LinearMap.real_one, x.isReal_iff.mp hx]
 
--- theorem Pi.schurIdempotent_reflexive_of_isReal [hφ : ∀ i, (φ i).IsFaithfulPosMap] {x : l(ℍ)}
---     (hx : x.IsReal) : schurIdempotent x 1 = 1 ↔ schurIdempotent 1 x = 1 := by
---   rw [LinearMap.real_inj_eq, schurIdempotent_real, LinearMap.real_one, x.isReal_iff.mp hx]
+theorem Pi.schurMul_reflexive_of_isReal [hφ : ∀ i, (φ i).IsFaithfulPosMap] {x : l(ℍ)}
+    (hx : x.IsReal) : schurMul x 1 = 1 ↔ schurMul 1 x = 1 := by
+  rw [LinearMap.real_inj_eq, schurMul_real, LinearMap.real_one, x.isReal_iff.mp hx]
 
 theorem Qam.complement''_is_irreflexive_iff [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)} {δ : ℂ}
     [hφ : φ.IsFaithfulPosMap] (hφ₂ : φ.matrix⁻¹.trace = δ) {x : l(Matrix p p ℂ)}
@@ -461,25 +461,25 @@ theorem Qam.complement''_is_irreflexive_iff [Nonempty p] {φ : Module.Dual ℂ (
   constructor <;> rintro ⟨h1, h2⟩ <;> refine' ⟨_, h2⟩
   all_goals
     simp only [Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply, h2,
-      (schurIdempotent_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
+      (schurMul_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
     exact h1
 
--- theorem Pi.Qam.complement''_is_irreflexive_iff [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
---     (hx : x.IsReal) : QamIrreflexive (Pi.Qam.complement'' hφ hφ₂ x) ↔ QamReflexive x :=
---   by
---   rw [QamReflexive_iff, QamIrreflexive_iff]
---   have t1 := @Pi.Qam.Nontracial.TrivialGraph.qam p _ _ n _ _ φ _ _ δ _ hφ₂
---   have t2 := @Pi.Qam.Nontracial.trivialGraph p _ _ n _ _ φ _ _ δ _ hφ₂
---   have t3 : schurIdempotent (Pi.Qam.complement'' hφ hφ₂ x) 1 = 0 ↔ schurIdempotent x 1 = 1 := by
---     simp_rw [Pi.Qam.complement'', map_sub, LinearMap.sub_apply, t2, sub_eq_zero]
---   rw [t3]
---   simp_rw [Pi.Qam.complement'', map_sub, LinearMap.sub_apply, t1, sub_sub]
---   constructor <;> rintro ⟨h1, h2⟩ <;> refine' ⟨_, h2⟩
---   all_goals
---     simp only [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply, h2,
---       (Pi.schurIdempotent_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
---     rw [h1]
+theorem Pi.Qam.complement''_is_irreflexive_iff [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
+    (hx : x.IsReal) : QamIrreflexive (Pi.Qam.complement'' hφ hφ₂ x) ↔ QamReflexive x :=
+  by
+  rw [QamReflexive_iff, QamIrreflexive_iff]
+  have t1 := @Pi.Qam.Nontracial.TrivialGraph.qam p _ _ n _ _ φ _ _ δ _ hφ₂
+  have t2 := @Pi.Qam.Nontracial.trivialGraph p _ _ n _ _ φ _ _ δ _ hφ₂
+  have t3 : schurMul (Pi.Qam.complement'' hφ hφ₂ x) 1 = 0 ↔ schurMul x 1 = 1 := by
+    simp_rw [Pi.Qam.complement'', map_sub, LinearMap.sub_apply, t2, sub_eq_zero]
+  rw [t3]
+  simp_rw [Pi.Qam.complement'', map_sub, LinearMap.sub_apply, t1, sub_sub]
+  constructor <;> rintro ⟨h1, h2⟩ <;> refine' ⟨_, h2⟩
+  all_goals
+    simp only [Pi.Qam.trivialGraph_eq, _root_.map_smul, LinearMap.smul_apply, h2,
+      (Pi.schurMul_reflexive_of_isReal hx).mp h2, sub_self, add_zero, sub_left_inj] at h1 ⊢
+    rw [h1]
 
 noncomputable def Pi.Qam.irreflexiveComplement [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     (hφ : ∀ i, (φ i).IsFaithfulPosMap) (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) (x : l(ℍ)) :
@@ -511,23 +511,23 @@ theorem Pi.Qam.Nontracial.trivialGraph.isReal [Nonempty p] [∀ i, Nontrivial (n
   rw [← hφ₂ (Nonempty.some (by infer_instance))]
   rw [trace_star, (hφ _).matrixIsPosDef.inv.1.eq]
 
--- theorem Pi.Qam.irreflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
---     (hx : x.IsReal) : (Pi.Qam.irreflexiveComplement hφ hφ₂ x).IsReal := by
---   rw [LinearMap.isReal_iff, Pi.Qam.irreflexiveComplement, LinearMap.real_sub, LinearMap.real_sub,
---     (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
---     (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
---       (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
---     (LinearMap.isReal_iff x).mp hx]
+theorem Pi.Qam.irreflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
+    (hx : x.IsReal) : (Pi.Qam.irreflexiveComplement hφ hφ₂ x).IsReal := by
+  rw [LinearMap.isReal_iff, Pi.Qam.irreflexiveComplement, LinearMap.real_sub, LinearMap.real_sub,
+    (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Qam.Nontracial.CompleteGraph.isReal,
+    (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
+      (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
+    (LinearMap.isReal_iff x).mp hx]
 
--- theorem Pi.Qam.reflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
---     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
---     (hx : x.IsReal) : (Pi.Qam.reflexiveComplement hφ hφ₂ x).IsReal := by
---   rw [LinearMap.isReal_iff, Pi.Qam.reflexiveComplement, LinearMap.real_sub, LinearMap.real_add,
---     (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Pi.Qam.Nontracial.CompleteGraph.isReal,
---     (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
---       (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
---     (LinearMap.isReal_iff x).mp hx]
+theorem Pi.Qam.reflexiveComplement.isReal [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
+    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)}
+    (hx : x.IsReal) : (Pi.Qam.reflexiveComplement hφ hφ₂ x).IsReal := by
+  rw [LinearMap.isReal_iff, Pi.Qam.reflexiveComplement, LinearMap.real_sub, LinearMap.real_add,
+    (LinearMap.isReal_iff (Qam.completeGraph ℍ ℍ)).mp Qam.Nontracial.CompleteGraph.isReal,
+    (LinearMap.isReal_iff (Pi.Qam.trivialGraph hφ hφ₂)).mp
+      (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂),
+    (LinearMap.isReal_iff x).mp hx]
 
 theorem Pi.Qam.irreflexiveComplement_irreflexiveComplement [Nonempty p] [∀ i, Nontrivial (n i)]
     {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ)
@@ -559,23 +559,23 @@ theorem Qam.complement'_eq {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
     Qam.complement' a = Qam.completeGraph E₁ E₂ - a :=
   rfl
 
--- theorem Pi.Qam.irreflexiveComplement_is_irreflexive_qam_iff_irreflexive_qam [Nonempty p]
---     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
---     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)} (hx : x.IsReal) :
---     QamIrreflexive (Pi.Qam.irreflexiveComplement hφ hφ₂ x) ↔ QamIrreflexive x :=
---   by
---   rw [Pi.Qam.irreflexiveComplement, sub_sub, ← Qam.complement'_eq,
---     Qam.complement'_is_irreflexive_iff, ← Pi.Qam.complement''_is_irreflexive_iff hφ₂,
---     Pi.Qam.complement'', add_sub_cancel']
---   ·
---     rw [LinearMap.isReal_iff, LinearMap.real_add, x.isReal_iff.mp hx,
---       (Pi.Qam.trivialGraph hφ hφ₂).isReal_iff.mp (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂)]
+theorem Pi.Qam.irreflexiveComplement_is_irreflexive_qam_iff_irreflexive_qam [Nonempty p]
+    [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+    (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)} (hx : x.IsReal) :
+    QamIrreflexive (Pi.Qam.irreflexiveComplement hφ hφ₂ x) ↔ QamIrreflexive x :=
+  by
+  rw [Pi.Qam.irreflexiveComplement, sub_sub, ← Qam.complement'_eq,
+    Qam.complement'_is_irreflexive_iff, ← Pi.Qam.complement''_is_irreflexive_iff hφ₂,
+    Pi.Qam.complement'', add_sub_cancel_left]
+  ·
+    rw [LinearMap.isReal_iff, LinearMap.real_add, x.isReal_iff.mp hx,
+      (Pi.Qam.trivialGraph hφ hφ₂).isReal_iff.mp (Pi.Qam.Nontracial.trivialGraph.isReal hφ₂)]
 
--- theorem Pi.Qam.reflexive_complment_is_reflexive_qam_iff_reflexive_qam [Nonempty p]
---     [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
---     (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)} (hx : x.IsReal) :
---     QamReflexive (Pi.Qam.reflexiveComplement hφ hφ₂ x) ↔ QamReflexive x :=
---   by
---   rw [Pi.Qam.reflexiveComplement, ← sub_sub_eq_add_sub, ← Qam.complement'_eq,
---     Qam.complement'_is_reflexive_iff]
---   exact Pi.Qam.complement''_is_irreflexive_iff hφ₂ hx
+theorem Pi.Qam.reflexive_complment_is_reflexive_qam_iff_reflexive_qam [Nonempty p]
+    [∀ i, Nontrivial (n i)] {δ : ℂ} [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+    (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) {x : l(ℍ)} (hx : x.IsReal) :
+    QamReflexive (Pi.Qam.reflexiveComplement hφ hφ₂ x) ↔ QamReflexive x :=
+  by
+  rw [Pi.Qam.reflexiveComplement, ← sub_sub_eq_add_sub, ← Qam.complement'_eq,
+    Qam.complement'_is_reflexive_iff]
+  exact Pi.Qam.complement''_is_irreflexive_iff hφ₂ hx
