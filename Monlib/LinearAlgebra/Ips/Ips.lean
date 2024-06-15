@@ -6,7 +6,7 @@ Authors: Monica Omar
 import Monlib.LinearAlgebra.InvariantSubmodule
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Analysis.InnerProductSpace.Spectrum
-import Monlib.LinearAlgebra.MyIps.Symm
+import Monlib.LinearAlgebra.Ips.Symm
 
 #align_import linear_algebra.my_ips.ips
 

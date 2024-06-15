@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Analysis.InnerProductSpace.Spectrum
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.RankOne
 import Monlib.LinearAlgebra.End
 import Mathlib.Analysis.InnerProductSpace.Positive
 import Monlib.Preq.RCLikeLe

@@ -4,11 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.InvariantSubmodule
-import Monlib.LinearAlgebra.MyIps.Basic
-import Monlib.LinearAlgebra.MyIps.Ips
+import Monlib.LinearAlgebra.Ips.Basic
+import Monlib.LinearAlgebra.Ips.Ips
 import Mathlib.Analysis.VonNeumannAlgebra.Basic
-import Monlib.LinearAlgebra.MyIps.MinimalProj
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.MinimalProj
+import Monlib.LinearAlgebra.Ips.RankOne
 
 #align_import linear_algebra.my_ips.vn
 

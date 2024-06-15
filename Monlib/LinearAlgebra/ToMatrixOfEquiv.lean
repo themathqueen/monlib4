@@ -3,9 +3,9 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.InnerAut
-import Monlib.LinearAlgebra.MyMatrix.Reshape
+import Monlib.LinearAlgebra.Matrix.Reshape
 
 #align_import linear_algebra.to_matrix_of_equiv
 

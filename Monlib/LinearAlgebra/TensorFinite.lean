@@ -7,8 +7,8 @@ import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Mathlib.LinearAlgebra.FiniteDimensional
 import Mathlib.Analysis.RCLike.Basic
 import Monlib.LinearAlgebra.IsReal
-import Monlib.LinearAlgebra.MyIps.OpUnop
-import Monlib.LinearAlgebra.MyIps.MulOp
+import Monlib.LinearAlgebra.Ips.OpUnop
+import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.MyTensorProduct
 
 #align_import linear_algebra.tensor_finite

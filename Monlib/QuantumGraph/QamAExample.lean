@@ -6,9 +6,9 @@ Authors: Monica Omar
 import Monlib.QuantumGraph.Nontracial
 import Monlib.QuantumGraph.Iso
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
-import Monlib.LinearAlgebra.MyIps.MatIps
+import Monlib.LinearAlgebra.Ips.MatIps
 import Monlib.QuantumGraph.QamA
-import Monlib.LinearAlgebra.MyMatrix.Spectra
+import Monlib.LinearAlgebra.Matrix.Spectra
 
 #align_import quantum_graph.qam_A_example
 

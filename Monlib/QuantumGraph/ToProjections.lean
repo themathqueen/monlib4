@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.QuantumGraph.Nontracial
-import Monlib.LinearAlgebra.MyIps.MinimalProj
+import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.QuantumGraph.Iso
 
 #align_import quantum_graph.to_projections

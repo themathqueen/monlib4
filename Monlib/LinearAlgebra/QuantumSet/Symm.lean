@@ -1,8 +1,8 @@
 import Monlib.LinearAlgebra.IsReal
 -- import Monlib.LinearAlgebra.MyIps.Nontracial
-import Monlib.LinearAlgebra.MyIps.OpUnop
-import Monlib.LinearAlgebra.MyIps.QuantumSet
-import Monlib.LinearAlgebra.MyIps.MulOp
+import Monlib.LinearAlgebra.Ips.OpUnop
+import Monlib.LinearAlgebra.QuantumSet.Basic
+import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.TensorFinite
 
 #align_import quantum_graph.symm

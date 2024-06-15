@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Analysis.InnerProductSpace.Adjoint
-import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.Ips.Basic
 import Monlib.LinearAlgebra.IsProj'
 
 #align_import linear_algebra.my_ips.rank_one

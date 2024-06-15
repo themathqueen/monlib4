@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.MySpec
-import Monlib.LinearAlgebra.MyMatrix.Basic
-import Monlib.LinearAlgebra.MyMatrix.IsAlmostHermitian
-import Monlib.LinearAlgebra.MyMatrix.PosEqLinearMapIsPositive
+import Monlib.LinearAlgebra.Matrix.Basic
+import Monlib.LinearAlgebra.Matrix.IsAlmostHermitian
+import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.MyTensorProduct
 import Monlib.RepTheory.AutMat
 import Monlib.Preq.StarAlgEquiv

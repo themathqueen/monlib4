@@ -3,10 +3,10 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyIps.Functional
-import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
+import Monlib.LinearAlgebra.Ips.Functional
+import Monlib.LinearAlgebra.Matrix.PosDefRpow
 import Monlib.LinearAlgebra.Mul''
-import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.Ips.Basic
 import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
 

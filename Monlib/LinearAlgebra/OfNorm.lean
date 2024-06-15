@@ -1,6 +1,6 @@
-import Monlib.LinearAlgebra.MyIps.Basic
-import Monlib.LinearAlgebra.MyIps.Ips
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.Basic
+import Monlib.LinearAlgebra.Ips.Ips
+import Monlib.LinearAlgebra.Ips.RankOne
 import Monlib.Preq.RCLikeLe
 import Mathlib.Topology.Algebra.Module.WeakDual
 import Mathlib.Topology.MetricSpace.PseudoMetric

@@ -3,10 +3,10 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyMatrix.PosEqLinearMapIsPositive
+import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.Preq.RCLikeLe
 import Monlib.LinearAlgebra.IsReal
-import Monlib.LinearAlgebra.MyMatrix.IncludeBlock
+import Monlib.LinearAlgebra.Matrix.IncludeBlock
 
 #align_import linear_algebra.my_ips.functional
 

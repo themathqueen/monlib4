@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.InnerAut
-import Monlib.LinearAlgebra.MyMatrix.Spectra
+import Monlib.LinearAlgebra.Matrix.Spectra
 import Monlib.Preq.Equiv
 
 #align_import linear_algebra.blackbox

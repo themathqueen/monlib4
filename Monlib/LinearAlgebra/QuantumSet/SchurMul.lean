@@ -5,12 +5,12 @@ Authors: Monica Omar
 -/
 -- import Monlib.LinearAlgebra.MyIps.Nontracial
 -- import Monlib.LinearAlgebra.MyIps.MatIps
-import Monlib.LinearAlgebra.MyIps.QuantumSet
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
+import Monlib.LinearAlgebra.QuantumSet.Basic
+import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.IsReal
 -- import Monlib.LinearAlgebra.MyIps.Frob
 import Monlib.LinearAlgebra.TensorFinite
-import Monlib.LinearAlgebra.MyIps.OpUnop
+import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.CoalgebraFiniteDimensional

@@ -7,7 +7,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Monlib.Preq.Finset
-import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.Ips.Basic
 
 #align_import linear_algebra.my_ips.tensor_hilbert
 

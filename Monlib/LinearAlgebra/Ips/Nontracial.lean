@@ -4,16 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.Mul''
-import Monlib.LinearAlgebra.MyMatrix.PosDefRpow
+import Monlib.LinearAlgebra.Matrix.PosDefRpow
 import Monlib.LinearAlgebra.InnerAut
-import Monlib.LinearAlgebra.MyMatrix.Reshape
+import Monlib.LinearAlgebra.Matrix.Reshape
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
-import Monlib.LinearAlgebra.MyIps.Functional
-import Monlib.LinearAlgebra.MyIps.MatIps
-import Monlib.LinearAlgebra.MyIps.MulOp
-import Monlib.LinearAlgebra.MyMatrix.IncludeBlock
-import Monlib.LinearAlgebra.MyIps.OpUnop
+import Monlib.LinearAlgebra.Ips.TensorHilbert
+import Monlib.LinearAlgebra.Ips.Functional
+import Monlib.LinearAlgebra.Ips.MatIps
+import Monlib.LinearAlgebra.Ips.MulOp
+import Monlib.LinearAlgebra.Matrix.IncludeBlock
+import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.tensorProduct
 

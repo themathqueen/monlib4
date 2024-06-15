@@ -7,7 +7,7 @@ import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Monlib.LinearAlgebra.MyTensorProduct
 import Monlib.LinearAlgebra.Nacgor
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
+import Monlib.LinearAlgebra.Ips.TensorHilbert
 
 #align_import linear_algebra.mul''
 

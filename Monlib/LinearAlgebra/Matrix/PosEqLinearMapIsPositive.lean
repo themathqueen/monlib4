@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.LinearAlgebra.Matrix.PosDef
-import Monlib.LinearAlgebra.MyIps.Pos
-import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.Ips.Pos
+import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.End
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.RankOne
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Monlib.Preq.Ites
 import Monlib.Preq.RCLikeLe

@@ -1,4 +1,4 @@
-import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.InnerAut
 
 #align_import linear_algebra.my_matrix.spectra

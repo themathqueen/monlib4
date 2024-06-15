@@ -3,8 +3,8 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
-import Monlib.LinearAlgebra.MyIps.Nontracial
+import Monlib.LinearAlgebra.Ips.TensorHilbert
+import Monlib.LinearAlgebra.Ips.Nontracial
 import Monlib.LinearAlgebra.DirectSumFromTo
 import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.CoalgebraFiniteDimensional

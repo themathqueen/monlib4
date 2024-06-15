@@ -3,12 +3,12 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.RankOne
 -- import Monlib.LinearAlgebra.MyIps.Functional
 import Monlib.LinearAlgebra.Nacgor
 import Mathlib.RingTheory.Coalgebra.Basic
-import Monlib.LinearAlgebra.MyIps.MulOp
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
+import Monlib.LinearAlgebra.Ips.MulOp
+import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.IsReal
@@ -43,13 +43,13 @@ class QuantumSet (A : Type _)
   extends
     NormedAddCommGroupOfRing A,
     InnerProductSpace ℂ A,
+    -- Algebra ℂ A,
     StarRing A,
     StarModule ℂ A,
     SMulCommClass ℂ A A,
     IsScalarTower ℂ A A,
     Module.Finite ℂ A
     -- PartialOrder A,
-    -- Algebra ℂ A,
     -- Coalgebra ℂ A,
     -- Semiring A,
     -- StarOrderedRing A,

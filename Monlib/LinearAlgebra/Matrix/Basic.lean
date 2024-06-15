@@ -5,10 +5,10 @@ Authors: Monica Omar
 -/
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.LinearAlgebra.Matrix.Spectrum
-import Monlib.LinearAlgebra.MyMatrix.Conj
+import Monlib.LinearAlgebra.Matrix.Conj
 import Mathlib.LinearAlgebra.Trace
 import Monlib.Preq.Finset
-import Monlib.LinearAlgebra.MyIps.RankOne
+import Monlib.LinearAlgebra.Ips.RankOne
 import Mathlib.Data.Matrix.Kronecker
 import Mathlib.Analysis.InnerProductSpace.PiL2
 

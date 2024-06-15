@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyMatrix.Conj
+import Monlib.LinearAlgebra.Matrix.Conj
 
 #align_import linear_algebra.my_matrix.reshape
 

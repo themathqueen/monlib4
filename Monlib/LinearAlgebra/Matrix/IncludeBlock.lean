@@ -11,7 +11,7 @@ import Mathlib.LinearAlgebra.Matrix.Hermitian
 import Monlib.LinearAlgebra.MyTensorProduct
 import Mathlib.Data.Matrix.Kronecker
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
-import Monlib.LinearAlgebra.MyMatrix.PiMat
+import Monlib.LinearAlgebra.Matrix.PiMat
 
 #align_import linear_algebra.my_matrix.includeBlock
 

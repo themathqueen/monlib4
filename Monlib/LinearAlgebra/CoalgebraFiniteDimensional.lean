@@ -2,7 +2,7 @@ import Monlib.LinearAlgebra.CoalgebraLemmas
 import Mathlib.RingTheory.Coalgebra.Equiv
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Monlib.LinearAlgebra.Nacgor
-import Monlib.LinearAlgebra.MyIps.TensorHilbert
+import Monlib.LinearAlgebra.Ips.TensorHilbert
 
 variable {R A : Type*}
 local notation "lT" => LinearMap.lTensor
@@ -58,7 +58,7 @@ lemma TensorProduct.rid_adjoint {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGro
 --   NormedAddCommGroupOfRing A, InnerProductSpace R A, SMulCommClass R A A,
 --   IsScalarTower R A A, Finite R A where
 
-@[instance]
+@[reducible, instance]
 noncomputable
 def Coalgebra.ofFiniteDimensionalHilbertAlgebra
   [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]

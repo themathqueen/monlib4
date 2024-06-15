@@ -1,4 +1,4 @@
-import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.Matrix.Basic
 import Mathlib.Data.Matrix.PEquiv
 
 #align_import preq.equiv

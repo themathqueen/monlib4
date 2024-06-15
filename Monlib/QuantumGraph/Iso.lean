@@ -77,7 +77,8 @@ private theorem commutes_with_mul''_adjoint [hφ : φ.IsFaithfulPosMap] [Nontriv
       f.symm.toAlgEquiv.toLinearMap (x * y) =
         f.symm.toAlgEquiv.toLinearMap x * f.symm.toAlgEquiv.toLinearMap y :=
     fun x y => by simp_rw [AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, _root_.map_mul]
-  rw [LinearMap.adjoint_comp, this,LinearMap.adjoint_adjoint, this, ←
+  norm_cast at *
+  rw [LinearMap.adjoint_comp, this, LinearMap.adjoint_adjoint, this, ←
     (commutes_with_mul'_iff _).mpr this', LinearMap.adjoint_comp, map_adjoint, ← this,
     LinearMap.adjoint_adjoint]
 

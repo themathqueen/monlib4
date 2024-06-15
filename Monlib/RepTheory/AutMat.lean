@@ -8,11 +8,11 @@ import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Analysis.InnerProductSpace.Spectrum
-import Monlib.LinearAlgebra.MyMatrix.Basic
+import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.Preq.Set
 import Monlib.Preq.Submodule
 import Monlib.Preq.StarAlgEquiv
-import Monlib.LinearAlgebra.MyMatrix.PiMat
+import Monlib.LinearAlgebra.Matrix.PiMat
 import Monlib.LinearAlgebra.LmulRmul
 
 #align_import rep_theory.aut_mat

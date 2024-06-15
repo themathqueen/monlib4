@@ -3,14 +3,14 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyIps.Pos
-import Monlib.LinearAlgebra.MyIps.Ips
-import Monlib.LinearAlgebra.MyIps.Symm
+import Monlib.LinearAlgebra.Ips.Pos
+import Monlib.LinearAlgebra.Ips.Ips
+import Monlib.LinearAlgebra.Ips.Symm
 import Monlib.RepTheory.AutMat
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Mathlib.LinearAlgebra.Matrix.Hermitian
-import Monlib.LinearAlgebra.MyIps.RankOne
-import Monlib.LinearAlgebra.MyIps.Basic
+import Monlib.LinearAlgebra.Ips.RankOne
+import Monlib.LinearAlgebra.Ips.Basic
 import Monlib.LinearAlgebra.IsProj'
 import Mathlib.Analysis.InnerProductSpace.Orthogonal
 
