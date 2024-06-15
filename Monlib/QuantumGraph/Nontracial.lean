@@ -73,11 +73,14 @@ local notation "τ⁻¹" =>
 
 local notation "id" => (1 : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
 
+set_option synthInstance.checkSynthOrder false in
+attribute [instance] Module.Dual.isNormedAddCommGroupOfRing
+
 set_option linter.unusedVariables false in
 @[reducible, nolint unusedArguments]
 noncomputable def Qam.reflIdempotent (hφ : φ.IsFaithfulPosMap) :=
 -- l(ℍ) →ₗ[ℂ] l(ℍ) →ₗ[ℂ] l(ℍ) :=
-@schurMul _ _ hφ.quantumSet hφ.quantumSet
+@schurMul _ _ _ _ hφ.quantumSet hφ.quantumSet
 
 theorem Qam.RankOne.reflIdempotent_eq [hφ : φ.IsFaithfulPosMap] (a b c d : ℍ) :
     Qam.reflIdempotent hφ ↑|a⟩⟨b| ↑|c⟩⟨d| = |a * c⟩⟨b * d| :=
@@ -133,7 +136,7 @@ QuantumSet.modAut_zero
 private theorem comp_sig_eq  [hφ : φ.IsFaithfulPosMap] (t : ℝ) (f g : ℍ →ₗ[ℂ] ℍ) :
     f ∘ₗ (hφ.sig t).toLinearMap = g ↔ f = g ∘ₗ (hφ.sig (-t)).toLinearMap :=
 by
-  rw [LinearEquiv.linearMap_comp_eq_iff, hφ.sig_symm_eq]
+  rw [AlgEquiv.linearMap_comp_eq_iff, hφ.sig_symm_eq]
 
 theorem LinearMap.IsReal.adjoint_isReal_iff_commute_with_sig  [hφ : φ.IsFaithfulPosMap] {f : ℍ →ₗ[ℂ] ℍ} (hf : f.IsReal) :
     (LinearMap.adjoint f).IsReal ↔ Commute f (hφ.sig 1).toLinearMap :=
@@ -201,7 +204,7 @@ by
 theorem sig_comp_eq_iff [hφ : φ.IsFaithfulPosMap]  (t : ℝ) (A B : ℍ →ₗ[ℂ] ℍ) :
     (hφ.sig t).toLinearMap.comp A = B ↔ A = (hφ.sig (-t)).toLinearMap.comp B :=
 by
-  rw [LinearEquiv.comp_linearMap_eq_iff, Module.Dual.IsFaithfulPosMap.sig_symm_eq]
+  rw [AlgEquiv.comp_linearMap_eq_iff, Module.Dual.IsFaithfulPosMap.sig_symm_eq]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_real [hφ : φ.IsFaithfulPosMap]  {t : ℝ} :
     (hφ.sig t).toLinearMap.real = (hφ.sig (-t)).toLinearMap :=
@@ -275,7 +278,7 @@ private theorem Psi.symmetric_rank_one [hφ : φ.IsFaithfulPosMap] (a b : ℍ) (
   by
   simp_rw [sigop, Qam.RankOne.symmetric_eq, Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, tenSwap_apply, map_tmul, LinearMap.comp_apply,
-    unop_apply, op_apply, MulOpposite.unop_op, LinearEquiv.coe_toLinearMap,
+    unop_apply, op_apply, MulOpposite.unop_op, AlgEquiv.toLinearMap_apply,
     Module.Dual.IsFaithfulPosMap.sig_conjTranspose, Module.Dual.IsFaithfulPosMap.sig_apply_sig,
     conjTranspose_conjTranspose, sub_add_comm, ← sub_eq_add_neg, sub_sub_cancel_left]
   ring_nf
@@ -296,7 +299,7 @@ private theorem Psi.symmetric'_rank_one [hφ : φ.IsFaithfulPosMap] (a b : ℍ) 
   by
   simp_rw [sigop, Qam.RankOne.symmetric'_eq, Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, tenSwap_apply, map_tmul, LinearMap.comp_apply,
-    op_apply, unop_apply, MulOpposite.unop_op, LinearEquiv.coe_toLinearMap,
+    op_apply, unop_apply, MulOpposite.unop_op, AlgEquiv.toLinearMap_apply,
     Module.Dual.IsFaithfulPosMap.sig_conjTranspose, neg_neg,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, conjTranspose_conjTranspose]
   ring_nf
@@ -316,7 +319,7 @@ private theorem Psi.idempotent_rank_one [hφ : φ.IsFaithfulPosMap] (a b c d : �
   by
   simp_rw [Qam.RankOne.reflIdempotent_eq, Module.Dual.IsFaithfulPosMap.psi_apply,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, Algebra.TensorProduct.tmul_mul_tmul,
-    op_apply, ← MulOpposite.op_mul, ← conjTranspose_mul, Module.Dual.IsFaithfulPosMap.sig.map_mul']
+    op_apply, ← MulOpposite.op_mul, ← conjTranspose_mul, _root_.map_mul]
 
 set_option synthInstance.maxHeartbeats 0 in
 theorem Psi.reflIdempotent [hφ : φ.IsFaithfulPosMap] (A B : l(ℍ)) (t s : ℝ) :
@@ -353,8 +356,8 @@ private theorem Psi.adjoint_rank_one [hφ : φ.IsFaithfulPosMap] (a b : ℍ) (t 
   simp_rw [sigop] at this
   rw [← this]
   rw [LinearMap.comp_apply, map_tmul, LinearMap.comp_apply, tenSwap_apply, op_apply,
-    MulOpposite.unop_op, Module.Dual.IsFaithfulPosMap.sig_conjTranspose, LinearEquiv.coe_toLinearMap,
-    LinearMap.comp_apply, unop_apply, MulOpposite.unop_op, LinearEquiv.coe_toLinearMap,
+    MulOpposite.unop_op, Module.Dual.IsFaithfulPosMap.sig_conjTranspose, AlgEquiv.toLinearMap_apply,
+    LinearMap.comp_apply, unop_apply, MulOpposite.unop_op, AlgEquiv.toLinearMap_apply,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig hφ, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig]
   ring_nf
@@ -404,7 +407,7 @@ x.induction_on
   (fun _ _ =>
     by simp only [map_tmul, tensor_op_star_apply, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
     LinearMap.comp_apply, op_apply, unop_apply, MulOpposite.unop_op, MulOpposite.op_unop,
-    LinearEquiv.coe_toLinearMap, sigop, star_eq_conjTranspose])
+    AlgEquiv.toLinearMap_apply, sigop, star_eq_conjTranspose])
   (fun z w hz hw => by simp only [_root_.map_add, hz, hw, StarAddMonoid.star_add])
 
 theorem op_sig_unop_comp [hφ : φ.IsFaithfulPosMap] (t s : ℝ) : sigop hφ t ∘ₗ sigop hφ s = sigop hφ (t + s) :=
@@ -412,7 +415,7 @@ theorem op_sig_unop_comp [hφ : φ.IsFaithfulPosMap] (t s : ℝ) : sigop hφ t �
   rw [LinearMap.ext_iff]
   intro x
   simp only [LinearMap.comp_apply, sigop, unop_op, Module.Dual.IsFaithfulPosMap.sig_apply_sig,
-    LinearEquiv.coe_toLinearMap]
+    AlgEquiv.toLinearMap_apply]
 
 theorem map_sig_injective [hφ : φ.IsFaithfulPosMap] (t s : ℝ) :
     Function.Injective ⇑((hφ.sig t).toLinearMap ⊗ₘ sigop hφ s) :=
@@ -429,7 +432,7 @@ theorem map_sig_injective [hφ : φ.IsFaithfulPosMap] (t s : ℝ) :
       Module.Dual.IsFaithfulPosMap.sig_comp_sig, neg_add_self,
       Module.Dual.IsFaithfulPosMap.sig_zero', LinearMap.one_comp, op_comp_unop,
       TensorProduct.map_one, LinearMap.one_apply]
-    simp only [LinearEquiv.coe_toLinearMap_one, sigop, Module.Dual.IsFaithfulPosMap.sig_zero']
+    simp only [AlgEquiv.one_toLinearMap, sigop, Module.Dual.IsFaithfulPosMap.sig_zero']
     simp only [LinearMap.id_comp, op_comp_unop, LinearMap.one_eq_id, TensorProduct.map_id]
     rfl
   rw [this a]
@@ -454,7 +457,7 @@ theorem map_sig_eq [hφ : φ.IsFaithfulPosMap] (t s : ℝ) :
   simp only [this, map_tmul, LinearMap.comp_apply, LinearMap.mulLeft_apply,
     LinearMap.mulRight_apply, Algebra.TensorProduct.tmul_mul_tmul, sigop, unop_op,
     Module.Dual.IsFaithfulPosMap.sig_apply, LinearMap.coe_mk, AddHom.coe_mk, ← MulOpposite.op_mul,
-    Matrix.mul_assoc, LinearEquiv.coe_toLinearMap, LinearEquiv.coe_coe,
+    Matrix.mul_assoc, AlgEquiv.toLinearMap_apply,
     MulOpposite.coe_opLinearEquiv, MulOpposite.coe_opLinearEquiv_symm, unop_apply, op_apply,
     MulOpposite.unop_op]
 
@@ -602,14 +605,14 @@ theorem Psi.real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (t s : �
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, tensor_op_star_apply, unop_op,
     conjTranspose_conjTranspose, map_tmul, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, sigop, LinearMap.comp_apply,
-    LinearEquiv.coe_toLinearMap, star_eq_conjTranspose]
+    AlgEquiv.toLinearMap_apply, star_eq_conjTranspose]
   simp only [neg_add_rev, neg_neg, two_mul, add_assoc, add_neg_cancel_right]
   simp_rw [sub_add, sub_eq_add_neg, add_neg_self, add_zero,
     add_assoc, add_neg_self, add_zero]
 
 theorem sigop_zero [hφ : φ.IsFaithfulPosMap] : sigop hφ 0 = 1 := by
   rw [sigop, Module.Dual.IsFaithfulPosMap.sig_zero']
-  simp only [LinearEquiv.coe_toLinearMap_one, LinearMap.id_comp, op_comp_unop]
+  simp only [AlgEquiv.one_toLinearMap, LinearMap.one_comp, op_comp_unop]
 
 theorem Qam.isReal_and_idempotent_iff_psi_orthogonal_projection [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) :
     Qam.reflIdempotent hφ A A = A ∧ A.IsReal ↔
@@ -620,7 +623,7 @@ theorem Qam.isReal_and_idempotent_iff_psi_orthogonal_projection [hφ : φ.IsFait
   rw [LinearMap.isReal_iff, ← Function.Injective.eq_iff (hφ.psi 0 (1 / 2)).injective,
     Psi.reflIdempotent, Psi.real, MulZeroClass.mul_zero, Module.Dual.IsFaithfulPosMap.sig_zero',
     one_div, mul_inv_cancel (two_ne_zero' ℝ), sub_self, sigop_zero]
-  simp only [LinearEquiv.coe_toLinearMap_one, LinearMap.one_eq_id, TensorProduct.map_id,
+  simp only [AlgEquiv.one_toLinearMap, LinearMap.one_eq_id, TensorProduct.map_id,
     LinearMap.id_apply, IsIdempotentElem]
 
 set_option maxHeartbeats 0 in
@@ -633,7 +636,7 @@ theorem sig_map_sigop_comp_psi [hφ : φ.IsFaithfulPosMap] (t s r q : ℝ) :
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
   simp_rw [Function.comp_apply, map_sum, Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, map_tmul, sigop, LinearMap.comp_apply, unop_op,
-    LinearEquiv.coe_toLinearMap, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
+    AlgEquiv.toLinearMap_apply, Module.Dual.IsFaithfulPosMap.sig_conjTranspose,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig, neg_sub, sub_eq_add_neg, add_comm]
 
 theorem sig_map_sigop_apply_psi [hφ : φ.IsFaithfulPosMap] (t s r q : ℝ) (A : ℍ →ₗ[ℂ] ℍ) :

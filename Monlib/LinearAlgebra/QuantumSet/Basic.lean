@@ -36,18 +36,32 @@ The quantum set is also equipped with a `trace` functional on `A` such that `φ 
 
 -/
 
+@[reducible]
+class InnerProductAlgebra (A : Type*) [NormedAddCommGroupOfRing A]
+  extends InnerProductSpace ℂ A, Algebra ℂ A where
+attribute [instance] InnerProductAlgebra.toInnerProductSpace
+attribute [instance] InnerProductAlgebra.toAlgebra
+
+@[reducible]
+class InnerProductStarAlgebra (A : Type*) [NormedAddCommGroupOfRing A]
+  extends InnerProductAlgebra A, StarRing A, StarModule ℂ A where
+attribute [instance] InnerProductStarAlgebra.toInnerProductAlgebra
+attribute [instance] InnerProductStarAlgebra.toStarRing
+attribute [instance] InnerProductStarAlgebra.toStarModule
+
 -- attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 open Coalgebra in
 @[reducible]
-class QuantumSet (A : Type _)
+class QuantumSet (A : Type _) [NormedAddCommGroupOfRing A]
   extends
-    NormedAddCommGroupOfRing A,
-    InnerProductSpace ℂ A,
-    -- Algebra ℂ A,
-    StarRing A,
-    StarModule ℂ A,
-    SMulCommClass ℂ A A,
-    IsScalarTower ℂ A A,
+    InnerProductStarAlgebra A,
+    -- NormedAddCommGroupOfRing A,
+    -- InnerProductSpace ℂ A,
+    -- -- Algebra ℂ A,
+    -- StarRing A,
+    -- StarModule ℂ A,
+    -- SMulCommClass ℂ A A,
+    -- IsScalarTower ℂ A A,
     Module.Finite ℂ A
     -- PartialOrder A,
     -- Coalgebra ℂ A,
@@ -59,14 +73,14 @@ class QuantumSet (A : Type _)
     -- /-- the inner product is given by `⟪·,·⟫ := counit (star · * ·)` -/
     -- inner_eq : ∀ x y : A, ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y)
     /-- the modular automorphism `σ _` as a linear isomorphism `A ≃ₗ[ℂ] A` -/
-    modAut : Π _ : ℝ, A ≃ₗ[ℂ] A
-    /-- the module automorphism is also an algebra isomorphism -/
-    modAut_map_mul : ∀ (r : ℝ) (x y : A), modAut r (x * y) = modAut r x * modAut r y
-    modAut_map_one : ∀ r, modAut r 1 = 1
+    modAut : Π _ : ℝ, A ≃ₐ[ℂ] A
+    -- /-- the module automorphism is also an algebra isomorphism -/
+    -- modAut_map_mul : ∀ (r : ℝ) (x y : A), modAut r (x * y) = modAut r x * modAut r y
+    -- modAut_map_one : ∀ r, modAut r 1 = 1
     -- modAux :=
     /-- the modular automorphism is an additive homomorphism from `ℝ` to
       `(A ≃ₐ[ℂ] A, add := · * ·, zero := 1)` -/
-    modAut_trans : ∀ r s, modAut r ≪≫ₗ modAut s = modAut (r + s)
+    modAut_trans : ∀ r s, (modAut r).trans (modAut s) = modAut (r + s)
     modAut_zero : modAut 0 = 1
     /-- applying star to `modAut r x` will give `modAut (-r) (star x)` -/
     modAut_star : ∀ r x, star (modAut r x) = modAut (-r) (star x)
@@ -83,19 +97,20 @@ class QuantumSet (A : Type _)
     /-- fix an orthonormal basis on `A` -/
     onb : OrthonormalBasis n ℂ A
 
-attribute [instance] QuantumSet.toNormedAddCommGroupOfRing
-attribute [instance] QuantumSet.toInnerProductSpace
+-- attribute [instance] QuantumSet.toNormedAddCommGroupOfRing
+-- attribute [instance] QuantumSet.toInnerProductSpace
 -- attribute [instance] QuantumSet.toPartialOrder
 -- attribute [instance] QuantumSet.toStarOrderedRing
-attribute [instance] QuantumSet.toSMulCommClass
-attribute [instance] QuantumSet.toIsScalarTower
+-- attribute [instance] QuantumSet.toSMulCommClass
+-- attribute [instance] QuantumSet.toIsScalarTower
+attribute [instance] QuantumSet.toInnerProductStarAlgebra
 attribute [instance] QuantumSet.n_isFintype
 attribute [instance] QuantumSet.n_isDecidableEq
 -- attribute [instance] QuantumSet.toCoalgebra
 -- attribute [simp] QuantumSet.inner_eq
 attribute [simp] QuantumSet.modAut_trans
-attribute [simp] QuantumSet.modAut_map_mul
-attribute [simp] QuantumSet.modAut_map_one
+-- attribute [simp] QuantumSet.modAut_map_mul
+-- attribute [simp] QuantumSet.modAut_map_one
 attribute [simp] QuantumSet.modAut_zero
 attribute [simp] QuantumSet.inner_star_left
 attribute [simp] QuantumSet.inner_conj_left
@@ -103,22 +118,24 @@ attribute [simp] QuantumSet.modAut_isSymmetric
 
 export QuantumSet (modAut n onb)
 
-instance QuantumSet.toAlgebra {A : Type*} [QuantumSet A] :
-  Algebra ℂ A :=
-Algebra.ofIsScalarTowerSmulCommClass
+-- instance QuantumSet.toAlgebra {A : Type*} [NormedAddCommGroupOfRing A] [QuantumSet A] :
+--   Algebra ℂ A :=
+-- Algebra.ofIsScalarTowerSmulCommClass
 
 -- instance QuantumSet.toFiniteDimensionalHilbertAlgebra {A : Type*} [QuantumSet A] :
 --   FiniteDimensionalHilbertAlgebra ℂ A :=
 -- by infer_instance
 
-theorem lmul_adjoint {B : Type _} [hB : QuantumSet B] [FiniteDimensional ℂ B] (a : B) :
+variable {A B : Type _} [NormedAddCommGroupOfRing B] [NormedAddCommGroupOfRing A]
+  [hA : QuantumSet A] [hB : QuantumSet B]
+theorem lmul_adjoint (a : B) :
     LinearMap.adjoint (lmul a : B →ₗ[ℂ] B) = lmul (star a) :=
   by
   rw [LinearMap.ext_iff_inner_map]
   intro u
   simp_rw [LinearMap.adjoint_inner_left, lmul_apply, hB.inner_star_left, star_star]
 
-lemma QuantumSet.inner_eq_counit' {B : Type*} [hB : QuantumSet B] :
+lemma QuantumSet.inner_eq_counit' :
   (⟪(1 : B), ·⟫_ℂ) = Coalgebra.counit :=
 by
   simp_rw [Coalgebra.counit]
@@ -128,13 +145,13 @@ by
   simp_rw [LinearMap.adjoint_inner_right, Algebra.linearMap_apply,
     Algebra.algebraMap_eq_smul_one, inner_smul_left, inner]
 
-lemma QuantumSet.inner_eq_counit {B : Type*} [hB : QuantumSet B] (x y : B) :
+lemma QuantumSet.inner_eq_counit (x y : B) :
   ⟪x, y⟫_ℂ = Coalgebra.counit (star x * y) :=
 calc ⟪x, y⟫_ℂ = ⟪x * 1, y⟫_ℂ := by rw [mul_one]
   _ = ⟪(1 : B), star x * y⟫_ℂ := hB.inner_star_left x 1 y
   _ = Coalgebra.counit (star x * y) := by rw [← inner_eq_counit']
 
-theorem rmul_adjoint {B : Type*} [hB : QuantumSet B] (a : B) :
+theorem rmul_adjoint (a : B) :
     LinearMap.adjoint (rmul a : B →ₗ[ℂ] B) = rmul (hB.modAut (-1) (star a)) :=
   by
   rw [LinearMap.ext_iff_inner_map]
@@ -143,21 +160,20 @@ theorem rmul_adjoint {B : Type*} [hB : QuantumSet B] (a : B) :
   nth_rw 1 [← inner_conj_symm]
   rw [hB.inner_conj_left, inner_conj_symm]
 
-lemma QuantumSet.inner_conj {A : Type*} [hA : QuantumSet A] (a b : A) :
+lemma QuantumSet.inner_conj (a b : A) :
   ⟪a, b⟫_ℂ = ⟪star b, (hA.modAut (-1) (star a))⟫_ℂ :=
 calc ⟪a, b⟫_ℂ = ⟪1 * a, b⟫_ℂ := by rw [one_mul]
   _ = ⟪1, b * hA.modAut (-1) (star a)⟫_ℂ := by rw [inner_conj_left]
   _ = starRingEnd ℂ ⟪b * hA.modAut (-1) (star a), 1⟫_ℂ := by rw [inner_conj_symm]
   _ = starRingEnd ℂ ⟪hA.modAut (-1) (star a), star b⟫_ℂ := by rw [inner_star_left, mul_one]
   _ = ⟪star b, hA.modAut (-1) (star a)⟫_ℂ := by rw [inner_conj_symm]
-lemma QuantumSet.inner_conj' {A : Type*} [hA : QuantumSet A] (a b : A) :
+lemma QuantumSet.inner_conj' (a b : A) :
   ⟪a, b⟫_ℂ = ⟪hA.modAut (-1) (star b), star a⟫_ℂ :=
 calc ⟪a, b⟫_ℂ = starRingEnd ℂ ⟪b, a⟫_ℂ := by rw [inner_conj_symm]
   _ = starRingEnd ℂ ⟪star a, hA.modAut (-1) (star b)⟫_ℂ := by rw [inner_conj]
   _ = ⟪hA.modAut (-1) (star b), star a⟫_ℂ := by rw [inner_conj_symm]
 
 namespace QuantumSet
-variable {A B : Type*} [hA : QuantumSet A] [hB : QuantumSet B]
 open scoped TensorProduct
 noncomputable
 def Psi_toFun
@@ -214,22 +230,21 @@ theorem Psi_invFun_apply (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
 theorem modAut_apply_modAut (t r : ℝ) (a : A) :
   hA.modAut t (hA.modAut r a) = hA.modAut (t + r) a :=
 by
-  simp only [modAut_trans, ← LinearMap.comp_apply, ← LinearEquiv.coe_toLinearMap,
-    LinearEquiv.comp_coe, add_comm]
+  rw [← AlgEquiv.trans_apply, modAut_trans, add_comm]
 
 theorem Psi_left_inv (t r : ℝ) (x : A) (y : B) :
     Psi_invFun t r (Psi_toFun t r |x⟩⟨y|) = (|x⟩⟨y|).toLinearMap :=
   by
   simp_rw [Psi_toFun_apply, Psi_invFun_apply, MulOpposite.unop_op, star_star, modAut_apply_modAut,
     add_left_neg, modAut_zero]
-  simp only [LinearEquiv.coe_one, id_eq]
+  simp only [AlgEquiv.one_apply]
 
 theorem Psi_right_inv (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
     Psi_toFun t r (Psi_invFun t r (x ⊗ₜ[ℂ] y)) = x ⊗ₜ[ℂ] y :=
   by
   rw [Psi_invFun_apply, Psi_toFun_apply]
   simp_rw [modAut_apply_modAut, add_neg_self, modAut_zero]
-  simp only [LinearEquiv.coe_one, id_eq, star_star, MulOpposite.op_unop]
+  simp only [AlgEquiv.one_apply, star_star, MulOpposite.op_unop]
 
 @[simps]
 noncomputable def Psi
@@ -249,7 +264,6 @@ noncomputable def Psi
 
 end QuantumSet
 
-variable {A B : Type*} [hA : QuantumSet A] [hB : QuantumSet B]
 open QuantumSet
 theorem LinearMap.adjoint_real_eq (f : A →ₗ[ℂ] B) :
     (LinearMap.adjoint f).real =
@@ -260,7 +274,7 @@ theorem LinearMap.adjoint_real_eq (f : A →ₗ[ℂ] B) :
   intro x
   apply ext_inner_right ℂ
   intro u
-  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap]
+  simp_rw [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply]
   nth_rw 1 [inner_conj']
   simp_rw [LinearMap.real_apply, star_star, LinearMap.adjoint_inner_right, modAut_isSymmetric,
     LinearMap.adjoint_inner_left, LinearMap.real_apply, modAut_star]

@@ -16,14 +16,14 @@ theorem Module.Dual.IsFaithfulPosMap.sig_trans_sig [hφ : φ.IsFaithfulPosMap] (
     (hφ.sig x).trans (hφ.sig y) = hφ.sig (x + y) :=
   by
   ext1
-  simp_rw [LinearEquiv.trans_apply, Module.Dual.IsFaithfulPosMap.sig_apply_sig, add_comm]
+  simp_rw [AlgEquiv.trans_apply, Module.Dual.IsFaithfulPosMap.sig_apply_sig, add_comm]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_comp_sig  [hφ : φ.IsFaithfulPosMap] (x y : ℝ) :
     (hφ.sig x).toLinearMap.comp (hφ.sig y).toLinearMap =
       (hφ.sig (x + y)).toLinearMap :=
   by
   ext1
-  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+  simp_rw [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
     Module.Dual.IsFaithfulPosMap.sig_apply_sig]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_isCoalgHom
@@ -36,30 +36,23 @@ by
     congr 1
     ext1
     simp_rw [LinearMap.comp_apply, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
-      one_smul, LinearEquiv.coe_toLinearMap, sig_map_one]
+      one_smul, AlgEquiv.toLinearMap_apply, sig_map_one]
   . rw [← sig_adjoint, Coalgebra.comul_eq_mul_adjoint]
     rw [LinearMap.adjoint_commutes_with_mul_adjoint_iff]
     intro x y
-    simp_rw [LinearEquiv.coe_toLinearMap]
-    exact sig.map_mul' x y
+    simp_rw [AlgEquiv.toLinearMap_apply, _root_.map_mul]
 
--- attribute [instance 10] Algebra.ofIsScalarTowerSmulCommClass
 set_option synthInstance.checkSynthOrder false in
--- set_option maxHeartbeats 0 in
 noncomputable instance Module.Dual.IsFaithfulPosMap.quantumSet [hφ : φ.IsFaithfulPosMap] :
     QuantumSet (Matrix n n ℂ) where
-  -- toNormedAddCommGroupOfRing := φ.isNormedAddCommGroupOfRing
-  -- toInnerProductSpace := φ.InnerProductSpace
   modAut r := hφ.sig r
-  modAut_map_mul r := Module.Dual.IsFaithfulPosMap.sig.map_mul'
-  modAut_map_one r := sig_map_one _ _
   modAut_trans r s := sig_trans_sig _ _
   modAut_zero := by
     ext1
     exact Module.Dual.IsFaithfulPosMap.sig_zero _ _
   modAut_star r x := sig_conjTranspose _ _ _
   modAut_isSymmetric r x y := by
-    simp_rw [← LinearEquiv.coe_toLinearMap]
+    simp_rw [← AlgEquiv.toLinearMap_apply]
     nth_rw 1 [← sig_adjoint]
     simp_rw [LinearMap.adjoint_inner_left]
   modAut_isCoalgHom r := Module.Dual.IsFaithfulPosMap.sig_isCoalgHom _ _
@@ -72,16 +65,25 @@ noncomputable instance Module.Dual.IsFaithfulPosMap.quantumSet [hφ : φ.IsFaith
   n_isFintype := by infer_instance
   n_isDecidableEq := by infer_instance
   onb := hφ.orthonormalBasis
+  map_one' := rfl
+  map_mul' x y := _root_.map_mul _ _ _
+  map_zero' := _root_.map_zero _
+  map_add' := _root_.map_add _
+  commutes' := Algebra.commutes
+  smul_def' r x := by ext; simp [Matrix.scalar, Algebra.smul_def r]
 
-example [hφ : φ.IsFaithfulPosMap] :
-  (QuantumSet.toAlgebra : Algebra ℂ (Matrix n n ℂ)) = Matrix.instAlgebra :=
--- rfl
-by
-  apply IsScalarTower.Algebra.ext
-  exact (fun r x ↦ rfl)
+-- ay! `rfl`!
+example [φ.IsFaithfulPosMap] :
+  (QuantumSet.toInnerProductStarAlgebra.toInnerProductAlgebra.toAlgebra : Algebra ℂ (Matrix n n ℂ)) = Matrix.instAlgebra :=
+rfl
+-- by
+--   apply IsScalarTower.Algebra.ext
+--   exact (fun r x ↦ rfl)
 
-theorem Module.Dual.pi.IsFaithfulPosMap.sig_isCoalgHom {k : Type*} [Fintype k] [DecidableEq k] {s : k → Type*} [Π i, Fintype (s i)]
-  [Π i, DecidableEq (s i)] {ψ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} (hψ : Π i, (ψ i).IsFaithfulPosMap)
+variable {k : Type*} [Fintype k] [DecidableEq k] {s : k → Type*} [Π i, Fintype (s i)]
+  [Π i, DecidableEq (s i)] {ψ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+
+theorem Module.Dual.pi.IsFaithfulPosMap.sig_isCoalgHom (hψ : Π i, (ψ i).IsFaithfulPosMap)
   (r : ℝ) :
   (sig hψ r).toLinearMap.IsCoalgHom :=
 by
@@ -90,30 +92,42 @@ by
     congr 1
     ext1
     simp_rw [LinearMap.comp_apply, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
-      one_smul, LinearEquiv.coe_toLinearMap, sig_map_one]
+      one_smul, AlgEquiv.toLinearMap_apply, _root_.map_one]
   . rw [← sig_adjoint, Coalgebra.comul_eq_mul_adjoint]
     rw [LinearMap.adjoint_commutes_with_mul_adjoint_iff]
     intro x y
-    simp_rw [LinearEquiv.coe_toLinearMap]
-    exact sig_map_mul _ x y
+    simp_rw [AlgEquiv.toLinearMap_apply, _root_.map_mul]
 
-set_option synthInstance.checkSynthOrder false in
-set_option maxHeartbeats 0 in
+theorem Module.Dual.pi.IsFaithfulPosMap.sig_trans_sig (hψ : ∀ i, (ψ i).IsFaithfulPosMap)
+    (x y : ℝ) :
+    (Module.Dual.pi.IsFaithfulPosMap.sig hψ x).trans (Module.Dual.pi.IsFaithfulPosMap.sig hψ y) =
+      Module.Dual.pi.IsFaithfulPosMap.sig hψ (x + y) :=
+by rw [Moudle.Dual.Pi.IsFaithfulPosMap.sig_trans_sig, add_comm]
+
+theorem Module.Dual.pi.IsFaithfulPosMap.sig_isSymmetric (hψ : ∀ i, (ψ i).IsFaithfulPosMap)
+    (r : ℝ) (x y : PiMat ℂ k s) :
+  ⟪sig hψ r x, y⟫_ℂ = ⟪x, sig hψ r y⟫_ℂ :=
+by rw [← AlgEquiv.toLinearMap_apply, ← sig_adjoint, LinearMap.adjoint_inner_left,
+  AlgEquiv.toLinearMap_apply]
+
+noncomputable
+instance Module.Dual.pi.IsFaithfulPosMap.innerProductAlgebra [hψ : Π i, (ψ i).IsFaithfulPosMap] :
+    InnerProductAlgebra (PiMat ℂ k s) :=
+{ (Pi.ringHom fun i => algebraMap ℂ (Matrix (s i) (s i) ℂ) : _ →+* ∀ i : _, Matrix (s i) (s i) ℂ) with
+    commutes' := fun a f => by ext1; simp [Algebra.commutes]
+    smul_def' := fun a f => by ext1; simp [Algebra.smul_def] }
+
+-- set_option synthInstance.checkSynthOrder false in
+set_option maxHeartbeats 500000 in
 noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
-  {k : Type*} [Fintype k] [DecidableEq k] {s : k → Type*} [Π i, Fintype (s i)]
-  [Π i, DecidableEq (s i)] {ψ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : Π i, (ψ i).IsFaithfulPosMap] :
+  [hψ : Π i, (ψ i).IsFaithfulPosMap] :
     QuantumSet (PiMat ℂ k s) where
-  modAut r := pi.IsFaithfulPosMap.sig hψ r
-  modAut_map_mul r := sig_map_mul _
-  modAut_map_one r := sig_map_one _
-  modAut_trans r s :=
-    by simp_rw [Moudle.Dual.Pi.IsFaithfulPosMap.sig_trans_sig, add_comm]
+  modAut r := (Module.Dual.pi.IsFaithfulPosMap.sig hψ r : PiMat ℂ k s ≃ₐ[ℂ] PiMat ℂ k s)
+  modAut_trans r s := Module.Dual.pi.IsFaithfulPosMap.sig_trans_sig hψ _ _
   modAut_zero := Module.Dual.pi.IsFaithfulPosMap.sig_zero'
   modAut_star r x := Module.Dual.pi.IsFaithfulPosMap.sig_star _ _ _
-  modAut_isSymmetric r x y := by
-    simp_rw [← LinearEquiv.coe_toLinearMap]
-    nth_rw 1 [← sig_adjoint]
-    simp_rw [LinearMap.adjoint_inner_left]
+  modAut_isSymmetric r x y :=
+    by simp only; exact Module.Dual.pi.IsFaithfulPosMap.sig_isSymmetric hψ _ _ _
   modAut_isCoalgHom r :=
     by simp only; exact Module.Dual.pi.IsFaithfulPosMap.sig_isCoalgHom hψ r
   inner_star_left x y z := by
@@ -124,3 +138,6 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
   n_isFintype := by infer_instance
   n_isDecidableEq := by infer_instance
   onb := Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis hψ
+  -- commutes' a f := by ext1; simp only [RingHom.coe_mk, MonoidHom.coe_mk, Pi.mul_apply]
+  -- smul_def' a f := by ext1; simp only [Pi.smul_apply, RingHom.coe_mk, MonoidHom.coe_mk,
+  --   Pi.mul_apply]

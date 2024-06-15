@@ -71,7 +71,8 @@ theorem Qam.completeGraph_eq {E₁ E₂ : Type _} [One E₁] [One E₂] [NormedA
     Qam.completeGraph E₁ E₂ = |(1 : E₁)⟩⟨(1 : E₂)| :=
   rfl
 
-variable {A B : Type*} [hA : QuantumSet A] [hB : QuantumSet B]
+variable {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+  [hA : QuantumSet A] [hB : QuantumSet B]
 
 theorem Qam.completeGraph_eq' :
   Qam.completeGraph A B =
@@ -105,11 +106,11 @@ theorem Qam.Nontracial.CompleteGraph.isSelfAdjoint {E : Type _} [One E] [NormedA
 theorem Qam.Nontracial.CompleteGraph.isReal :
     (Qam.completeGraph A B).IsReal := by
   simp_rw [Qam.completeGraph, LinearMap.isReal_iff, rankOne_real, star_one,
-    QuantumSet.modAut_map_one]
+    _root_.map_one]
 
 theorem Qam.Nontracial.CompleteGraph.symm_eq :
   symmMap ℂ _ _ (Qam.completeGraph A B) = Qam.completeGraph B A :=
-by simp_rw [Qam.completeGraph, symmMap_rankOne_apply, star_one, hB.modAut_map_one]
+by simp_rw [Qam.completeGraph, symmMap_rankOne_apply, star_one, _root_.map_one]
 theorem Qam.Nontracial.CompleteGraph.is_symm :
   symmMap ℂ _ _ (Qam.completeGraph A A) = Qam.completeGraph A A :=
 Qam.Nontracial.CompleteGraph.symm_eq

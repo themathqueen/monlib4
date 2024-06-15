@@ -37,7 +37,9 @@ open Coalgebra
 /-- Schur product `⬝ •ₛ ⬝ : (B → C) → (B → C) → (B → C)` given by
   `x •ₛ y := m ∘ (x ⊗ y) ∘ comul`  -/
 @[simps]
-noncomputable def schurMul {B C : Type _} [hB : QuantumSet B] [hC : QuantumSet C] :
+noncomputable def schurMul {B C : Type _}
+  [NormedAddCommGroupOfRing B] [NormedAddCommGroupOfRing C]
+  [hB : QuantumSet B] [hC : QuantumSet C] :
   (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C)
     where
   toFun x :=
@@ -60,10 +62,15 @@ noncomputable def schurMul {B C : Type _} [hB : QuantumSet B] [hC : QuantumSet C
     intro _ _; rfl
 
 @[inherit_doc schurMul]
-scoped[schurMul] infix:100 " •ₛ " => schurMul
+-- scoped[schurMul] infix:100 " •ₛ " => schurMul
+notation3:80 (name := schurMulNotation) x:81 " •ₛ " y:80 => schurMul x y
 open scoped schurMul
 
-theorem schurMul.apply_rankOne {B C : Type _} [QuantumSet B] [QuantumSet C]
+variable {A B C : Type _}
+  [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [NormedAddCommGroupOfRing C]
+  [hA : QuantumSet A] [hB : QuantumSet B] [hC : QuantumSet C]
+
+theorem schurMul.apply_rankOne
   (a : B) (b : C) (c : B) (d : C) : (↑|a⟩⟨b|) •ₛ (↑|c⟩⟨d|) = (|a * c⟩⟨b * d| : C →ₗ[ℂ] B) :=
   by
   rw [schurMul, LinearMap.ext_iff]
@@ -78,26 +85,24 @@ theorem schurMul.apply_rankOne {B C : Type _} [QuantumSet B] [QuantumSet C]
     LinearMap.mul'_apply, smul_mul_smul, ← TensorProduct.inner_tmul, ← Finset.sum_smul, ← inner_sum,
     h, comul_eq_mul_adjoint, LinearMap.adjoint_inner_right, LinearMap.mul'_apply]
 
-theorem schurMul_one_one_right {B C : Type _} [QuantumSet B] [QuantumSet C]
+theorem schurMul_one_one_right
     (A : C →ₗ[ℂ] B) : A •ₛ (|(1 : B)⟩⟨(1 : C)| : C →ₗ[ℂ] B) = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, LinearMap.sum_apply, schurMul.apply_rankOne, mul_one]
 
-theorem schurMul_one_one_left {B C : Type _} [QuantumSet B] [QuantumSet C]
+theorem schurMul_one_one_left
     (A : C →ₗ[ℂ] B) : (|(1 : B)⟩⟨(1 : C)| : C →ₗ[ℂ] B) •ₛ A = A :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp_rw [map_sum, schurMul.apply_rankOne, one_mul]
 
-theorem schurMul_adjoint {B C : Type _} [QuantumSet B] [QuantumSet C] (x y : B →ₗ[ℂ] C) :
+theorem schurMul_adjoint (x y : B →ₗ[ℂ] C) :
     LinearMap.adjoint (x •ₛ y) = (LinearMap.adjoint x) •ₛ (LinearMap.adjoint y) :=
   by
   simp_rw [schurMul, comul_eq_mul_adjoint]
   simp only [LinearMap.coe_mk, AddHom.coe_mk, LinearMap.adjoint_comp, LinearMap.adjoint_adjoint,
     TensorProduct.map_adjoint, LinearMap.comp_assoc]
-
-variable {A B : Type*} [hA : QuantumSet A] [hB : QuantumSet B]
 
 theorem schurMul_real (x y : A →ₗ[ℂ] B) :
     LinearMap.real (x •ₛ y : A →ₗ[ℂ] B) = (LinearMap.real y) •ₛ (LinearMap.real x) :=
@@ -105,7 +110,7 @@ theorem schurMul_real (x y : A →ₗ[ℂ] B) :
   obtain ⟨α, β, rfl⟩ := x.exists_sum_rankOne
   obtain ⟨γ, ζ, rfl⟩ := y.exists_sum_rankOne
   simp only [map_sum, LinearMap.real_sum, LinearMap.sum_apply, schurMul.apply_rankOne]
-  simp_rw [rankOne_real, schurMul.apply_rankOne, ← QuantumSet.modAut_map_mul, ← StarMul.star_mul]
+  simp_rw [rankOne_real, schurMul.apply_rankOne, ← map_mul, ← StarMul.star_mul]
   rw [Finset.sum_comm]
 
 theorem schurMul_one_right_rankOne (a b : B) :
@@ -147,4 +152,4 @@ theorem Psi.schurMul (r₁ r₂ : ℝ)
   intro a b c d
   simp_rw [hA.Psi_apply, hA.Psi_toFun_apply, schurMul.apply_rankOne,
     hA.Psi_toFun_apply, Algebra.TensorProduct.tmul_mul_tmul,
-    ← MulOpposite.op_mul, ← StarMul.star_mul, ← QuantumSet.modAut_map_mul]
+    ← MulOpposite.op_mul, ← StarMul.star_mul, ← map_mul]

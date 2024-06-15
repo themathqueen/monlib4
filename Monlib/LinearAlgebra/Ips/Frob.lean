@@ -327,14 +327,19 @@ theorem directSumTensorToKronecker_apply (x y : (PiMat ℂ k s)) (r : k × k) (a
   simp_rw [directSumTensorToKronecker, LinearEquiv.coe_mk, directSumTensorMatrix,
     directSumTensor_apply, TensorProduct.toKronecker_apply, kroneckerMap, of_apply]
 
+@[simp]
+theorem Module.Dual.IsFaithfulPosMap.sig_apply' [hφ : φ.IsFaithfulPosMap] {r : ℝ}
+  {x : ℍ} : hφ.sig r x = hφ.matrixIsPosDef.rpow (-r) * x * hφ.matrixIsPosDef.rpow r :=
+rfl
+
 theorem frobenius_equation' [hφ : φ.IsFaithfulPosMap] :
     ((id ⊗ₘ LinearMap.mul' ℂ ℍ) ∘ₗ υ ∘ₗ LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ⊗ₘ id) =
       LinearMap.adjoint (LinearMap.mul' ℂ ℍ) ∘ₗ LinearMap.mul' ℂ ℍ :=
 by
   apply Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
-  let σ : ℍ ≃ₗ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
+  let σ : ℍ ≃ₐ[ℂ] ℍ := (hφ.sig (-1 : ℝ))
   refine ⟨σ, λ _ _ _ => ?_⟩
-  simp only [σ, hφ.sig_apply, neg_neg, Matrix.PosDef.rpow_one_eq_self,
+  simp only [σ, hφ.sig_apply', neg_neg, Matrix.PosDef.rpow_one_eq_self,
     Matrix.PosDef.rpow_neg_one_eq_inv_self, star_eq_conjTranspose, hφ.inner_right_conj]
 
 theorem LinearMap.mul'_assoc :
