@@ -66,5 +66,6 @@ import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 import Monlib.LinearAlgebra.tensorProduct
 import Monlib.LinearAlgebra.CoalgebraLemmas
 import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
+import Monlib.LinearAlgebra.PosMap_isReal
 
 #align_import all
