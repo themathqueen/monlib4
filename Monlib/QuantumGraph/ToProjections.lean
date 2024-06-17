@@ -80,12 +80,6 @@ noncomputable def blockDiag'KroneckerEquiv {φ : ∀ i, Module.Dual ℂ (ℍ_ i)
     (LinearEquiv.TensorProduct.map isBlockDiagonalPiAlgEquiv.symm.toLinearEquiv
       isBlockDiagonalPiAlgEquiv.symm.toLinearEquiv)
 
-#print LinearEquiv.coe_one /-
-theorem LinearEquiv.coe_one {R : Type _} [Semiring R] (M : Type _) [AddCommMonoid M] [Module R M] :
-    ↑(1 : M ≃ₗ[R] M) = (1 : M →ₗ[R] M) :=
-  rfl
--/
-
 theorem Matrix.conj_conjTranspose' {R n₁ n₂ : Type _} [InvolutiveStar R] (A : Matrix n₁ n₂ R) :
     (Aᴴᵀ)ᴴ = Aᵀ := by rw [← conj_conjTranspose A]
 
