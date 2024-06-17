@@ -153,3 +153,50 @@ theorem Psi.schurMul (r₁ r₂ : ℝ)
   simp_rw [hA.Psi_apply, hA.Psi_toFun_apply, schurMul.apply_rankOne,
     hA.Psi_toFun_apply, Algebra.TensorProduct.tmul_mul_tmul,
     ← MulOpposite.op_mul, ← StarMul.star_mul, ← map_mul]
+
+theorem schurMul_assoc (f g h : A →ₗ[ℂ] B) :
+  (f •ₛ g) •ₛ h = f •ₛ (g •ₛ h) :=
+by
+  apply_fun hA.Psi 0 0 using LinearEquiv.injective _
+  simp_rw [Psi.schurMul, mul_assoc]
+
+theorem algHom_comp_mul {R A B : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Algebra R A] [Algebra R B] (f : A →ₐ[R] B) :
+    f.toLinearMap ∘ₗ LinearMap.mul' R A = (LinearMap.mul' R B) ∘ₗ (f.toLinearMap ⊗ₘ f.toLinearMap) :=
+by
+  rw [TensorProduct.ext_iff]
+  intro a b
+  simp only [LinearMap.comp_apply, LinearMap.mul'_apply, AlgHom.toLinearMap_apply, map_mul,
+    TensorProduct.map_tmul]
+
+theorem comul_comp_algHom_adjoint (f : A →ₐ[ℂ] B) :
+    Coalgebra.comul ∘ₗ (LinearMap.adjoint f.toLinearMap)
+      = ((LinearMap.adjoint f.toLinearMap) ⊗ₘ (LinearMap.adjoint f.toLinearMap)) ∘ₗ Coalgebra.comul :=
+by
+  simp_rw [comul_eq_mul_adjoint, ← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp,
+    algHom_comp_mul]
+
+theorem schurMul_algHom_comp_coalgHom {D : Type*} [NormedAddCommGroupOfRing D]
+  [hD : QuantumSet D] (g : C →ₐ[ℂ] D) (f : A →ₗc[ℂ] B) (x y : B →ₗ[ℂ] C) :
+  (g.toLinearMap ∘ₗ x ∘ₗ f.toLinearMap) •ₛ (g.toLinearMap ∘ₗ y ∘ₗ f.toLinearMap)
+    = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ f.toLinearMap :=
+by
+  simp_rw [schurMul_apply_apply, ← LinearMap.comp_assoc, algHom_comp_mul, LinearMap.comp_assoc,
+    ← f.map_comp_comul]
+  congr 1
+  simp_rw [← LinearMap.comp_assoc]
+  congr 1
+  simp_rw [TensorProduct.map_comp]
+
+theorem schurMul_algHom_comp_algHom_adjoint {D : Type*} [NormedAddCommGroupOfRing D]
+  [hD : QuantumSet D] (g : C →ₐ[ℂ] D) (f : B →ₐ[ℂ] A) (x y : B →ₗ[ℂ] C) :
+  (g.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap))
+    •ₛ (g.toLinearMap ∘ₗ y ∘ₗ LinearMap.adjoint f.toLinearMap)
+    = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ LinearMap.adjoint f.toLinearMap :=
+by
+  simp_rw [schurMul_apply_apply, ← LinearMap.comp_assoc, algHom_comp_mul,
+    LinearMap.comp_assoc, comul_comp_algHom_adjoint]
+  congr 1
+  simp_rw [← LinearMap.comp_assoc]
+  congr 1
+  simp_rw [TensorProduct.map_comp]

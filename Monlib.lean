@@ -29,7 +29,7 @@ import Monlib.Preq.RCLikeLe
 import Monlib.Preq.Ites
 import Monlib.Preq.StarAlgEquiv
 import Monlib.QuantumGraph.Example
--- import Monlib.QuantumGraph.Iso
+import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 import Monlib.QuantumGraph.Nontracial
 -- import Monlib.QuantumGraph.QamA

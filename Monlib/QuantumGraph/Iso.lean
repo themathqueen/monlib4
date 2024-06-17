@@ -64,23 +64,14 @@ private theorem commutes_with_mul''_adjoint [hφ : φ.IsFaithfulPosMap] [Nontriv
       ∘ₗ Coalgebra.comul =
     Coalgebra.comul ∘ₗ f.toAlgEquiv.toLinearMap :=
   by
+  rw [Coalgebra.comul_eq_mul_adjoint, LinearMap.commutes_with_mul_adjoint_iff
+    f.toAlgEquiv.toLinearMap]
   -- rw [LinearMap.comp_assoc]
-  symm
-  nth_rw 1 [←
-    LinearMap.adjoint_adjoint (Coalgebra.comul ∘ₗ f.toAlgEquiv.toLinearMap)]
   have :=
     (List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 0
           1).mp
       hf
-  have this' :
-    ∀ x y,
-      f.symm.toAlgEquiv.toLinearMap (x * y) =
-        f.symm.toAlgEquiv.toLinearMap x * f.symm.toAlgEquiv.toLinearMap y :=
-    fun x y => by simp_rw [AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, _root_.map_mul]
-  norm_cast at *
-  rw [LinearMap.adjoint_comp, this, LinearMap.adjoint_adjoint, this, ←
-    (commutes_with_mul'_iff _).mpr this', LinearMap.adjoint_comp, map_adjoint, ← this,
-    LinearMap.adjoint_adjoint]
+  simp_rw [this, AlgEquiv.toLinearMap_apply, _root_.map_mul, implies_true]
 
 open scoped Matrix
 
@@ -108,40 +99,30 @@ theorem innerAut_adjoint_eq_iff [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
 
 theorem Qam.mul'_adjoint_commutes_with_innerAut_lm [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     {x : Matrix.unitaryGroup n ℂ} (hx : Commute φ.matrix x) :
-    TensorProduct.map (innerAut x) (innerAut x) ∘ₗ LinearMap.adjoint m = LinearMap.adjoint m ∘ₗ innerAut x :=
+    TensorProduct.map (innerAut x) (innerAut x) ∘ₗ Coalgebra.comul = Coalgebra.comul ∘ₗ innerAut x :=
   by
-  simp_rw [Commute, SemiconjBy] at hx
-  rw [unitaryGroup.injective_hMul x⁻¹] at hx
-  simp_rw [UnitaryGroup.inv_apply, Matrix.mul_assoc, UnitaryGroup.mul_star_self, Matrix.mul_one, ←
-    Matrix.mul_assoc, unitaryGroup.star_coe_eq_coe_star, ← innerAut_apply',
-    @eq_comm _ _ ((innerAut x) _)] at hx
-  have hf : ∀ U : unitaryGroup n ℂ, innerAut U = (innerAutStarAlg U).toAlgEquiv.toLinearMap :=
-    fun _ => rfl
-  have hh : ∀ U : unitaryGroup n ℂ, (innerAutStarAlg U).symm = innerAutStarAlg (star U) :=
-    by
-    intro V
-    ext1
-    simp_rw [innerAutStarAlg_symm_apply, innerAutStarAlg_apply, unitary.star_eq_inv,
-      UnitaryGroup.inv_apply, star_star]
-  have hf' : innerAut (star x) = (innerAutStarAlg x).symm.toAlgEquiv.toLinearMap := by
-    rw [hh, hf]
-  simp_rw [hf', hf] at *
-  rw [commutes_with_mul''_adjoint hx]
+  apply commutes_with_mul''_adjoint
+  rw [innerAutStarAlg_apply, ← hx, mul_assoc, ← unitaryGroup.star_coe_eq_coe_star,
+    UnitaryGroup.mul_star_self, mul_one]
 
-theorem Qam.unit_commutes_with_innerAut_lm (U : Matrix.unitaryGroup n ℂ) : innerAut U ∘ₗ η = η := by
+theorem Qam.unit_commutes_with_innerAut_lm (U : Matrix.unitaryGroup n ℂ) :
+  innerAut U ∘ₗ η = η := by
   rw [commutes_with_unit_iff, innerAut_apply_one]
 
 theorem Qam.mul'_commutes_with_innerAut_lm (x : Matrix.unitaryGroup n ℂ) :
-    m ∘ₗ (TensorProduct.map (innerAut x) (innerAut x) : l((Matrix n n ℂ) ⊗[ℂ] (Matrix n n ℂ))) =
-      innerAut x ∘ₗ (m : (Matrix n n ℂ) ⊗[ℂ] (Matrix n n ℂ) →ₗ[ℂ] (Matrix n n ℂ)) :=
+    m ∘ₗ ((innerAut x) ⊗ₘ (innerAut x)) = innerAut x ∘ₗ m :=
 by simp_rw [commutes_with_mul'_iff, innerAut.map_mul, forall₂_true_iff]
 
 theorem Qam.unit_adjoint_commutes_with_innerAut_lm [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
-    {U : Matrix.unitaryGroup n ℂ} (hU : Commute φ.matrix U) : LinearMap.adjoint η ∘ₗ innerAut U = LinearMap.adjoint η :=
+    {U : Matrix.unitaryGroup n ℂ} (hU : Commute φ.matrix U) :
+  Coalgebra.counit ∘ₗ innerAut U = Coalgebra.counit :=
   by
   rw [← innerAut_adjoint_eq_iff] at hU
   apply_fun LinearMap.adjoint using LinearMap.adjoint.injective
-  rw [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, hU, Qam.unit_commutes_with_innerAut_lm]
+  rw [LinearMap.adjoint_comp, Coalgebra.counit_eq_unit_adjoint, LinearMap.adjoint_adjoint, hU]
+  ext1
+  simp only [LinearMap.comp_apply, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
+  one_smul, innerAut, AlgEquiv.toLinearMap_apply, _root_.map_one]
 
 local notation "f_{" x "}" => innerAut x
 
@@ -189,12 +170,12 @@ theorem unitary_commutes_with_hφ_matrix_iff_isIsometry (hφ : φ.IsFaithfulPosM
 
 theorem Qam.symm_apply_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)} (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-    LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ (f.toAlgEquiv.toLinearMap ∘ₗ A ∘ₗ f.symm.toAlgEquiv.toLinearMap) =
-      f.toAlgEquiv.toLinearMap ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
+    symmMap ℂ (Matrix n n ℂ) _ (f.toAlgEquiv.toLinearMap ∘ₗ A ∘ₗ f.symm.toAlgEquiv.toLinearMap) =
+      f.toAlgEquiv.toLinearMap ∘ₗ symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
   by
   have := List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 4 1
   rw [StarAlgEquiv.IsIsometry, isometry_iff_norm, this] at hf
-  simp only [LinearEquiv.symmMap_apply, LinearMap.adjoint_comp, ←
+  simp only [symmMap_apply, LinearMap.adjoint_comp, ←
     AlgEquiv.toLinearEquiv_toLinearMap, LinearMap.real_starAlgEquiv_conj]
   simp_rw [AlgEquiv.toLinearEquiv_toLinearMap, hf]
   nth_rw 1 [← hf]
@@ -202,8 +183,8 @@ theorem Qam.symm_apply_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial
 
 theorem InnerAut.symmetric_eq [hφ : φ.IsFaithfulPosMap] [Nontrivial n] (A : l((Matrix n n ℂ)))
     {U : Matrix.unitaryGroup n ℂ} (hU : Commute φ.matrix U) :
-    LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ (f_{U} ∘ₗ A ∘ₗ f_{star U}) =
-      f_{U} ∘ₗ LinearEquiv.symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f_{star U} :=
+    symmMap ℂ (Matrix n n ℂ) _ (f_{U} ∘ₗ A ∘ₗ f_{star U}) =
+      f_{U} ∘ₗ symmMap ℂ (Matrix n n ℂ) _ A ∘ₗ f_{star U} :=
   by
   rw [← innerAut_inv_eq_star, ← innerAutStarAlg_equiv_symm_toLinearMap, ←
     innerAutStarAlg_equiv_toLinearMap]
@@ -236,7 +217,7 @@ theorem Qam.reflIdempotent_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontri
         (f.toAlgEquiv.toLinearMap ∘ₗ B ∘ₗ f.symm.toAlgEquiv.toLinearMap) =
       f.toAlgEquiv.toLinearMap ∘ₗ Qam.reflIdempotent hφ A B ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
   by
-  simp only [Qam.reflIdempotent, schurIdempotent_apply_apply, TensorProduct.map_comp, ←
+  simp only [Qam.reflIdempotent, schurMul_apply_apply, TensorProduct.map_comp, ←
     LinearMap.comp_assoc, f.commutes_with_mul']
   have : StarAlgEquiv.IsIsometry f.symm :=
     by
@@ -247,7 +228,8 @@ theorem Qam.reflIdempotent_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontri
     have this' := List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 4 1
     rw [this'] at hf
     rw [StarAlgEquiv.symm_symm, ← hf, LinearMap.adjoint_adjoint]
-  simp only [LinearMap.comp_assoc, this.commutes_with_mul'_adjoint]
+  simp only [LinearMap.comp_assoc, Coalgebra.comul_eq_mul_adjoint,
+    this.commutes_with_mul'_adjoint, hf.commutes_with_mul'_adjoint]
 
 theorem InnerAut.reflIdempotent [hφ : φ.IsFaithfulPosMap]
   [Nontrivial n] {U : unitaryGroup n ℂ} (hU : Commute φ.matrix U)
