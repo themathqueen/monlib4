@@ -352,6 +352,29 @@ by
   use α, β
   rw [← hα, ← hβ]
 
+theorem PiMat.IsSelfAdjoint.posSemidefDecomposition {k : Type*} {n : k → Type*}
+  [Fintype k] [DecidableEq k] [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  {x : PiMat ℂ k n} (hx : IsSelfAdjoint x) :
+  ∃ a b, x = star a * a - star b * b :=
+by
+  have : ∀ i, (x i).IsHermitian := λ i =>
+  by
+    rw [IsSelfAdjoint, Function.funext_iff] at hx
+    simp_rw [Pi.star_apply, Matrix.star_eq_conjTranspose] at hx
+    exact hx i
+  have := λ i => Matrix.IsHermitian.posSemidefDecomposition' (this i)
+  let a : PiMat ℂ k n :=
+  λ i => (this i).choose
+  let b : PiMat ℂ k n :=
+  λ i => (this i).choose_spec.choose
+  have hab : ∀ i, x i = star (a i) * (a i) - star (b i) * (b i) :=
+  λ i => (this i).choose_spec.choose_spec
+  use a, b
+  ext1
+  simp only [Pi.sub_apply, Pi.mul_apply, Pi.star_apply, hab]
+
+
+
 open ContinuousLinearMap in
 theorem IsSelfAdjoint.isPositiveDecomposition
   {x : B →L[ℂ] B} (hx : IsSelfAdjoint x) :
@@ -379,6 +402,20 @@ by
   . rw [hab, ← toLinearMapAlgEquiv_symm_apply, map_sub, map_mul]
     rfl
   . congr 1
+
+theorem IsSelfAdjoint.isPositiveDecomposition_of_starAlgEquiv_piMat
+  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] (PiMat ℂ k n))
+  {x : A} (hx : _root_.IsSelfAdjoint x) :
+  ∃ a b, x = star a * a - star b * b :=
+by
+  have : IsSelfAdjoint (φ x) := by
+    rw [IsSelfAdjoint, ← StarAlgEquiv.toFun_eq, ← StarAlgEquiv.map_star', hx]
+  obtain ⟨α, β, h⟩ := PiMat.IsSelfAdjoint.posSemidefDecomposition this
+  use φ.symm α, φ.symm β
+  apply_fun φ
+  simp_rw [h, map_sub, map_mul, ← StarAlgEquiv.toFun_eq, StarAlgEquiv.map_star',
+    StarAlgEquiv.toFun_eq, StarAlgEquiv.apply_symm_apply]
 
 /-- if a map preserves positivity, then it is star-preserving -/
 theorem map_isReal_of_posMap
