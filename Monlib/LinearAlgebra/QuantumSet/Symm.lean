@@ -169,7 +169,7 @@ rfl
 
 open LinearMap Coalgebra in
 -- set_option maxHeartbeats 700000 in
-set_option synthInstance.maxHeartbeats 0 in
+-- set_option synthInstance.maxHeartbeats 0 in
 theorem symmMap_symm_eq (f : A →ₗ[ℂ] B) :
   (symmMap ℂ _ _).symm f = (TensorProduct.lid ℂ A).toLinearMap
     ∘ₗ (rTensor _ (counit ∘ₗ m _))

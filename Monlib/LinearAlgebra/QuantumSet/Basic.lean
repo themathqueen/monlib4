@@ -351,45 +351,45 @@ by
 
 
 open scoped TensorProduct
-noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
-  [QuantumSet B] :
-    NormedAddCommGroupOfRing (A ⊗[ℂ] B) where
+-- noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+--   [QuantumSet B] :
+--     NormedAddCommGroupOfRing (A ⊗[ℂ] B) where
 
-noncomputable instance TensorProduct.innerProductAlgebra {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
-  [QuantumSet B] :
-    InnerProductAlgebra (A ⊗[ℂ] B) where
-  toFun x := Algebra.toRingHom x
-  map_one' := RingHom.map_one Algebra.toRingHom
-  map_mul' x y := RingHom.map_mul Algebra.toRingHom x y
-  map_zero' := RingHom.map_zero Algebra.toRingHom
-  map_add' x y := RingHom.map_add Algebra.toRingHom x y
-  commutes' _ _ := Algebra.commutes' _ _
-  smul_def' _ _ := Algebra.smul_def' _ _
+-- noncomputable instance TensorProduct.innerProductAlgebra {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+--   [QuantumSet B] :
+--     InnerProductAlgebra (A ⊗[ℂ] B) where
+--   toFun x := Algebra.toRingHom x
+--   map_one' := RingHom.map_one Algebra.toRingHom
+--   map_mul' x y := RingHom.map_mul Algebra.toRingHom x y
+--   map_zero' := RingHom.map_zero Algebra.toRingHom
+--   map_add' x y := RingHom.map_add Algebra.toRingHom x y
+--   commutes' _ _ := Algebra.commutes' _ _
+--   smul_def' _ _ := Algebra.smul_def' _ _
 
 -- -- not `rfl`... need to change the def of `InnerProductAlgebra` so that it
 -- -- takes in the algebra and extends the inner product only
 --nvm... just changed the above instance
-example {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
-  [QuantumSet B] :
-  (TensorProduct.innerProductAlgebra.toAlgebra : Algebra ℂ (A ⊗[ℂ] B))
-  = (Algebra.TensorProduct.instAlgebra : Algebra ℂ (A ⊗[ℂ] B)) :=
-rfl
+-- example {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+--   [QuantumSet B] :
+--   (TensorProduct.innerProductAlgebra.toAlgebra : Algebra ℂ (A ⊗[ℂ] B))
+--   = (Algebra.TensorProduct.instAlgebra : Algebra ℂ (A ⊗[ℂ] B)) :=
+-- rfl
 -- by ext; simp only
 
-noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
-  [QuantumSet B] :
-    StarRing (A ⊗[ℂ] B) where
-  star_add x y := TensorProduct.star_add _ _
-  star_mul x y :=
-    x.induction_on
-      (by simp only [zero_mul, star_zero, mul_zero])
-      (fun a b => y.induction_on
-        (by simp only [star_zero, zero_mul, mul_zero])
-        (fun c d => by simp only [Algebra.TensorProduct.tmul_mul_tmul,
-          TensorProduct.star_tmul, star_mul])
-        (fun c d h h2 => by simp only [mul_add, star_add, h, h2, add_mul]))
-      (fun x y hx hy => by
-        simp only [add_mul, mul_add, star_add, hx, hy])
+-- noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+--   [QuantumSet B] :
+--     StarRing (A ⊗[ℂ] B) where
+--   star_add x y := TensorProduct.star_add _ _
+--   star_mul x y :=
+--     x.induction_on
+--       (by simp only [zero_mul, star_zero, mul_zero])
+--       (fun a b => y.induction_on
+--         (by simp only [star_zero, zero_mul, mul_zero])
+--         (fun c d => by simp only [Algebra.TensorProduct.tmul_mul_tmul,
+--           TensorProduct.star_tmul, star_mul])
+--         (fun c d h h2 => by simp only [mul_add, star_add, h, h2, add_mul]))
+--       (fun x y hx hy => by
+--         simp only [add_mul, mul_add, star_add, hx, hy])
 
 local notation
   f " ⊗ₘ " g => TensorProduct.map f g
