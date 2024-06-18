@@ -373,8 +373,6 @@ by
   ext1
   simp only [Pi.sub_apply, Pi.mul_apply, Pi.star_apply, hab]
 
-
-
 open ContinuousLinearMap in
 theorem IsSelfAdjoint.isPositiveDecomposition
   {x : B →L[ℂ] B} (hx : IsSelfAdjoint x) :
@@ -444,3 +442,32 @@ by
   simp only [star_sub, star_mul, star_star, map_sub]
   rw [IsSelfAdjoint.of_nonneg (hφ (star_mul_self_nonneg a)),
     IsSelfAdjoint.of_nonneg (hφ (star_mul_self_nonneg b))]
+
+theorem map_isReal_of_posMap_of_starAlgEquiv_piMat
+  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] {φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n}
+  {K : Type*}
+  [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
+  {f : A →ₗ[ℂ] K} (hf : ∀ ⦃a : A⦄, 0 ≤ a → 0 ≤ f a) :
+  f.IsReal :=
+by
+  intro x
+  rw [selfAdjointDecomposition x]
+  let L := aL x
+  have hL : L = aL x := rfl
+  let R := aR x
+  have hR : R = aR x := rfl
+  rw [← hL, ← hR]
+  simp only [star_add, map_add, star_smul, map_smul]
+  repeat rw [selfAdjointDecomposition_left_isSelfAdjoint _]
+  suffices h2 : ∀ a (_ : IsSelfAdjoint a),
+      f (star a) = star (f a)
+  by rw [← h2 _ (selfAdjointDecomposition_left_isSelfAdjoint _),
+    ← h2 _ (selfAdjointDecomposition_right_isSelfAdjoint _),
+    selfAdjointDecomposition_left_isSelfAdjoint,
+    selfAdjointDecomposition_right_isSelfAdjoint]
+  intro x hx
+  obtain ⟨a, b, rfl⟩ := hx.isPositiveDecomposition_of_starAlgEquiv_piMat φ
+  simp only [star_sub, star_mul, star_star, map_sub]
+  rw [IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg a)),
+    IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg b))]
