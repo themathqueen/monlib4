@@ -12,6 +12,8 @@ import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.IsReal
+import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.tensorProduct
 
 #align_import linear_algebra.my_ips.quantum_set
 
@@ -38,9 +40,10 @@ The quantum set is also equipped with a `trace` functional on `A` such that `φ 
 
 @[reducible]
 class InnerProductAlgebra (A : Type*) [NormedAddCommGroupOfRing A]
-  extends InnerProductSpace ℂ A, Algebra ℂ A where
+  extends InnerProductSpace ℂ A, Algebra ℂ A where --Module.Finite ℂ A where
 attribute [instance] InnerProductAlgebra.toInnerProductSpace
 attribute [instance] InnerProductAlgebra.toAlgebra
+-- attribute [instance] InnerProductAlgebra.toFinite
 
 @[reducible]
 class InnerProductStarAlgebra (A : Type*) [NormedAddCommGroupOfRing A]
@@ -55,6 +58,7 @@ open Coalgebra in
 class QuantumSet (A : Type _) [NormedAddCommGroupOfRing A]
   extends
     InnerProductStarAlgebra A,
+    Module.Finite ℂ A
     -- NormedAddCommGroupOfRing A,
     -- InnerProductSpace ℂ A,
     -- -- Algebra ℂ A,
@@ -62,7 +66,7 @@ class QuantumSet (A : Type _) [NormedAddCommGroupOfRing A]
     -- StarModule ℂ A,
     -- SMulCommClass ℂ A A,
     -- IsScalarTower ℂ A A,
-    Module.Finite ℂ A
+    -- Module.Finite ℂ A
     -- PartialOrder A,
     -- Coalgebra ℂ A,
     -- Semiring A,
@@ -106,6 +110,7 @@ class QuantumSet (A : Type _) [NormedAddCommGroupOfRing A]
 attribute [instance] QuantumSet.toInnerProductStarAlgebra
 attribute [instance] QuantumSet.n_isFintype
 attribute [instance] QuantumSet.n_isDecidableEq
+attribute [instance] QuantumSet.toFinite
 -- attribute [instance] QuantumSet.toCoalgebra
 -- attribute [simp] QuantumSet.inner_eq
 attribute [simp] QuantumSet.modAut_trans
@@ -160,6 +165,12 @@ theorem rmul_adjoint (a : B) :
   nth_rw 1 [← inner_conj_symm]
   rw [hB.inner_conj_left, inner_conj_symm]
 
+@[simp]
+theorem QuantumSet.modAut_apply_modAut (t r : ℝ) (a : A) :
+  hA.modAut t (hA.modAut r a) = hA.modAut (t + r) a :=
+by
+  rw [← AlgEquiv.trans_apply, modAut_trans, add_comm]
+
 lemma QuantumSet.inner_conj (a b : A) :
   ⟪a, b⟫_ℂ = ⟪star b, (hA.modAut (-1) (star a))⟫_ℂ :=
 calc ⟪a, b⟫_ℂ = ⟪1 * a, b⟫_ℂ := by rw [one_mul]
@@ -172,6 +183,14 @@ lemma QuantumSet.inner_conj' (a b : A) :
 calc ⟪a, b⟫_ℂ = starRingEnd ℂ ⟪b, a⟫_ℂ := by rw [inner_conj_symm]
   _ = starRingEnd ℂ ⟪star a, hA.modAut (-1) (star b)⟫_ℂ := by rw [inner_conj]
   _ = ⟪hA.modAut (-1) (star b), star a⟫_ℂ := by rw [inner_conj_symm]
+lemma QuantumSet.inner_conj'' (a b : A) :
+  ⟪a, b⟫_ℂ = ⟪hA.modAut (- (1/2)) (star b), hA.modAut (- (1 / 2)) (star a)⟫_ℂ :=
+calc ⟪a, b⟫_ℂ = starRingEnd ℂ ⟪b, a⟫_ℂ := by rw [inner_conj_symm]
+  _ = starRingEnd ℂ ⟪star a, hA.modAut (-1) (star b)⟫_ℂ := by rw [inner_conj]
+  _ = ⟪hA.modAut (-1) (star b), star a⟫_ℂ := by rw [inner_conj_symm]
+  _ = ⟪hA.modAut (-(1/2)) (hA.modAut (-(1/2)) (star b)), star a⟫_ℂ := by
+    rw [modAut_apply_modAut]; norm_num
+  _ = ⟪hA.modAut (- (1/2)) (star b), hA.modAut (- (1 / 2)) (star a)⟫_ℂ := by rw [modAut_isSymmetric]
 
 namespace QuantumSet
 open scoped TensorProduct
@@ -225,12 +244,6 @@ theorem Psi_invFun_apply (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
     Basis.tensorProduct_repr_tmul_apply, ← rankOne_lm_smul_smul, ← rankOne_lm_sum_sum, ←
     _root_.map_smul, ← star_smul, Basis.mulOpposite_repr_apply, ← map_sum, ← star_sum,
     OrthonormalBasis.coe_toBasis_repr_apply, OrthonormalBasis.sum_repr]
-
-@[simp]
-theorem modAut_apply_modAut (t r : ℝ) (a : A) :
-  hA.modAut t (hA.modAut r a) = hA.modAut (t + r) a :=
-by
-  rw [← AlgEquiv.trans_apply, modAut_trans, add_comm]
 
 theorem Psi_left_inv (t r : ℝ) (x : A) (y : B) :
     Psi_invFun t r (Psi_toFun t r |x⟩⟨y|) = (|x⟩⟨y|).toLinearMap :=
@@ -335,6 +348,115 @@ by
     ← ext_inner_left_iff, ← LinearMap.comp_apply, _root_.LinearMap.apply_eq_id,
     StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
   tfae_finish
+
+
+open scoped TensorProduct
+noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+  [QuantumSet B] :
+    NormedAddCommGroupOfRing (A ⊗[ℂ] B) where
+
+noncomputable instance TensorProduct.innerProductAlgebra {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+  [QuantumSet B] :
+    InnerProductAlgebra (A ⊗[ℂ] B) where
+  toFun x := Algebra.toRingHom x
+  map_one' := RingHom.map_one Algebra.toRingHom
+  map_mul' x y := RingHom.map_mul Algebra.toRingHom x y
+  map_zero' := RingHom.map_zero Algebra.toRingHom
+  map_add' x y := RingHom.map_add Algebra.toRingHom x y
+  commutes' _ _ := Algebra.commutes' _ _
+  smul_def' _ _ := Algebra.smul_def' _ _
+
+-- -- not `rfl`... need to change the def of `InnerProductAlgebra` so that it
+-- -- takes in the algebra and extends the inner product only
+--nvm... just changed the above instance
+example {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+  [QuantumSet B] :
+  (TensorProduct.innerProductAlgebra.toAlgebra : Algebra ℂ (A ⊗[ℂ] B))
+  = (Algebra.TensorProduct.instAlgebra : Algebra ℂ (A ⊗[ℂ] B)) :=
+rfl
+-- by ext; simp only
+
+noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [QuantumSet A]
+  [QuantumSet B] :
+    StarRing (A ⊗[ℂ] B) where
+  star_add x y := TensorProduct.star_add _ _
+  star_mul x y :=
+    x.induction_on
+      (by simp only [zero_mul, star_zero, mul_zero])
+      (fun a b => y.induction_on
+        (by simp only [star_zero, zero_mul, mul_zero])
+        (fun c d => by simp only [Algebra.TensorProduct.tmul_mul_tmul,
+          TensorProduct.star_tmul, star_mul])
+        (fun c d h h2 => by simp only [mul_add, star_add, h, h2, add_mul]))
+      (fun x y hx hy => by
+        simp only [add_mul, mul_add, star_add, hx, hy])
+
+local notation
+  f " ⊗ₘ " g => TensorProduct.map f g
+
+lemma AlgEquiv.TensorProduct.map_toLinearMap
+    {R : Type _} [CommSemiring R] {A B C D : Type _} [Semiring A]
+    [Semiring B] [Semiring C] [Semiring D] [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+    (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) :
+  (AlgEquiv.TensorProduct.map f g).toLinearMap = f.toLinearMap ⊗ₘ g.toLinearMap :=
+rfl
+lemma AlgEquiv.TensorProduct.map_map_toLinearMap
+  {R : Type _} [CommSemiring R] {A B C D E F : Type _} [Semiring A]
+    [Semiring B] [Semiring C] [Semiring D] [Semiring E] [Semiring F]
+    [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D] [Algebra R E] [Algebra R F]
+    (h : B ≃ₐ[R] E) (i : D ≃ₐ[R] F) (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) (x : A ⊗[R] C) :
+  (AlgEquiv.TensorProduct.map h i) ((AlgEquiv.TensorProduct.map f g) x)
+    = (AlgEquiv.TensorProduct.map (f.trans h) (g.trans i)) x :=
+by
+  simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply]
+  rfl
+
+lemma AlgEquiv.op_trans {R A B C : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Semiring C] [Algebra R A] [Algebra R B] [Algebra R C]
+  (f : A ≃ₐ[R] B) (g : B ≃ₐ[R] C) :
+  (AlgEquiv.op f).trans (AlgEquiv.op g) = AlgEquiv.op (f.trans g) :=
+rfl
+@[simp]
+lemma AlgEquiv.op_one {R A : Type*} [CommSemiring R] [Semiring A]
+  [Algebra R A] :
+  AlgEquiv.op (1 : A ≃ₐ[R] A) = 1 :=
+rfl
+
+@[simp]
+lemma AlgEquiv.TensorProduct.map_one {R A B : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Algebra R A] [Algebra R B] :
+  AlgEquiv.TensorProduct.map (1 : A ≃ₐ[R] A) (1 : B ≃ₐ[R] B) = 1 :=
+by
+  rw [AlgEquiv.ext_iff]
+  simp_rw [← AlgEquiv.toLinearMap_apply, ← LinearMap.ext_iff]
+  simp only [map_toLinearMap, one_toLinearMap, _root_.TensorProduct.map_one]
+
+-- noncomputable instance {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [hA : QuantumSet A]
+--   [hB : QuantumSet B] :
+--     QuantumSet (A ⊗[ℂ] B) where
+--   out := by
+--     refine Module.finite_def.mp ?_
+--     exact Module.Finite.tensorProduct ℂ A B
+--   modAut r := AlgEquiv.TensorProduct.map (hA.modAut r) (hB.modAut r)
+--   modAut_trans r s := by
+--     simp only [AlgEquiv.ext_iff, ← AlgEquiv.toLinearMap_apply, ← LinearMap.ext_iff]
+--     rw [TensorProduct.ext_iff]
+--     intro a b
+--     simp only [AlgEquiv.trans_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.TensorProduct.map]
+--     simp only [AlgEquiv.toAlgHom_eq_coe, AlgEquiv.coe_mk, Algebra.TensorProduct.map_tmul,
+--       AlgHom.coe_coe, modAut_apply_modAut, add_comm]
+--   modAut_zero := by
+--     simp only [modAut_zero, AlgEquiv.TensorProduct.map_one]
+--   modAut_star r x :=
+--     x.induction_on
+--       (by simp only [map_zero, star_zero])
+--       (fun c d => by simp only [AlgEquiv.TensorProduct.map]; simp only [AlgEquiv.toAlgHom_eq_coe,
+--         AlgEquiv.coe_mk, Algebra.TensorProduct.map_tmul, AlgHom.coe_coe,
+--         TensorProduct.star_tmul, QuantumSet.modAut_star])
+--       (fun x y hx hy => by
+--         simp only [map_add, hx, hy, star_add])
+  -- onb := hA.onb.tensorProduct hB.onb
+
 
 -- attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 -- open QuantumSet

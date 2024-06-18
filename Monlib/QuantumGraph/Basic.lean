@@ -24,42 +24,7 @@ by
   simp only [QuantumSet.modAut_apply_modAut, MulOpposite.op_star, MulOpposite.unop_star,
     MulOpposite.unop_op, QuantumSet.modAut_star, neg_add, neg_neg]
 
-lemma AlgEquiv.TensorProduct.map_toLinearMap
-    {R : Type _} [CommSemiring R] {A B C D : Type _} [Semiring A]
-    [Semiring B] [Semiring C] [Semiring D] [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
-    (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) :
-  (AlgEquiv.TensorProduct.map f g).toLinearMap = f.toLinearMap ⊗ₘ g.toLinearMap :=
-rfl
-
 open scoped TensorProduct
-
-lemma AlgEquiv.TensorProduct.map_map_toLinearMap
-  {R : Type _} [CommSemiring R] {A B C D E F : Type _} [Semiring A]
-    [Semiring B] [Semiring C] [Semiring D] [Semiring E] [Semiring F]
-    [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D] [Algebra R E] [Algebra R F]
-    (h : B ≃ₐ[R] E) (i : D ≃ₐ[R] F) (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) (x : A ⊗[R] C) :
-  (AlgEquiv.TensorProduct.map h i) ((AlgEquiv.TensorProduct.map f g) x)
-    = (AlgEquiv.TensorProduct.map (f.trans h) (g.trans i)) x :=
-by
-  simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply]
-  rfl
-
-lemma AlgEquiv.op_trans {R A B C : Type*} [CommSemiring R] [Semiring A]
-  [Semiring B] [Semiring C] [Algebra R A] [Algebra R B] [Algebra R C]
-  (f : A ≃ₐ[R] B) (g : B ≃ₐ[R] C) :
-  (AlgEquiv.op f).trans (AlgEquiv.op g) = AlgEquiv.op (f.trans g) :=
-rfl
-lemma AlgEquiv.op_one {R A : Type*} [CommSemiring R] [Semiring A]
-  [Algebra R A] :
-  AlgEquiv.op (1 : A ≃ₐ[R] A) = 1 :=
-rfl
-lemma AlgEquiv.TensorProduct.map_one {R A B : Type*} [CommSemiring R] [Semiring A]
-  [Semiring B] [Algebra R A] [Algebra R B] :
-  AlgEquiv.TensorProduct.map (1 : A ≃ₐ[R] A) (1 : B ≃ₐ[R] B) = 1 :=
-by
-  rw [AlgEquiv.ext_iff]
-  simp_rw [← AlgEquiv.toLinearMap_apply, ← LinearMap.ext_iff]
-  simp only [map_toLinearMap, one_toLinearMap, _root_.TensorProduct.map_one]
 
 lemma isReal_iff_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
