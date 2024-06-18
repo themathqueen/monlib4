@@ -28,14 +28,17 @@ import Monlib.Preq.Finset
 import Monlib.Preq.RCLikeLe
 import Monlib.Preq.Ites
 import Monlib.Preq.StarAlgEquiv
+import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 import Monlib.QuantumGraph.Nontracial
 -- import Monlib.QuantumGraph.QamA
 -- import Monlib.QuantumGraph.QamAExample
+import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.QuantumSet.SchurMul
 import Monlib.LinearAlgebra.QuantumSet.Symm
+import Monlib.LinearAlgebra.QuantumSet.Instances
 -- import Monlib.QuantumGraph.ToProjections
 import Monlib.RepTheory.AutMat
 import Monlib.LinearAlgebra.Ips.Basic
@@ -48,7 +51,6 @@ import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.Ips.Nontracial
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.Ips.Pos
-import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.Ips.RankOne
 import Monlib.LinearAlgebra.Ips.Strict
 import Monlib.LinearAlgebra.Ips.Symm
