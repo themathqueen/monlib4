@@ -1,5 +1,6 @@
-\subsection{Ket-bra operators}
- Let $E_1,E_2$ be inner product spaces over $\CC$.
+\chapter{Ket-bra operators}
+ Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
+
  \begin{definition}\label{rankOne}\lean{rankOne}\leanok
   A \textit{ket-bra} operator $\ketbra{\cdot}{\cdot}$ is defined as the linear map from $E_2$ to the anti-linear map $E_1\to\Bcal(E_1,E_2)$ and is given by
   \begin{align*}
@@ -9,13 +10,51 @@
  
  So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
 
- Given an orthonormal basis $(u_i)$ of a $\CC$-inner product space $E$, we get $\sum_i\ketbra{u_i}{u_i}=\id$.
- \begin{lemma}\uses{rankOne}\label{linear_map_comp_rank_one}\lean{ContinuousLinearMap.comp_rankOne}\leanok\label{rank_one_comp_linear_map}\lean{ContinuousLinearMap.rankOne_comp}\leanok\label{rank_one.adjoint}\lean{rankOne_adjoint}\leanok
-  Given Hilbert spaces $E_1,E_2,E_3$, linear maps $T_1\in\Bcal(E_2,E_3)$, $T_2\in\Bcal(E_3,E_1)$, and elements $x\in E_2$, $y\in{E_1}$, we get,
-  \begin{enumerate}[label=(\roman*)]
-   \item $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$,
-   \item $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$,
-   \item $\ketbra{x}{y}^*=\ketbra{y}{x}$.
-  \end{enumerate}\qed
+ \begin{lemma}\uses{rankOne}\label{linearMap_comp_rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
+  Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
  \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+ 
+ \begin{lemma}\uses{rankOne}\label{rankOne_comp_linearMap}\lean{ContinuousLinearMap.rankOne_comp}\leanok
+  Given a linear map $T_2\in\Bcal(E_3,E_1)$ and elements $x\in E_2$, $y\in E_1$, we get $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+ 
+ \begin{lemma}\uses{rankOne}\label{rankOne_adjoint}\lean{rankOne_adjoint}\leanok
+  Given $x\in E_2$ and $y\in E_1$, we get $\ketbra{x}{y}^*=\ketbra{y}{x}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
 
+ \begin{lemma}\uses{rankOne}\label{sum_rankOne_onb_eq_id}\lean{rankOne.sum_orthonormalBasis_eq_id}\leanok
+  Given an orthonormal basis $(u_i)$ of a $\CC$-inner product space $E$, we get $\sum_i\ketbra{u_i}{u_i}=\id$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{lemma}\label{continuous_linear_map.centralizer}\lean{ContinuousLinearMap.commutes_with_all_iff}\leanok
+  Given a Hilbert space $\Hcal$, we have ${\Bcal(\Hcal)}^\prime=\{\alpha\id:\alpha\in\CC\}$.\\
+  In other words, $x\in\Bcal(\Hcal)$ commutes with all operators $y\in\Bcal(\Hcal)$ if and only if $x=\alpha\id$ for some $\alpha\in\CC$.
+ \end{lemma}
+ \begin{proof}\uses{rankOne}\uses{rankOne_adjoint}\uses{rankOne_comp_linearMap}\uses{linearMap_comp_rankOne}\leanok
+  Let $x\in\Bcal(\Hcal)$. Obviously, if $x=\alpha\id$ for some $\alpha\in\CC$, then it commutes with every other operator. Now suppose $x$ commutes with every operator in $\Bcal(\Hcal)$.
+  So this means $\ketbra{a}{x^*(b)}=\ketbra{a}{b}x=x\ketbra{a}{b}=\ketbra{x(a)}{b}$ for all $a,b\in\Hcal$.
+  Suppose there exists some non-zero $a\in\Hcal$, otherwise this is trivial. Then, for any $b\in\Hcal$, we have
+  \[x(b)=\frac{\norm{a}^2}{\norm{a}^2}x(b)=\frac{1}{\norm{a}^2}\ketbra{x(b)}{a}(a)=\frac{1}{\norm{a}^2}\ketbra{b}{x^*(a)}(a)=\frac{\ip{x^*(a)}{a}}{\norm{a}^2}b.\]
+  Thus $x=\alpha\id$ where $\alpha=\ip{x^*(a)}{a}/\norm{a}^2$.
+ \end{proof}
+
+ \begin{proposition}\uses{rankOne}\label{colinear_of_rankOne_self_eq_rankOne_self}\lean{colinear_of_rankOne_self_eq_rankOne_self}\leanok
+  Let $\Hcal$ be a Hilbert space, and let $x,y\in\Hcal$. Then if $\ketbra{x}{x}=\ketbra{y}{y}$, then there exists some $0\neq\alpha\in\CC$ such that $x=\alpha{y}$ (i.e., they are co-linear).
+ \end{proposition}
+ \begin{proof}\uses{rankOne}\leanok
+  Suppose $\ketbra{x}{x}=\ketbra{y}{y}$. Then it is clear that we get $x=0$ if and only if $y=0$. So we assume $x\neq0$ (and so $y\neq0$), otherwise this is trivial.
+  Then we have \[\norm{x}^2x=\ketbra{x}{x}(x)=\ketbra{y}{y}(x)=\ip{y}{x}y.\]
+  And as $x\neq0$, we get $x=\dfrac{\ip{y}{x}}{\norm{x}^2}y$. We have $\ip{y}{x}\neq0$ (otherwise, this would mean $x=0$ which is a contradiction). Thus we can let $\alpha=\ip{y}{x}/\norm{x}^2\neq0$ such that $x=\alpha{y}$.
+ \end{proof}
