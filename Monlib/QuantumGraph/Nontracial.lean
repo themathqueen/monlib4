@@ -138,8 +138,8 @@ private theorem comp_sig_eq  [hφ : φ.IsFaithfulPosMap] (t : ℝ) (f g : ℍ �
 by
   rw [AlgEquiv.linearMap_comp_eq_iff, hφ.sig_symm_eq]
 
-theorem LinearMap.IsReal.adjoint_isReal_iff_commute_with_sig  [hφ : φ.IsFaithfulPosMap] {f : ℍ →ₗ[ℂ] ℍ} (hf : f.IsReal) :
-    (LinearMap.adjoint f).IsReal ↔ Commute f (hφ.sig 1).toLinearMap :=
+theorem LinearMap.IsReal.adjoint_isReal_iff_commute_with_sig  [hφ : φ.IsFaithfulPosMap] {f : ℍ →ₗ[ℂ] ℍ} (hf : LinearMap.IsReal f) :
+    LinearMap.IsReal (LinearMap.adjoint f) ↔ Commute f (hφ.sig 1).toLinearMap :=
   by
   rw [LinearMap.isReal_iff] at hf
   let σ := hφ.sig
@@ -526,7 +526,7 @@ theorem LinearMap.matrix.mulLeft_adjoint [hφ : φ.IsFaithfulPosMap] (x : ℍ) :
   simp_rw [LinearMap.mulLeft_apply, ←
     Module.Dual.IsFaithfulPosMap.inner_right_hMul]
 
-theorem Qam.ir_refl_iff_ir_refl'_of_real [hφ : φ.IsFaithfulPosMap] {A : ℍ →ₗ[ℂ] ℍ} (hA : A.IsReal) (p : Prop) [Decidable p] :
+theorem Qam.ir_refl_iff_ir_refl'_of_real [hφ : φ.IsFaithfulPosMap] {A : ℍ →ₗ[ℂ] ℍ} (hA : LinearMap.IsReal A) (p : Prop) [Decidable p] :
     Qam.reflIdempotent hφ A 1 = ite p 1 0 ↔ Qam.reflIdempotent hφ 1 A = ite p 1 0 :=
   by
   rw [LinearMap.isReal_iff] at hA
@@ -549,7 +549,7 @@ theorem Qam.ir_refl_iff_ir_refl'_of_real [hφ : φ.IsFaithfulPosMap] {A : ℍ �
     LinearMap.mulLeft_eq_one_or_zero_iff_mulRight]
 
 theorem Qam.realOfSelfAdjointSymm [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ)
-    (h1 : LinearMap.adjoint A = A) (h2 : symmMap ℂ ℍ _ A = A) : A.IsReal :=
+    (h1 : LinearMap.adjoint A = A) (h2 : symmMap ℂ ℍ _ A = A) : LinearMap.IsReal A :=
   by
   rw [LinearMap.isReal_iff]
   rw [symmMap_apply, ← LinearMap.star_eq_adjoint, star_eq_iff_star_eq,
@@ -557,13 +557,13 @@ theorem Qam.realOfSelfAdjointSymm [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[�
   exact h2.symm
 
 theorem Qam.self_adjoint_of_symm_real [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ)
-    (h1 : symmMap ℂ ℍ _ A = A) (h2 : A.IsReal) : LinearMap.adjoint A = A :=
+    (h1 : symmMap ℂ ℍ _ A = A) (h2 : LinearMap.IsReal A) : LinearMap.adjoint A = A :=
   by
   rw [LinearMap.isReal_iff] at h2
   rw [symmMap_apply, h2] at h1
   exact h1
 
-theorem Qam.symm_of_real_self_adjoint [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (h1 : A.IsReal)
+theorem Qam.symm_of_real_self_adjoint [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) (h1 : LinearMap.IsReal A)
     (h2 : LinearMap.adjoint A = A) : symmMap ℂ ℍ _ A = A :=
   by
   rw [symmMap_apply, (LinearMap.isReal_iff _).mp h1]
@@ -571,8 +571,8 @@ theorem Qam.symm_of_real_self_adjoint [hφ : φ.IsFaithfulPosMap] (A : ℍ →�
 
 theorem Qam.self_adjoint_symm_real_tfae [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) :
     List.TFAE
-      [LinearMap.adjoint A = A ∧ symmMap ℂ ℍ _ A = A, LinearMap.adjoint A = A ∧ A.IsReal,
-        symmMap ℂ ℍ _ A = A ∧ A.IsReal] :=
+      [LinearMap.adjoint A = A ∧ symmMap ℂ ℍ _ A = A, LinearMap.adjoint A = A ∧ LinearMap.IsReal A,
+        symmMap ℂ ℍ _ A = A ∧ LinearMap.IsReal A] :=
   by
   tfae_have 1 → 2
   · intro h
@@ -607,7 +607,7 @@ theorem sigop_zero [hφ : φ.IsFaithfulPosMap] : sigop hφ 0 = 1 := by
   simp only [AlgEquiv.one_toLinearMap, LinearMap.one_comp, op_comp_unop]
 
 theorem Qam.isReal_and_idempotent_iff_psi_orthogonal_projection [hφ : φ.IsFaithfulPosMap] (A : ℍ →ₗ[ℂ] ℍ) :
-    Qam.reflIdempotent hφ A A = A ∧ A.IsReal ↔
+    Qam.reflIdempotent hφ A A = A ∧ LinearMap.IsReal A ↔
       IsIdempotentElem (hφ.psi 0 (1 / 2) A) ∧
         star (hφ.psi 0 (1 / 2) A) = hφ.psi 0 (1 / 2) A :=
   by

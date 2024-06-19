@@ -104,7 +104,7 @@ theorem Qam.Nontracial.CompleteGraph.isSelfAdjoint {E : Type _} [One E] [NormedA
     ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]
 
 theorem Qam.Nontracial.CompleteGraph.isReal :
-    (Qam.completeGraph A B).IsReal := by
+    LinearMap.IsReal (Qam.completeGraph A B) := by
   simp_rw [Qam.completeGraph, LinearMap.isReal_iff, rankOne_real, star_one,
     _root_.map_one]
 
@@ -274,7 +274,7 @@ theorem Qam.Nontracial.Complement'.qam
   simp only [sub_eq_zero, @eq_comm _ x]
 
 theorem Qam.Nontracial.Complement'.qam.isReal
-    (x : A →ₗ[ℂ] B) : x.IsReal ↔ (Qam.complement' x).IsReal :=
+    (x : A →ₗ[ℂ] B) : LinearMap.IsReal x ↔ LinearMap.IsReal (Qam.complement' x) :=
   by
   simp only [Qam.complement', LinearMap.isReal_iff, LinearMap.real_sub,
     (LinearMap.isReal_iff _).mp (Qam.Nontracial.CompleteGraph.isReal)]
@@ -337,13 +337,13 @@ noncomputable def Qam.complement'' [QuantumSetDeltaForm A]
     l(A) :=
   x - Qam.trivialGraph A
 
-theorem schurMul_reflexive_of_isReal {x : l(A)} (hx : x.IsReal) :
+theorem schurMul_reflexive_of_isReal {x : l(A)} (hx : LinearMap.IsReal x) :
     x •ₛ 1 = 1 ↔ 1 •ₛ x = 1 :=
 by
   rw [LinearMap.real_inj_eq, schurMul_real, LinearMap.real_one, x.isReal_iff.mp hx]
 
 theorem Qam.complement''_is_irreflexive_iff [hA2 : QuantumSetDeltaForm A] {x : l(A)}
-    (hx : x.IsReal) : QamIrreflexive (Qam.complement'' x) ↔ QamReflexive x :=
+    (hx : LinearMap.IsReal x) : QamIrreflexive (Qam.complement'' x) ↔ QamReflexive x :=
   by
   rw [QamReflexive_iff, QamIrreflexive_iff]
   have t1 := @Qam.Nontracial.TrivialGraph.qam A _ _ _
@@ -367,7 +367,7 @@ noncomputable def Qam.reflexiveComplement [QuantumSetDeltaForm A] (x : l(A)) :
 Qam.completeGraph A A + Qam.trivialGraph A - x
 
 theorem Qam.Nontracial.trivialGraph.isReal [hA2 : QuantumSetDeltaForm A] :
-    (Qam.trivialGraph A).IsReal :=
+    LinearMap.IsReal (Qam.trivialGraph A) :=
   by
   rw [LinearMap.isReal_iff, Qam.trivialGraph_eq, LinearMap.real_smul, LinearMap.real_one,
     starRingEnd_apply, star_inv']
@@ -377,7 +377,7 @@ theorem Qam.Nontracial.trivialGraph.isReal [hA2 : QuantumSetDeltaForm A] :
   exact this.2
 
 theorem Qam.irreflexiveComplement.isReal [hA2 : QuantumSetDeltaForm A]
-  {x : l(A)} (hx : x.IsReal) : (Qam.irreflexiveComplement x).IsReal := by
+  {x : l(A)} (hx : LinearMap.IsReal x) : LinearMap.IsReal (Qam.irreflexiveComplement x) := by
   rw [LinearMap.isReal_iff, Qam.irreflexiveComplement, LinearMap.real_sub, LinearMap.real_sub,
     (LinearMap.isReal_iff (Qam.completeGraph A A)).mp Qam.Nontracial.CompleteGraph.isReal,
     (LinearMap.isReal_iff (Qam.trivialGraph A)).mp
@@ -385,7 +385,7 @@ theorem Qam.irreflexiveComplement.isReal [hA2 : QuantumSetDeltaForm A]
     (LinearMap.isReal_iff x).mp hx]
 
 theorem Qam.reflexiveComplement.isReal [hA2 : QuantumSetDeltaForm A] {x : l(A)}
-    (hx : x.IsReal) : (Qam.reflexiveComplement x).IsReal := by
+    (hx : LinearMap.IsReal x) : LinearMap.IsReal (Qam.reflexiveComplement x) := by
   rw [LinearMap.isReal_iff, Qam.reflexiveComplement, LinearMap.real_sub, LinearMap.real_add,
     (LinearMap.isReal_iff (Qam.completeGraph A A)).mp Qam.Nontracial.CompleteGraph.isReal,
     (LinearMap.isReal_iff (Qam.trivialGraph A)).mp
@@ -417,7 +417,7 @@ theorem Qam.complement'_eq {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
   rfl
 
 theorem Qam.irreflexiveComplement_is_irreflexive_qam_iff_irreflexive_qam
-  [hA2 : QuantumSetDeltaForm A] {x : l(A)} (hx : x.IsReal) :
+  [hA2 : QuantumSetDeltaForm A] {x : l(A)} (hx : LinearMap.IsReal x) :
     QamIrreflexive (Qam.irreflexiveComplement x) ↔ QamIrreflexive x :=
   by
   rw [Qam.irreflexiveComplement, sub_sub, ← Qam.complement'_eq,
@@ -428,7 +428,7 @@ theorem Qam.irreflexiveComplement_is_irreflexive_qam_iff_irreflexive_qam
       (Qam.trivialGraph A).isReal_iff.mp Qam.Nontracial.trivialGraph.isReal]
 
 theorem Qam.reflexive_complment_is_reflexive_qam_iff_reflexive_qam
-  [hA2 : QuantumSetDeltaForm A] {x : l(A)} (hx : x.IsReal) :
+  [hA2 : QuantumSetDeltaForm A] {x : l(A)} (hx : LinearMap.IsReal x) :
     QamReflexive (Qam.reflexiveComplement x) ↔ QamReflexive x :=
   by
   rw [Qam.reflexiveComplement, ← sub_sub_eq_add_sub, ← Qam.complement'_eq,

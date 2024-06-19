@@ -12,6 +12,13 @@ import Monlib.LinearAlgebra.ToMatrixOfEquiv
 variable {A : Type _} [Ring A] [StarRing A] [Algebra ℂ A] [StarModule ℂ A] [PartialOrder A]
   [_root_.StarOrderedRing A]
 
+/-- we say a map $f \colon M_1 \to M_2$ is a positive map
+  if for all positive $x \in M_1$, we also get $f(x)$ is positive -/
+def LinearMap.IsPosMap
+  {M₁ M₂ : Type*} [Zero M₁] [Zero M₂] [PartialOrder M₁] [PartialOrder M₂]
+  {F : Type*} [FunLike F M₁ M₂] (f : F) : Prop :=
+∀ ⦃x : M₁⦄, 0 ≤ x → 0 ≤ f x
+
 noncomputable abbrev selfAdjointDecomposition_left (a : A) :=
 (1 / 2 : ℂ) • (a + star a)
 local notation "aL" => selfAdjointDecomposition_left
@@ -416,11 +423,11 @@ by
     StarAlgEquiv.toFun_eq, StarAlgEquiv.apply_symm_apply]
 
 /-- if a map preserves positivity, then it is star-preserving -/
-theorem map_isReal_of_posMap
+theorem isReal_of_isPosMap
   {K : Type*}
   [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
-  {φ : (B →L[ℂ] B) →ₗ[ℂ] K} (hφ : ∀ ⦃a : B →L[ℂ] B⦄, 0 ≤ a → 0 ≤ φ a) :
-  φ.IsReal :=
+  {φ : (B →L[ℂ] B) →ₗ[ℂ] K} (hφ : LinearMap.IsPosMap φ) :
+  LinearMap.IsReal φ :=
 by
   intro x
   rw [selfAdjointDecomposition x]
@@ -443,13 +450,13 @@ by
   rw [IsSelfAdjoint.of_nonneg (hφ (star_mul_self_nonneg a)),
     IsSelfAdjoint.of_nonneg (hφ (star_mul_self_nonneg b))]
 
-theorem map_isReal_of_posMap_of_starAlgEquiv_piMat
+theorem isReal_of_isPosMap_of_starAlgEquiv_piMat
   {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] {φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n)
   {K : Type*}
   [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
-  {f : A →ₗ[ℂ] K} (hf : ∀ ⦃a : A⦄, 0 ≤ a → 0 ≤ f a) :
-  f.IsReal :=
+  {f : A →ₗ[ℂ] K} (hf : LinearMap.IsPosMap f) :
+  LinearMap.IsReal f :=
 by
   intro x
   rw [selfAdjointDecomposition x]
@@ -471,3 +478,47 @@ by
   simp only [star_sub, star_mul, star_star, map_sub]
   rw [IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg a)),
     IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg b))]
+
+/-- a $^*$-homomorphism from $A$ to $B$ is a positive map -/
+theorem StarAlgHom.isPosMap
+  {R A K : Type*}
+  [CommSemiring R]
+  [Semiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A] [Algebra R A]
+  [Semiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K] [Algebra R K]
+  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  (f : A →⋆ₐ[R] K) :
+  LinearMap.IsPosMap f :=
+by
+  intro a ha
+  obtain ⟨b, rfl⟩ := hA.mp ha
+  rw [map_mul, map_star]
+  exact star_mul_self_nonneg _
+
+theorem LinearMap.isPosMap_iff_star_mul_self_nonneg {R A K : Type*}
+  [CommSemiring R]
+  [Semiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A] [Algebra R A]
+  [Semiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K] [Algebra R K]
+  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  {f : A →ₗ[R] K} :
+  LinearMap.IsPosMap f ↔ ∀ a : A, 0 ≤ f (star a * a) :=
+by
+  refine ⟨λ h a => h (star_mul_self_nonneg _), λ h a => ?_⟩
+  . rw [hA]
+    rintro ⟨b, rfl⟩
+    exact h _
+
+theorem AlgHom.isPosMap_iff_isReal_of_starAlgEquiv_piMat
+  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n)
+  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  {K : Type*}
+  [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
+  {f : A →ₐ[ℂ] K} :
+  LinearMap.IsPosMap f ↔ LinearMap.IsReal f :=
+by
+  have : LinearMap.IsPosMap f ↔ LinearMap.IsPosMap f.toLinearMap := by rfl
+  refine ⟨λ h => isReal_of_isPosMap_of_starAlgEquiv_piMat φ (this.mp h), λ h => ?_⟩
+  let f' : A →⋆ₐ[ℂ] K := StarAlgHom.mk f h
+  have : f = f' := rfl
+  rw [this]
+  exact StarAlgHom.isPosMap hA _

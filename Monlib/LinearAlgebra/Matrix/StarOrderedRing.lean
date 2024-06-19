@@ -4,9 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.PiStarOrderedRing
-import Monlib.LinearAlgebra.Ips.Functional
+-- import Monlib.LinearAlgebra.Ips.Functional
 -- import Monlib.LinearAlgebra.MyIps.QuantumSet
 import Monlib.LinearAlgebra.PiDirectSum
+import Monlib.LinearAlgebra.InnerAut
+import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Monlib.Preq.Complex
 import Monlib.LinearAlgebra.Matrix.PiMat

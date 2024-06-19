@@ -7,6 +7,7 @@ import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.Preq.RCLikeLe
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.Matrix.IncludeBlock
+import Monlib.LinearAlgebra.PosMap_isReal
 
 #align_import linear_algebra.my_ips.functional
 
@@ -245,6 +246,26 @@ open scoped DirectSum
 def Module.Dual.IsPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
     (φ : Module.Dual 𝕜 A) : Prop :=
   ∀ a : A, 0 ≤ φ (star a * a)
+
+open scoped MatrixOrder
+lemma Matrix.nonneg_iff {k : Type*} [Fintype k]
+  [DecidableEq k] {x : Matrix k k ℂ} :
+  0 ≤ x ↔ ∃ y : Matrix k k ℂ, x = star y * y :=
+by rw [nonneg_def]; exact posSemidef_iff_eq_transpose_mul_self
+lemma PiMat.nonneg_iff {k : Type _} [Fintype k]
+  [DecidableEq k] {s : k → Type _} [Π i, Fintype (s i)] [Π i, DecidableEq (s i)]
+  {x : PiMat ℂ k s} :
+  0 ≤ x ↔ ∃ y : PiMat ℂ k s, x = star y * y :=
+by
+  simp_rw [Pi.le_def, Pi.zero_apply, Pi.mul_def, Pi.star_apply, Matrix.nonneg_iff,
+    Function.funext_iff]
+  exact ⟨λ h => ⟨(λ i => (h i).choose), λ _ => (h _).choose_spec⟩,
+    λ h a => ⟨h.choose a, h.choose_spec _⟩⟩
+
+lemma dual_isPosMap_of_linearMap_isPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A]
+  [PartialOrder A] [StarOrderedRing A] {φ : Module.Dual 𝕜 A} (h : LinearMap.IsPosMap φ) :
+  φ.IsPosMap :=
+λ _ => h (star_mul_self_nonneg _)
 
 lemma Module.Dual.piIsPosMap_iff {k : Type _} [Fintype k]
   [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
@@ -705,19 +726,19 @@ theorem Matrix.ext_iff_trace' {R m n : Type _} [Semiring R] [StarRing R] [Fintyp
   exact h
 
 theorem Module.Dual.isReal_iff {φ : Module.Dual ℂ (Matrix n n ℂ)} :
-    φ.IsReal ↔ φ.matrix.IsHermitian := by
+    LinearMap.IsReal φ ↔ φ.matrix.IsHermitian := by
   simp_rw [LinearMap.IsReal, Module.Dual.apply, trace_star, conjTranspose_mul,
     star_eq_conjTranspose, trace_mul_comm φ.matrix, Matrix.ext_iff_trace', IsHermitian, eq_comm]
 
 theorem Module.Dual.IsPosMap.isReal {φ : Module.Dual ℂ (Matrix n n ℂ)} (hφ : φ.IsPosMap) :
-    φ.IsReal := by
+    LinearMap.IsReal φ := by
   rw [Module.Dual.isPosMap_iff_of_matrix] at hφ
   rw [Module.Dual.isReal_iff]
   exact hφ.1
 
 theorem Module.Dual.pi.IsPosMap.isReal {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {ψ : ∀ i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-    (hψ : ∀ i, (ψ i).IsPosMap) : (Module.Dual.pi ψ).IsReal := by
+    (hψ : ∀ i, (ψ i).IsPosMap) : LinearMap.IsReal (Module.Dual.pi ψ) := by
   simp_rw [LinearMap.IsReal, Module.Dual.pi_apply, star_sum, Pi.star_apply, (hψ _).isReal _,
     forall_true_iff]
 

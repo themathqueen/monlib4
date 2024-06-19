@@ -58,3 +58,25 @@
   Then we have \[\norm{x}^2x=\ketbra{x}{x}(x)=\ketbra{y}{y}(x)=\ip{y}{x}y.\]
   And as $x\neq0$, we get $x=\dfrac{\ip{y}{x}}{\norm{x}^2}y$. We have $\ip{y}{x}\neq0$ (otherwise, this would mean $x=0$ which is a contradiction). Thus we can let $\alpha=\ip{y}{x}/\norm{x}^2\neq0$ such that $x=\alpha{y}$.
  \end{proof}
+
+\chapter{The inner product}
+
+ \begin{definition}\label{linear_functional.matrix}\lean{Module.Dual.matrix}\leanok
+  Given a linear functional $\phi\colon M_n \to \CC$, we define $\phi_Q=\sum_{i,j}\phi(e_{ij})e_{ji}$.
+ \end{definition}
+
+ \begin{lemma}\label{linear_functional_eq_trace}\uses{linear_functional.matrix}\lean{Module.Dual.apply}\leanok
+  Given a linear functional $\phi\colon M_n\to\CC$, we get $\phi$ is given by $x\mapsto\Tr(\phi_Q \,x)$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{definition}\label{LinearMap.IsPosMap}\lean{LinearMap.IsPosMap}\leanok
+  Given C$^*$-algebras $A,C$, we say a linear map $f\colon A \to C$ is \textit{positive} when $0\leq f(a)$ for all $0\leq a$. In other words, $f$ maps positive elements in $A$ to positive elements in $C$.
+ \end{definition}
+
+ 
+
+
+ 

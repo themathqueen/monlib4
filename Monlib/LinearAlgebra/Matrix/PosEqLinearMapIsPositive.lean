@@ -363,28 +363,6 @@ lemma inner_self_nonpos' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 
 by
 simp_rw [@RCLike.nonpos_def 𝕜, inner_self_nonpos, inner_self_im, and_true]
 
-section
-variable {M₁ M₂ : Type _} [NormedAddCommGroup M₁] [NormedAddCommGroup M₂] [InnerProductSpace ℂ M₁]
-  [InnerProductSpace ℂ M₂]
-
-/-- we say a linear map $T \colon L(M_1) \to L(M_2)$ is a positive map
-  if for all positive $x \in L(M_1)$, we also get $T(x)$ is positive  -/
-def LinearMap.PositiveMap (T : (M₁ →ₗ[ℂ] M₁) →ₗ[ℂ] M₂ →ₗ[ℂ] M₂) : Prop :=
-  ∀ x : M₁ →ₗ[ℂ] M₁, x.IsPositive → (T x).IsPositive
-
-/-- a $^*$-homomorphism from $L(M_1)$ to $L(M_2)$ is a positive map -/
-theorem LinearMap.PositiveMap.starHom [FiniteDimensional ℂ M₁] [FiniteDimensional ℂ M₂]
-    (φ : StarAlgHom ℂ (M₁ →ₗ[ℂ] M₁) (M₂ →ₗ[ℂ] M₂)) :
-    φ.toAlgHom.toLinearMap.PositiveMap := by
-  intro x hx
-  rcases(LinearMap.isPositive_iff_exists_adjoint_hMul_self x).mp hx with ⟨w, rfl⟩
-  have : ∀ h, φ.toAlgHom.toLinearMap h = φ h := fun h => rfl
-  simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, this, _root_.map_mul, ←
-    LinearMap.star_eq_adjoint, map_star, LinearMap.mul_apply, LinearMap.star_eq_adjoint,
-    LinearMap.adjoint_inner_left, LinearMap.adjoint_inner_right, forall₂_true_iff,
-    true_and_iff, inner_self_nonneg, forall_const]
-end
-
 /-- the identity is a positive definite matrix -/
 theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).PosDef :=
   by

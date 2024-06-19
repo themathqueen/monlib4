@@ -28,7 +28,7 @@ open scoped TensorProduct
 
 lemma isReal_iff_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
-  f.IsReal ↔ star (hA.Psi t r f) = hA.Psi (-t) (1 - r) f :=
+  LinearMap.IsReal f ↔ star (hA.Psi t r f) = hA.Psi (-t) (1 - r) f :=
 by
   simp_rw [LinearMap.isReal_iff, ← Function.Injective.eq_iff (hA.Psi t r).injective,
     Psi.real_apply]
@@ -47,7 +47,7 @@ by
 
 lemma isReal_iff_Psi_isSelfAdjoint {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) :
-  f.IsReal ↔ IsSelfAdjoint (hA.Psi 0 (1 / 2) f) :=
+  LinearMap.IsReal f ↔ IsSelfAdjoint (hA.Psi 0 (1 / 2) f) :=
 by
   rw [_root_.IsSelfAdjoint, isReal_iff_Psi f 0 (1 / 2)]
   norm_num
@@ -56,7 +56,7 @@ class schurProjection {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommG
   [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) :
     Prop :=
   isIdempotentElem : f •ₛ f = f
-  isReal : f.IsReal
+  isReal : LinearMap.IsReal f
 
 lemma ContinuousLinearMap.isOrthogonalProjection_iff
   {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (T : E →L[𝕜] E) :

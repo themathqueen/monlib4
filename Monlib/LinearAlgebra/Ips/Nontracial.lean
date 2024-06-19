@@ -881,7 +881,7 @@ theorem Finset.sum_product_univ {β α γ : Type _} [AddCommMonoid β] [Fintype 
   Finset.sum_product
 
 set_option synthInstance.maxHeartbeats 300000 in
-set_option maxHeartbeats 400000 in
+set_option maxHeartbeats 600000 in
 theorem Module.Dual.pi.IsFaithfulPosMap.toMatrixLinEquiv_symm_apply' [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   [hψ₂ : ∀ i, (ψ₂ i).IsFaithfulPosMap]
     (x : Matrix (Σ i, s₂ i × s₂ i) (Σ i, s i × s i) ℂ) :
@@ -908,16 +908,16 @@ theorem Module.Dual.pi.IsFaithfulPosMap.toMatrixLinEquiv_symm_apply' [hψ : ∀ 
     smul_smul]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (a i j b c d) -/
--- set_option maxHeartbeats 400000 in
+set_option synthInstance.maxHeartbeats 400000 in
 theorem Module.Dual.pi.IsFaithfulPosMap.toMatrix_symm_apply' [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (x : Matrix (Σ i, s i × s i) (Σ i, s i × s i) ℂ) :
-    (Module.Dual.pi.IsFaithfulPosMap.toMatrix fun i => (hψ i)).symm x =
+    (Module.Dual.pi.IsFaithfulPosMap.toMatrix hψ).symm x =
       ∑ a, ∑ i, ∑ j, ∑ b, ∑ c, ∑ d,
         x ⟨a, (i, j)⟩ ⟨b, (c, d)⟩ •
-          |Module.Dual.pi.IsFaithfulPosMap.basis (fun e => (hψ e))
+          |Module.Dual.pi.IsFaithfulPosMap.basis hψ
               ⟨a,
                 (i,
-                  j)⟩⟩⟨Module.Dual.pi.IsFaithfulPosMap.basis (fun e => (hψ e)) ⟨b, (c, d)⟩| :=
+                  j)⟩⟩⟨Module.Dual.pi.IsFaithfulPosMap.basis hψ ⟨b, (c, d)⟩| :=
 toMatrixLinEquiv_symm_apply' _
 
 theorem TensorProduct.of_basis_eq_span {𝕜 : Type _} {E : Type _} {F : Type _} [RCLike 𝕜]
@@ -966,7 +966,7 @@ by
   simp_rw [OrthonormalBasis.coe_toBasis, pi.IsFaithfulPosMap.orthonormalBasis_apply,
     pi.IsFaithfulPosMap.basis_apply]
 
-/- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (a b) -/
+set_option synthInstance.maxHeartbeats 400000 in
 theorem Module.Dual.pi.IsFaithfulPosMap.linearMap_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   [hψ₂ : ∀ i, (ψ₂ i).IsFaithfulPosMap]
     (x : (PiMat ℂ k s) →ₗ[ℂ] PiMat ℂ k₂ s₂) :
