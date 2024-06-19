@@ -376,7 +376,7 @@ theorem IsSymmetric.rePow_eq_rankOne {𝕜 E : Type _} [RCLike 𝕜] [NormedAddC
     LinearMap.rePow T hT r =
       ∑ i,
         ((hT.eigenvalues rfl i ^ r : ℝ) : 𝕜) •
-          (rankOne (hT.eigenvectorBasis rfl i) (hT.eigenvectorBasis rfl i) : E →L[𝕜] E) :=
+          (rankOne 𝕜 (hT.eigenvectorBasis rfl i) (hT.eigenvectorBasis rfl i)) :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.rePow_apply,
     ContinuousLinearMap.coe_sum, ContinuousLinearMap.coe_smul,
@@ -461,10 +461,11 @@ theorem IsPositive.toLinearMap (T : E →L[𝕜] E) : T.toLinearMap.IsPositive �
 
 end ContinuousLinearMap
 
-theorem rankOne.isPositive {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    [CompleteSpace E] (x : E) : (rankOne x x : _ →L[𝕜] _).IsPositive :=
+theorem rankOne_self_isPositive {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+    [CompleteSpace E] {x : E} :
+  (rankOne 𝕜 x x).IsPositive :=
   by
-  refine' ⟨rankOne.isSelfAdjoint _, _⟩
+  refine' ⟨rankOne_self_isSelfAdjoint, _⟩
   intro y
   rw [ContinuousLinearMap.reApplyInnerSelf_apply, rankOne_apply, inner_smul_left, RCLike.conj_mul, ← RCLike.ofReal_pow,
     RCLike.ofReal_re]
@@ -484,7 +485,7 @@ open scoped BigOperators
 theorem LinearMap.isPositive_iff_eq_sum_rankOne [FiniteDimensional 𝕜 E]
     (T : E →ₗ[𝕜] E) :
     T.IsPositive ↔
-      ∃ (m : ℕ) (u : Fin m → E), T = ∑ i : Fin m, ((rankOne (u i) (u i) : E →L[𝕜] E) : E →ₗ[𝕜] E) :=
+      ∃ (m : ℕ) (u : Fin m → E), T = ∑ i : Fin m, ((rankOne 𝕜 (u i) (u i)) : E →ₗ[𝕜] E) :=
   by
   constructor
   · intro hT
@@ -522,6 +523,6 @@ theorem LinearMap.IsSymmetric.rePowIsPositiveOfIsPositive {𝕜 E : Type _} [RCL
   intro i
   apply LinearMap.IsPositive.smulNonneg
   · rw [ContinuousLinearMap.IsPositive.toLinearMap]
-    exact rankOne.isPositive _
+    exact rankOne_self_isPositive
   · apply Real.rpow_nonneg
     exact hT.nonneg_eigenvalue (hT.1.hasEigenvalue_eigenvalues rfl _)

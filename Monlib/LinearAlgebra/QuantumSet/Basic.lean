@@ -209,7 +209,7 @@ def Psi_toFun
 
 theorem Psi_toFun_apply
     (t r : ℝ) (b : A) (a : B) :
-    Psi_toFun t r (rankOne a b : _ →L[ℂ] _).toLinearMap =
+    Psi_toFun t r (rankOne ℂ a b).toLinearMap =
       hB.modAut t a ⊗ₜ[ℂ] MulOpposite.op (star (hA.modAut r b)) :=
   by
   simp_rw [Psi_toFun, LinearMap.coe_mk, AddHom.coe_mk,

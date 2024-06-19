@@ -77,12 +77,12 @@ variable {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
 theorem symmMap_rankOne_apply (a : A) (b : B) :
     symmMap _ _ _ (|a⟩⟨b| : B →ₗ[ℂ] A) =
       |hB.modAut (-1) (star b)⟩⟨star a| :=
-by rw [symmMap_apply, rankOne_real, rankOneLm_adjoint]
+by rw [symmMap_apply, rankOne_real, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]
 
 theorem symmMap_symm_rankOne_apply (a : A) (b : B) :
     (symmMap _ _ _).symm (|a⟩⟨b| : B →ₗ[ℂ] A) =
       |star b⟩⟨hA.modAut (-1) (star a)| :=
-by rw [symmMap_symm_apply, rankOneLm_adjoint, rankOne_real]
+by rw [symmMap_symm_apply, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint, rankOne_real]
 
 open scoped BigOperators
 
@@ -330,7 +330,7 @@ theorem Psi.adjoint_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     obtain ⟨α, β, rfl⟩ := f.exists_sum_rankOne
     simp only [map_sum, star_sum, this]
   intro a b
-  simp_rw [rankOneLm_adjoint, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
+  simp_rw [ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
     star_tmul, ← MulOpposite.op_star, tenSwap_apply', star_star, map_tmul,
     AlgEquiv.toLinearMap_apply, AlgEquiv.op_apply_apply, MulOpposite.unop_op,
     QuantumSet.modAut_star, QuantumSet.modAut_apply_modAut,
@@ -377,5 +377,6 @@ theorem symmMap_apply_adjoint (x : A →ₗ[ℂ] B) :
       = ((symmMap ℂ _ _).symm) (LinearMap.adjoint x) :=
   by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
-  simp_rw [map_sum, rankOneLm_adjoint,
-    symmMap_symm_apply, symmMap_apply, rankOneLm_adjoint, LinearMap.adjoint_adjoint]
+  simp_rw [map_sum, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint,
+    symmMap_symm_apply, symmMap_apply, ContinuousLinearMap.linearMap_adjoint,
+    rankOne_adjoint, LinearMap.adjoint_adjoint]

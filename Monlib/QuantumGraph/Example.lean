@@ -96,12 +96,12 @@ lemma Qam.Nontracial.CompleteGraph.adjoint_eq {E₁ E₂ : Type _} [NormedAddCom
     [IsScalarTower ℂ E₁ E₁] [IsScalarTower ℂ E₂ E₂]
     [SMulCommClass ℂ E₁ E₁] [SMulCommClass ℂ E₂ E₂] :
   LinearMap.adjoint (Qam.completeGraph E₁ E₂) = Qam.completeGraph E₂ E₁ :=
-rankOneLm_adjoint _ _
+by rw [completeGraph_eq, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]; rfl
 
 theorem Qam.Nontracial.CompleteGraph.isSelfAdjoint {E : Type _} [One E] [NormedAddCommGroup E]
     [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] : _root_.IsSelfAdjoint (Qam.completeGraph E E) := by
-  simp_rw [_root_.IsSelfAdjoint, Qam.completeGraph, LinearMap.star_eq_adjoint, ←
-    rankOneLm_eq_rankOne, rankOneLm_adjoint]
+  simp_rw [_root_.IsSelfAdjoint, Qam.completeGraph, LinearMap.star_eq_adjoint,
+    ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]
 
 theorem Qam.Nontracial.CompleteGraph.isReal :
     (Qam.completeGraph A B).IsReal := by

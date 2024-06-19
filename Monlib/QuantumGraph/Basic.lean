@@ -121,6 +121,15 @@ by
   simp_rw [lmul_apply, mul_one] at h
   exact h
 
+lemma isIdempotentElem_algEquiv_iff {R A B : Type*} [CommSemiring R]
+  [Semiring A] [Semiring B]
+  [Algebra R A] [Algebra R B]
+  (φ : A ≃ₐ[R] B)
+  (a : A) :
+  IsIdempotentElem (φ a : B) ↔ IsIdempotentElem a :=
+by
+  simp_rw [IsIdempotentElem, ← map_mul, Function.Injective.eq_iff (AlgEquiv.injective _)]
+
 lemma lmul_isSelfAdjoint_iff' {A B : Type*} [NormedAddCommGroupOfRing A]
   [NormedAddCommGroupOfRing B]
   [hA : QuantumSet A] [hB : QuantumSet B] (a : A ⊗[ℂ] B) :
@@ -161,14 +170,3 @@ lemma LinearMap.isOrthogonalProjection_iff
 by rw [ContinuousLinearMap.isOrthogonalProjection_iff',
   isSelfAdjoint_toContinuousLinearMap,
   ContinuousLinearMap.IsIdempotentElem.toLinearMap]; simp only [coe_toContinuousLinearMap]
-
--- lemma schurProjection_submodule {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
---     [hA : QuantumSet A] [hB : QuantumSet B]
---     (f : A →ₗ[ℂ] B) :
---     schurProjection f ↔
---   ContinuousLinearMap.IsOrthogonalProjection
---     (LinearMap.toContinuousLinearMap
---       (lmul (hA.Psi 0 (1 / 2) f) : _ →ₗ[ℂ] _)) :=
--- by
---   rw [LinearMap.isOrthogonalProjection_iff, lmul_isIdempotentElem_iff,
---     ← schurIdempotent_iff_Psi_isIdempotentElem, lmul_isSelfAdjoint_iff']

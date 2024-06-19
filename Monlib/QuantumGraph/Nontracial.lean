@@ -254,14 +254,6 @@ theorem stdBasisMatrix_squash (i j k l : n) (x : Matrix n n ℂ) :
     Finset.mem_univ, if_true, smul_eq_mul, mul_one, MulZeroClass.mul_zero]
   simp_rw [← ite_and, @and_comm (l = j_1) (i = i_1)]
 
-theorem rankOneLm_smul {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x y : E) (r : 𝕜) : (rankOneLm x (r • y) : E →ₗ[𝕜] E) = starRingEnd 𝕜 r • rankOneLm x y := by
-  rw [rankOneLm, rankOne.smul_apply]; rfl
-
-theorem smul_rankOneLm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x y : E) (r : 𝕜) : (rankOneLm (r • x) y : E →ₗ[𝕜] E) = r • rankOneLm x y := by
-  rw [rankOneLm, rankOne.apply_smul]; rfl
-
 open scoped ComplexOrder
 private theorem nontracial_basis_apply {Q : ℍ} (hQ : Q.PosDef) (i j k l : n) :
     (e_{i,j} * hQ.rpow (-(1 / 2))) k l = ite (i = k) (hQ.rpow (-(1 / 2)) j l) 0 := by
@@ -346,9 +338,9 @@ private theorem Psi.adjoint_rank_one [hφ : φ.IsFaithfulPosMap] (a b : ℍ) (t 
       ((hφ.sig (t - s)).toLinearMap ⊗ₘ sigop hφ (t - s))
         (tenSwap (star (hφ.psi t s (|a⟩⟨b|)))) :=
   by
-  simp_rw [← rankOneLm_eq_rankOne, sigop]
-  rw [rankOneLm_adjoint]
-  simp_rw [rankOneLm_eq_rankOne, Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,
+  simp_rw [sigop]
+  rw [ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]
+  simp_rw [Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,
     Module.Dual.IsFaithfulPosMap.psiToFun'_apply, tensor_op_star_apply, unop_apply, op_apply,
     MulOpposite.unop_op, star_eq_conjTranspose, conjTranspose_conjTranspose, ←
     LinearMap.comp_apply]

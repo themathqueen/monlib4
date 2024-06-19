@@ -306,19 +306,19 @@ theorem Module.Dual.IsFaithfulPosMap.psiInvFun'_apply [hφ : φ.IsFaithfulPosMap
   have s_rank_one : ∀ (α : ℂ) (x y : ℍ), (|α • x⟩⟨y| : ℍ →ₗ[ℂ] ℍ) = α • ↑|x⟩⟨y| :=
     by
     intro _ _ _
-    simp_rw [rankOne.apply_smul]
+    simp_rw [map_smulₛₗ, LinearMap.smul_apply, RingHom.id_apply]
     rfl
   have rank_one_s : ∀ (α : ℂ) (x y : ℍ), (|x⟩⟨starRingEnd ℂ α • y| : ℍ →ₗ[ℂ] ℍ) = α • ↑|x⟩⟨y| :=
     by
     intro _ _ _
-    simp_rw [rankOne.smul_apply, starRingEnd_self_apply]
+    simp_rw [map_smulₛₗ, starRingEnd_self_apply]
     rfl
   have rank_one_sumz :
     ∀ (x : ℍ) (y : n × n → ℍ),
       (|x⟩⟨∑ i : n × n, y i| : ℍ →ₗ[ℂ] ℍ) =
         ∑ i in Finset.univ ×ˢ Finset.univ, (|x⟩⟨y i| : ℍ →ₗ[ℂ] ℍ) :=
     fun α β => by
-    simp only [rankOne_sum, LinearMap.ext_iff, ContinuousLinearMap.coe_coe,
+    simp only [map_sum, LinearMap.sum_apply, LinearMap.ext_iff, ContinuousLinearMap.coe_coe,
       ContinuousLinearMap.sum_apply, LinearMap.sum_apply, Finset.univ_product_univ,
       eq_self_iff_true, forall_true_iff]
   have sumz_rank_one :
@@ -326,7 +326,7 @@ theorem Module.Dual.IsFaithfulPosMap.psiInvFun'_apply [hφ : φ.IsFaithfulPosMap
       (|∑ i : n × n, x i⟩⟨y| : ℍ →ₗ[ℂ] ℍ) =
         ∑ i in Finset.univ ×ˢ Finset.univ, (|x i⟩⟨y| : ℍ →ₗ[ℂ] ℍ) :=
     fun α β => by
-    simp only [sum_rankOne, LinearMap.ext_iff, ContinuousLinearMap.coe_coe,
+    simp only [map_sum, LinearMap.sum_apply, LinearMap.ext_iff, ContinuousLinearMap.coe_coe,
       ContinuousLinearMap.sum_apply, LinearMap.sum_apply, Finset.univ_product_univ,
       eq_self_iff_true, forall_true_iff]
   simp_rw [← rank_one_s ((unop (op y') * hφ.matrixIsPosDef.rpow (1/2)) _ _), ← s_rank_one, ←
@@ -948,7 +948,7 @@ lemma _root_.Matrix.toLin_apply_rankOne {𝕜 H₁ H₂ : Type*} [RCLike 𝕜]
   [_root_.InnerProductSpace 𝕜 H₂] {ι₁ ι₂ : Type*} [Fintype ι₁] [DecidableEq ι₁] [Fintype ι₂]
   [DecidableEq ι₂]
   (b₁ : OrthonormalBasis ι₁ 𝕜 H₁) (b₂ : OrthonormalBasis ι₂ 𝕜 H₂) (x : Matrix ι₂ ι₁ 𝕜) :
-  Matrix.toLin b₁.toBasis b₂.toBasis x = ∑ i, ∑ j, x i j • (rankOne (b₂ i) (b₁ j) : _ →L[𝕜] _) :=
+  Matrix.toLin b₁.toBasis b₂.toBasis x = ∑ i, ∑ j, x i j • (rankOne 𝕜 (b₂ i) (b₁ j)) :=
 by
   ext1
   simp_rw [toLin_apply, mulVec, dotProduct, OrthonormalBasis.coe_toBasis_repr_apply,
@@ -1274,12 +1274,12 @@ theorem Pi.rankOneLm_real_apply {k₂ : Type*} [Fintype k₂] [DecidableEq k₂]
   [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   [hφ : ∀ i, (φ i).IsFaithfulPosMap]
   (x : PiMat ℂ k s) (y : PiMat ℂ k₂ s₂) :
-    LinearMap.real (rankOneLm x y : (PiMat ℂ k₂ s₂) →ₗ[ℂ] (PiMat ℂ k s)) =
-      (rankOneLm (star x) (Module.Dual.pi.IsFaithfulPosMap.sig hφ (-1) (star y))) :=
+    LinearMap.real (rankOne ℂ x y : (PiMat ℂ k₂ s₂) →ₗ[ℂ] (PiMat ℂ k s)) =
+      rankOne ℂ (star x) (Module.Dual.pi.IsFaithfulPosMap.sig hφ (-1) (star y)) :=
   by
   rw [LinearMap.ext_iff]
   intro x_1
-  simp_rw [rankOneLm_apply, LinearMap.real_apply, rankOneLm_apply,
+  simp only [LinearMap.real_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
     star_smul, ← starRingEnd_apply]
   have := @Pi.inner_symm _ _ _ _ _ _ hφ (star x_1) y
   rw [star_star] at this
@@ -1361,11 +1361,6 @@ theorem Pi.sig_comp_eq_iff {A : Type*} [AddCommMonoid A] [Module ℂ A]
   on_goal 2 => rw [add_neg_self]
   all_goals
     rw [Module.Dual.pi.IsFaithfulPosMap.sig_zero', AlgEquiv.one_toLinearMap, LinearMap.one_comp]
-
-theorem rankOneLm_eq_rankOne {𝕜 E E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-  [NormedAddCommGroup E₂]
-    [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 E₂] (x : E) (y : E₂) : (rankOneLm x y : E₂ →ₗ[𝕜] E) = (rankOne x y : E₂ →L[𝕜] E) :=
-  rfl
 
 theorem LinearMap.pi.adjoint_real_eq {k₂ : Type*} [Fintype k₂] [DecidableEq k₂]
   {s₂ : k₂ → Type*} [Π i, Fintype (s₂ i)] [Π i, DecidableEq (s₂ i)]

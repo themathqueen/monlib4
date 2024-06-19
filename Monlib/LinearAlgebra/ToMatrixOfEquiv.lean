@@ -34,7 +34,7 @@ noncomputable def OrthonormalBasis.toMatrix {n E : Type _} [Fintype n] [Decidabl
     (b : OrthonormalBasis n 𝕜 E) : (E →ₗ[𝕜] E) ≃⋆ₐ[𝕜] Matrix n n 𝕜
     where
   toFun x k p := inner (b k) (x (b p))
-  invFun x := ∑ i, ∑ j, x i j • (rankOne (b i) (b j) : E →L[𝕜] E)
+  invFun x := ∑ i, ∑ j, x i j • (rankOne 𝕜 (b i) (b j))
   map_add' x y := by simp only [LinearMap.add_apply, inner_add_right]; rfl
   map_smul' r x := by simp only [LinearMap.smul_apply, inner_smul_right]; rfl
   map_mul' x y := by
@@ -69,7 +69,7 @@ theorem OrthonormalBasis.toMatrix_apply {n E : Type _} [Fintype n] [DecidableEq 
 theorem OrthonormalBasis.toMatrix_symm_apply {n E : Type _} [Fintype n] [DecidableEq n]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
     (b : OrthonormalBasis n 𝕜 E) (x : Matrix n n 𝕜) :
-    b.toMatrix.symm x = ∑ i, ∑ j, x i j • (rankOne (b i) (b j) : E →L[𝕜] E).toLinearMap :=
+    b.toMatrix.symm x = ∑ i, ∑ j, x i j • (rankOne 𝕜 (b i) (b j)).toLinearMap :=
   rfl
 
 theorem OrthonormalBasis.toMatrix_symm_apply' {n E : Type _} [Fintype n] [DecidableEq n]

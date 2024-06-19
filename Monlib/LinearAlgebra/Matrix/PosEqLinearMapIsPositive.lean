@@ -257,8 +257,7 @@ theorem Matrix.posSemidef_iff_eq_rankOne [Fintype n] [DecidableEq n] {x : Matrix
       ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
         x =
           ∑ i : Fin m,
-            LinearMap.toMatrix' ((rankOne (v i) (v i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
-                EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+            LinearMap.toMatrix' (rankOne 𝕜 (v i) (v i)).toLinearMap :=
   by
   simp_rw [posSemidef_eq_linearMap_positive, LinearMap.isPositive_iff_eq_sum_rankOne,
     toEuclideanLin_eq_toLin, Matrix.toLin_piLp_eq_toLin', ← map_sum]
@@ -267,18 +266,19 @@ theorem Matrix.posSemidef_iff_eq_rankOne [Fintype n] [DecidableEq n] {x : Matrix
     exact (LinearMap.toMatrix'_toLin' _).symm
   · rw [hy]
     exact (toLin'_toMatrix' _)
+
 theorem Matrix.posSemidef_iff_eq_rankOne' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
       ∃ (m : ℕ) (v : Fin m → (n → 𝕜)),
         x = ∑ i : Fin m,
-          LinearMap.toMatrix' (rankOneLm (v i) (v i) : (EuclideanSpace 𝕜 n) →ₗ[𝕜] (EuclideanSpace 𝕜 n)) :=
+          LinearMap.toMatrix' (rankOne 𝕜 ((EuclideanSpace.equiv _ _).symm (v i)) ((EuclideanSpace.equiv _ _).symm (v i))).toLinearMap :=
 Matrix.posSemidef_iff_eq_rankOne
 theorem Matrix.posSemidef_iff_eq_rankOne'' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
       ∃ (m : Type) (hm : Fintype m) (v : m → (n → 𝕜)),
         x =
           ∑ i : m,
-            LinearMap.toMatrix' (rankOneLm (v i) (v i) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :=
+            LinearMap.toMatrix' (rankOne 𝕜 ((EuclideanSpace.equiv _ _).symm (v i)) ((EuclideanSpace.equiv _ _).symm (v i))).toLinearMap :=
 by
   rw [Matrix.posSemidef_iff_eq_rankOne']
   constructor
@@ -292,28 +292,30 @@ by
     . simp only [Finset.mem_univ, implies_true]
     . simp_rw [v', Finset.mem_univ, Equiv.symm_apply_apply, forall_true_left, implies_true]
 
-theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
-    [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
-    toEuclideanLin.symm (rankOne x y : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) =
-      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [RCLike 𝕜] {n m : Type _} [Fintype n]
+    [Fintype m] [DecidableEq n] [DecidableEq m]
+    (x : EuclideanSpace 𝕜 n) (y : EuclideanSpace 𝕜 m) :
+    toEuclideanLin.symm (rankOne 𝕜 x y).toLinearMap =
+      col (x : n → 𝕜) * (col (y : m → 𝕜))ᴴ :=
   by
   simp_rw [← Matrix.ext_iff, toEuclideanLin_eq_toLin, toLin_symm, LinearMap.toMatrix_apply,
     ContinuousLinearMap.coe_coe, rankOne_apply, PiLp.basisFun_repr, PiLp.basisFun_apply,
     PiLp.smul_apply]
-  have : ∀ j, (WithLp.equiv 2 (n → 𝕜)).symm (Pi.single j 1) = EuclideanSpace.single j 1 := λ j => rfl
+  have : ∀ j, (WithLp.equiv 2 (m → 𝕜)).symm (Pi.single j 1) = EuclideanSpace.single j 1 := λ j => rfl
   simp_rw [this, EuclideanSpace.inner_single_right, one_mul, conjTranspose_col, ← vecMulVec_eq,
     vecMulVec_apply, smul_eq_mul, Pi.star_apply, mul_comm]
   intro i j
   rfl
 
-theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
-    [DecidableEq n] (x y : EuclideanSpace 𝕜 n) :
-    LinearMap.toMatrix' ((rankOne x y).toLinearMap : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
-      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [RCLike 𝕜] {n m : Type _}
+    [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
+    (x : EuclideanSpace 𝕜 n) (y : EuclideanSpace 𝕜 m) :
+    LinearMap.toMatrix' ((rankOne 𝕜 x y).toLinearMap : (m → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
+      col (x : n → 𝕜) * (col (y : m → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _
 theorem rankOne.Pi.toMatrix'' {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
     [DecidableEq n] (x y : n → 𝕜) :
-    LinearMap.toMatrix' (((rankOneLm x y) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n)
+    LinearMap.toMatrix' (((rankOne 𝕜 ((EuclideanSpace.equiv _ _).symm x) ((EuclideanSpace.equiv _ _).symm y)) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n)
         : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
       col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _

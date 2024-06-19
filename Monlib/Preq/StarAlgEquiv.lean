@@ -96,12 +96,6 @@ theorem StarAlgEquiv.comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [S
     simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv,
       StarAlgEquiv.symm_apply_apply]
 
-#print AlgEquiv.one_toLinearMap /-
-theorem AlgEquiv.one_toLinearMap {R E : Type _} [CommSemiring R] [Semiring E] [Algebra R E] :
-    (1 : E ≃ₐ[R] E).toLinearMap = 1 :=
-  rfl
--/
-
 theorem AlgEquiv.map_eq_zero_iff {R E₁ E₂ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
     [Algebra R E₁] [Algebra R E₂] (f : E₁ ≃ₐ[R] E₂) (x : E₁) : f x = 0 ↔ x = 0 :=
   RingEquiv.map_eq_zero_iff f.toRingEquiv

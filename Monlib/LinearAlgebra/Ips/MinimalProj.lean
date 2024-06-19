@@ -103,7 +103,7 @@ theorem LinearMap.commutes_of_isIdempotentElem {E 𝕜 : Type _} [RCLike 𝕜] [
     by
     simp_rw [two_smul]
     nth_rw 2 [← h]
-    simp_rw [mul_eq_comp, add_sub_cancel'_right, add_comm]
+    simp_rw [mul_eq_comp, add_sub_cancel, add_comm]
   have H : ((2 : 𝕜) • p).comp q = q.comp (p.comp q) + p.comp q := by
     simp_rw [h', add_comp, comp_assoc, ← mul_eq_comp, hq.eq]
   simp_rw [add_comm, two_smul, add_comp, add_right_inj] at H
@@ -481,8 +481,6 @@ theorem orthogonal_projection_commutes_of_is_idempotent [InnerProductSpace ℂ E
       (LinearMap.commutes_of_isIdempotentElem (IsIdempotentElem.clm_to_lm.mp hp)
           (IsIdempotentElem.clm_to_lm.mp hq) (IsIdempotentElem.clm_to_lm.mp h)).2
 
-set_option synthInstance.checkSynthOrder false in
-scoped[FiniteDimensional] attribute [instance] FiniteDimensional.complete
 open scoped FiniteDimensional
 
 /-- copy of `linear_map.is_positive_iff_exists_adjoint_mul_self` -/
@@ -670,10 +668,10 @@ theorem orthogonalProjection.isMinimalProjection_of
     contradiction
 
 /-- any rank one operator given by a norm one vector is a minimal projection -/
-theorem rankOne.isMinimalProjection [InnerProductSpace ℂ E] [CompleteSpace E] (x : E)
-    (h : ‖x‖ = 1) : (rankOne x x).IsMinimalProjection (Submodule.span ℂ {x}) :=
+theorem rankOne_self_isMinimalProjection [InnerProductSpace ℂ E] [CompleteSpace E] {x : E}
+    (h : ‖x‖ = 1) : (rankOne ℂ x x).IsMinimalProjection (Submodule.span ℂ {x}) :=
   by
-  refine' ⟨rankOne.isSelfAdjoint x, _⟩
+  refine' ⟨rankOne_self_isSelfAdjoint, _⟩
   simp_rw [finrank_eq_one_iff']
   constructor
   · use⟨x, Submodule.mem_span_singleton_self x⟩
@@ -708,8 +706,8 @@ theorem normalize_op [InnerProductSpace ℂ E] (x : E) :
 
 /-- given any non-zero `x ∈ E`, we have
   `1 / ‖x‖ ^ 2 • |x⟩⟨x|` is a minimal projection -/
-theorem rankOne.isMinimalProjection' [InnerProductSpace ℂ E] [CompleteSpace E] (x : E) (h : x ≠ 0) :
-    IsMinimalProjection ((1 / ‖x‖ ^ 2) • rankOne x x) (Submodule.span ℂ {x}) :=
+theorem rankOne_self_isMinimalProjection' [InnerProductSpace ℂ E] [CompleteSpace E] {x : E} (h : x ≠ 0) :
+    IsMinimalProjection ((1 / ‖x‖ ^ 2) • rankOne ℂ x x) (Submodule.span ℂ {x}) :=
   by
   rcases normalize_op x with ⟨y, r, ⟨hy, hx⟩⟩
   · have : r ^ 2 ≠ 0 := by
@@ -717,8 +715,8 @@ theorem rankOne.isMinimalProjection' [InnerProductSpace ℂ E] [CompleteSpace E]
       rw [pow_eq_zero_iff two_ne_zero] at d
       rw [d, Complex.coe_smul, zero_smul] at hx
       contradiction
-    simp_rw [hx, Complex.coe_smul, one_div, ← Complex.coe_smul, rankOne.apply_smul,
-      rankOne.smul_apply, Complex.conj_ofReal,
+    simp_rw [hx, Complex.coe_smul, one_div, ← Complex.coe_smul, map_smulₛₗ, LinearMap.smul_apply,
+      RingHom.id_apply, Complex.conj_ofReal,
       norm_smul, mul_pow, Complex.norm_real, mul_inv, smul_smul, hy,
       one_pow, inv_one, mul_one, Real.norm_eq_abs, ← abs_pow, pow_two, abs_mul_self, ← pow_two,
       Complex.ofReal_inv, Complex.ofReal_pow, Complex.coe_smul]
@@ -732,7 +730,7 @@ theorem rankOne.isMinimalProjection' [InnerProductSpace ℂ E] [CompleteSpace E]
       rw [← pow_eq_zero_iff two_ne_zero]
       norm_cast
     rw [← Complex.coe_smul, this]
-    exact rankOne.isMinimalProjection y hy
+    exact rankOne_self_isMinimalProjection hy
   · contradiction
 
 lemma LinearMap.range_of_isProj {R M : Type*} [CommSemiring R] [AddCommGroup M] [Module R M]
@@ -889,7 +887,7 @@ theorem orthogonalProjection.orthogonal_complement_eq [InnerProductSpace 𝕜 E]
   by
   have : 1 = id 𝕜 E := rfl
   simp_rw [this, id_eq_sum_orthogonalProjection_self_orthogonalComplement U,
-    orthogonalProjection'_eq, add_sub_cancel']
+    orthogonalProjection'_eq, add_sub_cancel_left]
 
 example [InnerProductSpace ℂ E] {U W : Submodule ℂ E} [CompleteSpace E] [CompleteSpace U]
   [CompleteSpace W] :

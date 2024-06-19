@@ -228,7 +228,7 @@ theorem EuclideanSpace.inner_eq {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] {x y
 
 theorem EuclideanSpace.rankOne_of_orthonormalBasis_eq_one {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n]
     (h : OrthonormalBasis n 𝕜 (EuclideanSpace 𝕜 n)) :
-    ∑ i : n, (rankOne (h i) (h i) : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) = 1 :=
+    ∑ i : n, rankOne 𝕜 (h i) (h i) = 1 :=
   by
   rw [ContinuousLinearMap.ext_iff]
   intro x
