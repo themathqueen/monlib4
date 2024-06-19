@@ -10,7 +10,7 @@
  So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
 
  Given an orthonormal basis $(u_i)$ of a $\CC$-inner product space $E$, we get $\sum_i\ketbra{u_i}{u_i}=\id$.
- \begin{lemma}\uses{rankOne}\label{linear_map_comp_rank_one}\lean{ContinuousLinearMap.comp_rankOne}\leanok\label{rank_one_comp_linear_map}\lean{ContinuousLinearMap.rankOne_comp}\leanok\label{rank_one.adjoint}\lean{rankOne.adjoint}\leanok
+ \begin{lemma}\uses{rankOne}\label{linear_map_comp_rank_one}\lean{ContinuousLinearMap.comp_rankOne}\leanok\label{rank_one_comp_linear_map}\lean{ContinuousLinearMap.rankOne_comp}\leanok\label{rank_one.adjoint}\lean{rankOne_adjoint}\leanok
   Given Hilbert spaces $E_1,E_2,E_3$, linear maps $T_1\in\Bcal(E_2,E_3)$, $T_2\in\Bcal(E_3,E_1)$, and elements $x\in E_2$, $y\in{E_1}$, we get,
   \begin{enumerate}[label=(\roman*)]
    \item $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$,
