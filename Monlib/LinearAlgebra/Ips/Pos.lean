@@ -26,11 +26,6 @@ for linear maps:
 
 -/
 
-
-/-- set over `K` is **non-negative** if all its elements are non-negative -/
-def Set.IsNonneg {K : Type _} [LE K] [Zero K] (A : Set K) : Prop :=
-  ∀ x : K, x ∈ A → 0 ≤ x
-
 open InnerProductSpace RCLike
 
 open scoped InnerProduct ComplexConjugate
@@ -42,31 +37,33 @@ local notation "⟪" x ", " y "⟫" => @inner 𝕜 _ _ x y
 
 namespace LinearMap
 
+open scoped ComplexOrder
+
 /-- `T` is (semi-definite) **positive** if `T` is symmetric
 and `∀ x : V, 0 ≤ re ⟪x, T x⟫` -/
 def IsPositive (T : E →ₗ[𝕜] E) : Prop :=
-  T.IsSymmetric ∧ ∀ x : E, 0 ≤ re ⟪x, T x⟫
+  T.IsSymmetric ∧ ∀ x : E, 0 ≤ ⟪x, T x⟫
 
 theorem isPositiveZero : (0 : E →ₗ[𝕜] E).IsPositive :=
   by
   refine' ⟨isSymmetric_zero, fun x => _⟩
-  simp_rw [zero_apply, inner_re_zero_right, le_rfl]
+  simp_rw [zero_apply, inner_zero_right, le_rfl]
 
 theorem isPositiveOne : (1 : E →ₗ[𝕜] E).IsPositive :=
-  ⟨isSymmetric_id, fun _ => inner_self_nonneg⟩
+  ⟨isSymmetric_id, fun _ => inner_self_nonneg'⟩
 
 theorem IsPositive.add {S T : E →ₗ[𝕜] E} (hS : S.IsPositive) (hT : T.IsPositive) :
     (S + T).IsPositive :=
   by
   refine' ⟨IsSymmetric.add hS.1 hT.1, fun x => _⟩
-  rw [add_apply, inner_add_right, map_add]
+  rw [add_apply, inner_add_right]
   exact add_nonneg (hS.2 _) (hT.2 _)
 
 theorem IsPositive.inner_nonneg_left {T : E →ₗ[𝕜] E} (hT : IsPositive T) (x : E) :
-    0 ≤ re ⟪T x, x⟫ := by rw [inner_re_symm]; exact hT.2 x
+    0 ≤ ⟪T x, x⟫ := by rw [hT.1]; exact hT.2 x
 
 theorem IsPositive.inner_nonneg_right {T : E →ₗ[𝕜] E} (hT : IsPositive T) (x : E) :
-    0 ≤ re ⟪x, T x⟫ :=
+    0 ≤ ⟪x, T x⟫ :=
   hT.2 x
 
 /-- a linear projection onto `U` along its complement `V` is positive if
@@ -94,7 +91,7 @@ theorem linear_proj_isPositive_iff {U V : Submodule 𝕜 E} (hUV : IsCompl U V) 
     intro x
     rw [comp_apply, Submodule.subtype_apply, ← Submodule.linearProjOfIsCompl_idempotent, ←
       Submodule.subtype_apply, ← comp_apply, ← this _ ((U.linearProjOfIsCompl V hUV) x)]
-    exact inner_self_nonneg
+    exact inner_self_nonneg'
 
 section FiniteDimensional
 
@@ -108,18 +105,23 @@ variable [FiniteDimensional 𝕜 E] (T : E →ₗ[𝕜] E)
 
 open scoped ComplexOrder
 
+private theorem _root_.spec_subseteq_nonneg :
+  (spectrum 𝕜 T) ⊆ { x : 𝕜 | 0 ≤ x } ↔ ∀ x ∈ spectrum 𝕜 T, 0 ≤ x :=
+by
+  simp_rw [Set.subset_def, Set.mem_setOf_eq]
+
 /-- the spectrum of a positive linear map is non-negative -/
-theorem IsPositive.nonneg_spectrum (h : T.IsPositive) : (spectrum 𝕜 T).IsNonneg :=
+theorem IsPositive.nonneg_spectrum (h : T.IsPositive) :
+  (spectrum 𝕜 T) ⊆ { x : 𝕜 | 0 ≤ x } :=
   by
-  cases' h with hT h
   intro μ hμ
   simp_rw [← Module.End.hasEigenvalue_iff_mem_spectrum] at hμ
+  simp only [Set.mem_setOf_eq, @RCLike.nonneg_def' 𝕜]
   have : ↑(re μ) = μ := by
     simp_rw [← conj_eq_iff_re]
-    exact IsSymmetric.conj_eigenvalue_eq_self hT hμ
+    exact IsSymmetric.conj_eigenvalue_eq_self h.1 hμ
   rw [← this] at hμ
-  rw [RCLike.nonneg_def']
-  exact ⟨this, eigenvalue_nonneg_of_nonneg hμ h⟩
+  exact ⟨this, eigenvalue_nonneg_of_nonneg hμ (λ _ => ((@RCLike.nonneg_def 𝕜 _ _).mp (h.2 _)).1)⟩
 
 open scoped BigOperators
 
@@ -128,11 +130,12 @@ we can write `T x = ∑ i, √α i • √α i • ⟪e i, x⟫` for any `x ∈ 
 where `α i` are the eigenvalues of `T` and `e i` are the respective eigenvectors
 that form an eigenbasis (`isSymmetric.eigenvector_basis`) -/
 theorem sq_mul_sq_eq_self_of_isSymmetric_and_nonneg_spectrum
-    (hT : T.IsSymmetric) (hT1 : (spectrum 𝕜 T).IsNonneg)
+    (hT : T.IsSymmetric) (hT1 : (spectrum 𝕜 T) ⊆ { x : 𝕜 | 0 ≤ x })
     (v : E) : T v = ∑ i, (√ (α hT rfl i) • √ (α hT rfl i) : 𝕜) • ⟪e hT rfl i, v⟫ • e hT rfl i :=
   by
   have : ∀ i, 0 ≤ α hT rfl i := fun i =>
     by
+    rw [spec_subseteq_nonneg] at hT1
     specialize hT1 (hT.eigenvalues rfl i)
     simp only [zero_le_real, ofReal_re, true_and_iff] at hT1
     apply
@@ -197,7 +200,7 @@ theorem sqrt_apply (hT : T.IsSymmetric)
 /-- given a symmetric linear map `T` with a non-negative spectrum,
 the square root of `T` composed with itself equals itself, i.e., `T.sqrt ^ 2 = T`  -/
 theorem sqrt_sq_eq_self_of_isSymmetric_and_nonneg_spectrum
-  (hT : T.IsSymmetric) (hT1 : (spectrum 𝕜 T).IsNonneg) :
+  (hT : T.IsSymmetric) (hT1 : (spectrum 𝕜 T) ⊆ {x : 𝕜 | 0 ≤ x}) :
     T.sqrt hT ^ 2 = T := by
   simp_rw [pow_two, mul_eq_comp, LinearMap.ext_iff, comp_apply, sqrt_apply, inner_sum,
     inner_smul_real_right, smul_smul, inner_smul_right, ← OrthonormalBasis.repr_apply_apply,
@@ -218,26 +221,25 @@ theorem IsSymmetric.sqrtIsPositive
     simp_rw [mul_assoc, map_mul, this _, inner_conj_symm, mul_comm ⟪e hT rfl _, y⟫ _, ← mul_assoc]
   refine' ⟨this, _⟩
   intro x
-  simp_rw [sqrt_apply _ hT, inner_sum, map_sum, inner_smul_right]
+  simp_rw [sqrt_apply _ hT, inner_sum, inner_smul_right]
   apply Finset.sum_nonneg'
   intro i
-  simp_rw [← inner_conj_symm x _, ← OrthonormalBasis.repr_apply_apply, mul_conj, ← ofReal_pow, ← ofReal_mul,
-    ofReal_re]
+  simp_rw [← inner_conj_symm x _, ← OrthonormalBasis.repr_apply_apply, mul_conj, ← ofReal_pow, ← ofReal_mul, ofReal_nonneg]
   exact mul_nonneg (Real.sqrt_nonneg _) (sq_nonneg _)
 
 /-- `T` is positive if and only if `T` is symmetric
 (which is automatic from the definition of positivity)
 and has a non-negative spectrum -/
 theorem isPositive_iff_isSymmetric_and_nonneg_spectrum :
-    T.IsPositive ↔ T.IsSymmetric ∧ (spectrum 𝕜 T).IsNonneg := by
+    T.IsPositive ↔ T.IsSymmetric ∧ (spectrum 𝕜 T) ⊆ {x : 𝕜 | 0 ≤ x} := by
   classical
-  refine' ⟨fun h => ⟨h.1, fun μ hμ => IsPositive.nonneg_spectrum T h μ hμ⟩, fun h => ⟨h.1, _⟩⟩
+  refine' ⟨fun h => ⟨h.1, fun μ hμ => IsPositive.nonneg_spectrum T h hμ⟩, fun h => ⟨h.1, _⟩⟩
   intro x
   rw [← sqrt_sq_eq_self_of_isSymmetric_and_nonneg_spectrum T h.1 h.2, pow_two, mul_apply, ←
     adjoint_inner_left,
     isSelfAdjoint_iff'.mp
       ((isSymmetric_iff_isSelfAdjoint _).mp (IsSymmetric.sqrtIsPositive T h.1).1)]
-  exact inner_self_nonneg
+  exact inner_self_nonneg'
 
 /-- `T` is positive if and only if there exists a
 linear map `S` such that `T = S.adjoint * S` -/
@@ -257,18 +259,20 @@ theorem isPositive_iff_exists_adjoint_hMul_self :
     refine' ⟨isSymmetric_adjoint_mul_self S, _⟩
     intro x
     simp_rw [mul_apply, adjoint_inner_right]
-    exact inner_self_nonneg
+    exact inner_self_nonneg'
 
 section Complex
 
 /-- for spaces `V` over `ℂ`, it suffices to define positivity with
 `0 ≤ ⟪v, T v⟫_ℂ` for all `v ∈ V` -/
 theorem complex_isPositive {V : Type _} [NormedAddCommGroup V] [InnerProductSpace ℂ V]
-    (T : V →ₗ[ℂ] V) : T.IsPositive ↔ ∀ v : V, ↑(re ⟪v, T v⟫_ℂ) = ⟪v, T v⟫_ℂ ∧ 0 ≤ re ⟪v, T v⟫_ℂ :=
+    (T : V →ₗ[ℂ] V) : T.IsPositive ↔ ∀ v : V, 0 ≤ ⟪v, T v⟫_ℂ :=
   by
-  simp_rw [IsPositive, isSymmetric_iff_inner_map_self_real, inner_conj_symm,
-    RCLike.re_to_complex, ← Complex.conj_eq_iff_re, inner_conj_symm,
-    ← forall_and, eq_comm]
+  simp_rw [IsPositive, isSymmetric_iff_inner_map_self_real, eq_comm, inner_conj_symm,
+    ← inner_conj_symm (T _), @RCLike.nonneg_def' ℂ,
+    RCLike.re_to_complex, Complex.conj_eq_iff_re,
+    ← forall_and]
+  exact ⟨λ h v => ⟨(h v).1, (h v).2.2⟩, λ h v => ⟨(h v).1, (h v).1, (h v).2⟩⟩
 
 end Complex
 
@@ -315,17 +319,18 @@ theorem norm_of_sqrt_adjoint_mul_self_eq (T : E →ₗ[𝕜] E) (x : E) :
   apply IsPositive.nonneg_spectrum _ ⟨isSymmetric_adjoint_mul_self T, _⟩
   intro x
   simp_rw [mul_apply, adjoint_inner_right]
-  exact inner_self_nonneg
+  exact inner_self_nonneg'
 
 theorem invertible_iff_inner_map_self_pos
-    (hT : T.IsPositive) : Function.Bijective T ↔ ∀ v : E, v ≠ 0 → 0 < re ⟪T v, v⟫ :=
+    (hT : T.IsPositive) : Function.Bijective T ↔ ∀ v : E, v ≠ 0 → 0 < ⟪T v, v⟫ :=
   by
   constructor
   · intro h v hv
     cases' (isPositive_iff_exists_adjoint_hMul_self T).mp hT with S hS
-    rw [hS, mul_apply, adjoint_inner_left, inner_self_eq_norm_sq]
+    rw [hS, mul_apply, adjoint_inner_left, inner_self_eq_norm_sq_to_K]
     suffices S v ≠ 0 by
       rw [← norm_ne_zero_iff] at this
+      rw [← RCLike.ofReal_pow, RCLike.zero_lt_real]
       exact sq_pos_iff.mpr this
     by_contra!
     rw [ext_iff] at hS
@@ -343,7 +348,7 @@ theorem invertible_iff_inner_map_self_pos
     push_neg at this
     cases' this with a ha
     specialize h a ha.2
-    rw [ha.1, inner_zero_left, zero_re', lt_self_iff_false] at h
+    rw [ha.1, inner_zero_left, lt_self_iff_false] at h
     exact h
 
 theorem invertiblePos (T : E →ₗ[𝕜] E) [hTi : Invertible T]
@@ -366,7 +371,7 @@ theorem invertiblePos (T : E →ₗ[𝕜] E) [hTi : Invertible T]
     simp_rw [t, ugh]
   · intro x
     by_cases b : ⅟ T x = 0
-    · rw [b, inner_zero_right, map_zero]
+    · rw [b, inner_zero_right]
     · specialize this _ b
       rw [← mul_apply, mul_invOf_self, one_apply] at this
       exact le_of_lt this
@@ -406,7 +411,8 @@ theorem isPositive_and_invertible_pos_eigenvalues (hT : T.IsPositive) [Invertibl
     Module.End.has_eigenvector_iff_hasEigenvalue.mpr
       (@LinearMap.IsSymmetric.hasEigenvalue_eigenvalues 𝕜 _ E _ _ T hT.1 _ _ rfl i)
   have ugh := (LinearMap.invertible_iff_inner_map_self_pos T hT).mp fs v gh
-  rw [hv, inner_smul_real_left, RCLike.smul_re, inner_self_eq_norm_sq, mul_pos_iff] at ugh
+  rw [hv, inner_smul_real_left, inner_self_eq_norm_sq_to_K, ← ofReal_pow, real_smul_ofReal,
+    ← ofReal_mul, zero_lt_real, mul_pos_iff] at ugh
   simp_rw [not_lt_of_le (sq_nonneg _), and_false_iff, or_false_iff] at ugh
   exact ugh.1
 
@@ -438,8 +444,9 @@ theorem IsPositive.smulNonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGrou
     [InnerProductSpace 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) {r : ℝ} (hr : 0 ≤ r) :
     ((r : 𝕜) • T).IsPositive := by
   simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, LinearMap.smul_apply, inner_smul_left,
-    inner_smul_right, RCLike.conj_ofReal, RCLike.re_ofReal_mul, hT.1 _ _,
-    forall₂_true_iff, true_and_iff, mul_nonneg hr (hT.2 _), forall_true_iff]
+    inner_smul_right, RCLike.conj_ofReal, hT.1 _ _, forall₂_true_iff, true_and_iff]
+  rw [← @zero_le_real 𝕜] at hr
+  simp_rw [mul_nonneg hr (hT.2 _), forall_true_iff]
 theorem IsPositive.smulNNReal {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) (r : NNReal) :
     (((r : ℝ) : 𝕜) • T).IsPositive :=
@@ -457,7 +464,12 @@ variable [CompleteSpace E] [CompleteSpace F]
 
 theorem IsPositive.toLinearMap (T : E →L[𝕜] E) : T.toLinearMap.IsPositive ↔ T.IsPositive := by
   simp_rw [LinearMap.IsPositive, ContinuousLinearMap.coe_coe, IsPositive,
-    isSelfAdjoint_iff_isSymmetric, reApplyInnerSelf_apply T, inner_re_symm]
+    ← isSelfAdjoint_iff_isSymmetric,
+    reApplyInnerSelf_apply T, and_congr_right_iff, ← @zero_le_real 𝕜]
+  intro h
+  simp_rw [IsSelfAdjoint.inner_re_eq h, ← adjoint_inner_left, ← star_eq_adjoint]
+  rw [h]
+
 
 end ContinuousLinearMap
 
@@ -475,7 +487,7 @@ theorem LinearMap.IsPositive.nonneg_eigenvalue {E : Type _} [NormedAddCommGroup 
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) {α : ℝ}
     (hα : Module.End.HasEigenvalue T α) : 0 ≤ α :=
   by
-  have this := LinearMap.IsPositive.nonneg_spectrum T hT α
+  have this := ((spec_subseteq_nonneg _).mp (LinearMap.IsPositive.nonneg_spectrum T hT)) α
     (Module.End.hasEigenvalue_iff_mem_spectrum.mp hα)
   rw [zero_le_real] at this
   exact this
@@ -505,12 +517,9 @@ theorem LinearMap.isPositive_iff_eq_sum_rankOne [FiniteDimensional 𝕜 E]
     simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, hu, LinearMap.sum_apply,
       ContinuousLinearMap.coe_coe, rankOne_apply, inner_sum, sum_inner, inner_smul_left,
       inner_smul_right, inner_conj_symm, mul_comm, forall₂_true_iff, true_and_iff,
-      map_sum]
-    intros
-    apply Finset.sum_nonneg'
-    intros
-    simp_rw [← inner_conj_symm _ (u _), RCLike.conj_mul, ← RCLike.ofReal_pow,
-      RCLike.ofReal_re, sq_nonneg]
+      ← inner_conj_symm _ (u _), RCLike.conj_mul, ← RCLike.ofReal_pow,
+      ← ofReal_sum, zero_le_real]
+    exact λ _ => Finset.sum_nonneg' (λ _ => sq_nonneg _)
 
 theorem LinearMap.IsSymmetric.rePowIsPositiveOfIsPositive {𝕜 E : Type _} [RCLike 𝕜]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]

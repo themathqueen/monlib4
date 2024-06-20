@@ -21,6 +21,7 @@ This defines the rank one operator $| x \rangle\langle y |$ for continuous linea
 
 section rankOne
 
+set_option maxHeartbeats 400000 in
 /-- we define the rank one operator $| x \rangle\langle y |$ by
   $x \mapsto \langle y,z\rangle x$ -/
 @[simps]

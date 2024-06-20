@@ -96,25 +96,25 @@ by
 
 theorem LinearMap.real_starAlgEquiv_conj {E K : Type _} [CommSemiring K] [Semiring E] [Algebra K E]
     [InvolutiveStar K] [StarAddMonoid E] [StarModule K E] (f : E →ₗ[K] E) (φ : E ≃⋆ₐ[K] E) :
-    (φ.toAlgEquiv.toLinearMap ∘ₗ
-          f ∘ₗ φ.symm.toAlgEquiv.toLinearMap).real =
-      φ.toAlgEquiv.toLinearMap ∘ₗ
-        f.real ∘ₗ φ.symm.toAlgEquiv.toLinearMap :=
+    (φ.toLinearMap ∘ₗ
+          f ∘ₗ φ.symm.toLinearMap).real =
+      φ.toLinearMap ∘ₗ
+        f.real ∘ₗ φ.symm.toLinearMap :=
 by
   ext
   simp only [LinearMap.real_apply, LinearMap.comp_apply,
-    AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, map_star]
+    StarAlgEquiv.toLinearMap_apply, map_star]
 
 theorem LinearMap.real_starAlgEquiv_conj_iff {E K : Type _} [CommSemiring K] [Semiring E]
     [Algebra K E] [InvolutiveStar K] [StarAddMonoid E] [StarModule K E] (f : E →ₗ[K] E)
     (φ : E ≃⋆ₐ[K] E) :
-    LinearMap.IsReal (φ.toAlgEquiv.toLinearMap ∘ₗ
-      f ∘ₗ φ.symm.toAlgEquiv.toLinearMap) ↔
+    LinearMap.IsReal (φ.toLinearMap ∘ₗ
+      f ∘ₗ φ.symm.toLinearMap) ↔
     LinearMap.IsReal f :=
 by
   simp_rw [LinearMap.isReal_iff, LinearMap.real_starAlgEquiv_conj, LinearMap.ext_iff,
-    LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-    StarAlgEquiv.coe_toAlgEquiv, ← StarAlgEquiv.symm_apply_eq, StarAlgEquiv.symm_apply_apply]
+    LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
+    ← StarAlgEquiv.symm_apply_eq, StarAlgEquiv.symm_apply_apply]
   refine' ⟨fun h x => _, fun h x => h _⟩
   specialize h (φ x)
   simp_rw [StarAlgEquiv.symm_apply_apply] at h

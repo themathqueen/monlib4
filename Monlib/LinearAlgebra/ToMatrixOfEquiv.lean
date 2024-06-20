@@ -144,11 +144,11 @@ theorem LinearEquiv.one_apply {R E : Type _} [CommSemiring R] [AddCommMonoid E] 
   rfl
 
 theorem OrthonormalBasis.std_toMatrix {n : Type _} [Fintype n] [DecidableEq n] :
-    ((EuclideanSpace.orthonormalBasis n 𝕜).toMatrix).symm.toAlgEquiv.toLinearEquiv
+    (((EuclideanSpace.orthonormalBasis n 𝕜).toMatrix).symm).toLinearEquiv
     = toEuclideanLin :=
   by
   ext
-  rw [AlgEquiv.toLinearEquiv_apply, StarAlgEquiv.coe_toAlgEquiv,
+  rw [StarAlgEquiv.toLinearEquiv_apply,
     OrthonormalBasis.toMatrix_symm_apply', EuclideanSpace.orthonormalBasis.repr_eq_one, ←
     LinearIsometryEquiv.toLinearEquiv_symm, LinearIsometryEquiv.toLinearEquiv_one,
     LinearEquiv.one_symm, LinearEquiv.conj_one, LinearEquiv.one_apply]

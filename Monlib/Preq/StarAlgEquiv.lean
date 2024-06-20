@@ -34,6 +34,53 @@ theorem AlgEquiv.inj_comp {R A B C : Type _} [CommSemiring R] [Semiring A] [Semi
   rw [AlgEquiv.apply_symm_apply] at h
   exact h
 
+@[simps]
+def StarAlgEquiv.toLinearMap {R A B : Type*} [Semiring R] [AddCommMonoid A]
+  [AddCommMonoid B]
+  [Mul A] [Mul B] [Module R A] [Module R B] [Star A] [Star B]
+  (f : A ≃⋆ₐ[R] B) : A →ₗ[R] B where
+    toFun x := f x
+    map_add' _ _ := by simp only [map_add]
+    map_smul' _ _ := by simp only [map_smul, RingHom.id_apply]
+
+theorem StarAlgEquiv.injective {R A B : Type _} [Add A] [Add B] [Mul A] [Mul B] [SMul R A] [SMul R B] [Star A] [Star B]
+  (f : A ≃⋆ₐ[R] B) : Function.Injective f :=
+(StarAlgEquiv.toRingEquiv _).injective
+
+theorem StarAlgEquiv.comp_inj {R A B C : Type*} [Semiring R] [AddCommMonoid A]
+  [AddCommMonoid B]
+  [AddCommMonoid C] [Mul B] [Mul C] [Module R A] [Module R B] [Module R C]
+  [Star B] [Star C]
+  (f : B ≃⋆ₐ[R] C) (S T : A →ₗ[R] B) :
+    f.toLinearMap ∘ₗ S = f.toLinearMap ∘ₗ T ↔ S = T := by
+  simp only [LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
+    f.injective.eq_iff]
+
+theorem StarAlgEquiv.inj_comp {R A B C : Type*} [Semiring R] [AddCommMonoid A]
+  [AddCommMonoid B]
+  [AddCommMonoid C] [Mul A] [Mul C] [Module R A] [Module R B] [Module R C]
+  [Star A] [Star C] (f : C ≃⋆ₐ[R] A) (S T : A →ₗ[R] B) :
+    S ∘ₗ f.toLinearMap = T ∘ₗ f.toLinearMap ↔ S = T :=
+  by
+  refine' ⟨fun h => _, fun h => by rw [h]⟩
+  simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply] at h ⊢
+  intro x
+  specialize h (f.symm x)
+  rw [StarAlgEquiv.apply_symm_apply] at h
+  exact h
+
+@[simps]
+def StarAlgEquiv.toLinearEquiv {R A B : Type*} [Semiring R] [AddCommMonoid A]
+  [AddCommMonoid B]
+  [Mul A] [Mul B] [Module R A] [Module R B] [Star A] [Star B]
+  (f : A ≃⋆ₐ[R] B) : A ≃ₗ[R] B where
+    toFun x := f x
+    invFun x := f.symm x
+    left_inv x := by simp only [symm_apply_apply]
+    right_inv x := by simp only [apply_symm_apply]
+    map_add' _ _ := by simp only [map_add]
+    map_smul' _ _ := by simp only [map_smul, RingHom.id_apply]
+
 def StarAlgEquiv.toAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
     [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) : A ≃ₐ[R] B
     where
@@ -50,8 +97,8 @@ theorem StarAlgEquiv.coe_toAlgEquiv {R A B : Type _} [CommSemiring R] [Semiring 
     [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) : ⇑f.toAlgEquiv = f :=
   rfl
 
-theorem StarAlgEquiv.symm_apply_eq {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
-    [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) (x : A) (y : B) :
+theorem StarAlgEquiv.symm_apply_eq {R A B : Type _}
+  [Add A] [Add B] [Mul A] [Mul B] [SMul R A] [SMul R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) (x : A) (y : B) :
     f.symm y = x ↔ y = f x :=
   Equiv.symm_apply_eq _
 
@@ -80,48 +127,52 @@ theorem StarAlgEquiv.ofAlgEquiv_symm_coe {R A B : Type _} [CommSemiring R] [Semi
     (hf : ∀ x : A, f (star x) = star (f x)) : ⇑(StarAlgEquiv.ofAlgEquiv f hf).symm = f.symm :=
   rfl
 
-theorem StarAlgEquiv.comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-    [AddCommGroup E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃] [Star E₁] [Star E₂]
+theorem StarAlgEquiv.comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [AddCommMonoid E₁] [AddCommMonoid E₂]
+    [AddCommMonoid E₃] [Module R E₁] [Module R E₂] [Module R E₃] [Star E₁] [Star E₂]
+    [Mul E₁] [Mul E₂]
     (f : E₁ ≃⋆ₐ[R] E₂) (x : E₂ →ₗ[R] E₃) (y : E₁ →ₗ[R] E₃) :
-    x ∘ₗ f.toAlgEquiv.toLinearMap = y ↔ x = y ∘ₗ f.symm.toAlgEquiv.toLinearMap :=
+    x ∘ₗ f.toLinearMap = y ↔ x = y ∘ₗ f.symm.toLinearMap :=
   by
   constructor
   · intro h
     ext1
     rw [← h]
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv,
+    simp only [LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
       StarAlgEquiv.apply_symm_apply]
   · rintro rfl
     ext1
-    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv,
-      StarAlgEquiv.symm_apply_apply]
+    simp only [LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply, StarAlgEquiv.symm_apply_apply]
 
 theorem AlgEquiv.map_eq_zero_iff {R E₁ E₂ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
     [Algebra R E₁] [Algebra R E₂] (f : E₁ ≃ₐ[R] E₂) (x : E₁) : f x = 0 ↔ x = 0 :=
   RingEquiv.map_eq_zero_iff f.toRingEquiv
 
-theorem StarAlgEquiv.map_eq_zero_iff {R E₁ E₂ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-    [Algebra R E₁] [Algebra R E₂] [Star E₁] [Star E₂] (f : E₁ ≃⋆ₐ[R] E₂) (x : E₁) :
+theorem StarAlgEquiv.map_eq_zero_iff {R A B : Type _}
+  [NonUnitalNonAssocSemiring A] [NonUnitalNonAssocSemiring B]
+  [SMul R A] [SMul R B] [Star A] [Star B]
+  (f : A ≃⋆ₐ[R] B) (x : A) :
     f x = 0 ↔ x = 0 :=
-  AlgEquiv.map_eq_zero_iff f.toAlgEquiv _
+  RingEquiv.map_eq_zero_iff f.toRingEquiv
 
-theorem IsIdempotentElem.mulEquiv {H₁ H₂ : Type _} [Semiring H₁] [Semiring H₂] (f : H₁ ≃* H₂)
-    (x : H₁) : IsIdempotentElem (f x) ↔ IsIdempotentElem x := by
+theorem IsIdempotentElem.mulEquiv {H₁ H₂ : Type _} [Mul H₁] [Mul H₂] (f : H₁ ≃* H₂)
+    {x : H₁} : IsIdempotentElem (f x) ↔ IsIdempotentElem x := by
   simp_rw [IsIdempotentElem, ← _root_.map_mul, Function.Injective.eq_iff f.injective]
 
 theorem IsIdempotentElem.algEquiv {R H₁ H₂ : Type _} [CommSemiring R] [Semiring H₁] [Semiring H₂]
-    [Algebra R H₁] [Algebra R H₂] (f : H₁ ≃ₐ[R] H₂) (x : H₁) :
+    [Algebra R H₁] [Algebra R H₂] (f : H₁ ≃ₐ[R] H₂) {x : H₁} :
     IsIdempotentElem (f x) ↔ IsIdempotentElem x :=
-  IsIdempotentElem.mulEquiv f.toMulEquiv x
+  IsIdempotentElem.mulEquiv f.toMulEquiv
 
-theorem IsIdempotentElem.starAlgEquiv {R H₁ H₂ : Type _} [CommSemiring R] [Semiring H₁]
-    [Semiring H₂] [Algebra R H₁] [Algebra R H₂] [Star H₁] [Star H₂] (f : H₁ ≃⋆ₐ[R] H₂) (x : H₁) :
+theorem IsIdempotentElem.starAlgEquiv {R A B : Type _}
+   [Add A] [Add B] [Mul A] [Mul B] [SMul R A] [SMul R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) {x : A} :
     IsIdempotentElem (f x) ↔ IsIdempotentElem x :=
-  IsIdempotentElem.algEquiv f.toAlgEquiv x
+IsIdempotentElem.mulEquiv f.toRingEquiv.toMulEquiv
 
-theorem StarAlgEquiv.injective {R α β : Type _} [CommSemiring R] [Semiring α] [Semiring β]
-    [Algebra R α] [Algebra R β] [Star α] [Star β] (f : α ≃⋆ₐ[R] β) : Function.Injective f :=
-  AlgEquiv.injective f.toAlgEquiv
+lemma _root_.isIdempotentElem_pi_iff
+  {ι : Type*} {A : ι → Type*} [Π i, Mul (A i)] {a : Π i, A i} :
+  IsIdempotentElem a ↔ ∀ i, IsIdempotentElem (a i) :=
+by
+  simp only [IsIdempotentElem, Pi.mul_def, Function.funext_iff]
 
 theorem AlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
     [Algebra R A] [Algebra R B] (f : A ≃ₐ[R] B) {a : B} {b : A} : a = f b ↔ f.symm a = b :=
@@ -132,10 +183,14 @@ theorem AlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semirin
     rw [← Equiv.apply_eq_iff_eq e, Equiv.apply_symm_apply]
   exact this f
 
-theorem StarAlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semiring A]
-    [Semiring B] [Algebra R A] [Algebra R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) {a : B} {b : A} :
+theorem StarAlgEquiv.eq_apply_iff_symm_eq {R A B : Type _}
+  [Add A] [Add B] [Mul A] [Mul B] [SMul R A] [SMul R B] [Star A] [Star B]
+  (f : A ≃⋆ₐ[R] B) {a : B} {b : A} :
     a = f b ↔ f.symm a = b :=
-  AlgEquiv.eq_apply_iff_symm_eq f.toAlgEquiv
+by
+  rw [eq_comm]
+  nth_rw 2 [eq_comm]
+  exact Equiv.apply_eq_iff_eq_symm_apply f.toRingEquiv.toEquiv
 
 lemma AlgEquiv.apply_eq_iff_eq {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
   (f : A ≃ₐ[R] B) {x y : A} :

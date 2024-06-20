@@ -176,8 +176,13 @@ by
   simp_rw [← mul_apply, h.isIdempotent.eq]
   exact ⟨x, sub_self _⟩
 
-lemma ker_to_clm [InnerProductSpace 𝕜 E] {T : E →L[𝕜] E} :
-    LinearMap.ker (T : E →ₗ[𝕜] E) = LinearMap.ker T := rfl
+
+lemma ker_to_clm
+  {R R₂ M M₂ : Type*} [Semiring R]
+  [Semiring R₂] [AddCommMonoid M] [AddCommMonoid M₂]
+  [TopologicalSpace M] [TopologicalSpace M₂]
+  [Module R M] [Module R₂ M₂] {τ₁₂ : R →+* R₂} (f : M →SL[τ₁₂] M₂) :
+    LinearMap.ker (ContinuousLinearMap.toLinearMap f) = LinearMap.ker f := rfl
 
 lemma subtype_compL_ker [InnerProductSpace 𝕜 E] (U : Submodule 𝕜 E)
   (f : E →L[𝕜] U) :
@@ -190,7 +195,7 @@ lemma subtype_compL_ker [InnerProductSpace 𝕜 E] (U : Submodule 𝕜 E)
 
 
 lemma orthogonalProjection.isOrthogonalProjection [InnerProductSpace 𝕜 E]
-    {U : Submodule 𝕜 E} [h : HasOrthogonalProjection U] :
+    (U : Submodule 𝕜 E) [h : HasOrthogonalProjection U] :
     (↥P U).IsOrthogonalProjection :=
 by
   refine ⟨orthogonalProjection.isIdempotentElem _, ?_⟩
@@ -200,7 +205,7 @@ by
 open LinearMap in
 /-- given any idempotent operator $T ∈ L(V)$, then `is_compl T.ker T.range`,
 in other words, there exists unique $v ∈ \textnormal{ker}(T)$ and $w ∈ \textnormal{range}(T)$ such that $x = v + w$ -/
-theorem IsIdempotentElem.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup V]
+theorem IsIdempotentElem.isCompl_range_ker {V R : Type _} [Semiring R] [AddCommGroup V]
     [Module R V] {T : V →ₗ[R] V} (h : IsIdempotentElem T) : IsCompl (ker T) (range T) :=
   by
   constructor
@@ -234,6 +239,20 @@ theorem IsIdempotentElem.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup
 theorem IsCompl.of_orthogonal_projection [InnerProductSpace 𝕜 E] {T : E →L[𝕜] E}
     (h : T.IsOrthogonalProjection) : IsCompl (LinearMap.ker T) (LinearMap.range T) :=
 IsIdempotentElem.isCompl_range_ker ((IsIdempotentElem.toLinearMap _).mp h.1)
+
+@[simp]
+theorem orthogonalProjection.ker [InnerProductSpace 𝕜 E]
+  {K : Submodule 𝕜 E} [HasOrthogonalProjection K] : LinearMap.ker (↥P K) = Kᗮ :=
+by
+  simp_rw [orthogonalProjection'_eq, ← ker_to_clm]
+  simp only [coe_comp, Submodule.coe_subtypeL, LinearMap.ker_comp, Submodule.ker_subtype,
+    Submodule.comap_bot, ker_to_clm, ker_orthogonalProjection]
+
+theorem _root_.LinearMap.isIdempotentElem_of_isProj {V R : Type _} [Semiring R] [AddCommGroup V]
+    [Module R V] {T : V →ₗ[R] V} {U : Submodule R V}
+    (h : LinearMap.IsProj U T) :
+  IsIdempotentElem T :=
+by ext; exact h.2 _ (h.1 _)
 
 /-- $P_V P_U = P_U$ if and only if $P_V - P_U$ is an orthogonal projection -/
 theorem sub_of_isOrthogonalProjection [InnerProductSpace ℂ E] [CompleteSpace E]
@@ -290,30 +309,31 @@ local notation "L(" x "," y ")" => x →L[y] x
 
 local notation "l(" x "," y ")" => x →ₗ[y] x
 
-instance {E : Type _} [NormedAddCommGroup E] [InnerProductSpace ℂ E] : PartialOrder (SymmetricLM E) where
-  le := fun u v => (v - u : E →ₗ[ℂ] E).IsPositive
+open scoped ComplexOrder
+instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] : PartialOrder (E →ₗ[𝕜] E) where
+  le := fun u v => LinearMap.IsPositive (v - u : E →ₗ[𝕜] E)
   le_refl := fun a => by
     simp_rw [sub_self]
     constructor
     · intro u v
       simp_rw [LinearMap.zero_apply, inner_zero_left, inner_zero_right]
     · intro x
-      simp_rw [LinearMap.zero_apply, inner_zero_right, RCLike.zero_re', le_rfl]
+      simp_rw [LinearMap.zero_apply, inner_zero_right, le_refl]
   le_trans := by
     intro a b c hab hbc
     simp only
-    rw [← add_zero (c : E →ₗ[ℂ] E), ← sub_self ↑b, ← add_sub_assoc, add_sub_right_comm, add_sub_assoc]
+    rw [← add_zero (c : E →ₗ[𝕜] E), ← sub_self ↑b, ← add_sub_assoc, add_sub_right_comm, add_sub_assoc]
     exact LinearMap.IsPositive.add hbc hab
   le_antisymm := by
     dsimp
     rintro a b hba hab
-    simp_rw [Subtype.coe_inj.symm, LinearMap.ext_iff_inner_map]
+    rw [← sub_eq_zero]
+    rw [← LinearMap.IsSymmetric.inner_map_self_eq_zero hab.1]
     intro x
     have hba2 := hba.2 x
-    rw [← neg_le_neg_iff, ← map_neg, ← inner_neg_right, ← LinearMap.neg_apply, neg_sub, neg_zero] at hba2
-    rw [← sub_eq_zero, ← inner_sub_left, ← LinearMap.sub_apply, hab.1, ←
-      ((LinearMap.complex_isPositive _).mp hab _).1, le_antisymm hba2 (hab.2 x),
-      Complex.ofReal_zero]
+    rw [← neg_le_neg_iff, ← inner_neg_right, ← LinearMap.neg_apply, neg_sub, neg_zero] at hba2
+    rw [hab.1]
+    apply le_antisymm hba2 (hab.2 _)
 
 /-- `p ≤ q` means `q - p` is positive -/
 theorem LinearMap.IsPositive.hasLe {E : Type _} [NormedAddCommGroup E] [InnerProductSpace ℂ E]

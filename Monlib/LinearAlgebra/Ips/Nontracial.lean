@@ -1473,18 +1473,18 @@ theorem unitary.coe_pi_apply (U : ∀ i, unitaryGroup (s i) ℂ) (i : k) :
 theorem pi_inner_aut_toMatrix
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (U : ∀ i, unitaryGroup (s i) ℂ) :
     (Module.Dual.pi.IsFaithfulPosMap.toMatrix hψ
-          ((unitary.innerAutStarAlg ℂ (unitary.pi U)).toAlgEquiv.toLinearMap) :
+          ((unitary.innerAutStarAlg ℂ (unitary.pi U)).toLinearMap) :
         Matrix (Σ i, s i × s i) (Σ i, s i × s i) ℂ) =
       blockDiagonal' fun i =>
         U i ⊗ₖ ((hψ i).sig (-(1 / 2 : ℝ)) (U i : Matrix (s i) (s i) ℂ))ᴴᵀ :=
   by
   have :
-    ((unitary.innerAutStarAlg ℂ (unitary.pi U)).toAlgEquiv.toLinearMap) =
+    ((unitary.innerAutStarAlg ℂ (unitary.pi U)).toLinearMap) =
       (lmul (↑U : PiMat ℂ k s)) * (rmul (star (↑U : PiMat ℂ k s))) :=
     by
     rw [LinearMap.ext_iff]
     intro x
-    simp_rw [AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, LinearMap.mul_apply,
+    simp only [StarAlgEquiv.toLinearMap_apply, LinearMap.mul_apply,
       lmul_apply, rmul_apply, unitary.innerAutStarAlg_apply, mul_assoc, unitary.coe_star,
       unitary.coe_pi]
   rw [this, _root_.map_mul, pi_lmul_toMatrix, pi_rmul_toMatrix, ← blockDiagonal'_mul]

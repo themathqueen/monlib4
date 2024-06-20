@@ -78,13 +78,11 @@ lemma Matrix.of_isHermitian' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
 
 theorem Matrix.posSemidef_eq_linearMap_positive [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) :
     x.PosSemidef ↔ x.toEuclideanLin.IsPositive :=
-  by
+by
   simp_rw [LinearMap.IsPositive, ← Matrix.isHermitian_iff_isSymmetric, Matrix.PosSemidef,
-    Matrix.toEuclideanLin_eq_piLp_linearEquiv, PiLp.inner_apply, RCLike.inner_apply, map_sum,
-    ← RCLike.star_def, Matrix.dotProduct, Pi.star_apply, Matrix.mulVec,
-    Matrix.dotProduct, @RCLike.nonneg_def' 𝕜, ← map_sum, ← Pi.star_apply]
-  refine ⟨fun h => ⟨h.1, fun y => (h.2 _).2⟩,
-    fun h => ⟨h.1, fun y => ⟨Matrix.of_isHermitian' h.1 _, (h.2 _)⟩⟩⟩
+    Matrix.toEuclideanLin_eq_piLp_linearEquiv, PiLp.inner_apply, RCLike.inner_apply,
+    ← RCLike.star_def, Matrix.dotProduct, Pi.star_apply]
+  rfl
 
 theorem Matrix.posSemidef_iff [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) :
     x.PosSemidef ↔ ∃ y : Matrix n n 𝕜, x = yᴴ * y :=
@@ -352,16 +350,6 @@ theorem vecMulVec_posSemidef [Fintype n] [DecidableEq n] (x : n → 𝕜) :
   by
   rw [vecMulVec_eq, ← conjTranspose_col]
   exact Matrix.posSemidef_self_mul_conjTranspose _
-
-lemma inner_self_nonneg' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {x : E} :
-  0 ≤ ⟪x, x⟫_𝕜 :=
-by
-simp_rw [@RCLike.nonneg_def 𝕜, inner_self_nonneg, true_and, inner_self_im]
-
-lemma inner_self_nonpos' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {x : E} :
-  ⟪x, x⟫_𝕜 ≤ 0 ↔ x = 0 :=
-by
-simp_rw [@RCLike.nonpos_def 𝕜, inner_self_nonpos, inner_self_im, and_true]
 
 /-- the identity is a positive definite matrix -/
 theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).PosDef :=

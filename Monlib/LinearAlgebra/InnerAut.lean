@@ -55,9 +55,15 @@ theorem unitary.innerAutStarAlg_apply {K R : Type _} [CommSemiring K] [Semiring 
     unitary.innerAutStarAlg K U x = U * x * (star U : unitary R) :=
   rfl
 
+@[simp]
 theorem unitary.innerAutStarAlg_apply' {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
     [Algebra K R] (U : unitary R) (x : R) :
     unitary.innerAutStarAlg K U x = U * x * (U⁻¹ : unitary R) :=
+  rfl
+
+theorem unitary.innerAutStarAlg_apply'' {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
+    [Algebra K R] (U : unitary R) (x : R) :
+    unitary.innerAutStarAlg K U x = U * x * star (U : R) :=
   rfl
 
 theorem unitary.innerAutStarAlg_symm_apply {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
@@ -65,9 +71,15 @@ theorem unitary.innerAutStarAlg_symm_apply {K R : Type _} [CommSemiring K] [Semi
     (unitary.innerAutStarAlg K U).symm x = (star U : unitary R) * x * U :=
   rfl
 
+@[simp]
 theorem unitary.innerAutStarAlg_symm_apply' {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
     [Algebra K R] (U : unitary R) (x : R) :
     (unitary.innerAutStarAlg K U).symm x = (U⁻¹ : unitary R) * x * U :=
+  rfl
+
+theorem unitary.innerAutStarAlg_symm_apply'' {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
+    [Algebra K R] (U : unitary R) (x : R) :
+    (unitary.innerAutStarAlg K U).symm x = star (U : R) * x * U :=
   rfl
 
 theorem unitary.innerAutStarAlg_symm {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
@@ -76,6 +88,13 @@ theorem unitary.innerAutStarAlg_symm {K R : Type _} [CommSemiring K] [Semiring R
   by
   ext1
   simp only [unitary.innerAutStarAlg_symm_apply', unitary.innerAutStarAlg_apply', inv_inv]
+
+theorem unitary.innerAutStarAlg_symm' {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
+    [Algebra K R] (U : unitary R) :
+    (unitary.innerAutStarAlg K U).symm = unitary.innerAutStarAlg K (star U) :=
+by
+  ext1
+  simp only [unitary.innerAutStarAlg_symm_apply, unitary.innerAutStarAlg_apply, star_star]
 
 instance Pi.coe {k : Type _} {s r : k → Type _} [∀ i, CoeTC (s i) (r i)] :
     CoeTC (Π i, s i) (Π i, r i) :=
@@ -94,7 +113,8 @@ theorem unitary.pi_mem {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [
   simp only [← unitary.coe_star, unitary.coe_mul_star_self, and_self]
   rfl
 
-def unitary.pi {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [∀ i, StarMul (s i)]
+@[reducible, inline]
+abbrev unitary.pi {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [∀ i, StarMul (s i)]
   (U : ∀ i, unitary (s i)) :
   unitary (∀ i, s i) :=
 ⟨↑U, unitary.pi_mem U⟩
@@ -124,7 +144,8 @@ theorem unitaryGroup.star_coe_eq_coe_star [DecidableEq n] (U : unitaryGroup n �
 
 /-- given a unitary $U$, we have the inner algebraic automorphism, given by
   $x \mapsto UxU^*$ with its inverse given by $x \mapsto U^* x U$ -/
-def innerAutStarAlg [DecidableEq n] (a : unitaryGroup n 𝕜) : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜 :=
+@[reducible, inline]
+abbrev innerAutStarAlg [DecidableEq n] (a : unitaryGroup n 𝕜) : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜 :=
   unitary.innerAutStarAlg 𝕜 a
 
 open scoped Matrix
@@ -151,8 +172,9 @@ theorem innerAutStarAlg_symm [DecidableEq n] (U : unitaryGroup n 𝕜) :
   unitary.innerAutStarAlg_symm U
 
 /-- inner automorphism (`matrix.innerAut_star_alg`), but as a linear map -/
-def innerAut [DecidableEq n] (U : unitaryGroup n 𝕜) : Matrix n n 𝕜 →ₗ[𝕜] Matrix n n 𝕜 :=
-  (innerAutStarAlg U).toAlgEquiv.toLinearMap
+@[reducible]
+abbrev innerAut [DecidableEq n] (U : unitaryGroup n 𝕜) : Matrix n n 𝕜 →ₗ[𝕜] Matrix n n 𝕜 :=
+  (innerAutStarAlg U).toLinearMap
 
 @[simp]
 theorem innerAut_coe [DecidableEq n] (U : unitaryGroup n 𝕜) : ⇑(innerAut U) = innerAutStarAlg U :=
@@ -210,11 +232,15 @@ theorem unitaryGroup.toLin'_eq [DecidableEq n] (U : unitaryGroup n 𝕜) (x : n 
     (UnitaryGroup.toLin' U) x = (toLin' U) x :=
   rfl
 
+theorem toLinAlgEquiv'_apply' [DecidableEq n] (x : Matrix n n 𝕜) :
+  toLinAlgEquiv' x = (toLin' : (Matrix n n 𝕜 ≃ₗ[𝕜] (n → 𝕜) →ₗ[𝕜] (n → 𝕜))) x :=
+rfl
+
 /-- the spectrum of $U x U^*$ for any unitary $U$ is equal to the spectrum of $x$ -/
 theorem innerAut.spectrum_eq [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     spectrum 𝕜 (toLin' (innerAut U x)) = spectrum 𝕜 (toLin' x) := by
-  rw [innerAut_apply, toLin'_mul, spectrum.comm, ← toLin'_mul, ← Matrix.mul_assoc,
-    UnitaryGroup.inv_apply, UnitaryGroup.star_mul_self, Matrix.one_mul]
+  simp_rw [← toLinAlgEquiv'_apply', AlgEquiv.spectrum_eq, innerAut_coe,
+    AlgEquiv.spectrum_eq]
 
 theorem innerAut_one [DecidableEq n] : innerAut (1 : unitaryGroup n 𝕜) = 1 := by
   simp_rw [LinearMap.ext_iff, innerAut_apply, UnitaryGroup.inv_apply, UnitaryGroup.one_apply,
@@ -472,7 +498,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
   have this13 : star (1 : n → 𝕜) ⬝ᵥ (1 : n → 𝕜) = (Fintype.card n : ℝ) :=
     by
     simp only [dotProduct, Pi.star_apply, Pi.one_apply, star_one, one_mul, Finset.sum_const]
-    simp only [Nat.smul_one_eq_coe, Nat.cast_inj,
+    simp only [Nat.smul_one_eq_cast, Nat.cast_inj,
       RCLike.ofReal_natCast]
     rfl
   simp_rw [hα, PosDef, smul_mulVec_assoc, dotProduct_smul, one_mulVec, smul_eq_mul] at this9
@@ -686,15 +712,14 @@ theorem unitaryGroup.injective_hMul {n 𝕜 : Type _} [Fintype n] [DecidableEq n
 
 theorem innerAutStarAlg_equiv_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
     [DecidableEq 𝕜] (U : unitaryGroup n 𝕜) :
-    (innerAutStarAlg U).toAlgEquiv.toLinearMap = innerAut U :=
+    (innerAutStarAlg U).toLinearMap = innerAut U :=
   rfl
 
 theorem innerAutStarAlg_equiv_symm_toLinearMap {n 𝕜 : Type _} [Fintype n] [DecidableEq n] [RCLike 𝕜]
-    (U : unitaryGroup n 𝕜) : (innerAutStarAlg U).symm.toAlgEquiv.toLinearMap = innerAut U⁻¹ :=
+    (U : unitaryGroup n 𝕜) : (innerAutStarAlg U).symm.toLinearMap = innerAut U⁻¹ :=
   by
   ext1
-  simp only [innerAutStarAlg_symm_apply, innerAut_apply, inv_inv, AlgEquiv.toLinearMap_apply,
-    StarAlgEquiv.coe_toAlgEquiv]
+  simp only [innerAutStarAlg_symm_apply, innerAut_apply, inv_inv]
   rw [UnitaryGroup.inv_apply]
   rfl
 

@@ -81,8 +81,7 @@ theorem ContinuousLinearMap.nonneg_iff_isSelfAdjoint_and_nonneg_spectrum
 by
   rw [nonneg_iff_isPositive, ← ContinuousLinearMap.IsPositive.toLinearMap,
     LinearMap.isPositive_iff_isSymmetric_and_nonneg_spectrum,
-    Set.IsNonneg, isSelfAdjoint_iff_isSymmetric, Set.subset_def, spectrum_coe]
-  rfl
+    isSelfAdjoint_iff_isSymmetric, spectrum_coe]
 
 theorem ContinuousLinearMap.nonneg_iff_exists
   (T : B →L[ℂ] B) :
@@ -203,7 +202,7 @@ innerAut (hx.eigenvectorUnitary)
 lemma Matrix.IsHermitian.sqSqrt_eq {x : Matrix n n ℂ} (hx : x.IsHermitian) :
   hx.sqSqrt = innerAut (hx.eigenvectorUnitary)
     (Matrix.diagonal (RCLike.ofReal ∘ (|hx.eigenvalues|))) :=
-by simp [sqSqrt, Real.sqrt_sq_eq_abs]
+by simp only [sqSqrt, Real.sqrt_sq_eq_abs]; rfl
 
 lemma Matrix.IsHermitian.sqSqrt_isPosSemidef {x : Matrix n n ℂ} (hx : x.IsHermitian) :
   hx.sqSqrt.PosSemidef :=

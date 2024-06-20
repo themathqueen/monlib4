@@ -133,9 +133,9 @@ theorem StarAlgEquiv.of_pi_is_inner {𝕜 : Type _} [RCLike 𝕜] {k : Type _} [
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     (f : ∀ i, Matrix (s i) (s i) 𝕜 ≃⋆ₐ[𝕜] Matrix (s i) (s i) 𝕜) :
     unitary.innerAutStarAlg 𝕜 (unitary.pi (StarAlgEquiv.pi.unitary f)) = StarAlgEquiv.pi f :=
-  by
-  simp_rw [StarAlgEquiv.ext_iff, unitary.innerAutStarAlg_apply, Function.funext_iff, Pi.mul_apply,
-    unitary.pi_apply, unitary.coe_star, Pi.star_apply, unitary.pi_apply, StarAlgEquiv.pi_apply,
+by
+  simp_rw [StarAlgEquiv.ext_iff, unitary.innerAutStarAlg_apply, Function.funext_iff, Pi.mul_apply]
+  simp only [unitary.pi_apply, unitary.coe_star, Pi.star_apply, unitary.pi_apply, StarAlgEquiv.pi_apply,
     StarAlgEquiv.pi.unitary_apply]
   intros a_1 i
   rw [← unitary.coe_star, ← @unitary.innerAutStarAlg_apply 𝕜 _ _ _ _ _ (f _).of_matrix_unitary (a_1 _)]
@@ -281,7 +281,7 @@ by
   where $Q$ is `hφ.matrix`. -/
 theorem starAlgEquiv_adjoint_eq (hφ : φ.IsFaithfulPosMap)
   (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) (x : Matrix n n ℂ) :
-  (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
+  (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toLinearMap :
           Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ)
       x =
     (f.symm (x * φ.matrix) : Matrix n n ℂ) * φ.matrix⁻¹ :=
@@ -289,7 +289,7 @@ by
   haveI := hφ.matrixIsPosDef.invertible
   apply @ext_inner_left ℂ
   intro a
-  simp_rw [LinearMap.adjoint_inner_right, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv]
+  simp_rw [LinearMap.adjoint_inner_right, StarAlgEquiv.toLinearMap_apply]
   obtain ⟨U, rfl⟩ := f.of_matrix_is_inner
   simp_rw [innerAutStarAlg_apply, innerAutStarAlg_symm_apply, Matrix.mul_assoc]
   nth_rw 1 [← Matrix.mul_assoc φ.matrix]
@@ -323,10 +323,10 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ) :
     List.TFAE
       [f φ.matrix = φ.matrix,
-        (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toAlgEquiv.toLinearMap :
+        (LinearMap.adjoint (f : Matrix n n ℂ ≃⋆ₐ[ℂ] Matrix n n ℂ).toLinearMap :
               Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ) =
-          f.symm.toAlgEquiv.toLinearMap,
-        φ ∘ₗ f.toAlgEquiv.toLinearMap = φ, ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
+          f.symm.toLinearMap,
+        φ ∘ₗ f.toLinearMap = φ, ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
         ∀ x : Matrix n n ℂ, ‖f x‖ = ‖x‖, Commute φ.matrix f.of_matrix_unitary] :=
   by
   tfae_have 5 ↔ 2
@@ -339,25 +339,24 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     have :
       ∀ x y,
         ⟪f x, f y⟫_ℂ - ⟪x, y⟫_ℂ =
-          ⟪(LinearMap.adjoint f.toAlgEquiv.toLinearMap ∘ₗ f.toAlgEquiv.toLinearMap - 1) x, y⟫_ℂ :=
+          ⟪(LinearMap.adjoint f.toLinearMap ∘ₗ f.toLinearMap - 1) x, y⟫_ℂ :=
       by
       intro x y
       simp only [LinearMap.sub_apply, LinearMap.one_apply, inner_sub_left, LinearMap.comp_apply,
-        LinearMap.adjoint_inner_left, StarAlgEquiv.coe_toAlgEquiv, AlgEquiv.toLinearMap_apply]
+        LinearMap.adjoint_inner_left, StarAlgEquiv.toLinearMap_apply]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]
   rw [tfae_5_iff_2]
   tfae_have 4 ↔ 3
   · simp_rw [inner_eq, ← star_eq_conjTranspose, ← map_star f, ← _root_.map_mul f,
-      LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-      StarAlgEquiv.coe_toAlgEquiv]
+      LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply]
     refine' ⟨fun h x => _, fun h x y => h _⟩
     rw [← Matrix.one_mul x, ← star_one]
     exact h _ _
   rw [tfae_4_iff_3]
   haveI :=  hφ.matrixIsPosDef.invertible
   simp_rw [LinearMap.ext_iff, starAlgEquiv_adjoint_eq, LinearMap.comp_apply,
-    AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, mul_inv_eq_iff_eq_mul_of_invertible,
+    StarAlgEquiv.toLinearMap_apply, mul_inv_eq_iff_eq_mul_of_invertible,
     φ.apply, StarAlgEquiv.symm_apply_eq, _root_.map_mul,
     StarAlgEquiv.apply_symm_apply, ← forall_left_hMul φ.matrix, @eq_comm _ φ.matrix]
   tfae_have 1 ↔ 2
@@ -846,7 +845,7 @@ toMatrixLinEquiv_apply' _ _ _
 
 theorem starAlgEquiv_adjoint_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ) (x : PiMat ℂ k s) :
-    LinearMap.adjoint (StarAlgEquiv.pi f).toAlgEquiv.toLinearMap x =
+    LinearMap.adjoint (StarAlgEquiv.pi f).toLinearMap x =
       (StarAlgEquiv.pi f).symm (x * Module.Dual.pi.matrixBlock ψ) *
         (Module.Dual.pi.matrixBlock ψ)⁻¹ :=
   by
@@ -854,7 +853,7 @@ theorem starAlgEquiv_adjoint_eq [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
   letI := fun i => (hψ i).matrixIsPosDef.invertible
   apply @ext_inner_left ℂ
   intro a
-  simp_rw [LinearMap.adjoint_inner_right, AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv]
+  simp_rw [LinearMap.adjoint_inner_right, StarAlgEquiv.toLinearMap_apply]
   rw [← StarAlgEquiv.of_pi_is_inner]
   simp_rw [unitary.innerAutStarAlg_apply, unitary.innerAutStarAlg_symm_apply, mul_assoc]
   symm
@@ -898,9 +897,8 @@ theorem starAlgEquiv_commute_iff [∀ i, (ψ i).IsFaithfulPosMap]
   nth_rw 1 [← StarAlgEquiv.of_pi_is_inner]
   rw [unitary.innerAutStarAlg_apply, unitary.coe_star]
   rw [unitary.inj_hMul (unitary.pi (StarAlgEquiv.pi.unitary f))]
-  simp_rw [mul_assoc, unitary.coe_star_mul_self, mul_one]
-  rw [eq_comm, Commute, SemiconjBy]
-  rfl
+  simp only [mul_assoc, unitary.coe_star_mul_self, mul_one, eq_comm, Commute, SemiconjBy,
+    Pi.mul_def, Pi.star_def]
 
 lemma _root_.isometry_iff_norm {E F : Type _} [SeminormedAddGroup E] [SeminormedAddGroup F]
   {e : Type*} [FunLike e E F]
@@ -955,9 +953,9 @@ theorem starAlgEquiv_is_isometry_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     [∀ i, Nontrivial (s i)] (f : ∀ i, Matrix (s i) (s i) ℂ ≃⋆ₐ[ℂ] Matrix (s i) (s i) ℂ) :
     List.TFAE
       [(StarAlgEquiv.pi f) (Module.Dual.pi.matrixBlock ψ) = Module.Dual.pi.matrixBlock ψ,
-        LinearMap.adjoint (StarAlgEquiv.pi f).toAlgEquiv.toLinearMap =
-          (StarAlgEquiv.pi f).symm.toAlgEquiv.toLinearMap,
-        Module.Dual.pi ψ ∘ₗ (StarAlgEquiv.pi f).toAlgEquiv.toLinearMap = Module.Dual.pi ψ,
+        LinearMap.adjoint (StarAlgEquiv.pi f).toLinearMap =
+          (StarAlgEquiv.pi f).symm.toLinearMap,
+        Module.Dual.pi ψ ∘ₗ (StarAlgEquiv.pi f).toLinearMap = Module.Dual.pi ψ,
         ∀ x y, ⟪(StarAlgEquiv.pi f) x, (StarAlgEquiv.pi f) y⟫_ℂ = ⟪x, y⟫_ℂ,
         ∀ x : ∀ i, Matrix (s i) (s i) ℂ, ‖(StarAlgEquiv.pi f) x‖ = ‖x‖,
         Commute (Module.Dual.pi.matrixBlock ψ) fun i => StarAlgEquiv.pi.unitary f i] :=
@@ -973,29 +971,28 @@ theorem starAlgEquiv_is_isometry_tfae [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
     have :
       ∀ x y,
         ⟪(StarAlgEquiv.pi f) x, (StarAlgEquiv.pi f) y⟫_ℂ - ⟪x, y⟫_ℂ =
-          ⟪(LinearMap.adjoint (StarAlgEquiv.pi f).toAlgEquiv.toLinearMap ∘ₗ
-                  (StarAlgEquiv.pi f).toAlgEquiv.toLinearMap -
+          ⟪(LinearMap.adjoint (StarAlgEquiv.pi f).toLinearMap ∘ₗ
+                  (StarAlgEquiv.pi f).toLinearMap -
                 1)
               x,
             y⟫_ℂ :=
       by
       intro x y
       simp only [LinearMap.sub_apply, LinearMap.one_apply, inner_sub_left, LinearMap.comp_apply,
-        LinearMap.adjoint_inner_left, StarAlgEquiv.coe_toAlgEquiv, AlgEquiv.toLinearMap_apply]
+        LinearMap.adjoint_inner_left, StarAlgEquiv.toLinearMap_apply]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]
   rw [tfae_5_iff_2]
   tfae_have 4 ↔ 3
   · simp_rw [inner_eq, ← map_star (StarAlgEquiv.pi f), ← _root_.map_mul (StarAlgEquiv.pi f),
-      LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-      StarAlgEquiv.coe_toAlgEquiv]
+      LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply]
     refine' ⟨fun h x => _, fun h x y => h _⟩
     rw [← one_mul x, ← star_one]
     exact h _ _
   rw [tfae_4_iff_3]
   letI := @matrixBlockInvertible _ _ _ _ _ _ ψ hψ
   simp_rw [LinearMap.ext_iff, starAlgEquiv_adjoint_eq f, LinearMap.comp_apply,
-    AlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_toAlgEquiv, mul_inv_eq_iff_eq_mul_aux,
+    StarAlgEquiv.toLinearMap_apply, mul_inv_eq_iff_eq_mul_aux,
     Module.Dual.pi.apply'', StarAlgEquiv.symm_apply_eq, _root_.map_mul,
     StarAlgEquiv.apply_symm_apply, pi.forall_left_mul, @eq_comm _ (Module.Dual.pi.matrixBlock ψ), ←
     blockDiagonal'AlgHom_apply, ← _root_.map_mul]

@@ -312,9 +312,9 @@ by simp_rw [LinearMap.ext_iff, LinearMap.one_apply]
 theorem _root_.QuantumSet.starAlgEquiv_is_isometry_tfae
     (f : B ≃⋆ₐ[ℂ] B) :
     List.TFAE
-      [LinearMap.adjoint f.toAlgEquiv.toLinearMap =
-          f.symm.toAlgEquiv.toLinearMap,
-        Coalgebra.counit ∘ₗ f.toAlgEquiv.toLinearMap = Coalgebra.counit,
+      [LinearMap.adjoint f.toLinearMap =
+          f.symm.toLinearMap,
+        Coalgebra.counit ∘ₗ f.toLinearMap = Coalgebra.counit,
         ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
         ∀ x : B, ‖f x‖ = ‖x‖] :=
 by
@@ -328,23 +328,22 @@ by
     have :
       ∀ x y,
         ⟪f x, f y⟫_ℂ - ⟪x, y⟫_ℂ =
-          ⟪(LinearMap.adjoint f.toAlgEquiv.toLinearMap ∘ₗ f.toAlgEquiv.toLinearMap - 1) x, y⟫_ℂ :=
+          ⟪(LinearMap.adjoint f.toLinearMap ∘ₗ f.toLinearMap - 1) x, y⟫_ℂ :=
       by
       intro x y
       simp only [LinearMap.sub_apply, LinearMap.one_apply, inner_sub_left, LinearMap.comp_apply,
-        LinearMap.adjoint_inner_left, StarAlgEquiv.coe_toAlgEquiv, AlgEquiv.toLinearMap_apply]
+        LinearMap.adjoint_inner_left, StarAlgEquiv.toLinearMap_apply]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]
   rw [tfae_4_iff_1]
   tfae_have 3 ↔ 2
   · simp_rw [QuantumSet.inner_eq_counit, ← map_star f, ← _root_.map_mul f,
-      LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-      StarAlgEquiv.coe_toAlgEquiv]
+      LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply]
     refine' ⟨fun h x => _, fun h x y => h _⟩
     rw [← one_mul x, ← star_one]
     exact h _ _
   rw [← tfae_3_iff_2]
-  simp_rw [← StarAlgEquiv.coe_toAlgEquiv, ← AlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_left,
+  simp_rw [← StarAlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_left,
     ← ext_inner_left_iff, ← LinearMap.comp_apply, _root_.LinearMap.apply_eq_id,
     StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
   tfae_finish
