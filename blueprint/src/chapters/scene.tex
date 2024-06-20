@@ -38,11 +38,11 @@
   Straightforward computation.
  \end{proof}
 
- \begin{lemma}\label{continuous_linear_map.centralizer}\lean{ContinuousLinearMap.commutes_with_all_iff}\leanok
+ \begin{lemma}\label{ContinuousLinearMap.centralizer}\lean{ContinuousLinearMap.commutes_with_all_iff}\leanok
   Given a Hilbert space $\Hcal$, we have ${\Bcal(\Hcal)}^\prime=\{\alpha\id:\alpha\in\CC\}$.\\
   In other words, $x\in\Bcal(\Hcal)$ commutes with all operators $y\in\Bcal(\Hcal)$ if and only if $x=\alpha\id$ for some $\alpha\in\CC$.
  \end{lemma}
- \begin{proof}\uses{rankOne}\uses{rankOne_adjoint}\uses{rankOne_comp_linearMap}\uses{linearMap_comp_rankOne}\leanok
+ \begin{proof}\uses{rankOne_adjoint}\uses{rankOne_comp_linearMap}\uses{linearMap_comp_rankOne}\leanok
   Let $x\in\Bcal(\Hcal)$. Obviously, if $x=\alpha\id$ for some $\alpha\in\CC$, then it commutes with every other operator. Now suppose $x$ commutes with every operator in $\Bcal(\Hcal)$.
   So this means $\ketbra{a}{x^*(b)}=\ketbra{a}{b}x=x\ketbra{a}{b}=\ketbra{x(a)}{b}$ for all $a,b\in\Hcal$.
   Suppose there exists some non-zero $a\in\Hcal$, otherwise this is trivial. Then, for any $b\in\Hcal$, we have
@@ -53,10 +53,19 @@
  \begin{proposition}\uses{rankOne}\label{colinear_of_rankOne_self_eq_rankOne_self}\lean{colinear_of_rankOne_self_eq_rankOne_self}\leanok
   Let $\Hcal$ be a Hilbert space, and let $x,y\in\Hcal$. Then if $\ketbra{x}{x}=\ketbra{y}{y}$, then there exists some $0\neq\alpha\in\CC$ such that $x=\alpha{y}$ (i.e., they are co-linear).
  \end{proposition}
- \begin{proof}\uses{rankOne}\leanok
+ \begin{proof}\leanok
   Suppose $\ketbra{x}{x}=\ketbra{y}{y}$. Then it is clear that we get $x=0$ if and only if $y=0$. So we assume $x\neq0$ (and so $y\neq0$), otherwise this is trivial.
   Then we have \[\norm{x}^2x=\ketbra{x}{x}(x)=\ketbra{y}{y}(x)=\ip{y}{x}y.\]
   And as $x\neq0$, we get $x=\dfrac{\ip{y}{x}}{\norm{x}^2}y$. We have $\ip{y}{x}\neq0$ (otherwise, this would mean $x=0$ which is a contradiction). Thus we can let $\alpha=\ip{y}{x}/\norm{x}^2\neq0$ such that $x=\alpha{y}$.
+ \end{proof}
+
+
+ \begin{lemma}\label{LinearMap.isPositive_iff_eq_sum_rankOne}\uses{rankOne}\lean{LinearMap.isPositive_iff_eq_sum_rankOne}\leanok
+  Given a finite-dimensional inner product space $E$ over $\CC$ and $T\in\Bcal(E)$, we get\\
+  \hspace*{0.5cm}$T$ is positive semi-definite $\LRa$ $T=\sum_i\ketbra{v_i}{v_i}$ for some tuple $(v_i)$ in $E$.
+ \end{lemma}
+ \begin{proof}
+  
  \end{proof}
 
 \chapter{Star-preserving maps}
@@ -66,7 +75,7 @@
   We say $A\in\Bcal(\Hcal_1,\Hcal_2)$ is \textit{star-preserving} when $A(a^*)={A(a)}^*$ for each $a\in\Hcal_1$.
  \end{definition}
  
- \begin{definition}\label{linear_map.real}\lean{LinearMap.real}\leanok
+ \begin{definition}\label{LinearMap.real}\lean{LinearMap.real}\leanok
   We define the map $\cdot^{\operatorname{r}}$ as the self-invertible anti-linear automorphism $(\Hcal_1\to\Hcal_2)\cong(\Hcal_1\to\Hcal_2)$ given by
   \[A\mapsto(a\mapsto{A(a^*)}^*).\]
  \end{definition}
@@ -103,21 +112,77 @@
 
 \chapter{The inner product}
 
- \begin{definition}\label{linear_functional.matrix}\lean{Module.Dual.matrix}\leanok
-  Given a linear functional $\phi\colon M_n \to \CC$, we define $\phi_Q=\sum_{i,j}\phi(e_{ij})e_{ji}$.
- \end{definition}
+ \section{On $M_n$}
 
- \begin{lemma}\label{linear_functional_eq_trace}\uses{linear_functional.matrix}\lean{Module.Dual.apply}\leanok
-  Given a linear functional $\phi\colon M_n\to\CC$, we get $\phi$ is given by $x\mapsto\Tr(\phi_Q \,x)$.
- \end{lemma}
- \begin{proof}\leanok
-  Straightforward computation.
- \end{proof}
+  \begin{definition}\label{Dual.matrix}\lean{Module.Dual.matrix}\leanok
+   Given a linear functional $\phi\colon M_n \to \CC$, we define $\phi_Q=\sum_{i,j}\phi(e_{ij})e_{ji}$.
+  \end{definition}
 
- \begin{definition}\label{LinearMap.IsPosMap}\lean{LinearMap.IsPosMap}\leanok
-  Given C$^*$-algebras $A,C$, we say a linear map $f\colon A \to C$ is \textit{positive} when $0\leq f(a)$ for all $0\leq a$. In other words, $f$ maps positive elements in $A$ to positive elements in $C$.
- \end{definition}
+  \begin{lemma}\label{dual_eq_trace}\uses{Dual.matrix}\lean{Module.Dual.apply}\leanok
+   Given a linear functional $\phi\colon M_n\to\CC$, we get $\phi$ is given by $x\mapsto\Tr(\phi_Q \,x)$.
+  \end{lemma}
+  \begin{proof}\leanok
+   Straightforward computation.
+  \end{proof}
 
+  \begin{definition}\label{LinearMap.IsPosMap}\lean{LinearMap.IsPosMap}\leanok
+   Given C$^*$-algebras $A,C$, we say a linear map $f\colon A \to C$ is \textit{positive} when $0\leq f(a)$ for all $0\leq a$. In other words, $f$ maps positive elements in $A$ to positive elements in $C$.
+  \end{definition}
+
+  As any matrix $x\in{M_n}$ is positive if and only if there exists some $y\in M_n$ such that $x=y^*y$, we get that a linear functional $f$ on $M_n$ is a \textit{positive map} when $0\leq{f(x^*x)}$ for any matrix $x\in{M_n}$.
+
+  \begin{lemma}\label{Dual.isPosMap_iff_of_matrix}\uses{Dual.matrix}\uses{LinearMap.IsPosMap}\lean{Module.Dual.isPosMap_iff_of_matrix}\leanok
+   Given a linear functional $\phi$ on $M_n$, we have,\\
+   \hspace*{0.5cm}$\phi$ is positive $\,\LRa\,$ $0\leq\phi_Q$.\\
+   Here, $\phi_Q$ is the matrix of $\phi$ defined in Definition \ref{Dual.matrix}.
+  \end{lemma}
+  \begin{proof}\uses{dual_eq_trace}\uses{LinearMap.isPositive_iff_eq_sum_rankOne}\leanok
+   By Lemma \ref{dual_eq_trace} we have $\phi(x)=\Tr(\phi_Q\, x)$ for all $x\in{M_n}$.
+   \begin{description}
+    \item[$(\tto)$]
+     Suppose $\phi$ is positive. By Lemma \ref{LinearMap.isPositive_iff_eq_sum_rankOne}, we get $0\leq\sum_i\phi(x_ix_i^*)$ for any tuple $(x_i)$ in $\CC^n$. So then for any $x\in\CC^n$, we have $0\leq\phi(xx^*)=\Tr(\phi_Q\, xx^*)=x^*\phi_Q\, x$, which means $\phi_Q$ is positive semi-definite.
+    \item[$(\ott)$]
+     Suppose $\Q$ is positive semi-definite. Then since $\phi_Q$ is positive semi-definite, we have $\phi_Q=\phi_Q^{1/2}\phi_Q^{1/2}$, where $\phi_Q^{1/2}$ is also positive semi-definite (and so is self-adjoint). So for any $x\in{M_n}$, we have $\phi(x^*x)=\Tr(\phi_Q\, x^*x)=\Tr\left({(x\phi_Q^{1/2})}^*(x\phi_Q^{1/2})\right)\geq0$.
+   \end{description}
+   Thus $\phi$ is a positive map if and only if our matrix $\phi_Q$ is positive semi-definite.
+  \end{proof}
+
+  \begin{proposition}\label{Module.Dual.isReal_iff}\uses{LinearMap.IsReal}\uses{Dual.matrix}\lean{Module.Dual.isReal_iff}\leanok
+   Given a linear functional $\phi\colon{M_n}\to\CC$, we get $\phi$ is star-preserving if and only if $\phi_Q$ is self-adjoint.\\
+   Here, $\phi_Q$ is the matrix given by $\phi$ defined in Definition \ref{Dual.matrix}.
+  \end{proposition}
+  \begin{proof}\uses{dual_eq_trace}\leanok {\ }
+   \begin{description}
+    \item[$(\tto)$]
+     Suppose $\phi$ is star-preserving, i.e., $\phi(x^*)=\overline{\phi(x)}$ for all $x\in{M_n}$.
+     We let $x\in{M_n}$, and compute using Lemma \ref{dual_eq_trace},
+     \[\Tr(\phi_Q\, x^*)=\phi(x^*)=\overline{\phi(x)}=\overline{\Tr(\phi_Q\, x)}=\Tr(x^*\phi_Q^*),\]
+     And so $\phi_Q=\phi_Q^*$.
+    \item[$(\ott)$]
+     Suppose $\phi_Q$ is self-adjoint. Using Lemma \ref{dual_eq_trace}, $\phi$ is given by $x\mapsto\Tr(\phi_Q\, x)$.
+     And so for any $x\in{M_n}$, we get $\phi(x^*)=\Tr(\phi_Q\, x^*)=\Tr({(x\phi_Q)}^*)=\overline{\Tr(x\phi_Q)}=\overline{\phi(x)}$.
+     Thus, $\phi$ is real.
+   \end{description}
+  \end{proof}
+
+  \begin{definition}\label{IsFaithful}\lean{Module.Dual.IsFaithful}\leanok
+   A positive linear functional $f$ on $A$ is said to be \textit{faithful} if $f(x^*x)=0$ if and only if $x=0$ for all $x\in A$.
+  \end{definition}
+
+  \begin{theorem}\label{Dual.isFaithfulPosMap_tfae}
+   \uses{LinearMap.IsPosMap}
+   \uses{IsFaithful} 
+   \lean{Module.Dual.isFaithfulPosMap_of_matrix_tfae}
+   Given a linear functional $\phi\colon{M_n}\to\CC$, then the following are equivalent,
+   \begin{enumerate}[label=(\roman*)]
+    \item $\phi$ is positive and faithful,
+    \item $\exists!\,0<Q\in{M_n}:\forall{x}\in{M_n}:\phi(x)=\Tr(Qx)$,
+    \item $M_n\times{M_n}\to\CC\colon(x,y)\mapsto\phi(x^*y)$ defines an inner product on $M_n$.
+   \end{enumerate}
+  \end{theorem}
+
+ \section{On $\bigoplus_i M_{n_i}$}
+  
  
 
 
