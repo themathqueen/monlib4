@@ -594,7 +594,7 @@ by
   have h11 : ∀ a : 𝕜, a • e₂ = (0, a • 1) := by
     intro a
     simp_rw [e₂, Prod.smul_mk, smul_zero]
-  have hf := AlgEquiv.image_center f
+  have hf := MulEquiv.image_center f
   rw [Set.ext_iff] at hf
   have he₁' : e₁ ∈ (Submodule.span 𝕜 {((1 : Matrix n n 𝕜), (0 : Matrix m m 𝕜)), (0, 1)} : Set _) := by
     simp only [SetLike.mem_coe]

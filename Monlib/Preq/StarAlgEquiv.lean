@@ -197,35 +197,43 @@ lemma AlgEquiv.apply_eq_iff_eq {R A B : Type*} [CommSemiring R] [Semiring A] [Al
   f x = f y ↔ x = y :=
 Equiv.apply_eq_iff_eq f.toEquiv
 
-lemma _root_.NonUnitalSemiring.mem_center_iff {A : Type*} [NonUnitalSemiring A] (a : A) :
-  a ∈ Set.center A ↔ ∀ y : A, a * y = y * a :=
+lemma MulEquiv.image_center {F A B : Type*} [Semigroup A] [Semigroup B]
+  [EquivLike F A B] [MulEquivClass F A B]
+  (f : F) :
+  f '' (Set.center A) = Set.center B :=
 by
-  simp only [Set.mem_center_iff, isMulCentral_iff, mul_assoc, forall_const, and_self, and_true]
-
-lemma AlgEquiv.image_center {R A : Type*} [CommRing R] [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
-  f '' (Set.center A) = Set.center A :=
-by
+  let f' : A ≃* B := f
   ext x
   symm
-  calc x ∈ Set.center A ↔ ∀ y, x * y = y * x := NonUnitalSemiring.mem_center_iff _
-    _ ↔ ∀ y, f.symm x * f.symm y = f.symm y * f.symm x :=
-      by simp only [AlgEquiv.apply_eq_iff_eq, ← map_mul]
-    _ ↔ ∀ y, f.symm x * y = y * f.symm x := by
+  calc x ∈ Set.center B ↔ ∀ y, y * x = x * y := Semigroup.mem_center_iff
+    _ ↔ ∀ y, f'.symm y * f'.symm x = f'.symm x * f'.symm y :=
+      by simp only [MulEquiv.apply_eq_iff_eq, ← map_mul]
+    _ ↔ ∀ y, y * f'.symm x = f'.symm x * y := by
         refine ⟨λ h y => ?_, λ h y => h _⟩
-        specialize h (f y)
-        simp_all only [AlgEquiv.symm_apply_apply]
-    _ ↔ f.symm x ∈ Set.center A := (NonUnitalSemiring.mem_center_iff _).symm
+        specialize h (f' y)
+        simp_all only [MulEquiv.symm_apply_apply]
+    _ ↔ f'.symm x ∈ Set.center A := Semigroup.mem_center_iff.symm
     _ ↔ x ∈ f '' Set.center A := Set.mem_image_equiv.symm
 
-lemma AlgEquiv.image_span_center {R A : Type*} [CommRing R]
-  [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
-  f '' (Submodule.span R (Set.center A)) = Submodule.span R (Set.center A) :=
-by rw [← Submodule.map_coe, Submodule.map_span, AlgEquiv.image_center]
+instance
+  {F R A B : Type*} [Monoid R] [NonUnitalNonAssocSemiring A] [NonUnitalNonAssocSemiring B]
+  [DistribMulAction R A] [DistribMulAction R B]
+  [EquivLike F A B] [NonUnitalAlgHomClass F R A B] :
+  MulEquivClass F A B :=
+{ map_mul := MulHomClass.map_mul }
 
-lemma AlgEquiv.map_span_center {R A : Type*} [CommRing R]
-  [Semiring A] [Algebra R A] (f : A ≃ₐ[R] A) :
-  Submodule.map f (Submodule.span R (Set.center A)) = Submodule.span R (Set.center A) :=
+lemma NonUnitalAlgEquiv.image_span_center {F R A B : Type*} [Semiring R]
+  [NonUnitalSemiring A] [NonUnitalSemiring B] [Module R A] [Module R B]
+  [EquivLike F A B] [NonUnitalAlgHomClass F R A B] (f : F) :
+  f '' (Submodule.span R (Set.center A)) = Submodule.span R (Set.center B) :=
 by
-  have := _root_.AlgEquiv.image_span_center f
+  rw [← Submodule.map_coe, Submodule.map_span, MulEquiv.image_center]
+
+lemma NonUnitalAlgEquiv.map_span_center {F R A B : Type*} [Semiring R]
+  [NonUnitalSemiring A] [NonUnitalSemiring B] [Module R A] [Module R B]
+  [EquivLike F A B] [NonUnitalAlgHomClass F R A B] (f : F) :
+  Submodule.map f (Submodule.span R (Set.center A)) = Submodule.span R (Set.center B) :=
+by
+  have := _root_.NonUnitalAlgEquiv.image_span_center f
   rw [← Submodule.map_coe] at this
   norm_cast at this
