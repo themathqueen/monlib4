@@ -673,7 +673,7 @@ theorem PosDef.trace_conjTranspose_hMul_self_eq_zero {m : Type*}
     (Function.Bijective.injective (Matrix.bij_toLin'_of_invertible hQ.invertible))
   simp_rw [← toLin'_apply, ← LinearMap.comp_apply, ← toLin'_mul, Matrix.mul_assoc,
     h, Matrix.mul_zero]
-alias Nontracial.trace_ConjTranspose_hMul_self_eq_zero := PosDef.trace_conjTranspose_hMul_self_eq_zero
+alias Nontracial.trace_conjTranspose_hMul_self_eq_zero := PosDef.trace_conjTranspose_hMul_self_eq_zero
 
 theorem IsHermitian.trace_conj_symm_star_hMul {m : Type*} [Fintype m] [Fintype n]
   {Q : Matrix m m 𝕜} (hQ : Q.IsHermitian)
