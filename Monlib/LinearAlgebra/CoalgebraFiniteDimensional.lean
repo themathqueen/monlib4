@@ -3,6 +3,7 @@ import Mathlib.RingTheory.Coalgebra.Equiv
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.Ips.TensorHilbert
+import Monlib.LinearAlgebra.Ips.RankOne
 
 variable {R A : Type*}
 local notation "lT" => LinearMap.lTensor
@@ -14,6 +15,17 @@ local notation "η" => Algebra.linearMap R
 
 attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 open scoped TensorProduct
+
+lemma algebraMapCLM_eq_ket_one {R A : Type*} [RCLike R] [NormedAddCommGroupOfRing A]
+  [InnerProductSpace R A] [SMulCommClass R A A] [IsScalarTower R A A] :
+  algebraMapCLM R A = ket R 1 :=
+rfl
+
+lemma algebraMapCLM_adjoint_eq_bra_one {R A : Type*} [RCLike R] [NormedAddCommGroupOfRing A]
+  [InnerProductSpace R A] [SMulCommClass R A A] [IsScalarTower R A A] [CompleteSpace A] :
+  ContinuousLinearMap.adjoint (algebraMapCLM R A) = bra R 1 :=
+by
+  rw [algebraMapCLM_eq_ket_one, ← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
 
 lemma LinearMap.adjoint_id {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A]
   [InnerProductSpace 𝕜 A] [FiniteDimensional 𝕜 A] :

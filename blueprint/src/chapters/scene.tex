@@ -1,14 +1,49 @@
 \chapter{Ket-bra operators}
- Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
 
- \begin{definition}\label{rankOne}\lean{rankOne}\leanok
+\section{Kets and bras}
+\begin{definition}\label{ket}\lean{ket}\leanok
+  A \textit{ket} operator $\ket{\cdot}$ on a Hilbert space $\Hcal$ is defined as the linear map $\Bcal(\Hcal,\Bcal(\CC,\Hcal))$ and is given by $x\mapsto(\alpha\mapsto\alpha x)$.
+\end{definition}
+\begin{definition}\label{bra}\lean{bra}\leanok
+  A \textit{bra} operator $\bra{\cdot}$ on a Hilbert space $\Hcal$ is defined as the anti-linear map $\Hcal\to\Bcal(\Hcal,\CC)$ and is given by $x\mapsto(y\mapsto\ip{x}{y})$.
+\end{definition}
+\begin{lemma}\label{bra_adjoint_eq_ket}\uses{bra, ket}\lean{bra_adjoint_eq_ket}\leanok
+  Given $x\in \Hcal$, we get $\bra{x}^*=\ket{x}$.
+\end{lemma}
+\begin{proof}\leanok
+  Easy computation.
+\end{proof}
+\begin{corollary}\label{bra-ket}\uses{bra, ket}\lean{bra_ket_one_eq_inner}\leanok
+  Given $x,y\in\Hcal$, we get $\bra{x}\circ\ket{y}(1)=\ip{x}{y}$.
+\end{corollary}
+\begin{proof}\leanok
+  Straightforward computation.
+\end{proof}
+\begin{corollary}\label{unit_eq_ket_one}
+  \uses{ket}
+  \lean{algebraMapCLM_eq_ket_one}\leanok
+  Let $\Acal$ be an algebra and a Hilbert space. Then the unit map $\eta\colon\CC\to\Acal$ (which is given by $\alpha\mapsto \alpha1$) is exactly $\ket{1}$.
+\end{corollary}
+\begin{proof}\leanok
+  True by definition.
+\end{proof}
+\begin{corollary}\label{unit_adjoint_eq_bra_one}\uses{bra}\lean{algebraMapCLM_adjoint_eq_bra_one}\leanok
+  The adjoint of the unit map $\eta\colon\CC\to\Acal$ in an algebra and Hilbert space $\Acal$ is $\bra{1}$.
+ \end{corollary}
+ \begin{proof}\uses{unit_eq_ket_one, bra_adjoint_eq_ket}\leanok
+  Use Lemma \ref{bra_adjoint_eq_ket} and Corollary \ref{unit_eq_ket_one}.
+ \end{proof}
+
+\section{Ket-bras}
+\begin{definition}\label{rankOne}\uses{ket, bra}\lean{rankOne}\leanok
   A \textit{ket-bra} operator $\ketbra{\cdot}{\cdot}$ is defined as the linear map from $E_2$ to the anti-linear map $E_1\to\Bcal(E_1,E_2)$ and is given by
   \begin{align*}
-   x\mapsto(y\mapsto(u\mapsto\ip{y}{u}x)).
+    x\mapsto(y\mapsto(u\mapsto\ip{y}{u}x)).
   \end{align*}
- \end{definition} 
- 
- So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
+  This is exactly $\ketbra{\cdot}{\cdot}=\ket{\cdot}\,\circ\,\bra{\cdot}$.
+\end{definition}
+Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
+So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
 
  \begin{lemma}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
   Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
@@ -64,8 +99,15 @@
   Given a finite-dimensional inner product space $E$ over $\CC$ and $T\in\Bcal(E)$, we get\\
   \hspace*{0.5cm}$T$ is positive semi-definite $\LRa$ $T=\sum_i\ketbra{v_i}{v_i}$ for some tuple $(v_i)$ in $E$.
  \end{lemma}
- \begin{proof}
-  
+ \begin{proof}\uses{sum_rankOne_onb_eq_id}\leanok {\ }
+ \begin{description}
+  \item[$(\tto)$]
+   Suppose $0\leq{T}$. We use the spectral theorem and let $(v_i)$ be the eigenbasis of $T$ in $E$ with corresponding eigenvalues $(\lambda_i)$. Note that, as $0\leq{T}$, we also get each $0\leq\lambda_i$. So then let each $x_i=\sqrt{\lambda_i}u_i$. Then we have $\sum_i\ketbra{x_i}{x_i}=\sum_i\sqrt{\lambda_i}\overline{\sqrt{\lambda_i}}\ketbra{u_i}{u_i}=\sum_i\lambda_i\ketbra{u_i}{u_i}=T$, where the last equality comes from Corollary \ref{sum_rankOne_onb_eq_id}.
+  \item[$(\ott)$]
+   Suppose we have some tuple $(v_i)$ in $E$ such that $T=\sum_i\ketbra{v_i}{v_i}$. Then, for any $x\in{E}$, we get
+   $\ip{x}{T(x)}=\sum_i\ip{x}{v_i}\ip{v_i}{x}=\sum_i\abs{\ip{x}{v_i}}^2\geq0$.
+   Thus $T$ is positive semi-definite.
+ \end{description}
  \end{proof}
 
  Given an orthonormal basis $b=(b_i)$ of a finite-dimensional Hilbert space $\Hcal$, we define $R_b$ to be the linear isomorphism $\Hcal\cong\CC^{\dim\Hcal}$ given by $R_b(x)_i=\ip{b_i}{x}$ with its inverse given by $x\mapsto\sum_ix_ib_i$.

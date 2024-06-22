@@ -21,6 +21,57 @@ This defines the rank one operator $| x \rangle\langle y |$ for continuous linea
 
 section rankOne
 
+@[simps!]
+noncomputable abbrev bra (𝕜 : Type*) {E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] :
+    E →L⋆[𝕜] (E →L[𝕜] 𝕜) :=
+innerSL 𝕜
+@[simps!]
+noncomputable def ket (𝕜 : Type*) {E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] :
+    E →L[𝕜] (𝕜 →L[𝕜] E) where
+  toFun x :=
+  { toFun := λ α => α • x
+    map_add' := λ _ _ => by simp only [add_smul]
+    map_smul' := λ _ _ => by simp only [smul_smul, smul_eq_mul]; rfl }
+  map_add' := λ _ _ => by simp only [smul_add]; rfl
+  map_smul' := λ α _ => by simp_rw [smul_smul, mul_comm _ α, ← smul_smul]; rfl
+  cont :=
+  by
+    simp only
+    refine continuous_clm_apply.mpr ?_
+    intro
+    simp only [ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk]
+    exact continuous_const_smul _
+@[simp]
+lemma ket_one_apply
+  {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+  (x : E) :
+  ket 𝕜 x 1 = x :=
+by simp only [ket_toFun_toFun, one_smul]
+
+lemma bra_adjoint_eq_ket {𝕜 E : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
+  ContinuousLinearMap.adjoint (bra 𝕜 x : E →L[𝕜] 𝕜) = (ket 𝕜 x) :=
+by
+  ext
+  apply ext_inner_left 𝕜
+  intro y
+  simp only [ket_toFun_toFun, one_smul, ContinuousLinearMap.adjoint_inner_right,
+    bra_apply_apply, RCLike.inner_apply, inner_conj_symm, mul_one]
+
+lemma bra_ket_apply {𝕜 E : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
+  (bra 𝕜 x) ∘L (ket 𝕜 y) = ContinuousLinearMap.lsmul 𝕜 𝕜 ⟪x, y⟫_𝕜 :=
+by
+  ext
+  simp only [ContinuousLinearMap.coe_comp', innerSL_apply_coe, Function.comp_apply, ket_toFun_toFun,
+    one_smul, ContinuousLinearMap.lsmul_apply, smul_eq_mul, mul_one]
+
+lemma bra_ket_one_eq_inner {𝕜 E : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
+  ((bra 𝕜 x) ∘L (ket 𝕜 y)) 1 = ⟪x, y⟫_𝕜 :=
+by
+  rw [bra_ket_apply, ContinuousLinearMap.lsmul_apply, smul_eq_mul, mul_one]
+
 set_option maxHeartbeats 400000 in
 /-- we define the rank one operator $| x \rangle\langle y |$ by
   $x \mapsto \langle y,z\rangle x$ -/
@@ -46,6 +97,10 @@ variable {𝕜 E₁ E₂ : Type*} [RCLike 𝕜] [NormedAddCommGroup E₁] [Inner
 
 @[simp]
 theorem rankOne_apply {x : E₁} {y : E₂} (z : E₂) : rankOne 𝕜 x y z = ⟪y,z⟫_𝕜 • x :=
+rfl
+
+theorem ket_bra_eq_rankOne {x : E₁} {y : E₂} :
+  ket 𝕜 x ∘L bra 𝕜 y = rankOne 𝕜 x y :=
 rfl
 
 open ContinuousLinearMap
