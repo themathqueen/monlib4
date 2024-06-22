@@ -22,13 +22,13 @@
 \begin{corollary}\label{unit_eq_ket_one}
   \uses{ket}
   \lean{algebraMapCLM_eq_ket_one}\leanok
-  Let $\Acal$ be an algebra and a Hilbert space. Then the unit map $\eta\colon\CC\to\Acal$ (which is given by $\alpha\mapsto \alpha1$) is exactly $\ket{1}$.
+  Let $\mathcal{A}$ be an algebra and a Hilbert space. Then the unit map $\eta\colon\CC\to\mathcal{A}$ (which is given by $\alpha\mapsto \alpha1$) is exactly $\ket{1}$.
 \end{corollary}
 \begin{proof}\leanok
   True by definition.
 \end{proof}
 \begin{corollary}\label{unit_adjoint_eq_bra_one}\uses{bra}\lean{algebraMapCLM_adjoint_eq_bra_one}\leanok
-  The adjoint of the unit map $\eta\colon\CC\to\Acal$ in an algebra and Hilbert space $\Acal$ is $\bra{1}$.
+  The adjoint of the unit map $\eta\colon\CC\to\mathcal{A}$ in an algebra and Hilbert space $\mathcal{A}$ is $\bra{1}$.
  \end{corollary}
  \begin{proof}\uses{unit_eq_ket_one, bra_adjoint_eq_ket}\leanok
   Use Lemma \ref{bra_adjoint_eq_ket} and Corollary \ref{unit_eq_ket_one}.
