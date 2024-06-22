@@ -446,3 +446,49 @@ theorem LinearMap.toContinuousLinearMap_adjoint' {𝕜 B C : Type _} [RCLike �
   ContinuousLinearMap.toLinearMap (ContinuousLinearMap.adjoint (toContinuousLinearMap x)) =
     LinearMap.adjoint x :=
 rfl
+
+theorem OrthonormalBasis.repr_adjoint {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [InnerProductSpace 𝕜 E] [Fintype ι] (b : OrthonormalBasis ι 𝕜 E) :
+  letI := FiniteDimensional.of_fintype_basis b.toBasis
+  ContinuousLinearMap.adjoint b.repr.toContinuousLinearEquiv.toContinuousLinearMap
+    = b.repr.symm.toContinuousLinearEquiv.toContinuousLinearMap :=
+by
+  haveI := FiniteDimensional.of_fintype_basis b.toBasis
+  haveI := FiniteDimensional.complete 𝕜 E
+  ext x
+  apply ext_inner_left 𝕜
+  intro
+  simp_rw [ContinuousLinearMap.adjoint_inner_right, ContinuousLinearEquiv.coe_apply,
+    LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+  rw [PiLp.inner_apply]
+  simp_rw [OrthonormalBasis.repr_apply_apply, RCLike.inner_apply, inner_conj_symm,
+    mul_comm (⟪_,_⟫_𝕜), ← inner_smul_right, ← inner_sum, OrthonormalBasis.sum_repr_symm]
+
+theorem OrthonormalBasis.repr_adjoint'
+  {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [InnerProductSpace 𝕜 E] [Fintype ι] (b : OrthonormalBasis ι 𝕜 E) :
+  haveI := FiniteDimensional.of_fintype_basis b.toBasis
+  LinearMap.adjoint b.repr.toLinearMap
+    = b.repr.symm.toLinearMap :=
+haveI := FiniteDimensional.of_fintype_basis b.toBasis
+haveI := FiniteDimensional.complete 𝕜 E
+calc LinearMap.adjoint b.repr.toLinearMap
+    =  ContinuousLinearMap.adjoint b.repr.toContinuousLinearEquiv.toContinuousLinearMap := rfl
+  _ = b.repr.symm.toContinuousLinearEquiv.toContinuousLinearMap := by rw [b.repr_adjoint]
+
+open scoped Matrix
+theorem rankOne_toMatrix_of_onb
+  {ι₁ ι₂ 𝕜 E₁ E₂ : Type*} [RCLike 𝕜] [NormedAddCommGroup E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂]
+  [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
+  (b₁ : OrthonormalBasis ι₁ 𝕜 E₁) (b₂ : OrthonormalBasis ι₂ 𝕜 E₂) (x : E₁) (y : E₂) :
+  LinearMap.toMatrix b₂.toBasis b₁.toBasis (rankOne 𝕜 x y).toLinearMap
+    = (Matrix.col (b₁.repr x)) * (Matrix.col (b₂.repr y))ᴴ :=
+by
+  ext1 i j
+  simp_rw [LinearMap.toMatrix_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
+    map_smul, Finsupp.smul_apply, OrthonormalBasis.coe_toBasis_repr_apply,
+    OrthonormalBasis.coe_toBasis,
+    Matrix.conjTranspose_col, ← Matrix.vecMulVec_eq, Matrix.vecMulVec_apply,
+    Pi.star_apply, OrthonormalBasis.repr_apply_apply, RCLike.star_def, inner_conj_symm,
+    smul_eq_mul, mul_comm]

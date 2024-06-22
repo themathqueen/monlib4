@@ -656,7 +656,7 @@ theorem trace_conjTranspose_hMul_self_eq_zero {m : Type*} [Fintype n] [Fintype m
 
 /-- given a positive definite matrix $Q$, we get
   $\textnormal{Tr}(Qx^*x)=0$ if and only if $x=0$ for any matrix $x$ -/
-theorem Nontracial.trace_conjTranspose_hMul_self_eq_zero {m : Type*}
+theorem PosDef.trace_conjTranspose_hMul_self_eq_zero {m : Type*}
   [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n] {Q : Matrix m m 𝕜}
   (hQ : Q.PosDef) {x : Matrix n m 𝕜} : (Q * xᴴ * x).trace = 0 ↔ x = 0 :=
   by
@@ -673,6 +673,7 @@ theorem Nontracial.trace_conjTranspose_hMul_self_eq_zero {m : Type*}
     (Function.Bijective.injective (Matrix.bij_toLin'_of_invertible hQ.invertible))
   simp_rw [← toLin'_apply, ← LinearMap.comp_apply, ← toLin'_mul, Matrix.mul_assoc,
     h, Matrix.mul_zero]
+alias Nontracial.trace_ConjTranspose_hMul_self_eq_zero := PosDef.trace_conjTranspose_hMul_self_eq_zero
 
 theorem IsHermitian.trace_conj_symm_star_hMul {m : Type*} [Fintype m] [Fintype n]
   {Q : Matrix m m 𝕜} (hQ : Q.IsHermitian)

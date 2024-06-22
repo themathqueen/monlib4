@@ -68,6 +68,28 @@
   
  \end{proof}
 
+ Given an orthonormal basis $b=(b_i)$ of a finite-dimensional Hilbert space $\Hcal$, we define $R_b$ to be the linear isomorphism $\Hcal\cong\CC^{\dim\Hcal}$ given by $R_b(x)_i=\ip{b_i}{x}$ with its inverse given by $x\mapsto\sum_ix_ib_i$.
+ \begin{lemma}\label{repr_adjoint}\lean{OrthonormalBasis.repr_adjoint'}\leanok
+  Let $e=(e_i)$ be an orthonormal basis of a finite-dimensional Hilbert space $\Hcal$. Then $R_e^*=R_e^{-1}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Let $x\in\Hcal$ and $y\in\CC^{\dim\Hcal}$. Then we compute,
+  \begin{align*}
+   \ip{x}{R_e^*(y)}_{\Hcal} &= \ip{R_e(x)}{y}_{\CC^{\dim\Hcal}} = \sum_i\ip{R_e(x)_i}{y_i}_{\CC} = \sum_i\ip{\ip{e_i}{x}_{\Hcal}}{y_i}_{\CC}\\
+   &= \sum_i\ip{x}{e_i}_{\Hcal}y_i = \sum_i\ip{x}{y_ie_i}_{\Hcal}=\ip{x}{R_e^{-1}(y)}_{\Hcal}.
+  \end{align*}
+  Thus $R_e^*=R_e^{-1}$.
+ \end{proof}
+ Given orthonormal bases $b=(b_i)$ and $c=(c_j)$ of Hilbert spaces $\Hcal_1,\Hcal_2$, then we let $\mathcal{M}$ denote the identification from $\Bcal(\Hcal_1,\Hcal_2)$ to $M_{\dim\Hcal_2,\dim\Hcal_1}$, which is given by $\Mcal_{b,c}(T)_{kp}=\ip{c_k}{T(b_p)}$.
+ \begin{lemma}\label{rankOne_toMatrix}\uses{rankOne}\lean{rankOne_toMatrix_of_onb}\leanok
+  Given orthonormal bases $b=(b_i)$ and $c=(c_j)$ of finite-dimensional Hilbert spaces $\Hcal_1,\Hcal_2$, and elements $x\in\Hcal_1$ and $y\in\Hcal_2$, we have $\mathcal{M}_{c,b}(\ketbra{x}{y})=R_b(x){R_c(y)}^*$.
+ \end{lemma}
+ \begin{proof}\leanok
+  For any $i\in[\dim\Hcal_1],j\in[\dim\Hcal_2]$, we compute,
+  \[\mathcal{M}_{c,b}(\ketbra{x}{y})_{ij}=\ip{b_i}{\ketbra{x}{y}(c_j)}=\ip{b_i}{x}\ip{y}{c_j}=R_b(x)_i\overline{R_c(y)_j}=\left(R_b(x){R_c(y)}^*\right)_{ij}.\]
+  Thus $\mathcal{M}_{c,b}(\ketbra{x}{y})=R_b(x){R_c(y)}^*$.
+ \end{proof}
+
 \chapter{Star-preserving maps}
  In this section, we define what it means for a linear map to be \textit{real} (also known as \textit{star-preserving}) on Hilbert spaces $\Hcal_1,\Hcal_2$.
  
@@ -166,9 +188,54 @@
    \end{description}
   \end{proof}
 
+\begin{corollary}\label{Matrix.isPosSemidef_and_invertible_iff_isPosDef}\lean{Matrix.PosSemidef.invertible_iff_posDef}\leanok
+  If $A\in{M_n}$. Then\\
+  \hspace*{0.5cm}$0\leq{A}$ and is invertible $\,\LRa\,$ $A$ is positive-definite.
+ \end{corollary}
+ \begin{proof}\leanok {\ }
+  \begin{description}
+   \item[$(\tto)$]
+    Suppose $0\leq{A}$ and $A=A^{1/2}A^{1/2}$ is invertible. Then $A^{1/2}$ is also invertible and positive semi-definite. Let $v\in\CC^n$ be non-zero.
+    Then, we compute,
+    \[\ip{v}{Av}=\ip{v}{A^{1/2}A^{1/2}v}=\ip{A^{1/2}v}{A^{1/2}v}>0,\]
+    since $A^{1/2}v\neq0$ (as $A^{1/2}$ is invertible). Note that, in the second equality, we use the self-adjointed-ness of $A^{1/2}$ since it is positive semi-definite. So we are done.
+   \item[$(\ott)$]
+    Suppose $0<A$. Then obviously $0\leq{A}$, so we only need to check if it is invertible. Suppose the contrary, i.e., $A$ is not invertible. Then there exists a non-zero $v\in\CC^n$ such that $Av=0$. But then, by the hypothesis, we get $0<\ip{v}{Av}=0$, which is a contradiction. Thus $A$ is invertible.
+  \end{description}
+ \end{proof}
+
+
+\begin{lemma}\label{PosDef.trace_conjTranspose_mul_self_eq_zero_iff}\lean{Matrix.PosDef.trace_conjTranspose_hMul_self_eq_zero}\leanok
+  Given a positive definite matrix $Q\in{M_n}$, we have $\Tr(Qx^*x)=0$ if and only if $x=0$ for any $x\in{M_n}$.
+ \end{lemma}
+ \begin{proof}\uses{Matrix.isPosSemidef_and_invertible_iff_isPosDef}\leanok
+  We have $\Tr\left({(xQ^{1/2})}^*(xQ^{1/2})\right)=\Tr(Qx^*x)=0$ if and only if $xQ^{1/2}=0$. As $Q^{1/2}$ is positive definite, we get it is also invertible by Corollary \ref{Matrix.isPosSemidef_and_invertible_iff_isPosDef}, and so $xQ^{1/2}=0$ if and only if $x=0$. And so we are done.
+ \end{proof}
+
   \begin{definition}\label{Dual.IsFaithful}\lean{Module.Dual.IsFaithful}\leanok
    A linear functional $f$ on $A$ is said to be \textit{faithful} if $f(x^*x)=0$ if and only if $x=0$ for all $x\in A$.
   \end{definition}
+
+  \begin{proposition}\label{Dual.isFaithfulPosMap_iff}
+    \uses{LinearMap.IsPosMap, Dual.IsFaithful, Dual.matrix}
+    \lean{Module.Dual.isFaithfulPosMap_iff_of_matrix}\leanok
+    Given a linear functional $\phi\colon{M_n}\to\CC$, we have\\
+    \hspace*{0.5cm}$\phi$ is a positive and faithful map $\,\LRa\,$ $\phi_Q$ is positive-definite.\\
+    Again, $\phi_Q$ is the matrix given by $\phi$ defined in Definition \ref{Dual.matrix}.
+   \end{proposition}
+   \begin{proof}\uses{dual_eq_trace, Dual.isPosMap_iff_of_matrix, PosDef.trace_conjTranspose_mul_self_eq_zero_iff}\leanok
+    By Lemma \ref{dual_eq_trace}, we have $\phi$ is given by $x\mapsto\Tr(\phi_Q\, x)$, and by Lemma \ref{Dual.isPosMap_iff_of_matrix}, we know $\phi$ is positive if and only if $0\leq\phi_Q$.
+    So we need to show that faithfulness of a positive linear functional is equivalent to $\phi_Q$ being positive definite.
+    \begin{description}
+     \item[$(\tto)$]
+      Suppose $\phi$ is faithful and positive.
+      So we have $\phi(x)=0$ if and only if $x=0$ for any positive semi-definite matrix $x\in{M_n}$.
+      Let $0\neq{x}\in\CC^n$. Then we have $xx^*\neq0$ as $x\neq0$. This means, by faithfulness and positivity of $\phi$ we get $\phi(xx^*)\neq0$ as $xx^*$ is a non-zero positive semi-definite matrix. And so $0<\phi(xx^*)=\Tr(\phi_Q\, xx^*)=x^*\phi_Q\, x$, which means $\phi_Q$ is positive definite.
+     \item[$(\ott)$]
+      Suppose $\phi_Q$ is positive definite. Then for any $x\in{M_n}$, we get $\phi(x^*x)=\Tr(\phi_Q\, xx^*)=0$ if and only if $x=0$ using Lemma \ref{PosDef.trace_conjTranspose_mul_self_eq_zero_iff}.
+    \end{description}
+    Thus $\phi$ is a faithful and positive linear functional if and only if the matrix $\phi_Q$ is positive definite.
+   \end{proof}
 
   \begin{theorem}\label{Dual.isFaithfulPosMap_tfae}
    \uses{LinearMap.IsPosMap, Dual.IsFaithful}
@@ -180,7 +247,7 @@
     \item $M_n\times{M_n}\to\CC\colon(x,y)\mapsto\phi(x^*y)$ defines an inner product on $M_n$.
    \end{enumerate}
   \end{theorem}
-  \begin{proof}\uses{dual_eq_trace, Dual.isReal_iff, Dual.isPosMap_iff_of_matrix}
+  \begin{proof}\uses{dual_eq_trace, Dual.isReal_iff, Dual.isFaithfulPosMap_iff}
   \end{proof}
 
  \section{On $\bigoplus_i M_{n_i}$}
