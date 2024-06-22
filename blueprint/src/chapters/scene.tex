@@ -10,28 +10,28 @@
  
  So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
 
- \begin{lemma}\uses{rankOne}\label{linearMap_comp_rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
+ \begin{lemma}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
   Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
  \end{lemma}
  \begin{proof}\leanok
   Straightforward computation.
  \end{proof}
  
- \begin{lemma}\uses{rankOne}\label{rankOne_comp_linearMap}\lean{ContinuousLinearMap.rankOne_comp}\leanok
+ \begin{lemma}\label{rankOne_comp_linearMap}\uses{rankOne}\lean{ContinuousLinearMap.rankOne_comp}\leanok
   Given a linear map $T_2\in\Bcal(E_3,E_1)$ and elements $x\in E_2$, $y\in E_1$, we get $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$.
  \end{lemma}
  \begin{proof}\leanok
   Straightforward computation.
  \end{proof}
  
- \begin{lemma}\uses{rankOne}\label{rankOne_adjoint}\lean{rankOne_adjoint}\leanok
+ \begin{lemma}\label{rankOne_adjoint}\uses{rankOne}\lean{rankOne_adjoint}\leanok
   Given $x\in E_2$ and $y\in E_1$, we get $\ketbra{x}{y}^*=\ketbra{y}{x}$.
  \end{lemma}
  \begin{proof}\leanok
   Straightforward computation.
  \end{proof}
 
- \begin{lemma}\uses{rankOne}\label{sum_rankOne_onb_eq_id}\lean{rankOne.sum_orthonormalBasis_eq_id}\leanok
+ \begin{lemma}\label{sum_rankOne_onb_eq_id}\uses{rankOne}\lean{rankOne.sum_orthonormalBasis_eq_id}\leanok
   Given an orthonormal basis $(u_i)$ of a $\CC$-inner product space $E$, we get $\sum_i\ketbra{u_i}{u_i}=\id$.
  \end{lemma}
  \begin{proof}\leanok
@@ -42,7 +42,7 @@
   Given a Hilbert space $\Hcal$, we have ${\Bcal(\Hcal)}^\prime=\{\alpha\id:\alpha\in\CC\}$.\\
   In other words, $x\in\Bcal(\Hcal)$ commutes with all operators $y\in\Bcal(\Hcal)$ if and only if $x=\alpha\id$ for some $\alpha\in\CC$.
  \end{lemma}
- \begin{proof}\uses{rankOne_adjoint}\uses{rankOne_comp_linearMap}\uses{linearMap_comp_rankOne}\leanok
+ \begin{proof}\uses{rankOne_adjoint, rankOne_comp_linearMap, linearMap_comp_rankOne}\leanok
   Let $x\in\Bcal(\Hcal)$. Obviously, if $x=\alpha\id$ for some $\alpha\in\CC$, then it commutes with every other operator. Now suppose $x$ commutes with every operator in $\Bcal(\Hcal)$.
   So this means $\ketbra{a}{x^*(b)}=\ketbra{a}{b}x=x\ketbra{a}{b}=\ketbra{x(a)}{b}$ for all $a,b\in\Hcal$.
   Suppose there exists some non-zero $a\in\Hcal$, otherwise this is trivial. Then, for any $b\in\Hcal$, we have
@@ -50,7 +50,7 @@
   Thus $x=\alpha\id$ where $\alpha=\ip{x^*(a)}{a}/\norm{a}^2$.
  \end{proof}
 
- \begin{proposition}\uses{rankOne}\label{colinear_of_rankOne_self_eq_rankOne_self}\lean{colinear_of_rankOne_self_eq_rankOne_self}\leanok
+ \begin{proposition}\label{colinear_of_rankOne_self_eq_rankOne_self}\uses{rankOne}\lean{colinear_of_rankOne_self_eq_rankOne_self}\leanok
   Let $\Hcal$ be a Hilbert space, and let $x,y\in\Hcal$. Then if $\ketbra{x}{x}=\ketbra{y}{y}$, then there exists some $0\neq\alpha\in\CC$ such that $x=\alpha{y}$ (i.e., they are co-linear).
  \end{proposition}
  \begin{proof}\leanok
@@ -72,7 +72,7 @@
  In this section, we define what it means for a linear map to be \textit{real} (also known as \textit{star-preserving}) on Hilbert spaces $\Hcal_1,\Hcal_2$.
  
  \begin{definition}\label{LinearMap.IsReal}\lean{LinearMap.IsReal}\leanok
-  We say $A\in\Bcal(\Hcal_1,\Hcal_2)$ is \textit{star-preserving} when $A(a^*)={A(a)}^*$ for each $a\in\Hcal_1$.
+  We say $A\in\Bcal(\Hcal_1,\Hcal_2)$ is \textit{real} (\textit{star-preserving}) when $A(a^*)={A(a)}^*$ for each $a\in\Hcal_1$.
  \end{definition}
  
  \begin{definition}\label{LinearMap.real}\lean{LinearMap.real}\leanok
@@ -80,7 +80,7 @@
   \[A\mapsto(a\mapsto{A(a^*)}^*).\]
  \end{definition}
 
- \begin{lemma}\label{LinearMap.isReal_iff}\uses{LinearMap.IsReal}\uses{LinearMap.real}\lean{LinearMap.isReal_iff}\leanok
+ \begin{lemma}\label{LinearMap.isReal_iff}\uses{LinearMap.IsReal, LinearMap.real}\lean{LinearMap.isReal_iff}\leanok
   Let $A\in\Bcal(\Hcal_1,\Hcal_2)$. Then $A$ is real if and only if $A^{\operatorname{r}}=A$.
  \end{lemma}
  \begin{proof}\leanok
@@ -101,7 +101,8 @@
   Straightforward computation.
  \end{proof}
 
- \begin{proposition}\label{LinearMap.real.spectrum}\lean{LinearMap.real.spectrum}\leanok
+ \begin{proposition}\label{LinearMap.real.spectrum}\uses{LinearMap.real}
+  \lean{LinearMap.real.spectrum}\leanok
   Given $A\in\Bcal(\Hcal)$, we get $\Spectrum(\real{A})=\overline{\Spectrum(A)}$.\\
   In fact, $x\in\ker(A-\lambda\id)$ if and only if $x^*\in\ker(\real{A}-\bar{\lambda}\id)$.
  \end{proposition}
@@ -131,24 +132,24 @@
 
   As any matrix $x\in{M_n}$ is positive if and only if there exists some $y\in M_n$ such that $x=y^*y$, we get that a linear functional $f$ on $M_n$ is a \textit{positive map} when $0\leq{f(x^*x)}$ for any matrix $x\in{M_n}$.
 
-  \begin{lemma}\label{Dual.isPosMap_iff_of_matrix}\uses{Dual.matrix}\uses{LinearMap.IsPosMap}\lean{Module.Dual.isPosMap_iff_of_matrix}\leanok
+  \begin{lemma}\label{Dual.isPosMap_iff_of_matrix}\uses{Dual.matrix, LinearMap.IsPosMap}\lean{Module.Dual.isPosMap_iff_of_matrix}\leanok
    Given a linear functional $\phi$ on $M_n$, we have,\\
    \hspace*{0.5cm}$\phi$ is positive $\,\LRa\,$ $0\leq\phi_Q$.\\
    Here, $\phi_Q$ is the matrix of $\phi$ defined in Definition \ref{Dual.matrix}.
   \end{lemma}
-  \begin{proof}\uses{dual_eq_trace}\uses{LinearMap.isPositive_iff_eq_sum_rankOne}\leanok
+  \begin{proof}\uses{dual_eq_trace, LinearMap.isPositive_iff_eq_sum_rankOne}\leanok
    By Lemma \ref{dual_eq_trace} we have $\phi(x)=\Tr(\phi_Q\, x)$ for all $x\in{M_n}$.
    \begin{description}
     \item[$(\tto)$]
      Suppose $\phi$ is positive. By Lemma \ref{LinearMap.isPositive_iff_eq_sum_rankOne}, we get $0\leq\sum_i\phi(x_ix_i^*)$ for any tuple $(x_i)$ in $\CC^n$. So then for any $x\in\CC^n$, we have $0\leq\phi(xx^*)=\Tr(\phi_Q\, xx^*)=x^*\phi_Q\, x$, which means $\phi_Q$ is positive semi-definite.
     \item[$(\ott)$]
-     Suppose $\Q$ is positive semi-definite. Then since $\phi_Q$ is positive semi-definite, we have $\phi_Q=\phi_Q^{1/2}\phi_Q^{1/2}$, where $\phi_Q^{1/2}$ is also positive semi-definite (and so is self-adjoint). So for any $x\in{M_n}$, we have $\phi(x^*x)=\Tr(\phi_Q\, x^*x)=\Tr\left({(x\phi_Q^{1/2})}^*(x\phi_Q^{1/2})\right)\geq0$.
+     Suppose $\phi_Q$ is positive semi-definite. Then since $\phi_Q$ is positive semi-definite, we have $\phi_Q=\phi_Q^{1/2}\phi_Q^{1/2}$, where $\phi_Q^{1/2}$ is also positive semi-definite (and so is self-adjoint). So for any $x\in{M_n}$, we have $\phi(x^*x)=\Tr(\phi_Q\, x^*x)=\Tr\left({(x\phi_Q^{1/2})}^*(x\phi_Q^{1/2})\right)\geq0$.
    \end{description}
    Thus $\phi$ is a positive map if and only if our matrix $\phi_Q$ is positive semi-definite.
   \end{proof}
 
-  \begin{proposition}\label{Module.Dual.isReal_iff}\uses{LinearMap.IsReal}\uses{Dual.matrix}\lean{Module.Dual.isReal_iff}\leanok
-   Given a linear functional $\phi\colon{M_n}\to\CC$, we get $\phi$ is star-preserving if and only if $\phi_Q$ is self-adjoint.\\
+  \begin{proposition}\label{Dual.isReal_iff}\uses{LinearMap.IsReal, Dual.matrix}\lean{Module.Dual.isReal_iff}\leanok
+   Given a linear functional $\phi\colon{M_n}\to\CC$, we get $\phi$ is real (star-preserving) if and only if $\phi_Q$ is self-adjoint.\\
    Here, $\phi_Q$ is the matrix given by $\phi$ defined in Definition \ref{Dual.matrix}.
   \end{proposition}
   \begin{proof}\uses{dual_eq_trace}\leanok {\ }
@@ -165,21 +166,22 @@
    \end{description}
   \end{proof}
 
-  \begin{definition}\label{IsFaithful}\lean{Module.Dual.IsFaithful}\leanok
-   A positive linear functional $f$ on $A$ is said to be \textit{faithful} if $f(x^*x)=0$ if and only if $x=0$ for all $x\in A$.
+  \begin{definition}\label{Dual.IsFaithful}\lean{Module.Dual.IsFaithful}\leanok
+   A linear functional $f$ on $A$ is said to be \textit{faithful} if $f(x^*x)=0$ if and only if $x=0$ for all $x\in A$.
   \end{definition}
 
   \begin{theorem}\label{Dual.isFaithfulPosMap_tfae}
-   \uses{LinearMap.IsPosMap}
-   \uses{IsFaithful} 
+   \uses{LinearMap.IsPosMap, Dual.IsFaithful}
    \lean{Module.Dual.isFaithfulPosMap_of_matrix_tfae}
    Given a linear functional $\phi\colon{M_n}\to\CC$, then the following are equivalent,
    \begin{enumerate}[label=(\roman*)]
     \item $\phi$ is positive and faithful,
-    \item $\exists!\,0<Q\in{M_n}:\forall{x}\in{M_n}:\phi(x)=\Tr(Qx)$,
+    \item $\exists!Q\in{M_n}:Q\text{ is pos-def and }\forall{x}\in{M_n}:\phi(x)=\Tr(Qx)$,
     \item $M_n\times{M_n}\to\CC\colon(x,y)\mapsto\phi(x^*y)$ defines an inner product on $M_n$.
    \end{enumerate}
   \end{theorem}
+  \begin{proof}\uses{dual_eq_trace, Dual.isReal_iff, Dual.isPosMap_iff_of_matrix}
+  \end{proof}
 
  \section{On $\bigoplus_i M_{n_i}$}
   
