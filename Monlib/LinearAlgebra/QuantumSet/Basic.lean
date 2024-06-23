@@ -14,6 +14,7 @@ import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.TensorFinite
 import Monlib.LinearAlgebra.tensorProduct
+import Mathlib.LinearAlgebra.Trace
 
 #align_import linear_algebra.my_ips.quantum_set
 
@@ -303,6 +304,177 @@ by
   simp only [ContinuousLinearMap.coe_coe, LinearMap.real_apply, rankOne_apply, star_smul]
   rw [QuantumSet.inner_conj, star_star]
   simp only [← starRingEnd_apply, inner_conj_symm]
+
+open LinearMap in
+lemma _root_.QuantumSet.rTensor_mul_comp_lTensor_comul_eq_comul_comp_mul :
+  rTensor A (mul' ℂ A) ∘ₗ (TensorProduct.assoc ℂ _ _ _).symm.toLinearMap ∘ₗ lTensor A (Coalgebra.comul)
+   = Coalgebra.comul ∘ₗ mul' ℂ A :=
+by
+  rw [Coalgebra.comul_eq_mul_adjoint, Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint]
+  exact fun x y ↦ inner_eq_counit x y
+open LinearMap in
+lemma _root_.QuantumSet.lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul :
+  lTensor A (mul' ℂ A) ∘ₗ (TensorProduct.assoc ℂ _ _ _).toLinearMap ∘ₗ rTensor A (Coalgebra.comul)
+   = Coalgebra.comul ∘ₗ mul' ℂ A :=
+by
+  rw [Coalgebra.comul_eq_mul_adjoint, Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of]
+  use modAut (-1)
+  exact fun x y z ↦ inner_conj_left x y z
+
+open scoped TensorProduct
+open LinearMap in
+-- set_option synthInstance.maxHeartbeats 200000 in
+theorem _root_.QuantumSet.rTensor_counit_mul_comp_comm_comp_rTensor_comul_unit_eq_modAut_one :
+  (TensorProduct.lid ℂ A).toLinearMap
+    ∘ₗ rTensor A (Coalgebra.counit ∘ₗ mul' ℂ A)
+    ∘ₗ (TensorProduct.assoc ℂ _ _ _).symm.toLinearMap
+    ∘ₗ lTensor A (TensorProduct.comm ℂ _ _).toLinearMap
+    ∘ₗ (TensorProduct.assoc ℂ _ _ _).toLinearMap
+    ∘ₗ rTensor A (Coalgebra.comul ∘ₗ Algebra.linearMap ℂ A)
+    ∘ₗ (TensorProduct.lid ℂ A).symm.toLinearMap
+  = (hA.modAut 1).toLinearMap :=
+by
+  ext
+  apply ext_inner_left ℂ
+  intro
+  simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply, TensorProduct.lid_symm_apply,
+    rTensor_tmul, Algebra.linearMap_apply, map_one, AlgEquiv.toLinearMap_apply]
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul 1 : A ⊗[ℂ] A)
+  simp_rw [← h, TensorProduct.sum_tmul, map_sum, inner_sum]
+  simp only [TensorProduct.assoc_tmul, lTensor_tmul, LinearEquiv.coe_coe,
+    TensorProduct.comm_tmul, TensorProduct.assoc_symm_tmul, rTensor_tmul,
+    LinearMap.comp_apply, mul'_apply, ← inner_eq_counit', TensorProduct.lid_tmul,
+    inner_smul_right, ← inner_conj_symm (1 : A), inner_conj_left, one_mul]
+  simp_rw [inner_conj_symm, ← TensorProduct.inner_tmul, ← inner_sum, h,
+    Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_right, mul'_apply,
+    inner_star_left, modAut_star, neg_neg, mul_one, star_star]
+
+open LinearMap in
+theorem _root_.QuantumSet.lTensor_counit_mul_comp_comm_comp_lTensor_comul_unit_eq_modAut_neg_one :
+  (TensorProduct.rid ℂ A).toLinearMap
+    ∘ₗ lTensor A (Coalgebra.counit ∘ₗ mul' ℂ A)
+    ∘ₗ (TensorProduct.assoc ℂ _ _ _).toLinearMap
+    ∘ₗ rTensor A (TensorProduct.comm ℂ _ _).toLinearMap
+    ∘ₗ (TensorProduct.assoc ℂ _ _ _).symm.toLinearMap
+    ∘ₗ lTensor A (Coalgebra.comul ∘ₗ Algebra.linearMap ℂ A)
+    ∘ₗ (TensorProduct.rid ℂ A).symm.toLinearMap
+  = (hA.modAut (-1)).toLinearMap :=
+by
+  ext
+  apply ext_inner_left ℂ
+  intro
+  simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply, TensorProduct.rid_symm_apply,
+    lTensor_tmul, Algebra.linearMap_apply, map_one, AlgEquiv.toLinearMap_apply]
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul 1 : A ⊗[ℂ] A)
+  simp_rw [← h, TensorProduct.tmul_sum, map_sum, inner_sum]
+  simp only [TensorProduct.assoc_tmul, lTensor_tmul, LinearEquiv.coe_coe,
+    TensorProduct.comm_tmul, TensorProduct.assoc_symm_tmul, rTensor_tmul,
+    LinearMap.comp_apply, mul'_apply, ← inner_eq_counit', TensorProduct.rid_tmul,
+    inner_smul_right, ← inner_conj_symm (1 : A), inner_star_left, mul_one]
+  simp_rw [inner_conj_symm, mul_comm, ← TensorProduct.inner_tmul, ← inner_sum, h,
+    Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_right, mul'_apply,
+    inner_conj_left, one_mul, star_star]
+
+open LinearMap in
+lemma _root_.QuantumSet.counit_tensor_star_left_eq_bra (x : A) :
+  Coalgebra.counit ∘ mul' ℂ A ∘ (star x ⊗ₜ[ℂ] ·) = bra ℂ x :=
+by
+  ext
+  simp only [Function.comp_apply, mul'_apply, innerSL_apply]
+  exact Eq.symm (inner_eq_counit _ _)
+open LinearMap in
+lemma _root_.QuantumSet.mul_comp_tensor_left_unit_eq_ket (x : A) :
+  mul' ℂ A ∘ (x ⊗ₜ[ℂ] ·) ∘ Algebra.linearMap ℂ A = ket ℂ x :=
+by
+  ext
+  simp only [Function.comp_apply, Algebra.linearMap_apply, mul'_apply, ket_toFun_toFun,
+    Algebra.algebraMap_eq_smul_one, mul_smul_one]
+open LinearMap in
+lemma _root_.QuantumSet.rTensor_bra_comul_unit_eq_ket_star (x : A) :
+  (TensorProduct.lid ℂ _).toLinearMap
+    ∘ₗ (rTensor A (bra ℂ x)) ∘ₗ Coalgebra.comul ∘ₗ Algebra.linearMap ℂ A
+  = ket ℂ (star x) :=
+by
+  ext
+  apply ext_inner_left ℂ
+  intro
+  simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply, Algebra.linearMap_apply, map_one,
+    ContinuousLinearMap.coe_coe, ket_toFun_toFun, one_smul]
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul 1 : A ⊗[ℂ] A)
+  simp_rw [← h, map_sum, inner_sum, rTensor_tmul, ContinuousLinearMap.coe_coe, bra_apply_apply,
+    TensorProduct.lid_tmul, inner_smul_right, ← TensorProduct.inner_tmul, ← inner_sum,
+    h, Coalgebra.comul_eq_mul_adjoint, adjoint_inner_right, mul'_apply, inner_star_left, mul_one]
+open LinearMap in
+
+lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
+  ContinuousLinearMap.adjoint (ket 𝕜 x) = bra 𝕜 x :=
+by
+  rw [← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
+
+open LinearMap in
+lemma _root_.QuantumSet.counit_mul_rTensor_ket_eq_bra_star (x : A) :
+  Coalgebra.counit ∘ₗ mul' ℂ A ∘ₗ (rTensor A (ket ℂ x)) ∘ₗ (TensorProduct.lid ℂ _).symm.toLinearMap
+  = bra ℂ (star x) :=
+by
+  rw [← ket_adjoint_eq_bra, ← ContinuousLinearMap.linearMap_adjoint,
+    ← rTensor_bra_comul_unit_eq_ket_star]
+  simp_rw [adjoint_comp, Coalgebra.counit_eq_unit_adjoint, Coalgebra.comul_eq_mul_adjoint,
+    LinearMap.adjoint_adjoint, TensorProduct.lid_adjoint, rTensor_adjoint,
+    ContinuousLinearMap.linearMap_adjoint, bra_adjoint_eq_ket, comp_assoc]
+  congr
+  ext; rfl
+
+theorem ket_real {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
+  [StarAddMonoid A] [StarModule 𝕜 A] (x : A) :
+  LinearMap.real (ket 𝕜 x) = (ket 𝕜 (star x)).toLinearMap :=
+by
+  ext
+  simp only [LinearMap.real_apply, star_one, ContinuousLinearMap.coe_coe,
+    ket_one_apply]
+theorem bra_real (x : A) :
+  LinearMap.real (bra ℂ x) = (bra ℂ (hA.modAut (-1) (star x))).toLinearMap :=
+by
+  ext
+  simp only [LinearMap.real_apply, ContinuousLinearMap.coe_coe,
+    bra_apply_apply, RCLike.star_def, inner_conj_symm]
+  rw [QuantumSet.inner_conj, star_star, modAut_isSymmetric]
+
+theorem ket_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
+  {ι : Type*} [Fintype ι] (b : Basis ι 𝕜 A) (x : A) :
+  LinearMap.toMatrix (Basis.singleton Unit 𝕜) b (ket 𝕜 x) = Matrix.col (b.repr x) :=
+by
+  ext
+  simp only [Matrix.col_apply, LinearMap.toMatrix_apply,
+    Basis.singleton_apply, ContinuousLinearMap.coe_coe, ket_toFun_toFun, one_smul]
+open scoped Matrix
+theorem bra_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
+  {ι : Type*} [Fintype ι] [DecidableEq ι] (b : OrthonormalBasis ι 𝕜 A) (x : A) :
+  LinearMap.toMatrix b.toBasis (Basis.singleton Unit 𝕜) (bra 𝕜 x) = (Matrix.col (b.repr x))ᴴ :=
+by
+  ext
+  simp only [Matrix.conjTranspose_col, Matrix.row_apply, Pi.star_apply, RCLike.star_def,
+    LinearMap.toMatrix_apply, OrthonormalBasis.coe_toBasis, ContinuousLinearMap.coe_coe,
+    innerSL_apply, Basis.singleton_repr, OrthonormalBasis.repr_apply_apply, inner_conj_symm]
+
+open Matrix in
+theorem lmul_toMatrix_apply {n : Type*} [Fintype n] [DecidableEq n]
+  (x : n → ℂ) (i j : n) :
+  LinearMap.toMatrix' (LinearMap.mulLeft ℂ x) i j
+    = ite (i = j) (x i) 0 :=
+by
+  simp_rw [LinearMap.toMatrix'_apply, LinearMap.mulLeft_apply, Pi.mul_apply, mul_boole]
+
+theorem rankOne_trace {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
+  [Module.Finite 𝕜 A] (x y : A) :
+  LinearMap.trace 𝕜 A (rankOne 𝕜 x y).toLinearMap = ⟪y, x⟫_𝕜 :=
+by
+  rw [← ket_bra_eq_rankOne, ContinuousLinearMap.coe_comp, LinearMap.trace_comp_comm',
+    ← ContinuousLinearMap.coe_comp, bra_ket_apply]
+  rw [LinearMap.trace_eq_matrix_trace 𝕜 (Basis.singleton Unit 𝕜),
+    ket_toMatrix, Matrix.trace]
+  simp only [Finset.univ_unique, PUnit.default_eq_unit, Matrix.diag_apply, Matrix.col_apply,
+    Basis.singleton_repr, Finset.sum_const, Finset.card_singleton, one_smul]
 
 lemma _root_.LinearMap.apply_eq_id {R M : Type*} [Semiring R] [AddCommMonoid M]
   [Module R M] {f : M →ₗ[R] M} :

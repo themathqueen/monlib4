@@ -60,17 +60,35 @@ by
 
 lemma bra_ket_apply {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
-  (bra 𝕜 x) ∘L (ket 𝕜 y) = ContinuousLinearMap.lsmul 𝕜 𝕜 ⟪x, y⟫_𝕜 :=
+  (bra 𝕜 x) ∘L (ket 𝕜 y) = ket 𝕜 ⟪x, y⟫_𝕜 :=
 by
   ext
-  simp only [ContinuousLinearMap.coe_comp', innerSL_apply_coe, Function.comp_apply, ket_toFun_toFun,
-    one_smul, ContinuousLinearMap.lsmul_apply, smul_eq_mul, mul_one]
+  simp_rw [ContinuousLinearMap.comp_apply, ket_one_apply]
+  rfl
 
 lemma bra_ket_one_eq_inner {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
   ((bra 𝕜 x) ∘L (ket 𝕜 y)) 1 = ⟪x, y⟫_𝕜 :=
 by
-  rw [bra_ket_apply, ContinuousLinearMap.lsmul_apply, smul_eq_mul, mul_one]
+  rw [bra_ket_apply, ket_one_apply]
+
+lemma continuousLinearMap_comp_ket {𝕜 E₁ E₂ : Type*} [RCLike 𝕜] [NormedAddCommGroup E₁] [InnerProductSpace 𝕜 E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₂]
+  (f : E₁ →L[𝕜] E₂) (x : E₁) :
+  f ∘L ket 𝕜 x = ket 𝕜 (f x) :=
+by
+  ext
+  simp only [ContinuousLinearMap.comp_apply, ket_one_apply]
+
+lemma bra_comp_continuousLinearMap {𝕜 E₁ E₂ : Type*} [RCLike 𝕜] [NormedAddCommGroup E₁] [InnerProductSpace 𝕜 E₁]
+  [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₂]
+  [CompleteSpace E₁] [CompleteSpace E₂]
+  (x : E₂) (f : E₁ →L[𝕜] E₂) :
+  bra 𝕜 x ∘L f = bra 𝕜 (ContinuousLinearMap.adjoint f x) :=
+by
+  ext
+  simp only [ContinuousLinearMap.comp_apply, bra_apply_apply,
+    ContinuousLinearMap.adjoint_inner_left]
 
 set_option maxHeartbeats 400000 in
 /-- we define the rank one operator $| x \rangle\langle y |$ by

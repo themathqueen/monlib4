@@ -125,13 +125,13 @@ by
   intro a
   simp_rw [LinearMap.adjoint_inner_right, Algebra.linearMap_apply,
     Algebra.algebraMap_eq_smul_one, inner_smul_left, inner]
-@[reducible]
-class NormedAddCommGroupOfStarRing (B : Type _) extends
-  NormedAddCommGroupOfRing B, StarRing B
+-- @[reducible]
+-- class NormedAddCommGroupOfStarRing (B : Type _) extends
+--   NormedAddCommGroupOfRing B, StarRing B
 
 open Coalgebra LinearMap TensorProduct in
 theorem FiniteDimensionalCoAlgebra.rTensor_mul_comp_lTensor_comul
-  [RCLike R] [NormedAddCommGroupOfStarRing A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [Coalgebra R A] [FiniteDimensional R A]
   (h : ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, (star x) * z⟫_R)
   (hm : ∀ x y, ⟪comul x, y⟫_R = ⟪x, m A y⟫_R) :
@@ -149,7 +149,7 @@ by
 
 -- open scoped ofFiniteDimensionalHilbertAlgebra in
 theorem Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint
-  [RCLike R] [NormedAddCommGroupOfStarRing A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [StarMul A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
   (h : ∀ x y : A, ⟪x, y⟫_R = Coalgebra.counit (star x * y)) :
   (rT A (m A)) ∘ₗ (ϰ A A A).symm ∘ₗ (lT A (LinearMap.adjoint (m A))) = (LinearMap.adjoint (m A)) ∘ₗ (m A) :=
@@ -232,7 +232,7 @@ FiniteDimensionalCoAlgebra.rTensor_mul_comp_lTensor_comul
 
 open Coalgebra LinearMap TensorProduct in
 theorem FiniteDimensionalCoAlgebra.lTensor_mul_comp_rTensor_comul_of
-  [RCLike R] [NormedAddCommGroupOfStarRing A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [Coalgebra R A] [FiniteDimensional R A]
   (hm : ∀ (x : A) y, ⟪comul x, y⟫_R = ⟪x, m A y⟫_R)
   (h' : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪x, z * σ (star y)⟫_R) :
@@ -252,7 +252,7 @@ by
 open Coalgebra LinearMap TensorProduct in
 -- open scoped ofFiniteDimensionalHilbertAlgebra in
 theorem Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
-  [RCLike R] [NormedAddCommGroupOfStarRing A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
   -- (h : ∀ x y : A, ⟪x, y⟫_R = counit (star x * y))
   (h' : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪x, z * σ (star y)⟫_R) :
