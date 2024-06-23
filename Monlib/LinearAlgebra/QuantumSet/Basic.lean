@@ -406,12 +406,6 @@ by
     h, Coalgebra.comul_eq_mul_adjoint, adjoint_inner_right, mul'_apply, inner_star_left, mul_one]
 open LinearMap in
 
-lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
-  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
-  ContinuousLinearMap.adjoint (ket 𝕜 x) = bra 𝕜 x :=
-by
-  rw [← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
-
 open LinearMap in
 lemma _root_.QuantumSet.counit_mul_rTensor_ket_eq_bra_star (x : A) :
   Coalgebra.counit ∘ₗ mul' ℂ A ∘ₗ (rTensor A (ket ℂ x)) ∘ₗ (TensorProduct.lid ℂ _).symm.toLinearMap

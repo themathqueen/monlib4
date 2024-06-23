@@ -730,6 +730,17 @@ theorem Pi.PosDef.rpow_zero {a : PiMat ℂ k s} (ha : ∀ i, (a i).PosDef) : Pi.
   ext x i j
   simp only [Pi.PosDef.rpow, Matrix.PosDef.rpow_zero, Pi.one_apply]
 
+theorem basis_repr_apply' [hψ : ∀ i, (ψ i).IsFaithfulPosMap]
+    (x : PiMat ℂ k s) (ijk : Σ i, s i × s i) :
+    let hQ := Module.Dual.pi.IsFaithfulPosMap.matrixIsPosDef hψ
+    (Module.Dual.pi.IsFaithfulPosMap.basis hψ).repr x ijk
+      = (x * (Pi.PosDef.rpow hQ (1/2))) ijk.1 ijk.2.1 ijk.2.2 :=
+by
+  rw [Module.Dual.pi.IsFaithfulPosMap.basis_repr_apply]
+  simp_rw [Pi.mul_apply, Pi.PosDef.rpow, Module.Dual.IsFaithfulPosMap.basis_apply,
+    ← Module.Dual.IsFaithfulPosMap.orthonormalBasis_apply]
+  rw [Module.Dual.IsFaithfulPosMap.inner_coord]
+
 theorem Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner {k : Type _} [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i : k, Fintype (s i)] [∀ i : k, DecidableEq (s i)]
     {ψ : ∀ i : k, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} [hψ : ∀ i : k, (ψ i).IsFaithfulPosMap]

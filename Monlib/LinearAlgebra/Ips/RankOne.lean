@@ -58,6 +58,13 @@ by
   simp only [ket_toFun_toFun, one_smul, ContinuousLinearMap.adjoint_inner_right,
     bra_apply_apply, RCLike.inner_apply, inner_conj_symm, mul_one]
 
+lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
+  ContinuousLinearMap.adjoint (ket 𝕜 x) = bra 𝕜 x :=
+by
+  rw [← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
+
+
 lemma bra_ket_apply {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
   (bra 𝕜 x) ∘L (ket 𝕜 y) = ket 𝕜 ⟪x, y⟫_𝕜 :=
@@ -178,11 +185,8 @@ isSelfAdjoint_iff_isSymmetric.mpr rankOne_self_isSymmetric
 theorem rankOne_adjoint [CompleteSpace E₁] [CompleteSpace E₂] (x : E₁) (y : E₂) :
   adjoint (rankOne 𝕜 x y) = rankOne 𝕜 y x :=
 by
-  ext a
-  apply @ext_inner_right 𝕜
-  intro b
-  simp_rw [adjoint_inner_left, rankOne_apply, inner_smul_left, inner_smul_right, inner_conj_symm,
-    mul_comm]
+  rw [← ket_bra_eq_rankOne, adjoint_comp, bra_adjoint_eq_ket, ket_adjoint_eq_bra]
+  rfl
 
 theorem rankOne_inner_left (x w : E₁) (y z : E₂) :
   ⟪rankOne 𝕜 x y z,w⟫_𝕜 = ⟪z,y⟫_𝕜 * ⟪x,w⟫_𝕜 := by

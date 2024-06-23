@@ -499,7 +499,7 @@ theorem inner_coord (hφ : φ.IsFaithfulPosMap) (ij : n × n) (y : Matrix n n �
   simp_rw [mul_comm]
 
 protected theorem basis_repr_apply (hφ : φ.IsFaithfulPosMap) (x : Matrix n n ℂ) (ij : n × n) :
-     hφ.basis.repr x ij = ⟪ hφ.basis ij, x⟫_ℂ :=
+     hφ.basis.repr x ij = ⟪hφ.basis ij, x⟫_ℂ :=
   by
   rw [hφ.basis_apply, ← hφ.orthonormalBasis_apply, ←
     OrthonormalBasis.repr_apply_apply]
@@ -755,7 +755,7 @@ protected theorem orthonormalBasis_apply' (hψ : ∀ i, (ψ i).IsFaithfulPosMap)
 protected theorem inner_coord (hψ : ∀ i, (ψ i).IsFaithfulPosMap)
   (ijk : Σ i, s i × s i)
   (y : PiMat ℂ k s) :
-  ⟪Module.Dual.pi.IsFaithfulPosMap.basis (fun i => (hψ i)) ijk, y⟫_ℂ =
+  ⟪Module.Dual.pi.IsFaithfulPosMap.basis hψ ijk, y⟫_ℂ =
     (y ijk.1 * (hψ ijk.1).matrixIsPosDef.rpow (1 / 2)) ijk.2.1 ijk.2.2 :=
 by
 simp_rw [Module.Dual.pi.IsFaithfulPosMap.basis_apply, includeBlock_left_inner, ←

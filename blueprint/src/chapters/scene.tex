@@ -33,6 +33,18 @@
  \begin{proof}\uses{unit_eq_ket_one, bra_adjoint_eq_ket}\leanok
   Use Lemma \ref{bra_adjoint_eq_ket} and Corollary \ref{unit_eq_ket_one}.
  \end{proof}
+ \begin{lemma}\label{linearMap_comp_ket}\uses{ket}\lean{continuousLinearMap_comp_ket}\leanok
+  Let $f\in\Bcal(\Hcal_1,\Hcal_2)$ and $x\in\Hcal_1$. Then $f\circ\ket{x}=\ket{f(x)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Simple computation.
+ \end{proof}
+ \begin{lemma}\label{bra_comp_linearMap}\uses{bra}\lean{bra_comp_continuousLinearMap}\leanok
+  Let $f\in\Bcal(\Hcal_1,\Hcal_2)$ and $x\in\Hcal_2$. Then $\bra{x}\circ f=\bra{f^*(x)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Simple computation.
+ \end{proof}
 
 \section{Ket-bras}
 \begin{definition}\label{rankOne}\uses{ket, bra}\lean{rankOne}\leanok
@@ -48,22 +60,22 @@ So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $
  \begin{lemma}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
   Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
  \end{lemma}
- \begin{proof}\leanok
+ \begin{proof}\uses{linearMap_comp_ket}\leanok
   Straightforward computation.
  \end{proof}
  
  \begin{lemma}\label{rankOne_comp_linearMap}\uses{rankOne}\lean{ContinuousLinearMap.rankOne_comp}\leanok
   Given a linear map $T_2\in\Bcal(E_3,E_1)$ and elements $x\in E_2$, $y\in E_1$, we get $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$.
  \end{lemma}
- \begin{proof}\leanok
+ \begin{proof}\uses{bra_comp_linearMap}\leanok
   Straightforward computation.
  \end{proof}
  
  \begin{lemma}\label{rankOne_adjoint}\uses{rankOne}\lean{rankOne_adjoint}\leanok
   Given $x\in E_2$ and $y\in E_1$, we get $\ketbra{x}{y}^*=\ketbra{y}{x}$.
  \end{lemma}
- \begin{proof}\leanok
-  Straightforward computation.
+ \begin{proof}\uses{bra_adjoint_eq_ket}\leanok
+  Using Lemma \ref{bra_adjoint_eq_ket}.
  \end{proof}
 
  \begin{lemma}\label{sum_rankOne_onb_eq_id}\uses{rankOne}\lean{rankOne.sum_orthonormalBasis_eq_id}\leanok
@@ -285,16 +297,113 @@ So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $
    Given a linear functional $\phi\colon{M_n}\to\CC$, then the following are equivalent,
    \begin{enumerate}[label=(\roman*)]
     \item $\phi$ is positive and faithful,
-    \item $\exists!Q\in{M_n}:Q\text{ is pos-def and }\forall{x}\in{M_n}:\phi(x)=\Tr(Qx)$,
+    \item $\phi_Q$ is pos-def and $\forall{x}\in{M_n}:\phi(x)=\Tr(Qx)$,
     \item $M_n\times{M_n}\to\CC\colon(x,y)\mapsto\phi(x^*y)$ defines an inner product on $M_n$.
    \end{enumerate}
   \end{theorem}
-  \begin{proof}\uses{dual_eq_trace, Dual.isReal_iff, Dual.isFaithfulPosMap_iff}
+  \begin{proof}\uses{dual_eq_trace, Dual.isReal_iff, Dual.isFaithfulPosMap_iff}\leanok
+   The equivalence of the first and second parts is from Proposition \ref{Dual.isFaithfulPosMap_iff}.
+   
+   For any $x,y\in{M_n}$, let $\ip{x}{y}_\phi=\phi(x^*y)$.
+   Then, clearly,
+   \[\ip{x}{\alpha{y}+\beta{z}}_\phi=\phi(x^*(\alpha{y}+\beta{z}))=\alpha\phi(x^*y)+\beta\phi(x^*z)=\alpha\ip{x}{y}_\phi+\beta\ip{x}{z}_\phi,\]
+   by linearity of $\phi$, for any $x,y,z\in{M_n}$ and $\alpha,\beta\in\CC$.
+   \begin{description}
+    \item[$(\tto)$]
+     If $\phi$ is faithful, we have $\ip{x}{x}_\phi=\phi(x^*x)=0$ if and only if $x=0$ for any $x\in{M_n}$.
+     And $\phi$ is positive if and only if $0\leq\ip{x}{x}_\phi$ for any $x\in{M_n}$. So if $\ip{\cdot}{\cdot}_\phi$ defines an inner product on $M_n$, then we get $\phi$ is faithful and positive. So it remains to show that, given $\phi$ is a faithful and positive linear functional, we get $\overline{\ip{x}{y}_\phi}=\ip{y}{x}_\phi$ for any $x,y\in{M_n}$.
+    \item[$(\ott)$]
+     Suppose $\phi$ is faithful and positive. By Proposition \ref{Dual.isFaithfulPosMap_iff}, we get the matrix $\phi_Q$ is positive definite (and so is self-adjoint). Using Proposition \ref{Dual.isReal_iff}, we get $\phi$ is real, and so, for any $x,y\in{M_n}$, we get, $\overline{\ip{x}{y}_\phi}=\overline{\phi(x^*y)}=\phi(y^*x)=\ip{y}{x}_\phi$.
+     Therefore, $\ip{\cdot}{\cdot}_\phi\colon(x,y)\mapsto\phi(x^*y)$ is a well-defined inner product on $M_n$.
+   \end{description}
   \end{proof}
 
- \section{On $\bigoplus_i M_{n_i}$}
-  
- 
+\section{On $\bigoplus_iM_{n_i}$}
+
+\begin{definition}\label{PiMat.InnerProductSpace}
+  \uses{Dual.isFaithfulPosMap_tfae, LinearMap.IsPosMap, Dual.IsFaithful}
+  \lean{Module.Dual.pi.InnerProductSpace}\leanok
+  For each $i$, we fix a faithful and positive linear functional $\psi_i$ on $M_{n_i}$, and we let $Q_i\in{M_{n_i}}$ denote the positive definite matrix such that $\psi_i\colon x\mapsto\Tr(Q_ix)$ (so each $Q_i=\sum_{j,k}\psi_i(e_{jk})e_{kj}$) -- see Proposition \ref{Dual.matrix}.
+
+  Let $\psi$ be a faithful positive linear functional on $\bigoplus_iM_{n_i}$ given by $\psi=\sum_i\psi_i\circ p_i$, where each $p_i$ is the projection map $\bigoplus_jM_{n_j}\to M_{n_i}$, and we let $Q=\bigoplus_iQ_i$. So then, given $x\in\big_i{M_{n_i}}$, we get $\psi(x)=\Tr(Q x)$, where $\Tr$ here is defined by the sum of the diagonals in each matrix block.
+
+  By Theorem \ref{Dual.isFaithfulPosMap_tfae}, we define the inner product on each $M_{n_i}$ by
+  \[\ip{x}{y}_{\psi_i}=\psi_i(x^*y)=\Tr(\Q_ix^*y),\]
+  for all $x,y\in{M_{n_i}}$. We denote $(M_{n_i},\psi_i)$ to be the Hilbert space given by this inner product.\\
+  We define the inner product on $\bigoplus_iM_{n_i}$ by \[\ip{x}{y}_{\psi}=\psi(x^*y)=\Tr(\Q x^*y),\] for all $x,y\in\bigoplus_i{M_{n_i}}$, where $\Tr$ here is defined as the sum of the diagonals in each matrix block.
+ \end{definition}
+
+ \begin{proposition}\label{Dual.IsFaithfulPosMap.adjoint_eq_unit}
+  \uses{PiMat.InnerProductSpace}
+  \lean{Module.Dual.pi.IsFaithfulPosMap.adjoint_eq}\leanok
+  The adjoint of $psi$ on $(\bigoplus_iM_{n_i},\psi)$ and $\CC$ is given by $\CC\to{B}\colon{x\mapsto{x1}}$. In other words, $\psi^*=\ket{1}$.
+ \end{proposition}
+ \begin{proof}\leanok
+  For any $x\in\CC$ and $y\in\bigoplus_i{M_{n_i}}$, we have,
+  \[\ip{\psi^*(x)}{y}_{\psi}=\ip{x}{\psi(y)}_\CC=\overline{x}\psi(y)=\overline{x}\ip{1}{y}_{\psi}=\ip{x1}{y}_{\psi}.\]
+  Thus $\psi^*(x)=x1$ for any $x\in\CC$.
+ \end{proof}
+
+ \begin{proposition}\label{PiMat.onb}\uses{PiMat.InnerProductSpace}
+  \lean{Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis}\leanok
+  We get $\left[\iota_s(e_{ij}Q_s^{-1/2})_{i,j=1}^{n_s}\right]_{s=1}^{\mathfrak{K}}$ is an orthonormal basis of $(\bigoplus_iM_{n_i},\psi)$.\\
+  Here, $Q=\psi_Q$ from Proposition \ref{Dual.matrix}.
+ \end{proposition}
+ \begin{proof}
+ \end{proof}
+
+ Recall that, given an orthonormal basis $f=(f_i)$ on a Hilbert space $\Hcal$, we let $R_f$ be the linear isomorphism $\Hcal \cong \CC^{\dim\Hcal}$ given by $R_f(x)_i=\ip{f_i}{x}$.
+ \begin{proposition}\label{PiMat.onb_repr}\uses{PiMat.onb}\lean{basis_repr_apply'}\leanok
+  Let $f$ be the orthonormal basis from Proposition \ref{PiMat.onb}.
+  Then for $x\in\bigoplus_iM_{n_i}$, we get $R_f(x)_{s,ij}=(xQ^{1/2})_{s,ij}$.\\
+  Here, $Q=\psi_Q$ from Proposition \ref{Dual.matrix}.
+ \end{proposition}
+ \begin{proof}\uses{PiMat.InnerProductSpace}
+ \end{proof}
+
+\chapter{Algebra and co-algebras}
+
+ Recall that an algebra $\mathcal{A}$ is given by a multiplication map $m\colon \mathcal{A}\otimes\mathcal{A}\to\mathcal{A}$ and a unit map $\eta\colon \CC\to\mathcal{A}$, with associativity $m(m\otimes\id)=m(\id\otimes\,m)$ and the property $m(\eta\otimes\id)=\id=m(\id\otimes\,\eta)$. We say $(\mathcal{A},m,\eta)$ is an algebra when those properties are satisfied.
+
+ \begin{corollary}\uses{ket}\lean{algebraMapCLM_eq_ket_one}\leanok
+  When an algebra $(\mathcal{A},m,\eta)$ is also a Hilbert space, we get $\eta=\ket{1}$.
+ \end{corollary}
+ \begin{proof}\leanok
+  True by definition.
+ \end{proof}
+
+ Also recall that we say $\mathcal{A}$ is a \textit{co-algebra} when it has a co-multiplication map $\mu\colon\mathcal{A}\to\mathcal{A}\otimes\mathcal{A}$ and a co-unit map $\varpi\colon\mathcal{A}\to\CC$ such that co-associativity is satisfied, i.e., $(\mu\otimes\id)\mu=(\id\otimes\,\mu)\mu$, and the property $(\varpi\otimes\id)\mu=\id=(\id\otimes\,\varpi)\mu$ is satisfied.
+ We say $(\mathcal{A},\mu,\varpi)$ is a co-algebra when those properties are satisfied.
+
+ \begin{theorem}[the Frobenius equations]\label{Frobenius_equations}\lean{lTensor_mul_comp_rTensor_comul_of}\leanok
+  Given an algebra and co-algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, then if
+  \[(\id\otimes\,m)(\mu\otimes\id)=(m\otimes\id)(\id\otimes\,\mu),\]
+  then we get the following equations (the Frobenius equations),
+  \[(\id\otimes\,m)(\mu\otimes\id)=\mu m=(m\otimes\id)(\id\otimes\,\mu).\]
+ \end{theorem}
+ \begin{proof}\leanok
+  \begin{align*}
+   (m\otimes\id)(\id\otimes\,\mu) &= (m\otimes\id)((\varpi\otimes\id)\mu\otimes\mu) &\text{by (counit.id)}\\
+   &= (m\otimes\id)(\varpi\otimes\id^{\otimes3})\mu^{\otimes2}\\
+   &= (m(\varpi\otimes\id^{\otimes2})\otimes\id)\mu^{\otimes2}\\
+   &= ((\id_\CC\otimes\,m)(\varpi\otimes\id^{\otimes2})\otimes\id)\mu^{\otimes2}\\
+   &= ((\varpi\otimes\id)(\id\otimes\,m)\otimes\id)\mu^{\otimes2}\\
+   &= (\varpi\otimes\id^{\otimes2})(\id\otimes\,m\otimes\id)(\mu\otimes\id^{\otimes2})(\id\otimes\,\mu)\\
+   &= (\varpi\otimes\id^{\otimes2})((\id\otimes\,m)(\mu\otimes\id)\otimes\id)(\id\otimes\,\mu)\\
+   &= (\varpi\otimes\id^{\otimes2})((m\otimes\id)(\id\otimes\,\mu)\otimes\id)(\id\otimes\,\mu) &\text{by hyp}\\
+   &= (\varpi\otimes\id^{\otimes2})(m\otimes\id^{\otimes2})(\id\otimes\,(\mu\otimes\id)\mu)\\
+   &= (\varpi m\otimes\id^{\otimes2})(\id\otimes\,(\id\otimes\mu)\mu) &\text{by (comul.assoc)}\\
+   &= (\varpi\otimes\id^{\otimes2})(m\otimes\id^{\otimes2})(\id^{\otimes2}\otimes\mu)(\id\otimes\,\mu)\\
+   &= (\varpi\otimes\id^{\otimes2})(\id\otimes\,\mu)(m\otimes\id)(\id\otimes\,\mu)\\
+   &= (\varpi\otimes\id^{\otimes2})(\id\otimes\,\mu)(\id\otimes\,m)(\mu\otimes\id) &\text{by hyp}\\
+   &= (\varpi\otimes\id^{\otimes2})(\id\otimes\,\mu m)(\mu\otimes\id)\\
+   &= (\id_\CC\otimes\,\mu m)(\varpi\otimes\id^{\otimes2})(\mu\otimes\id)\\
+   &= \mu m((\varpi\otimes\id)\mu\otimes\id)\\
+   &= \mu m(\id\otimes\,\id) &\text{by (counit.id)}\\
+   &= \mu m.
+  \end{align*}
+ \end{proof}
 
 
- 
+
+
