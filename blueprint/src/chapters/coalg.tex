@@ -2,13 +2,6 @@
 
  Recall that an algebra $\mathcal{A}$ is given by a multiplication map $m\colon \mathcal{A}\otimes\mathcal{A}\to\mathcal{A}$ and a unit map $\eta\colon \CC\to\mathcal{A}$, with associativity $m(m\otimes\id)=m(\id\otimes\,m)$ and the property $m(\eta\otimes\id)=\id=m(\id\otimes\,\eta)$. We say $(\mathcal{A},m,\eta)$ is an algebra when those properties are satisfied.
 
- \begin{corollary}\lean{unit_eq_ket_one}\uses{ket}\lean{algebraMapCLM_eq_ket_one}\leanok
-  When an algebra $(\mathcal{A},m,\eta)$ is also a Hilbert space, we get $\eta=\ket{1}$.
- \end{corollary}
- \begin{proof}\leanok
-  True by definition.
- \end{proof}
-
  Also recall that we say $\mathcal{A}$ is a \textit{co-algebra} when it has a co-multiplication map $\mu\colon\mathcal{A}\to\mathcal{A}\otimes\mathcal{A}$ and a co-unit map $\varpi\colon\mathcal{A}\to\CC$ such that co-associativity is satisfied, i.e., $(\mu\otimes\id)\mu=(\id\otimes\,\mu)\mu$, and the property $(\varpi\otimes\id)\mu=\id=(\id\otimes\,\varpi)\mu$ is satisfied.
  We say $(\mathcal{A},\mu,\varpi)$ is a co-algebra when those properties are satisfied.
 
