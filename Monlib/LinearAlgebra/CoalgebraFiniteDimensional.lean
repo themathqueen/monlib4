@@ -129,6 +129,14 @@ by
 -- class NormedAddCommGroupOfStarRing (B : Type _) extends
 --   NormedAddCommGroupOfRing B, StarRing B
 
+lemma Coalgebra.counit_eq_bra_one [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
+  [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A] :
+  Coalgebra.counit = (bra R (1 : A)).toLinearMap :=
+by
+  haveI := FiniteDimensional.complete R A
+  rw [counit_eq_unit_adjoint, ← algebraMapCLM_adjoint_eq_bra_one]
+  rfl
+
 open Coalgebra LinearMap TensorProduct in
 theorem FiniteDimensionalCoAlgebra.rTensor_mul_comp_lTensor_comul
   [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]

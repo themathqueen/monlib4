@@ -390,3 +390,122 @@ by
         intro a b
         simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply, rTensor_tmul, lid_symm_apply,
           assoc_tmul, lTensor_tmul, mul'_apply, lid_tmul, one_smul]
+
+theorem counit_comp_mul_comp_rTensor_unit_eq_counit :
+  counit ∘ₗ (m A) ∘ₗ (rT _ (Algebra.linearMap R A)) = counit ∘ₗ (τ _).toLinearMap :=
+by
+  rw [Algebra.mul_comp_rTensor_unit]
+theorem counit_comp_mul_comp_lTensor_unit_eq_counit :
+  counit ∘ₗ (m A) ∘ₗ (lT _ (Algebra.linearMap R A)) = counit ∘ₗ (TensorProduct.rid _ _).toLinearMap :=
+by
+  rw [Algebra.mul_comp_lTensor_unit]
+theorem rTensor_counit_comp_comul_comp_unit_eq_unit :
+  (rT _ counit) ∘ₗ comul ∘ₗ Algebra.linearMap R A
+    = (τ _).symm.toLinearMap ∘ₗ Algebra.linearMap R A :=
+by
+  rw [← LinearMap.comp_assoc, rTensor_counit_comp_comul]
+  rfl
+theorem lTensor_counit_comp_comul_comp_unit_eq_unit :
+  (lT _ counit) ∘ₗ comul ∘ₗ Algebra.linearMap R A
+    = (TensorProduct.rid _ _).symm.toLinearMap ∘ₗ Algebra.linearMap R A :=
+by
+  rw [← LinearMap.comp_assoc, lTensor_counit_comp_comul]
+  rfl
+
+class FrobeniusAlgebra (R A : Type*) [CommSemiring R] [Semiring A] extends
+  Algebra R A, Coalgebra R A where
+    lTensor_mul_comp_rTensor_comul_commute :
+      (lT A (LinearMap.mul' R A))
+        ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+        ∘ₗ (rT A comul)
+      = (rT A (LinearMap.mul' R A))
+        ∘ₗ (TensorProduct.assoc _ _ _ _).symm.toLinearMap
+        ∘ₗ (lT A comul)
+
+attribute [instance] FrobeniusAlgebra.toAlgebra
+attribute [instance] FrobeniusAlgebra.toCoalgebra
+
+variable {R A : Type*} [CommSemiring R] [Semiring A] [FrobeniusAlgebra R A]
+theorem FrobeniusAlgebra.lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul :
+  (lT A (LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+    ∘ₗ (rT A comul) = comul ∘ₗ LinearMap.mul' R A :=
+lTensor_mul_comp_rTensor_comul_of FrobeniusAlgebra.lTensor_mul_comp_rTensor_comul_commute
+
+theorem FrobeniusAlgebra.rTensor_mul_comp_lTensor_comul_eq_comul_comp_mul :
+  (rT A (LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).symm.toLinearMap
+    ∘ₗ (lT A comul) = comul ∘ₗ LinearMap.mul' R A :=
+by rw [← lTensor_mul_comp_rTensor_comul_commute, lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul]
+
+theorem FrobeniusAlgebra.rTensor_mul_comp_lTensor_comul_unit_eq_comul :
+  (rT A (LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).symm.toLinearMap
+    ∘ₗ (lT A (comul ∘ₗ Algebra.linearMap R A))
+  = comul ∘ₗ (TensorProduct.rid R _).toLinearMap :=
+by
+  simp_rw [← lTensor_comp_lTensor, ← LinearMap.comp_assoc]
+  rw [LinearMap.comp_assoc (lT A comul), rTensor_mul_comp_lTensor_comul_eq_comul_comp_mul,
+    LinearMap.comp_assoc, Algebra.mul_comp_lTensor_unit]
+
+theorem FrobeniusAlgebra.lTensor_mul_comp_rTensor_comul_unit :
+  (lT A (LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc R _ _ _).toLinearMap
+    ∘ₗ (rT A (comul ∘ₗ Algebra.linearMap R A))
+  = comul ∘ₗ (TensorProduct.lid _ _).toLinearMap :=
+by
+  simp_rw [← rTensor_comp_rTensor, ← LinearMap.comp_assoc]
+  rw [LinearMap.comp_assoc (rT A comul), lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul,
+    LinearMap.comp_assoc, Algebra.mul_comp_rTensor_unit]
+
+theorem FrobeniusAlgebra.rTensor_counit_mul_comp_lTensor_comul :
+  (rT A (counit ∘ₗ LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).symm.toLinearMap
+    ∘ₗ (lT A comul)
+  = (TensorProduct.lid _ _).symm.toLinearMap ∘ₗ LinearMap.mul' R A :=
+by
+  rw [← rTensor_comp_rTensor, LinearMap.comp_assoc,
+    rTensor_mul_comp_lTensor_comul_eq_comul_comp_mul,
+    ← LinearMap.comp_assoc, rTensor_counit_comp_comul]
+  rfl
+
+theorem FrobeniusAlgebra.lTensor_counit_mul_comp_rTensor_comul :
+  (lT A (counit ∘ₗ LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+    ∘ₗ (rT A comul)
+  = (TensorProduct.rid _ _).symm.toLinearMap ∘ₗ LinearMap.mul' R A :=
+by
+  rw [← lTensor_comp_lTensor, LinearMap.comp_assoc,
+    lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul,
+    ← LinearMap.comp_assoc, lTensor_counit_comp_comul]
+  rfl
+
+/-- "snake equations" v1 -/
+theorem FrobeniusAlgebra.rTensor_counit_mul_comp_lTensor_comul_unit :
+  (rT A (counit ∘ₗ LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).symm.toLinearMap
+    ∘ₗ (lT A (comul ∘ₗ Algebra.linearMap R A))
+  = (TensorProduct.comm _ _ _).toLinearMap :=
+by
+  rw [← lTensor_comp_lTensor]
+  simp_rw [← LinearMap.comp_assoc (lT A (Algebra.linearMap R A)),
+    rTensor_counit_mul_comp_lTensor_comul, LinearMap.comp_assoc, Algebra.mul_comp_lTensor_unit]
+  ext
+  simp only [LinearEquiv.comp_coe, AlgebraTensorModule.curry_apply, curry_apply,
+    coe_restrictScalars, LinearEquiv.coe_coe, LinearEquiv.trans_apply, rid_tmul, one_smul,
+    lid_symm_apply, comm_tmul]
+
+/-- "snake equations" v2 -/
+theorem FrobeniusAlgebra.lTensor_counit_mul_comp_rTensor_comul_unit :
+  (lT A (counit ∘ₗ LinearMap.mul' R A))
+    ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+    ∘ₗ (rT A (comul ∘ₗ Algebra.linearMap R A))
+  = (TensorProduct.comm _ _ _).toLinearMap :=
+by
+  rw [← rTensor_comp_rTensor]
+  simp_rw [← LinearMap.comp_assoc (rT A (Algebra.linearMap R A)),
+    lTensor_counit_mul_comp_rTensor_comul, LinearMap.comp_assoc, Algebra.mul_comp_rTensor_unit]
+  ext
+  simp only [LinearEquiv.comp_coe, AlgebraTensorModule.curry_apply, curry_apply,
+    coe_restrictScalars, LinearEquiv.coe_coe, LinearEquiv.trans_apply, lid_tmul, one_smul,
+    rid_symm_apply, comm_tmul]

@@ -404,6 +404,113 @@ So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $
   \end{align*}
  \end{proof}
 
+ \begin{definition}\label{FrobeniusAlgebra}\lean{FrobeniusAlgebra}\leanok
+  We say an algebra and co-algebra $(\mathcal{A},m,\eta,\mu,\varpi)$ is a \textit{Frobenius algebra} when it satisfies the Frobenius equation condition,
+  \[(m\otimes\id)(\id\otimes\,\mu)=(\id\otimes\,m)(\mu\otimes\id).\]
+ \end{definition}
 
+ \begin{corollary}\label{rTensor_mul_comp_lTensor_comul_unit_eq_comul}
+  \uses{FrobeniusAlgebra, Frobenius_equations}
+  \lean{FrobeniusAlgebra.rTensor_mul_comp_lTensor_comul_unit_eq_comul}\leanok
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(m\otimes\id)(\id\otimes\,\mu\eta)=\mu.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  By Theorem \ref{Frobenius_equations} and definition.
+ \end{proof}
 
+ \begin{corollary}\label{lTensor_mul_comp_rTensor_comul_unit}
+  \uses{FrobeniusAlgebra, Frobenius_equations}
+  \lean{FrobeniusAlgebra.lTensor_mul_comp_rTensor_comul_unit}
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(\id\otimes\,m)(\mu\unit\otimes\id)=\mu.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  By Theorem \ref{Frobenius_equations} and definition.
+ \end{proof}
 
+ \begin{corollary}\label{lTensor_counit_mul_comp_rTensor_comul}
+  \uses{lTensor_mul_comp_rTensor_comul_unit}
+  \lean{FrobeniusAlgebra.lTensor_counit_mul_comp_rTensor_comul}\leanok
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(\id\otimes\,\varpi m)(\mu\otimes\id)=m.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Corollary \ref{lTensor_mul_comp_rTensor_comul_unit}.
+ \end{proof}
+ \begin{corollary}\label{rTensor_counit_mul_comp_lTensor_comul}
+  \uses{rTensor_mul_comp_lTensor_comul_unit_eq_comul}
+  \lean{FrobeniusAlgebra.rTensor_counit_mul_comp_lTensor_comul}\leanok
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(\varpi m\otimes\id)(\id\otimes\,\mu)=m.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Corollary \ref{rTensor_mul_comp_lTensor_comul_unit_eq_comul}.
+ \end{proof}
+
+ The following two results are known as the ``snake equations''.
+ \begin{corollary}\label{rTensor_counit_mul_comp_lTensor_comul_unit}
+  \uses{rTensor_counit_mul_comp_lTensor_comul}
+  \lean{FrobeniusAlgebra.rTensor_counit_mul_comp_lTensor_comul_unit}\leanok
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(\varpi m\otimes\id)(\id\otimes\,\mu\eta)=\id.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Corollary \ref{rTensor_counit_mul_comp_lTensor_comul}.
+ \end{proof}
+ \begin{corollary}\label{lTensor_counit_mul_comp_rTensor_comul_unit}
+  \uses{lTensor_counit_mul_comp_rTensor_comul}
+  \lean{FrobeniusAlgebra.lTensor_counit_mul_comp_rTensor_comul_unit}\leanok
+  Given a Frobenius algebra $(\mathcal{A},m,\eta,\mu,\varpi)$, we get,
+  \[(\id\otimes\,\varpi m\otimes)(\mu\eta\otimes\id)=\id.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Corollary \ref{lTensor_counit_mul_comp_rTensor_comul}.
+ \end{proof}
+
+\section{Finite-dimensional algebras}
+ 
+ \begin{proposition}\label{Coalgebra.ofFiniteDimensionalHilbertAlgebra}
+  \lean{Coalgebra.ofFiniteDimensionalHilbertAlgebra}\leanok
+  Let $(\mathcal{A},m,\eta)$ be a finite-dimensional algebra and Hilbert space. Then we can form a co-algebra by letting $m^*$ be the co-multiplication and $\eta^*$ be the co-unit.
+ \end{proposition}
+ \begin{proof}\leanok {\ }
+  \begin{description}
+   \item[comul\_assoc:]
+    We have the following equivalences,
+    \begin{align*}
+      (m^*\otimes\id)m^*=(\id\otimes\,m^*)m^* &\LRa {(m(m\otimes\id))}^*={(m(\id\otimes\,m)}^*\\
+      &\LRa m(m\otimes\id)=m(\id\otimes\,m),
+    \end{align*}
+    which is true since $\mathcal{A}$ is an algebra.
+   \item[counit\_comul\_id:]
+    Similarly, taking adjoints, we get
+    \begin{align*}
+     &\, (\eta^*\otimes\id)m^*=\id=(\id\otimes\,\eta^*)m^*
+     \,\LRa\, m(\eta\otimes\id)=\id=m(\id\otimes\,\eta),
+    \end{align*}
+    which is true since $\mathcal{A}$ is an algebra.
+  \end{description}
+ \end{proof}
+ 
+ \begin{lemma}\label{counit_eq_bra_one}
+  \uses{Coalgebra.ofFiniteDimensionalHilbertAlgebra}
+  \lean{Coalgebra.counit_eq_bra_one}\leanok
+  Let $(\mathcal{A},m,\eta)$ be a finite-dimensional algebra and Hilbert space. Then the counit is exactly $\bra{1}$.
+ \end{lemma}
+ \begin{proof}\uses{unit_adjoint_eq_bra_one}\leanok
+  By definition and Lemma \ref{unit_adjoint_eq_bra_one}.
+ \end{proof}
+
+ \begin{proposition}\label{isAlgHom_iff_adjoint_isCoalgHom}
+  \uses{Coalgebra.ofFiniteDimensionalHilbertAlgebra}
+  \lean{LinearMap.isAlgHom_iff_adjoint_isCoalgHom}\leanok
+  Let $(\mathcal{A}_1,m_1,\eta_1),(\mathcal{A}_2,m_2,\eta_2)$ be finite-dimensional algebras and Hilbert spaces, and let $f\colon\mathcal{A}_1\to\mathcal{A}_2$ be a linear map. Then $f$ is an algebra homomorphism if and only if $f^*$ is a co-algebra homomorphism.
+ \end{proposition}
+ \begin{proof}\leanok
+  \begin{align*}
+   f^*\text{ is a co-algebra hom} &\LRa (f^*\otimes f^*)\circ m_2^*=m_1^*\circ f^* \text{ and }\eta_1^*\circ f^*=\eta_2^*\\
+   &\LRa m_2\circ(f\otimes f)=f\circ m_1\text{ and }f\circ\eta_1=\eta_2\\
+   &\LRa f\text{ is an algebra hom}.
+  \end{align*}
+ \end{proof}
