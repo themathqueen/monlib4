@@ -213,7 +213,6 @@
   Using Proposition \ref{isAlgHom_iff_adjoint_isCoalgHom}, it is enough to show that $\sigma_t^*$ is an algebra homomorphism. And this is true since $\sigma_t$ is self-adjoint by Proposition \ref{modAut_isSelfAdjoint}.
  \end{proof}
  
- 
  \begin{lemma}\label{inner_star_left}
   \uses{PiMat.InnerProductSpace}
   \lean{Module.Dual.pi.IsFaithfulPosMap.inner_left_hMul}\leanok
@@ -250,3 +249,14 @@
   \[\sigma_s\sigma_t(x)=Q^{-s}(Q^{-t}xQ^t)Q^s=Q^{-(s+t)}xQ^{s+t}=\sigma_{s+t}(x).\]
  \end{proof}
 
+ From Proposition \ref{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}, we see that our Hilbert space on $B$ is a Frobenius algebra.
+
+\section{Multiplication composed with co-multiplication}
+
+ \begin{proposition}\label{delta_form_iff}
+  \uses{PiMat.InnerProductSpace}
+  \lean{LinearMap.pi_mul'_comp_mul'_adjoint_eq_smul_id_iff}
+  Given $\alpha\in\CC$, we get $mm^*=\alpha\id$ if and only if $\Tr(Q^{-1}_i)=\alpha$ for all $i\in[\mathfrak{K}]$.
+ \end{proposition}
+ \begin{proof}
+ \end{proof}

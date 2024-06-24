@@ -144,3 +144,26 @@
    &\LRa f\text{ is an algebra hom}.
   \end{align*}
  \end{proof}
+
+ \begin{proposition}\label{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}
+  \uses{FrobeniusAlgebra}
+  \lean{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}\leanok
+  For any finite-dimensional algebra $(B,m,\eta)$ that is also a Hilbert space, if $\ip{xy}{z}=\ip{y}{x^*z}$ for all $x,y,z\in B$, then $(B,m,\eta)$ is a Frobenius algebra.
+ \end{proposition}
+ \begin{proof}\uses{Coalgebra.ofFiniteDimensionalHilbertAlgebra}\leanok
+  We already know that our algebra is also a co-algebra using Proposition \ref{Coalgebra.ofFiniteDimensionalHilbertAlgebra} with co-multiplication $m^*$ and co-unit $\eta^*$.
+  So then it suffices to show $(m\otimes\,\id)(\id\otimes\,m^*)=m^*m$, as we get the other equality by taking adjoints.
+
+  Let $x,y,z,w\in{B}$. Let $m^*(y)=\sum_i\alpha_i\otimes\beta_i$ for some tuples $(\alpha_i),(\beta_i)$ in $B$. Then we compute,
+  \begin{align*}
+   \ip{(m\otimes\id)(\id\otimes\,m^*)(x\otimes y)}{z\otimes w}
+   &= \sum_i\ip{(m\otimes\id)(x\otimes\alpha_i\otimes\beta_i)}{z\otimes w}\\
+   &= \sum_i\ip{x\alpha_i\otimes\beta_i}{z\otimes w}
+   = \sum_i\ip{x\alpha_i}{z}\ip{\beta_i}{w}\\
+   = \sum_i\ip{\alpha_i}{x^*z}\ip{\beta_i}{w}\\
+   &= \sum_i\ip{\alpha_i\otimes\beta_i}{x^*z\otimes w}=\ip{m^*(y)}{x^*z\otimes w}\\
+   &= \ip{y}{x^*zw}=\ip{xy}{zw}\\
+   &= \ip{m^*m(x\otimes y)}{z\otimes w}.
+  \end{align*}
+  Thus $(m\otimes\id)(\id\otimes\,m^*)=m^*m$.
+ \end{proof}
