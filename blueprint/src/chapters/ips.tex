@@ -197,11 +197,11 @@
  \begin{proof}\uses{modAut_real_apply, dual_eq_trace}\leanok
   Let $x,y\in{B}$. Then we compute
   \begin{align*}
-   \ip{x}{\sigma_{t}^*(y)} &= \ip{\sigma_{t}(x)}{y}=\psi({\sigma_{t}(x)}^*y)=\psi(\sigma_{-t}(x^*)y) &\text{by \ref{modAut_real_apply}}\\
+   \ip{x}{\sigma_{t}^*(y)} &= \ip{\sigma_{t}(x)}{y}=\psi({\sigma_{t}(x)}^*y)=\psi(\sigma_{-t}(x^*)y)\\
    &=\Tr(Q\sigma_{-t}(x^*)y)=\Tr(QQ^tx^*Q^{-t}y)\\
    &= \Tr(Q x^*Q^{-t}yQ^t)=\ip{x}{\sigma_{t}(y)}.
   \end{align*}
-  Thus $\sigma_{t}$ is self-adjoint. Note that we used the fact $\psi\colon x\mapsto\Tr(Q x)$ (Proposition \ref{dual_eq_trace}).
+  Thus $\sigma_{t}$ is self-adjoint.
  \end{proof}
 
  \begin{corollary}\label{modAut_isCoalgHom}\uses{modAut}

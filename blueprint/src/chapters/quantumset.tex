@@ -4,7 +4,7 @@
   \uses{LinearMap.real, FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of, isAlgHom_iff_adjoint_isCoalgHom}
   \lean{QuantumSet}\leanok
   Given a $^*$-algebra $(\mathcal{A},m,\eta)$ that is also a finite-dimensional Hilbert space,
-  we say it is a \textit{quantum set} when there is a modular automorphism $\sigma_t\colon\mathcal{A}\cong\mathcal{A}$, which is an algebra automorphism for each $t\in\RR$, and that the following properties are satisfied:
+  we say it is a \textit{quantum set} when there is a modular automorphism $\sigma_t\colon\mathcal{A}\cong\mathcal{A}$, which is an algebra automorphism for each $t\in\mathbb{R}$, and that the following properties are satisfied:
   \begin{enumerate}
    \item $\sigma_t\circ\sigma_s=\sigma_{t+s}$,
    \item $\sigma_0=\id$,
@@ -15,9 +15,62 @@
   \end{enumerate}
   By Proposition \ref{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}, we see that $(\mathcal{A},m,\eta)$ is a Frobenius algebra.
 
-  And by Proposition \ref{isAlgHom_iff_adjoint_isCoalgHom}, we can see that for any $t\in\RR$, we get $\sigma_t$ is also a co-algebra homomorphism.
+  And by Proposition \ref{isAlgHom_iff_adjoint_isCoalgHom}, we can see that for any $t\in\mathbb{R}$, we get $\sigma_t$ is also a co-algebra homomorphism.
 
   We can easily see that we get $\ip{x}{y}=\eta^*(x^*y)$ for all $x,y\in\mathcal{A}$.
  \end{definition}
 
  Clearly, the Hilbert space of $\bigoplus_iM_{n_i}$ given by a positive and faithful linear functional $\psi$ (Definition \ref{PiMat.InnerProductSpace}) is a quantum set with modular automorphism defined in Definition \ref{modAut}.
+ 
+ \begin{lemma}\label{ket_real}\uses{LinearMap.real, ket}\lean{ket_real}\leanok
+  Given a Hilbert space $\Hcal$ that is also a $^*$-algebra, and $x\in\Hcal$, we get $\ket{x}^{\operatorname{r}}=\ket{x^*}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  \[{\ket{x}(1^*)}^*=\ket{x^*}(1).\]
+ \end{proof}
+
+ \begin{lemma}\label{bra_real}\uses{LinearMap.real, bra, QuantumSet}\lean{bra_real}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma_r)$ and $x\in\mathcal{A}$, we get $\bra{x}^{\operatorname{r}}=\bra{\sigma_{-1}(x^*)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  \[{\bra{x}(y^*)}^*=\ip{y^*}{x}=\ip{\sigma_{-1}(x^*)}{y}=\bra{\sigma_{-1}(x^*)}(y).\]
+ \end{proof}
+ \begin{corollary}\label{rankOne_real}
+  \uses{QuantumSet, LinearMap.real}
+  \lean{rankOne_real}\leanok
+  Given quantum sets $(\mathcal{A}_1,m_1,\eta_1,\sigma_r)$ and $(\mathcal{A}_2,m_2,\eta_2,\vartheta_r)$, and elements $a\in\mathcal{A}_1$ and $b\in\mathcal{A}_2$, we get
+  \[\ketbra{a}{b}^{\operatorname{r}}=\ketbra{a^*}{\theta_{-1}(b^*)}.\]
+ \end{corollary}
+ \begin{proof}\uses{ket_real, bra_real, LinearMap.real_comp}\leanok
+  Use Lemmas \ref{ket_real}, \ref{bra_real}, and \ref{LinearMap.real.comp}.
+ \end{proof}
+
+ \begin{proposition}\label{LinearMap.adjoint_real_eq}
+  \uses{LinearMap.real, QuantumSet}
+  \lean{LinearMap.adjoint_real_eq}\leanok
+  Given quantum sets $(\mathcal{A}_1,m_1,\eta_1,\sigma_r)$ and $(\mathcal{A}_2,m_2,\eta_2,\vartheta_r)$, and $f\colon\mathcal{A}_1\to\mathcal{A}_2$, we get
+  \[ f^{*\operatorname{r}}=\vartheta_1f^{\operatorname{r}*}\sigma_{-1}.\]
+ \end{proposition}
+ \begin{proof}\leanok
+  Let $x\in{\mathcal{A}_2}$ and $y\in \mathcal{A}_1$, and compute,
+  \begin{align*}
+   \ip{{A^{*\operatorname{r}}}(x)}{y} &= \ip{{A^*(x^*)}^*}{y} =\ip{y^*}{\sigma_{-1}(A^*(x^*))}\\
+   &= \ip{A(\sigma_{-1}(y^*))}{x^*}\\
+   &= \ip{A({\sigma_{1}(y)}^*)}{x^*}
+   = \ip{x}{\vartheta_{-1}A^{\operatorname{r}}\sigma_{1}(y)}\\
+   &= \ip{\sigma_{1}A^{\operatorname{r}*}\vartheta_{-1}(x)}{y}
+  \end{align*}
+  Thus, $A^{*\operatorname{r}}=\sigma_{1}A^{\operatorname{r}*}\vartheta_{-1}$.
+ \end{proof}
+ 
+
+ \begin{definition}\label{QuantumSet.Psi}
+  \uses{QuantumSet}
+  \lean{QuantumSet.Psi}\leanok
+  Given quantum sets $(\mathcal{A}_1,m_1,\eta_1,\sigma_r)$ and $(\mathcal{A}_2,m_2,\eta_2,\vartheta_r)$, then for each $t,r\in\mathbb{R}$, we define $\Psi_{t,r}$ to be the linear isomorphism from $\Bcal(\mathcal{A}_1,\mathcal{A}_2)$ to $\mathcal{A}_2\otimes\mathcal{A}_1^{\operatorname{op}}$ given by
+  \[\Psi_{t,r}(\ketbra{a}{b})=\vartheta_t(a)\otimes{\sigma_r(b)}^{*\operatorname{op}},\]
+  with inverse given by
+  \[\Psi_{t,r}^{-1}(a\otimes b^{\operatorname{op}})=\ketbra{\sigma_{-t}(a)}{\vartheta_{-r}(b^*)}.\]
+ \end{definition}
+
+
