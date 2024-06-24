@@ -39,7 +39,7 @@
   \uses{QuantumSet, LinearMap.real}
   \lean{rankOne_real}\leanok
   Given quantum sets $(\mathcal{A}_1,m_1,\eta_1,\sigma_r)$ and $(\mathcal{A}_2,m_2,\eta_2,\vartheta_r)$, and elements $a\in\mathcal{A}_1$ and $b\in\mathcal{A}_2$, we get
-  \[\ketbra{a}{b}^{\operatorname{r}}=\ketbra{a^*}{\theta_{-1}(b^*)}.\]
+  \[\ketbra{a}{b}^{\operatorname{r}}=\ketbra{a^*}{\vartheta_{-1}(b^*)}.\]
  \end{corollary}
  \begin{proof}\uses{ket_real, bra_real, LinearMap.real_comp}\leanok
   Use Lemmas \ref{ket_real}, \ref{bra_real}, and \ref{LinearMap.real.comp}.
@@ -62,7 +62,49 @@
   \end{align*}
   Thus, $A^{*\operatorname{r}}=\sigma_{1}A^{\operatorname{r}*}\vartheta_{-1}$.
  \end{proof}
- 
+
+ \begin{proposition}\label{modAut_one_eq_left_twist}
+  \uses{QuantumSet}
+  \lean{QuantumSet.rTensor_counit_mul_comp_comm_comp_rTensor_comul_unit_eq_modAut_one}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma_r)$, we get
+  \[(\eta^*m\otimes\id)(\id\otimes\,\varkappa)(m^*\eta\otimes\id)=\sigma_1.\]
+  Here, $\varkappa$ is the identification $\mathcal{A}\otimes\mathcal{A}\cong\mathcal{A}\otimes\mathcal{A}$ given by $x\otimes y\mapsto y\otimes x$.
+ \end{proposition}
+ \begin{proof}\leanok
+  Let $x,y\in\mathcal{A}$, and let $m^*(1)=\sum_i\alpha_i\otimes\beta_i$ for some tuples $(\alpha_i),(\beta_i)$ in $\mathcal{A}$.
+  Then we compute,
+  \begin{align*}
+   &\,\ip{(\eta^*m\otimes\id)(\id\otimes\,\varkappa)(m^*\eta\otimes\id)(x)}{y}\\
+   =& \sum_i\ip{(\eta^*m\otimes\id)(\id\otimes\,\varkappa)(\alpha_i\otimes\beta_i\otimes x)}{y}\\
+   =&\, \sum_i\ip{(\eta^*m\otimes\id)(\alpha_i\otimes x\otimes \beta_i)}{y}\\
+   =&\, \sum_i\ip{\eta^*(\alpha_ix)\beta_i}{y}
+   = \sum_i\ip{\alpha_ix}{1}\ip{\beta_i}{y}\\
+   =&\, \sum_i\ip{\alpha_i}{\sigma_{-1}(x^*)}\ip{\beta_i}{y}\\
+   =&\, \sum_i\ip{\alpha_i\otimes\beta_i}{\sigma_{-1}(x^*)\otimes y}=\ip{m^*(1)}{\sigma_{-1}(x^*)\otimes y}\\
+   =&\, \ip{1}{\sigma_{-1}(x^*)y}=\ip{\sigma_{1}(x)}{y}.
+  \end{align*}
+ \end{proof}
+
+
+ \begin{proposition}\label{modAut_neg_one_eq_right_twist}
+  \uses{QuantumSet}
+  \lean{QuantumSet.lTensor_counit_mul_comp_comm_comp_lTensor_comul_unit_eq_modAut_neg_one}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma_r)$, we get
+  \[(\id\otimes\,\eta^*m)(\varkappa\otimes\id)(\id\otimes\,m^*\eta)=\sigma_{-1}.\]
+  Here, $\varkappa$ is the identification $\mathcal{A}\otimes\mathcal{A}\cong\mathcal{A}\otimes\mathcal{A}$ given by $x\otimes y\mapsto y\otimes x$.
+ \end{proposition}
+ \begin{proof}\leanok
+  We let $x,y\in\mathcal{A}$ and $m^*(1)=\sum_i\alpha_i\otimes\beta_i$ for some tuples $(\alpha_i),(\beta_i)$ in $\mathcal{A}$. Then we compute,
+  \begin{align*}
+   & \ip{(\id\otimes\,\eta^*m)(\varkappa\otimes\id)(\id\otimes\,m^*\eta)(x)}{y}\\
+   =& \sum_i\ip{(\id\otimes\,\eta^*m)(\varkappa\otimes\id)(x\otimes\alpha_i\otimes\beta_i)}{y}\\
+   =& \sum_i\ip{(\id\otimes\,\eta^*m)(\alpha_i\otimes x\otimes\beta_i)}{y}\\
+   =& \sum_i\ip{\ip{1}{x\beta_i}\alpha_i}{y} = \sum_i\ip{\alpha_i}{y}\ip{x\beta_i}{1}\\
+   =& \sum_i\ip{\alpha_i}{y}\ip{\beta_i}{x^*}\\
+   =& \ip{m^*(1)}{y\otimes x^*}=\ip{1}{yx^*}\\
+   =& \ip{\sigma_{-1}(x)}{y}.
+  \end{align*}
+ \end{proof}
 
  \begin{definition}\label{QuantumSet.Psi}
   \uses{QuantumSet}
@@ -72,5 +114,3 @@
   with inverse given by
   \[\Psi_{t,r}^{-1}(a\otimes b^{\operatorname{op}})=\ketbra{\sigma_{-t}(a)}{\vartheta_{-r}(b^*)}.\]
  \end{definition}
-
-
