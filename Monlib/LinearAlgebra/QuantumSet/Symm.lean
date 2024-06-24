@@ -274,10 +274,6 @@ theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
   rw [eq_comm]
   simp_rw [LinearMap.comp_assoc]
 
-theorem QuantumSet.modAut_isSelfAdjoint (r : ℝ) :
-  _root_.IsSelfAdjoint (hB.modAut r).toLinearMap :=
-by rw [← LinearMap.isSymmetric_iff_isSelfAdjoint]; exact hB.modAut_isSymmetric _
-
 theorem symmMap_apply_eq_symmMap_symm_apply_iff (f : B →ₗ[ℂ] B) :
     symmMap ℂ _ _ f = (symmMap ℂ _ _).symm f ↔
       Commute f (hB.modAut 1).toLinearMap :=

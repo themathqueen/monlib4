@@ -4,6 +4,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.Ips.RankOne
+import Monlib.LinearAlgebra.Mul''
 
 variable {R A : Type*}
 local notation "lT" => LinearMap.lTensor
@@ -288,6 +289,15 @@ lemma LinearMap.isAlgHom_iff {R A B : Type*} [CommSemiring R] [Semiring A] [Semi
       (mul' R B) ∘ₗ (TensorProduct.map x x) = x ∘ₗ (mul' R A) :=
 ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
+lemma AlgHom.isAlgHom
+  {R A B : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Algebra R A] [Algebra R B]
+  (x : A →ₐ[R] B) :
+  x.toLinearMap.IsAlgHom :=
+by
+  rw [LinearMap.isAlgHom_iff, commutes_with_mul'_iff, commutes_with_unit_iff]
+  simp only [toLinearMap_apply, map_one, map_mul, implies_true, and_self]
+
 variable {B : Type*} [RCLike R] [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
   [InnerProductSpace R A] [InnerProductSpace R B]
   [SMulCommClass R A A] [SMulCommClass R B B] [IsScalarTower R A A] [IsScalarTower R B B]
@@ -306,3 +316,9 @@ by
     apply_fun adjoint at h1 h2
     simp_rw [adjoint_adjoint] at h1 h2
     exact ⟨h1, h2⟩
+
+
+theorem LinearMap.isCoalgHom_iff_adjoint_isAlgHom :
+  x.IsCoalgHom ↔ (LinearMap.adjoint x).IsAlgHom :=
+by
+  rw [isAlgHom_iff_adjoint_isCoalgHom, adjoint_adjoint]

@@ -15,6 +15,7 @@ import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.TensorFinite
 import Monlib.LinearAlgebra.tensorProduct
 import Mathlib.LinearAlgebra.Trace
+import Monlib.LinearAlgebra.Mul''
 
 #align_import linear_algebra.my_ips.quantum_set
 
@@ -89,8 +90,8 @@ class QuantumSet (A : Type _) [NormedAddCommGroupOfRing A]
     modAut_zero : modAut 0 = 1
     /-- applying star to `modAut r x` will give `modAut (-r) (star x)` -/
     modAut_star : ∀ r x, star (modAut r x) = modAut (-r) (star x)
-    /-- the modular automorphism is also a coalgebra homomorphism -/
-    modAut_isCoalgHom : ∀ r, (modAut r).toLinearMap.IsCoalgHom
+    -- /-- the modular automorphism is also a coalgebra homomorphism -/
+    -- modAut_isCoalgHom : ∀ r, (modAut r).toLinearMap.IsCoalgHom
     /-- the modular automorphism is symmetric with respect to the inner product,
       in other words, it is self-adjoint -/
     modAut_isSymmetric : ∀ r x y, ⟪modAut r x, y⟫_ℂ = ⟪x, modAut r y⟫_ℂ
@@ -123,6 +124,27 @@ attribute [simp] QuantumSet.inner_conj_left
 attribute [simp] QuantumSet.modAut_isSymmetric
 
 export QuantumSet (modAut n onb)
+
+lemma QuantumSet.modAut_isSelfAdjoint
+  {A : Type*} [NormedAddCommGroupOfRing A] [hA : QuantumSet A] (r : ℝ) :
+  IsSelfAdjoint (hA.modAut r).toLinearMap :=
+by
+  rw [← LinearMap.isSymmetric_iff_isSelfAdjoint]
+  exact modAut_isSymmetric _
+
+def QuantumSet.modAut_isCoalgHom
+  {A : Type*} [NormedAddCommGroupOfRing A] [hA : QuantumSet A] (r : ℝ) :
+  LinearMap.IsCoalgHom (hA.modAut r).toLinearMap :=
+by
+  rw [← modAut_isSelfAdjoint, LinearMap.star_eq_adjoint]
+  simp_rw [LinearMap.isCoalgHom_iff, Coalgebra.counit_eq_unit_adjoint,
+    Coalgebra.comul_eq_mul_adjoint,
+    ← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp,
+    Function.Injective.eq_iff (LinearEquiv.injective _),
+    TensorProduct.ext_iff, LinearMap.ext_iff, LinearMap.comp_apply,
+    TensorProduct.map_tmul, LinearMap.mul'_apply]
+  simp only [Algebra.linearMap_apply, AlgEquiv.toLinearMap_apply, map_mul, implies_true, and_true,
+    Algebra.algebraMap_eq_smul_one, map_smul, map_one]
 
 -- instance QuantumSet.toAlgebra {A : Type*} [NormedAddCommGroupOfRing A] [QuantumSet A] :
 --   Algebra ℂ A :=
