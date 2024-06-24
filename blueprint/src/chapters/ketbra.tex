@@ -1,0 +1,145 @@
+\chapter{Ket-bra operators}
+
+\section{Kets and bras}
+\begin{definition}\label{ket}\lean{ket}\leanok
+  A \textit{ket} operator $\ket{\cdot}$ on a Hilbert space $\Hcal$ is defined as the linear map $\Bcal(\Hcal,\Bcal(\CC,\Hcal))$ and is given by $x\mapsto(\alpha\mapsto\alpha x)$.
+\end{definition}
+\begin{definition}\label{bra}\lean{bra}\leanok
+  A \textit{bra} operator $\bra{\cdot}$ on a Hilbert space $\Hcal$ is defined as the anti-linear map $\Hcal\to\Bcal(\Hcal,\CC)$ and is given by $x\mapsto(y\mapsto\ip{x}{y})$.
+\end{definition}
+\begin{lemma}\label{bra_adjoint_eq_ket}\uses{bra, ket}\lean{bra_adjoint_eq_ket}\leanok
+  Given $x\in \Hcal$, we get $\bra{x}^*=\ket{x}$.
+\end{lemma}
+\begin{proof}\leanok
+  Easy computation.
+\end{proof}
+\begin{corollary}\label{bra-ket}\uses{bra, ket}\lean{bra_ket_one_eq_inner}\leanok
+  Given $x,y\in\Hcal$, we get $\bra{x}\circ\ket{y}(1)=\ip{x}{y}$.
+\end{corollary}
+\begin{proof}\leanok
+  Straightforward computation.
+\end{proof}
+\begin{corollary}\label{unit_eq_ket_one}
+  \uses{ket}
+  \lean{algebraMapCLM_eq_ket_one}\leanok
+  Let $\mathcal{A}$ be an algebra and a Hilbert space. Then the unit map $\eta\colon\CC\to\mathcal{A}$ (which is given by $\alpha\mapsto \alpha1$) is exactly $\ket{1}$.
+\end{corollary}
+\begin{proof}\leanok
+  True by definition.
+\end{proof}
+\begin{corollary}\label{unit_adjoint_eq_bra_one}\uses{bra}\lean{algebraMapCLM_adjoint_eq_bra_one}\leanok
+  The adjoint of the unit map $\eta\colon\CC\to\mathcal{A}$ in an algebra and Hilbert space $\mathcal{A}$ is $\bra{1}$.
+ \end{corollary}
+ \begin{proof}\uses{unit_eq_ket_one, bra_adjoint_eq_ket}\leanok
+  Use Lemma \ref{bra_adjoint_eq_ket} and Corollary \ref{unit_eq_ket_one}.
+ \end{proof}
+ \begin{lemma}\label{linearMap_comp_ket}\uses{ket}\lean{continuousLinearMap_comp_ket}\leanok
+  Let $f\in\Bcal(\Hcal_1,\Hcal_2)$ and $x\in\Hcal_1$. Then $f\circ\ket{x}=\ket{f(x)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Simple computation.
+ \end{proof}
+ \begin{lemma}\label{bra_comp_linearMap}\uses{bra}\lean{bra_comp_continuousLinearMap}\leanok
+  Let $f\in\Bcal(\Hcal_1,\Hcal_2)$ and $x\in\Hcal_2$. Then $\bra{x}\circ f=\bra{f^*(x)}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Simple computation.
+ \end{proof}
+
+\section{Ket-bras}
+\begin{definition}\label{rankOne}\uses{ket, bra}\lean{rankOne}\leanok
+  A \textit{ket-bra} operator $\ketbra{\cdot}{\cdot}$ is defined as the linear map from $E_2$ to the anti-linear map $E_1\to\Bcal(E_1,E_2)$ and is given by
+  \begin{align*}
+    x\mapsto(y\mapsto(u\mapsto\ip{y}{u}x)).
+  \end{align*}
+  This is exactly $\ketbra{\cdot}{\cdot}=\ket{\cdot}\,\circ\,\bra{\cdot}$.
+\end{definition}
+Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
+So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
+
+ \begin{lemma}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
+  Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
+ \end{lemma}
+ \begin{proof}\uses{linearMap_comp_ket}\leanok
+  Straightforward computation.
+ \end{proof}
+ 
+ \begin{lemma}\label{rankOne_comp_linearMap}\uses{rankOne}\lean{ContinuousLinearMap.rankOne_comp}\leanok
+  Given a linear map $T_2\in\Bcal(E_3,E_1)$ and elements $x\in E_2$, $y\in E_1$, we get $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$.
+ \end{lemma}
+ \begin{proof}\uses{bra_comp_linearMap}\leanok
+  Straightforward computation.
+ \end{proof}
+ 
+ \begin{lemma}\label{rankOne_adjoint}\uses{rankOne}\lean{rankOne_adjoint}\leanok
+  Given $x\in E_2$ and $y\in E_1$, we get $\ketbra{x}{y}^*=\ketbra{y}{x}$.
+ \end{lemma}
+ \begin{proof}\uses{bra_adjoint_eq_ket}\leanok
+  Using Lemma \ref{bra_adjoint_eq_ket}.
+ \end{proof}
+
+ \begin{lemma}\label{sum_rankOne_onb_eq_id}\uses{rankOne}\lean{rankOne.sum_orthonormalBasis_eq_id}\leanok
+  Given an orthonormal basis $(u_i)$ of a $\CC$-inner product space $E$, we get $\sum_i\ketbra{u_i}{u_i}=\id$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{lemma}\label{ContinuousLinearMap.centralizer}\lean{ContinuousLinearMap.commutes_with_all_iff}\leanok
+  Given a Hilbert space $\Hcal$, we have ${\Bcal(\Hcal)}^\prime=\{\alpha\id:\alpha\in\CC\}$.\\
+  In other words, $x\in\Bcal(\Hcal)$ commutes with all operators $y\in\Bcal(\Hcal)$ if and only if $x=\alpha\id$ for some $\alpha\in\CC$.
+ \end{lemma}
+ \begin{proof}\uses{rankOne_adjoint, rankOne_comp_linearMap, linearMap_comp_rankOne}\leanok
+  Let $x\in\Bcal(\Hcal)$. Obviously, if $x=\alpha\id$ for some $\alpha\in\CC$, then it commutes with every other operator. Now suppose $x$ commutes with every operator in $\Bcal(\Hcal)$.
+  So this means $\ketbra{a}{x^*(b)}=\ketbra{a}{b}x=x\ketbra{a}{b}=\ketbra{x(a)}{b}$ for all $a,b\in\Hcal$.
+  Suppose there exists some non-zero $a\in\Hcal$, otherwise this is trivial. Then, for any $b\in\Hcal$, we have
+  \[x(b)=\frac{\norm{a}^2}{\norm{a}^2}x(b)=\frac{1}{\norm{a}^2}\ketbra{x(b)}{a}(a)=\frac{1}{\norm{a}^2}\ketbra{b}{x^*(a)}(a)=\frac{\ip{x^*(a)}{a}}{\norm{a}^2}b.\]
+  Thus $x=\alpha\id$ where $\alpha=\ip{x^*(a)}{a}/\norm{a}^2$.
+ \end{proof}
+
+ \begin{proposition}\label{colinear_of_rankOne_self_eq_rankOne_self}\uses{rankOne}\lean{colinear_of_rankOne_self_eq_rankOne_self}\leanok
+  Let $\Hcal$ be a Hilbert space, and let $x,y\in\Hcal$. Then if $\ketbra{x}{x}=\ketbra{y}{y}$, then there exists some $0\neq\alpha\in\CC$ such that $x=\alpha{y}$ (i.e., they are co-linear).
+ \end{proposition}
+ \begin{proof}\leanok
+  Suppose $\ketbra{x}{x}=\ketbra{y}{y}$. Then it is clear that we get $x=0$ if and only if $y=0$. So we assume $x\neq0$ (and so $y\neq0$), otherwise this is trivial.
+  Then we have \[\norm{x}^2x=\ketbra{x}{x}(x)=\ketbra{y}{y}(x)=\ip{y}{x}y.\]
+  And as $x\neq0$, we get $x=\dfrac{\ip{y}{x}}{\norm{x}^2}y$. We have $\ip{y}{x}\neq0$ (otherwise, this would mean $x=0$ which is a contradiction). Thus we can let $\alpha=\ip{y}{x}/\norm{x}^2\neq0$ such that $x=\alpha{y}$.
+ \end{proof}
+
+
+ \begin{lemma}\label{LinearMap.isPositive_iff_eq_sum_rankOne}\uses{rankOne}\lean{LinearMap.isPositive_iff_eq_sum_rankOne}\leanok
+  Given a finite-dimensional inner product space $E$ over $\CC$ and $T\in\Bcal(E)$, we get\\
+  \hspace*{0.5cm}$T$ is positive semi-definite $\LRa$ $T=\sum_i\ketbra{v_i}{v_i}$ for some tuple $(v_i)$ in $E$.
+ \end{lemma}
+ \begin{proof}\uses{sum_rankOne_onb_eq_id}\leanok {\ }
+ \begin{description}
+  \item[$(\tto)$]
+   Suppose $0\leq{T}$. We use the spectral theorem and let $(v_i)$ be the eigenbasis of $T$ in $E$ with corresponding eigenvalues $(\lambda_i)$. Note that, as $0\leq{T}$, we also get each $0\leq\lambda_i$. So then let each $x_i=\sqrt{\lambda_i}u_i$. Then we have $\sum_i\ketbra{x_i}{x_i}=\sum_i\sqrt{\lambda_i}\overline{\sqrt{\lambda_i}}\ketbra{u_i}{u_i}=\sum_i\lambda_i\ketbra{u_i}{u_i}=T$, where the last equality comes from Corollary \ref{sum_rankOne_onb_eq_id}.
+  \item[$(\ott)$]
+   Suppose we have some tuple $(v_i)$ in $E$ such that $T=\sum_i\ketbra{v_i}{v_i}$. Then, for any $x\in{E}$, we get
+   $\ip{x}{T(x)}=\sum_i\ip{x}{v_i}\ip{v_i}{x}=\sum_i\abs{\ip{x}{v_i}}^2\geq0$.
+   Thus $T$ is positive semi-definite.
+ \end{description}
+ \end{proof}
+
+ Given an orthonormal basis $b=(b_i)$ of a finite-dimensional Hilbert space $\Hcal$, we define $R_b$ to be the linear isomorphism $\Hcal\cong\CC^{\dim\Hcal}$ given by $R_b(x)_i=\ip{b_i}{x}$ with its inverse given by $x\mapsto\sum_ix_ib_i$.
+ \begin{lemma}\label{repr_adjoint}\lean{OrthonormalBasis.repr_adjoint'}\leanok
+  Let $e=(e_i)$ be an orthonormal basis of a finite-dimensional Hilbert space $\Hcal$. Then $R_e^*=R_e^{-1}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Let $x\in\Hcal$ and $y\in\CC^{\dim\Hcal}$. Then we compute,
+  \begin{align*}
+   \ip{x}{R_e^*(y)}_{\Hcal} &= \ip{R_e(x)}{y}_{\CC^{\dim\Hcal}} = \sum_i\ip{R_e(x)_i}{y_i}_{\CC} = \sum_i\ip{\ip{e_i}{x}_{\Hcal}}{y_i}_{\CC}\\
+   &= \sum_i\ip{x}{e_i}_{\Hcal}y_i = \sum_i\ip{x}{y_ie_i}_{\Hcal}=\ip{x}{R_e^{-1}(y)}_{\Hcal}.
+  \end{align*}
+  Thus $R_e^*=R_e^{-1}$.
+ \end{proof}
+ Given orthonormal bases $b=(b_i)$ and $c=(c_j)$ of Hilbert spaces $\Hcal_1,\Hcal_2$, then we let $\mathcal{M}$ denote the identification from $\Bcal(\Hcal_1,\Hcal_2)$ to $M_{\dim\Hcal_2,\dim\Hcal_1}$, which is given by $\Mcal_{b,c}(T)_{kp}=\ip{c_k}{T(b_p)}$.
+ \begin{lemma}\label{rankOne_toMatrix}\uses{rankOne}\lean{rankOne_toMatrix_of_onb}\leanok
+  Given orthonormal bases $b=(b_i)$ and $c=(c_j)$ of finite-dimensional Hilbert spaces $\Hcal_1,\Hcal_2$, and elements $x\in\Hcal_1$ and $y\in\Hcal_2$, we have $\mathcal{M}_{c,b}(\ketbra{x}{y})=R_b(x){R_c(y)}^*$.
+ \end{lemma}
+ \begin{proof}\leanok
+  For any $i\in[\dim\Hcal_1],j\in[\dim\Hcal_2]$, we compute,
+  \[\mathcal{M}_{c,b}(\ketbra{x}{y})_{ij}=\ip{b_i}{\ketbra{x}{y}(c_j)}=\ip{b_i}{x}\ip{y}{c_j}=R_b(x)_i\overline{R_c(y)_j}=\left(R_b(x){R_c(y)}^*\right)_{ij}.\]
+  Thus $\mathcal{M}_{c,b}(\ketbra{x}{y})=R_b(x){R_c(y)}^*$.
+ \end{proof}

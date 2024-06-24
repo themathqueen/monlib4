@@ -1,0 +1,42 @@
+\chapter{Star-preserving maps}
+ In this section, we define what it means for a linear map to be \textit{real} (also known as \textit{star-preserving}) on Hilbert spaces $\Hcal_1,\Hcal_2$.
+ 
+ \begin{definition}\label{LinearMap.IsReal}\lean{LinearMap.IsReal}\leanok
+  We say $A\in\Bcal(\Hcal_1,\Hcal_2)$ is \textit{real} (\textit{star-preserving}) when $A(a^*)={A(a)}^*$ for each $a\in\Hcal_1$.
+ \end{definition}
+ 
+ \begin{definition}\label{LinearMap.real}\lean{LinearMap.real}\leanok
+  We define the map $\cdot^{\operatorname{r}}$ as the self-invertible anti-linear automorphism $(\Hcal_1\to\Hcal_2)\cong(\Hcal_1\to\Hcal_2)$ given by
+  \[A\mapsto(a\mapsto{A(a^*)}^*).\]
+ \end{definition}
+
+ \begin{lemma}\label{LinearMap.isReal_iff}\uses{LinearMap.IsReal, LinearMap.real}\lean{LinearMap.isReal_iff}\leanok
+  Let $A\in\Bcal(\Hcal_1,\Hcal_2)$. Then $A$ is real if and only if $A^{\operatorname{r}}=A$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Clearly $A^{\operatorname{r}}(x)={A(x^*)}^*=A(x)$ if and only if $A(x^*)={A(x)}^*$ for all $x\in\Hcal$, which means $A$ is real.
+ \end{proof}
+
+ \begin{lemma}\label{LinearMap.real_comp}\uses{LinearMap.real}\lean{LinearMap.real_comp}\leanok
+  When $f\in\Bcal(\Hcal_1,\Hcal_2)$ and $g\in\Bcal(\Hcal_3,\Hcal_1)$, then we get ${(f\circ g)}^{\operatorname{r}}={f^{\operatorname{r}}}\circ{{g^{\operatorname{r}}}}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{lemma}\label{TensorProduct.map_real}\uses{LinearMap.real}\lean{TensorProduct.map_real}\leanok
+  Given Hilbert spaces $\Hcal_1,\Hcal_2,\Hcal_3,\Hcal_4$, and linear maps $x\colon\Hcal_1\to\Hcal_2$ and $y\colon\Hcal_3\to\Hcal_4$, we clearly get $\real{(x\otimes y)}=\real{x}\otimes\real{y}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{proposition}\label{LinearMap.real.spectrum}\uses{LinearMap.real}
+  \lean{LinearMap.real.spectrum}\leanok
+  Given $A\in\Bcal(\Hcal)$, we get $\Spectrum(\real{A})=\overline{\Spectrum(A)}$.\\
+  In fact, $x\in\ker(A-\lambda\id)$ if and only if $x^*\in\ker(\real{A}-\bar{\lambda}\id)$.
+ \end{proposition}
+ \begin{proof}\leanok
+  For any $x\in\Hcal$, we have $\real{A}(x^*)={A(x)}^*$. So if $x$ is an eigenvector of $A$ with eigenvalue $\lambda$, then clearly $\real{A}(x^*)=\bar{\lambda}x^*$, so $x^*$ is an eigenvector of $\real{A}$ with eigenvalue $\bar{\lambda}$.
+  If, on the other hand, $x^*$ is an eigenvector of $\real{A}$ with eigenvalue $\bar{\lambda}$, then ${A(x)}^*=\bar{\lambda}x^*$, and so $A(x)=\lambda x$, which means $x$ is an eigenvector of $A$ with eigenvalue $\lambda$.
+ \end{proof}
