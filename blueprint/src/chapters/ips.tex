@@ -175,7 +175,7 @@
  \begin{definition}\label{modAut}
   \uses{PiMat.InnerProductSpace}
   \lean{Module.Dual.pi.IsFaithfulPosMap.sig}\leanok
-  Given $t\in\RR$, we define the algebra automorphism $\sigma_t\colon B\cong B$ to be given by $a\mapsto Q^{-t}aQ^{t}$ with inverse $a\mapsto Q^taQ^{-t}$ (so $\sigma_t^{-1}=\sigma_{-t}$).
+  Given $t\in\mathbb{R}$, we define the algebra automorphism $\sigma_t\colon B\cong B$ to be given by $a\mapsto Q^{-t}aQ^{t}$ with inverse $a\mapsto Q^taQ^{-t}$ (so $\sigma_t^{-1}=\sigma_{-t}$).
  \end{definition}
 
  \begin{proposition}\label{modAut_real_apply}
@@ -192,7 +192,7 @@
  \begin{proposition}\label{modAut_isSelfAdjoint}
   \uses{modAut}
   \lean{Pi.PosDef.rpow.is_self_adjoint}\leanok
-  For any $t\in\RR$, $\sigma_t$ is self-adjoint.
+  For any $t\in\mathbb{R}$, $\sigma_t$ is self-adjoint.
  \end{proposition}
  \begin{proof}\uses{modAut_real_apply, dual_eq_trace}\leanok
   Let $x,y\in{B}$. Then we compute
@@ -206,7 +206,7 @@
 
  \begin{corollary}\label{modAut_isCoalgHom}\uses{modAut}
   \lean{Module.Dual.pi.IsFaithfulPosMap.sig_isCoalgHom}\leanok
-  For any $t\in\RR$, we get $\sigma_t$ is also a co-algebra homomorphism.
+  For any $t\in\mathbb{R}$, we get $\sigma_t$ is also a co-algebra homomorphism.
  \end{corollary}
  \begin{proof}\uses{modAut_isSelfAdjoint, isAlgHom_iff_adjoint_isCoalgHom}
   \leanok
@@ -242,7 +242,7 @@
  \begin{lemma}\label{modAut_comp}
   \uses{modAut}
   \lean{Module.Dual.pi.IsFaithfulPosMap.sig_apply_sig}\leanok
-  For any $s,t\in\RR$, we get $\sigma_s\circ\sigma_t=\sigma_{s+t}$.
+  For any $s,t\in\mathbb{R}$, we get $\sigma_s\circ\sigma_t=\sigma_{s+t}$.
  \end{lemma}
  \begin{proof}\leanok
   For any $x\in{B}$, we get
