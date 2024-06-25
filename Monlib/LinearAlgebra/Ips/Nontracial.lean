@@ -931,19 +931,6 @@ theorem Module.Dual.pi.IsFaithfulPosMap.toMatrix_symm_apply' [hψ : ∀ i, (ψ i
                   j)⟩⟩⟨Module.Dual.pi.IsFaithfulPosMap.basis hψ ⟨b, (c, d)⟩| :=
 toMatrixLinEquiv_symm_apply' _
 
-theorem TensorProduct.of_basis_eq_span {𝕜 : Type _} {E : Type _} {F : Type _} [RCLike 𝕜]
-    [AddCommGroup E] [Module 𝕜 E] [AddCommGroup F] [Module 𝕜 F] (x : TensorProduct 𝕜 E F)
-    {ι₁ ι₂ : Type _} [Fintype ι₁] [Fintype ι₂] (b₁ : Basis ι₁ 𝕜 E) (b₂ : Basis ι₂ 𝕜 F) :
-    x = ∑ i : ι₁, ∑ j : ι₂, (b₁.tensorProduct b₂).repr x (i, j) • b₁ i ⊗ₜ[𝕜] b₂ j :=
-  x.induction_on
-  (by simp only [map_zero, Finsupp.zero_apply, zero_smul, Finset.sum_const_zero])
-  (fun α₁ α₂ => by
-    simp_rw [Basis.tensorProduct_repr_tmul_apply, ← TensorProduct.smul_tmul_smul, ←
-      TensorProduct.tmul_sum, ← TensorProduct.sum_tmul, Basis.sum_repr])
-  (fun a b ha hb => by
-    simp_rw [_root_.map_add, Finsupp.add_apply, add_smul, Finset.sum_add_distrib]
-    rw [← ha, ← hb])
-
 theorem Module.Dual.pi.IsFaithfulPosMap.toMatrix_eq_orthonormalBasis_toMatrix
     [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x : l(PiMat ℂ k s)) :
     (pi.IsFaithfulPosMap.toMatrix fun i => (hψ i)) x =

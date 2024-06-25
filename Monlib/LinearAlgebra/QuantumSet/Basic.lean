@@ -183,6 +183,45 @@ section Complex
     . intro i j
       simp_rw [Fin.fin_one_eq_zero, Basis.singleton_apply,
         RCLike.inner_apply, map_one, mul_one, if_true]
+  @[simp]
+  theorem RCLike.inner_tmul {𝕜 : Type*} [RCLike 𝕜] (x y z w : 𝕜) :
+    ⟪x ⊗ₜ[𝕜] y, z ⊗ₜ[𝕜] w⟫_𝕜 = ⟪x * y, z * w⟫_𝕜 :=
+  by
+    simp only [TensorProduct.inner_tmul, inner_apply, map_mul]
+    rw [mul_mul_mul_comm]
+  open scoped TensorProduct
+  theorem TensorProduct.singleton_tmul
+    {R : Type _} {E : Type _} {F : Type _} [CommSemiring R]
+    [AddCommGroup E] [Module R E] [AddCommGroup F] [Module R F]
+    (x : E ⊗[R] F) (b₁ : Basis (Fin 1) R E) (b₂ : Basis (Fin 1) R F) :
+    ∃ (a : E) (b : F), x = a ⊗ₜ[R] b :=
+  by
+    use (b₁.tensorProduct b₂).repr x (0,0) • b₁ 0, b₂ 0
+    have := TensorProduct.of_basis_eq_span x b₁ b₂
+    simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.sum_singleton] at this
+    rw [← TensorProduct.smul_tmul']
+    exact this
+
+  theorem RCLike.inner_tensor_apply {𝕜 : Type*} [RCLike 𝕜] (x y : 𝕜 ⊗[𝕜] 𝕜) :
+    ⟪x, y⟫_𝕜 = ⟪LinearMap.mul' 𝕜 _ x, LinearMap.mul' 𝕜 _ y⟫_𝕜 :=
+  by
+    obtain ⟨α,β,rfl⟩ := x.singleton_tmul (Basis.singleton (Fin 1) 𝕜) (Basis.singleton (Fin 1) 𝕜)
+    obtain ⟨α2,β2,rfl⟩ := y.singleton_tmul (Basis.singleton (Fin 1) 𝕜) (Basis.singleton (Fin 1) 𝕜)
+    simp only [LinearMap.mul'_apply, RCLike.inner_tmul]
+
+  @[simp]
+  theorem QuantumSet.complex_modAut :
+    Complex.QuantumSet.modAut = 1 :=
+  rfl
+  theorem QuantumSet.complex_comul :
+    (Coalgebra.comul : ℂ →ₗ[ℂ] ℂ ⊗[ℂ] ℂ) = (TensorProduct.lid ℂ ℂ).symm.toLinearMap :=
+  by
+    ext
+    rw [TensorProduct.inner_ext_iff']
+    intro a b
+    simp_rw [Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_left, LinearMap.mul'_apply,
+      LinearEquiv.coe_toLinearMap, TensorProduct.lid_symm_apply,
+      TensorProduct.inner_tmul, RCLike.inner_apply, starRingEnd_apply, star_one, one_mul]
 
 end Complex
 

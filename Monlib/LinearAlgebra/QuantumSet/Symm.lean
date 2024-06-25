@@ -376,3 +376,9 @@ theorem symmMap_apply_adjoint (x : A →ₗ[ℂ] B) :
   simp_rw [map_sum, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint,
     symmMap_symm_apply, symmMap_apply, ContinuousLinearMap.linearMap_adjoint,
     rankOne_adjoint, LinearMap.adjoint_adjoint]
+
+theorem symmMap_comp {C : Type*} [NormedAddCommGroupOfRing C] [QuantumSet C]
+  (x : A →ₗ[ℂ] B) (y : C →ₗ[ℂ] A) :
+  symmMap ℂ _ _ (x ∘ₗ y) = (symmMap ℂ _ _ y) ∘ₗ (symmMap ℂ _ _ x) :=
+by
+  simp_rw [symmMap_apply, LinearMap.real_comp, LinearMap.adjoint_comp]
