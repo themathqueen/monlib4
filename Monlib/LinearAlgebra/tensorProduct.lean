@@ -25,15 +25,6 @@ theorem TensorProduct.map_apply_map_apply {R : Type _} [CommSemiring R] {A B C D
   intro x y
   simp only [LinearMap.comp_apply, TensorProduct.map_tmul]
 
-#print Algebra.TensorProduct.map_id /-
-theorem Algebra.TensorProduct.map_id {R : Type _} [CommSemiring R] {A B : Type _} [Semiring A]
-    [Semiring B] [Algebra R A] [Algebra R B] :
-    Algebra.TensorProduct.map (AlgHom.id R A) (AlgHom.id R B) = AlgHom.id R (A ⊗[R] B) :=
-  by
-  ext
-  simp only [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
--/
-
 noncomputable def AlgEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A B C D : Type _} [Semiring A]
     [Semiring B] [Semiring C] [Semiring D] [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
     (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) : A ⊗[R] C ≃ₐ[R] B ⊗[R] D
@@ -49,6 +40,13 @@ noncomputable def AlgEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A B 
   map_add' x y := by simp_rw [map_add]
   map_mul' x y := by simp_rw [_root_.map_mul]
   commutes' r := by simp_rw [Algebra.algebraMap_eq_smul_one, _root_.map_smul, _root_.map_one]
+
+@[simp]
+lemma AlgEquiv.TensorProduct.map_tmul {R : Type _} [CommSemiring R] {A B C D : Type _} [Semiring A]
+    [Semiring B] [Semiring C] [Semiring D] [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+    (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) (x : A) (y : C) :
+  AlgEquiv.TensorProduct.map f g (x ⊗ₜ[R] y) = f x ⊗ₜ[R] g y :=
+rfl
 
 @[simps]
 noncomputable def LinearEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A B C D : Type _} [AddCommMonoid A]
@@ -67,3 +65,45 @@ noncomputable def LinearEquiv.TensorProduct.map {R : Type _} [CommSemiring R] {A
   map_smul' r x := by
     simp_rw [_root_.map_smul]
     rfl
+
+
+local notation
+  f " ⊗ₘ " g => TensorProduct.map f g
+
+@[simp]
+lemma AlgEquiv.TensorProduct.map_toLinearMap
+    {R : Type _} [CommSemiring R] {A B C D : Type _} [Semiring A]
+    [Semiring B] [Semiring C] [Semiring D] [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+    (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) :
+  (AlgEquiv.TensorProduct.map f g).toLinearMap = f.toLinearMap ⊗ₘ g.toLinearMap :=
+rfl
+lemma AlgEquiv.TensorProduct.map_map_toLinearMap
+  {R : Type _} [CommSemiring R] {A B C D E F : Type _} [Semiring A]
+    [Semiring B] [Semiring C] [Semiring D] [Semiring E] [Semiring F]
+    [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D] [Algebra R E] [Algebra R F]
+    (h : B ≃ₐ[R] E) (i : D ≃ₐ[R] F) (f : A ≃ₐ[R] B) (g : C ≃ₐ[R] D) (x : A ⊗[R] C) :
+  (AlgEquiv.TensorProduct.map h i) ((AlgEquiv.TensorProduct.map f g) x)
+    = (AlgEquiv.TensorProduct.map (f.trans h) (g.trans i)) x :=
+by
+  simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply]
+  rfl
+
+lemma AlgEquiv.op_trans {R A B C : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Semiring C] [Algebra R A] [Algebra R B] [Algebra R C]
+  (f : A ≃ₐ[R] B) (g : B ≃ₐ[R] C) :
+  (AlgEquiv.op f).trans (AlgEquiv.op g) = AlgEquiv.op (f.trans g) :=
+rfl
+@[simp]
+lemma AlgEquiv.op_one {R A : Type*} [CommSemiring R] [Semiring A]
+  [Algebra R A] :
+  AlgEquiv.op (1 : A ≃ₐ[R] A) = 1 :=
+rfl
+
+@[simp]
+lemma AlgEquiv.TensorProduct.map_one {R A B : Type*} [CommSemiring R] [Semiring A]
+  [Semiring B] [Algebra R A] [Algebra R B] :
+  AlgEquiv.TensorProduct.map (1 : A ≃ₐ[R] A) (1 : B ≃ₐ[R] B) = 1 :=
+by
+  rw [AlgEquiv.ext_iff]
+  simp_rw [← AlgEquiv.toLinearMap_apply, ← LinearMap.ext_iff]
+  simp only [map_toLinearMap, one_toLinearMap, _root_.TensorProduct.map_one]
