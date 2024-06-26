@@ -6,11 +6,120 @@ import Monlib.LinearAlgebra.PosMap_isReal
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
+theorem symmMap_apply_schurMul {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+    [hA : QuantumSet A] [QuantumSet B] (f g : A →ₗ[ℂ] B) :
+  symmMap ℂ _ _ (f •ₛ g) = (symmMap _ _ _ g) •ₛ (symmMap _ _ _ f) :=
+by
+  rw [symmMap_apply, schurMul_real, schurMul_adjoint]
+  rfl
+
+@[simps]
+def LinearMap.op {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
+  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
+  (f : M →ₛₗ[σ] M₂) : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ where
+    toFun x := MulOpposite.op (f (MulOpposite.unop x))
+    map_add' _ _ := by simp only [MulOpposite.unop_add, map_add, MulOpposite.op_add]
+    map_smul' _ _ := by simp only [MulOpposite.unop_smul, LinearMap.map_smulₛₗ, MulOpposite.op_smul]
+@[simps]
+def LinearMap.unop {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
+  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
+  (f : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ) : M →ₛₗ[σ] M₂ where
+    toFun x := MulOpposite.unop (f (MulOpposite.op x))
+    map_add' _ _ := by simp only [MulOpposite.unop_add, map_add, MulOpposite.op_add]
+    map_smul' _ _ := by simp only [MulOpposite.unop_smul, LinearMap.map_smulₛₗ, MulOpposite.op_smul]
+@[simp]
+lemma LinearMap.unop_op {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
+  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
+  (f : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ) :
+  f.unop.op = f :=
+rfl
+@[simp]
+lemma LinearMap.op_unop {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
+  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
+  (f : M →ₛₗ[σ] M₂) :
+  f.op.unop = f :=
+rfl
+
+
+theorem Psi_apply_linearMap_comp_linearMap_of_commute_modAut {A B C D : Type*}
+  [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [NormedAddCommGroupOfRing D]
+  [hA : QuantumSet A] [hB : QuantumSet B]
+  [hC : QuantumSet C] [hD : QuantumSet D]
+  {f : A →ₗ[ℂ] B} {g : D →ₗ[ℂ] C}
+  (t r : ℝ)
+  (hf : (hB.modAut t).toLinearMap.comp f = f.comp (hA.modAut t).toLinearMap)
+  (hg : (hC.modAut r).toLinearMap.comp g = g.comp (hD.modAut r).toLinearMap)
+  (x : C →ₗ[ℂ] A) :
+  QuantumSet.Psi t r (f ∘ₗ x ∘ₗ g)
+    = (f ⊗ₘ ((symmMap ℂ _ _).symm g).op) (QuantumSet.Psi t r x) :=
+by
+  apply_fun LinearMap.adjoint at hg
+  simp_rw [LinearMap.adjoint_comp, ← LinearMap.star_eq_adjoint,
+    isSelfAdjoint_iff.mp (QuantumSet.modAut_isSelfAdjoint _)] at hg
+  have : ∀ a b, QuantumSet.Psi t r (f ∘ₗ (rankOne ℂ a b).toLinearMap ∘ₗ g)
+    = (f ⊗ₘ ((symmMap ℂ _ _).symm g).op) (QuantumSet.Psi t r (rankOne ℂ a b).toLinearMap) := λ _ _ => by
+    simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply] at hf hg
+    simp only [symmMap_symm_apply,
+      QuantumSet.Psi_apply, LinearMap.rankOne_comp, LinearMap.comp_rankOne,
+      QuantumSet.Psi_toFun_apply, TensorProduct.map_tmul,
+      QuantumSet.modAut_star, LinearMap.real_apply,
+      LinearMap.op_apply, MulOpposite.unop_star,
+      MulOpposite.unop_op, neg_neg, star_star,
+      ← MulOpposite.op_star, ← hf, ← hg, QuantumSet.modAut_star]
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne x
+  simp only [LinearMap.comp_sum, LinearMap.sum_comp, map_sum, this]
+
+theorem symmMap_symm_comp {A B C : Type*} [NormedAddCommGroupOfRing A]
+  [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]
+  [NormedAddCommGroupOfRing C] [QuantumSet C]
+  (x : A →ₗ[ℂ] B) (y : C →ₗ[ℂ] A) :
+  (symmMap ℂ _ _).symm (x ∘ₗ y) = (symmMap ℂ _ _).symm y ∘ₗ (symmMap ℂ _ _).symm x :=
+by
+  simp only [symmMap_symm_apply, LinearMap.adjoint_comp, LinearMap.real_comp]
+
+theorem linearMap_map_Psi_of_commute_modAut {A B C D : Type*}
+  [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+  [NormedAddCommGroupOfRing C] [NormedAddCommGroupOfRing D]
+  [hA : QuantumSet A] [hB : QuantumSet B]
+  [hC : QuantumSet C] [hD : QuantumSet D]
+  {f : A →ₗ[ℂ] B} {g : Cᵐᵒᵖ →ₗ[ℂ] Dᵐᵒᵖ}
+  (t r : ℝ)
+  (hf : (hB.modAut t).toLinearMap.comp f = f.comp (hA.modAut t).toLinearMap)
+  (hg : (hD.modAut r).toLinearMap.comp g.unop = g.unop.comp (hC.modAut r).toLinearMap)
+  (x : C →ₗ[ℂ] A) :
+  (f ⊗ₘ g) (QuantumSet.Psi t r x) = QuantumSet.Psi t r (f ∘ₗ x ∘ₗ ((symmMap ℂ _ _) g.unop)) :=
+by
+  rw [Psi_apply_linearMap_comp_linearMap_of_commute_modAut,
+    LinearEquiv.symm_apply_apply, LinearMap.unop_op]
+  . exact hf
+  . apply_fun (symmMap ℂ _ _).symm using LinearEquiv.injective _
+    simp_rw [symmMap_symm_comp, LinearEquiv.symm_apply_apply,
+      symmMap_symm_apply, ← LinearMap.star_eq_adjoint,
+      isSelfAdjoint_iff.mp (QuantumSet.modAut_isSelfAdjoint _),
+      QuantumSet.modAut_real, AlgEquiv.linearMap_comp_eq_iff, QuantumSet.modAut_symm,
+      neg_neg, LinearMap.comp_assoc, ← hg, ← QuantumSet.modAut_symm,
+      ← AlgEquiv.comp_linearMap_eq_iff]
+
 lemma schurIdempotent_iff_Psi_isIdempotentElem {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
   f •ₛ f = f ↔ IsIdempotentElem (hA.Psi t r f) :=
 by
   simp_rw [IsIdempotentElem, ← Psi.schurMul, Function.Injective.eq_iff (LinearEquiv.injective _)]
+
+@[simp]
+theorem AlgEquiv.op_toLinearMap
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A]
+  [Algebra R B] (f : A ≃ₐ[R] B) :
+  f.op.toLinearMap = f.toLinearMap.op :=
+rfl
+@[simp]
+theorem LinearMap.op_real {K E F : Type*}
+  [AddCommMonoid E] [StarAddMonoid E] [AddCommMonoid F] [StarAddMonoid F]
+  [Semiring K] [Module K E] [Module K F] [InvolutiveStar K] [StarModule K E]  [StarModule K F]
+  (φ : E →ₗ[K] F) :
+  φ.op.real = φ.real.op :=
+rfl
 
 lemma modAut_map_comp_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (t₁ r₁ t₂ r₂ : ℝ) :
@@ -18,12 +127,18 @@ lemma modAut_map_comp_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddC
     = (hA.Psi (t₁ + t₂) (-r₁ + r₂)).toLinearMap :=
 by
   apply LinearMap.ext_of_rank_one'
-  intro a b
-  simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap, hA.Psi_apply,
-    QuantumSet.Psi_toFun_apply, TensorProduct.map_tmul, AlgEquiv.toLinearMap_apply,
-    AlgEquiv.op_apply_apply]
-  simp only [QuantumSet.modAut_apply_modAut, MulOpposite.op_star, MulOpposite.unop_star,
-    MulOpposite.unop_op, QuantumSet.modAut_star, neg_add, neg_neg]
+  intro _ _
+  simp_rw [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap]
+  rw [linearMap_map_Psi_of_commute_modAut, AlgEquiv.op_toLinearMap,
+    LinearMap.op_unop, symmMap_apply, LinearMap.rankOne_comp',
+    LinearMap.comp_rankOne]
+  simp_rw [AlgEquiv.toLinearMap_apply, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
+    QuantumSet.modAut_real, AlgEquiv.toLinearMap_apply, QuantumSet.modAut_apply_modAut, add_comm]
+  all_goals
+    ext
+    simp only [AlgEquiv.op_toLinearMap, LinearMap.op_unop,
+      LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
+      QuantumSet.modAut_apply_modAut, add_comm]
 
 open scoped TensorProduct
 
