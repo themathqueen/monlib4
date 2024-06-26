@@ -2,6 +2,7 @@ import Monlib.LinearAlgebra.QuantumSet.SchurMul
 import Monlib.LinearAlgebra.QuantumSet.Symm
 import Monlib.LinearAlgebra.tensorProduct
 import Monlib.LinearAlgebra.Ips.MinimalProj
+import Monlib.LinearAlgebra.PosMap_isReal
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
@@ -58,115 +59,72 @@ class schurProjection {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommG
   isIdempotentElem : f •ₛ f = f
   isReal : LinearMap.IsReal f
 
-lemma ContinuousLinearMap.isOrthogonalProjection_iff
-  {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (T : E →L[𝕜] E) :
-  T.IsOrthogonalProjection ↔ IsIdempotentElem T ∧ LinearMap.ker T = (LinearMap.range T)ᗮ :=
-⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
+structure isEquivToPiMat (A : Type*) [Add A] [Mul A] [Star A] [SMul ℂ A] :=
+  n : Type*
+  hn₁ : Fintype n
+  hn₂ : DecidableEq n
+  k : n → Type*
+  hk₁ : Π i, Fintype (k i)
+  hk₂ : Π i, DecidableEq (k i)
+  φ : A ≃⋆ₐ[ℂ] PiMat ℂ n k
+attribute [instance] isEquivToPiMat.hn₁
+attribute [instance] isEquivToPiMat.hn₂
+attribute [instance] isEquivToPiMat.hk₁
+attribute [instance] isEquivToPiMat.hk₂
 
-lemma lmul_isIdempotentElem_iff {R A : Type*} [CommSemiring R]
-  [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a : A) :
-  (IsIdempotentElem (lmul a : _ →ₗ[R] _)) ↔ (IsIdempotentElem a) :=
+open scoped ComplexOrder
+def schurProjection.isPosMap {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+  [hA : QuantumSet A] [hB : QuantumSet B] [PartialOrder A] [PartialOrder B]
+  [StarOrderedRing B]
+  (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
+  {δ : ℂ} (hδ : 0 ≤ δ)
+  (h₂ : Coalgebra.comul ∘ₗ LinearMap.mul' ℂ A = δ • 1)
+  -- (hh : isEquivToPiMat A)
+  {f : A →ₗ[ℂ] B}
+  (hf : schurProjection f) :
+  LinearMap.IsPosMap f :=
 by
-  simp_rw [IsIdempotentElem, LinearMap.mul_eq_comp, lmul_eq_mul, ← LinearMap.mulLeft_mul]
-  refine ⟨λ h => ?_, λ h => by rw [h]⟩
-  rw [LinearMap.ext_iff] at h
-  specialize h 1
-  simp_rw [LinearMap.mulLeft_apply, mul_one] at h
-  exact h
+  revert hf
+  rintro ⟨h1, h2⟩ x hx
+  obtain ⟨a, b, rfl⟩ := h₁.mp hx
+  rw [← h1, ← @LinearMap.mul'_apply ℂ, schurMul_apply_apply]
+  simp_rw [← LinearMap.comp_apply, LinearMap.comp_assoc, h₂,
+    LinearMap.comp_apply, LinearMap.smul_apply, LinearMap.one_apply,
+    map_smul, TensorProduct.map_tmul, LinearMap.mul'_apply, h2 a]
+  have : δ = Real.sqrt (RCLike.re δ) * Real.sqrt (RCLike.re δ) :=
+  by
+    simp only [← Complex.ofReal_mul, ← Real.sqrt_mul' _ (RCLike.nonneg_def'.mp hδ).2,
+      Real.sqrt_mul_self (RCLike.nonneg_def'.mp hδ).2]
+    exact (RCLike.nonneg_def'.mp hδ).1.symm
+  have : δ • (star (f a) * f a) = star (f ((Real.sqrt (RCLike.re δ) : ℂ) • a)) *
+    f ((Real.sqrt (RCLike.re δ) : ℂ) • a) :=
+  by
+    rw [map_smul, star_smul, smul_mul_smul, RCLike.star_def, Complex.conj_ofReal, ← this]
+  rw [this]
+  exact star_mul_self_nonneg _
 
-lemma lmul_isSelfAdjoint_iff {A : Type*} [NormedAddCommGroupOfRing A]
-    [hA : QuantumSet A] (a : A) :
-  IsSelfAdjoint (lmul a : _ →ₗ[ℂ] _) ↔ IsSelfAdjoint a :=
-by
-  rw [IsSelfAdjoint, LinearMap.star_eq_adjoint, lmul_adjoint, LinearMap.ext_iff]
-  refine ⟨λ h => ?_, λ h a => by rw [h]⟩
-  specialize h 1
-  simp_rw [lmul_apply, mul_one] at h
-  exact h
+def schurIdempotent.isSchurProjection_iff_isPosMap {A B : Type*}
+  [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+  [QuantumSet A] [QuantumSet B] [PartialOrder A] [PartialOrder B]
+  [StarOrderedRing A] [StarOrderedRing B]
+  (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
+  {δ : ℂ} (hδ : 0 ≤ δ)
+  (h₂ : Coalgebra.comul ∘ₗ LinearMap.mul' ℂ A = δ • 1)
+  (hh : isEquivToPiMat A)
+  {f : A →ₗ[ℂ] B} (hf : f •ₛ f = f) :
+  schurProjection f ↔ LinearMap.IsPosMap f :=
+⟨λ h => h.isPosMap h₁ hδ h₂,
+ λ h => ⟨hf, isReal_of_isPosMap_of_starAlgEquiv_piMat hh.φ h⟩⟩
 
-lemma lmul_tmul {R A B : Type*} [CommSemiring R]
-  [Semiring A] [Semiring B] [Module R A] [Module R B] [SMulCommClass R A A]
-  [SMulCommClass R B B] [IsScalarTower R A A] [IsScalarTower R B B] (a : A) (b : B) :
-  lmul (a ⊗ₜ[R] b) = lmul a ⊗ₘ lmul b :=
-rfl
+class QuantumGraph (A : Type*) [NormedAddCommGroupOfRing A] [hA : QuantumSet A]
+    (f : A →ₗ[ℂ] A) : Prop :=
+  isIdempotentElem : f •ₛ f = f
 
-lemma lmul_tmul_adjoint_aux {A B : Type*} [NormedAddCommGroupOfRing A]
-  [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]
-  (a : A) (b : B) :
-  LinearMap.adjoint (lmul (a ⊗ₜ[ℂ] b)) = lmul (star a) ⊗ₘ lmul (star b) :=
-by
-  rw [TensorProduct.ext_iff]
-  intro c d
-  rw [TensorProduct.inner_ext_iff']
-  intro e f
-  simp_rw [LinearMap.adjoint_inner_left, lmul_tmul, TensorProduct.map_tmul,
-    TensorProduct.inner_tmul, lmul_apply, QuantumSet.inner_star_left, star_star]
-lemma lmul_tmul_adjoint {A B : Type*} [NormedAddCommGroupOfRing A]
-  [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]
-  (a : A ⊗[ℂ] B) :
-  LinearMap.adjoint (lmul a) = (lmul (star a) : _ →ₗ[ℂ] _) :=
-by
-  obtain ⟨α, β, h⟩ := TensorProduct.eq_span a
-  rw [← h]
-  simp_rw [map_sum, lmul_tmul_adjoint_aux, star_sum, map_sum, ← lmul_tmul,
-    TensorProduct.star_tmul]
-
-lemma lmul_eq_lmul_iff {R A : Type*} [CommSemiring R]
-  [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a b : A) :
-  lmul a = (lmul b : _ →ₗ[R] _) ↔ a = b :=
-by
-  refine ⟨λ h => ?_, λ h => by rw [h]⟩
-  rw [LinearMap.ext_iff] at h
-  specialize h 1
-  simp_rw [lmul_apply, mul_one] at h
-  exact h
-
-lemma isIdempotentElem_algEquiv_iff {R A B : Type*} [CommSemiring R]
-  [Semiring A] [Semiring B]
-  [Algebra R A] [Algebra R B]
-  (φ : A ≃ₐ[R] B)
-  (a : A) :
-  IsIdempotentElem (φ a : B) ↔ IsIdempotentElem a :=
-by
-  simp_rw [IsIdempotentElem, ← map_mul, Function.Injective.eq_iff (AlgEquiv.injective _)]
-
-lemma lmul_isSelfAdjoint_iff' {A B : Type*} [NormedAddCommGroupOfRing A]
-  [NormedAddCommGroupOfRing B]
-  [hA : QuantumSet A] [hB : QuantumSet B] (a : A ⊗[ℂ] B) :
-  IsSelfAdjoint (lmul a : _ →ₗ[ℂ] _) ↔ IsSelfAdjoint a :=
-by
-  rw [IsSelfAdjoint, LinearMap.star_eq_adjoint, lmul_tmul_adjoint, lmul_eq_lmul_iff]
-  rfl
-
-open scoped FiniteDimensional
-theorem ContinuousLinearMap.isOrthogonalProjection_iff'
-  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-  [FiniteDimensional ℂ E] {p : E →L[ℂ] E} :
-  IsOrthogonalProjection p
-  ↔ IsIdempotentElem p ∧ IsSelfAdjoint p :=
-by
-
-  rw [isOrthogonalProjection_iff]
-  simp only [and_congr_right_iff]
-  intro h
-  have := List.TFAE.out (IsIdempotentElem.self_adjoint_is_positive_isOrthogonalProjection_tFAE h) 0 1
-  rw [this, isOrthogonalProjection_iff]
-  simp only [h, true_and]
-
-lemma LinearMap.isSelfAdjoint_toContinuousLinearMap
-  {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
-  (f : E →ₗ[𝕜] E) :
-    _root_.IsSelfAdjoint (LinearMap.toContinuousLinearMap f) ↔ _root_.IsSelfAdjoint f :=
-by
-  simp_rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric, isSymmetric_iff_isSelfAdjoint]
-  rfl
-
-lemma LinearMap.isOrthogonalProjection_iff
-  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-  [FiniteDimensional ℂ E]
-  (T : E →ₗ[ℂ] E) :
-  (LinearMap.toContinuousLinearMap T).IsOrthogonalProjection
-    ↔ IsIdempotentElem T ∧ IsSelfAdjoint T :=
-by rw [ContinuousLinearMap.isOrthogonalProjection_iff',
-  isSelfAdjoint_toContinuousLinearMap,
-  ContinuousLinearMap.IsIdempotentElem.toLinearMap]; simp only [coe_toContinuousLinearMap]
+-- class QuantumGraphHom {A B : Type*} [NormedAddCommGroupOfRing A]
+--   [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]
+--   {x : A →ₗ[ℂ] A} (hx : QuantumGraph A x)
+--   {y : B →ₗ[ℂ] B} (hy : QuantumGraph B y)
+--     extends A →⋆ₐ[ℂ] B where
+--   isGraphHom :
+--     y •ₛ (toStarAlgHom.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint toStarAlgHom.toLinearMap))
+--       = toStarAlgHom.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint toStarAlgHom.toLinearMap)

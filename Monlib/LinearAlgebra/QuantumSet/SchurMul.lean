@@ -271,3 +271,18 @@ by
   simp_rw [← LinearMap.comp_assoc]
   congr 1
   simp_rw [TensorProduct.map_comp]
+
+theorem schurMul_one_iff_one_schurMul_of_isReal {x y z : A →ₗ[ℂ] B}
+  (hx : LinearMap.IsReal x) (hy : LinearMap.IsReal y) (hz : LinearMap.IsReal z) :
+    x •ₛ y = z ↔ y •ₛ x = z :=
+by
+  rw [LinearMap.real_inj_eq, schurMul_real, x.isReal_iff.mp hx, y.isReal_iff.mp hy,
+    z.isReal_iff.mp hz]
+
+theorem schurMul_reflexive_of_isReal {x : A →ₗ[ℂ] A} (hx : LinearMap.IsReal x) :
+  x •ₛ 1 = 1 ↔ 1 •ₛ x = 1 :=
+schurMul_one_iff_one_schurMul_of_isReal hx LinearMap.isRealOne LinearMap.isRealOne
+
+theorem schurMul_irreflexive_of_isReal {x : A →ₗ[ℂ] A} (hx : LinearMap.IsReal x) :
+  x •ₛ 1 = 0 ↔ 1 •ₛ x = 0 :=
+schurMul_one_iff_one_schurMul_of_isReal hx LinearMap.isRealOne LinearMap.isRealZero

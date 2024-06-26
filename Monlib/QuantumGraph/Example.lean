@@ -337,11 +337,6 @@ noncomputable def Qam.complement'' [QuantumSetDeltaForm A]
     l(A) :=
   x - Qam.trivialGraph A
 
-theorem schurMul_reflexive_of_isReal {x : l(A)} (hx : LinearMap.IsReal x) :
-    x •ₛ 1 = 1 ↔ 1 •ₛ x = 1 :=
-by
-  rw [LinearMap.real_inj_eq, schurMul_real, LinearMap.real_one, x.isReal_iff.mp hx]
-
 theorem Qam.complement''_is_irreflexive_iff [hA2 : QuantumSetDeltaForm A] {x : l(A)}
     (hx : LinearMap.IsReal x) : QamIrreflexive (Qam.complement'' x) ↔ QamReflexive x :=
   by

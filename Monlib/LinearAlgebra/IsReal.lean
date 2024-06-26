@@ -206,6 +206,12 @@ theorem LinearMap.real_inj_eq {E F K : Type _} [Semiring K] [AddCommMonoid E] [A
 theorem LinearMap.isRealOne {E K : Type _} [Semiring K] [AddCommMonoid E] [Module K E] [Star E] :
     LinearMap.IsReal (1 : E →ₗ[K] E) := fun _ => rfl
 
+lemma LinearMap.isRealZero
+  {E F K : Type*} [Semiring K] [AddCommMonoid E] [AddCommMonoid F]
+  [Module K E] [Module K F] [Star E] [StarAddMonoid F] :
+  LinearMap.IsReal (0 : E →ₗ[K] F) :=
+λ _ => by simp only [zero_apply, star_zero]
+
 theorem LinearMap.real_one {E K : Type _} [Semiring K] [InvolutiveStar K] [AddCommMonoid E]
     [StarAddMonoid E] [Module K E] [StarModule K E] : (1 : E →ₗ[K] E).real = 1 :=
   (LinearMap.isReal_iff _).mp LinearMap.isRealOne

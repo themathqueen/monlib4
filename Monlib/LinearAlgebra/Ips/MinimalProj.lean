@@ -918,3 +918,79 @@ example [InnerProductSpace ℂ E] {U W : Submodule ℂ E} [CompleteSpace E] [Com
     sub_add_eq_sub_sub]
 
 end MinProj
+
+section
+  lemma ContinuousLinearMap.isOrthogonalProjection_iff
+    {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (T : E →L[𝕜] E) :
+    T.IsOrthogonalProjection ↔ IsIdempotentElem T ∧ LinearMap.ker T = (LinearMap.range T)ᗮ :=
+  ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
+
+  open scoped FiniteDimensional
+  theorem ContinuousLinearMap.isOrthogonalProjection_iff'
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+    [FiniteDimensional ℂ E] {p : E →L[ℂ] E} :
+    IsOrthogonalProjection p
+    ↔ IsIdempotentElem p ∧ IsSelfAdjoint p :=
+  by
+
+    rw [isOrthogonalProjection_iff]
+    simp only [and_congr_right_iff]
+    intro h
+    have := List.TFAE.out (IsIdempotentElem.self_adjoint_is_positive_isOrthogonalProjection_tFAE h) 0 1
+    rw [this, isOrthogonalProjection_iff]
+    simp only [h, true_and]
+
+  lemma LinearMap.isSelfAdjoint_toContinuousLinearMap
+    {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
+    (f : E →ₗ[𝕜] E) :
+      _root_.IsSelfAdjoint (LinearMap.toContinuousLinearMap f) ↔ _root_.IsSelfAdjoint f :=
+  by
+    simp_rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric, isSymmetric_iff_isSelfAdjoint]
+    rfl
+
+  lemma LinearMap.isOrthogonalProjection_iff
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+    [FiniteDimensional ℂ E]
+    (T : E →ₗ[ℂ] E) :
+    (LinearMap.toContinuousLinearMap T).IsOrthogonalProjection
+      ↔ IsIdempotentElem T ∧ IsSelfAdjoint T :=
+  by rw [ContinuousLinearMap.isOrthogonalProjection_iff',
+    isSelfAdjoint_toContinuousLinearMap,
+    ContinuousLinearMap.IsIdempotentElem.toLinearMap]; simp only [coe_toContinuousLinearMap]
+end
+
+lemma lmul_isIdempotentElem_iff {R A : Type*} [CommSemiring R]
+  [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a : A) :
+  (IsIdempotentElem (lmul a : _ →ₗ[R] _)) ↔ (IsIdempotentElem a) :=
+by
+  simp_rw [IsIdempotentElem, LinearMap.mul_eq_comp, lmul_eq_mul, ← LinearMap.mulLeft_mul]
+  refine ⟨λ h => ?_, λ h => by rw [h]⟩
+  rw [LinearMap.ext_iff] at h
+  specialize h 1
+  simp_rw [LinearMap.mulLeft_apply, mul_one] at h
+  exact h
+
+lemma lmul_tmul {R A B : Type*} [CommSemiring R]
+  [Semiring A] [Semiring B] [Module R A] [Module R B] [SMulCommClass R A A]
+  [SMulCommClass R B B] [IsScalarTower R A A] [IsScalarTower R B B] (a : A) (b : B) :
+  lmul (a ⊗ₜ[R] b) = TensorProduct.map (lmul a) (lmul b) :=
+rfl
+
+lemma lmul_eq_lmul_iff {R A : Type*} [CommSemiring R]
+  [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a b : A) :
+  lmul a = (lmul b : _ →ₗ[R] _) ↔ a = b :=
+by
+  refine ⟨λ h => ?_, λ h => by rw [h]⟩
+  rw [LinearMap.ext_iff] at h
+  specialize h 1
+  simp_rw [lmul_apply, mul_one] at h
+  exact h
+
+lemma isIdempotentElem_algEquiv_iff {R A B : Type*} [CommSemiring R]
+  [Semiring A] [Semiring B]
+  [Algebra R A] [Algebra R B]
+  (φ : A ≃ₐ[R] B)
+  (a : A) :
+  IsIdempotentElem (φ a : B) ↔ IsIdempotentElem a :=
+by
+  simp_rw [IsIdempotentElem, ← map_mul, Function.Injective.eq_iff (AlgEquiv.injective _)]

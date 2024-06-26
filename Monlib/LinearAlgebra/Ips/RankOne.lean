@@ -41,12 +41,38 @@ noncomputable def ket (𝕜 : Type*) {E : Type*} [RCLike 𝕜] [NormedAddCommGro
     intro
     simp only [ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk]
     exact continuous_const_smul _
-@[simp]
+@[simp high]
 lemma ket_one_apply
   {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
   (x : E) :
   ket 𝕜 x 1 = x :=
 by simp only [ket_toFun_toFun, one_smul]
+
+theorem ket_RCLike {𝕜 : Type*} [RCLike 𝕜] (x : 𝕜) :
+  ket 𝕜 x = ContinuousLinearMap.mul 𝕜 𝕜 x :=
+by
+  ext
+  simp only [ket_one_apply, ContinuousLinearMap.mul_apply', mul_one]
+
+lemma ContinuousLinearMap.mul_one_apply {𝕜 𝕜' : Type*}
+  [NontriviallyNormedField 𝕜] [SeminormedRing 𝕜']
+  [NormedSpace 𝕜 𝕜'] [IsScalarTower 𝕜 𝕜' 𝕜'] [SMulCommClass 𝕜 𝕜' 𝕜'] :
+  mul 𝕜 𝕜' 1 = 1 :=
+by ext; rw [mul_apply', one_mul]; rfl
+
+theorem ket_RCLike_one {𝕜 : Type*} [RCLike 𝕜] :
+  ket 𝕜 (1 : 𝕜) = 1 :=
+by rw [ket_RCLike, ContinuousLinearMap.mul_one_apply]
+
+theorem bra_RCLike {𝕜 : Type*} [RCLike 𝕜] (x : 𝕜) :
+  bra 𝕜 x = ContinuousLinearMap.mul 𝕜 𝕜 ((starRingEnd 𝕜) x) :=
+by
+  ext
+  simp only [innerSL_apply, RCLike.inner_apply, mul_one, ContinuousLinearMap.mul_apply']
+
+theorem bra_RCLike_one {𝕜 : Type*} [RCLike 𝕜] :
+  bra 𝕜 (1 : 𝕜) = 1 :=
+by rw [bra_RCLike, map_one, ContinuousLinearMap.mul_one_apply]
 
 lemma bra_adjoint_eq_ket {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
@@ -63,7 +89,6 @@ lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
   ContinuousLinearMap.adjoint (ket 𝕜 x) = bra 𝕜 x :=
 by
   rw [← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
-
 
 lemma bra_ket_apply {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
@@ -127,6 +152,19 @@ rfl
 theorem ket_bra_eq_rankOne {x : E₁} {y : E₂} :
   ket 𝕜 x ∘L bra 𝕜 y = rankOne 𝕜 x y :=
 rfl
+
+theorem ket_eq_rankOne_one (x : E₁) :
+  ket 𝕜 x = rankOne 𝕜 x 1 :=
+by
+  ext
+  simp only [ket_toFun_toFun, one_smul, rankOne_apply_apply_toFun, RCLike.inner_apply, map_one,
+    mul_one]
+theorem bra_eq_one_rankOne (x : E₁) :
+  bra 𝕜 x = rankOne 𝕜 1 x :=
+by
+  ext
+  simp only [innerSL_apply, rankOne_apply_apply_toFun, smul_eq_mul, mul_one]
+
 
 open ContinuousLinearMap
 
