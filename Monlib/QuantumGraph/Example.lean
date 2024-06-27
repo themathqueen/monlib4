@@ -83,7 +83,10 @@ by
   intro x
   simp_rw [Qam.completeGraph_eq, ContinuousLinearMap.coe_coe, LinearMap.comp_apply, rankOne_apply,
     QuantumSet.inner_eq_counit, star_one, one_mul]
-  simp only [Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one]
+  simp only [
+    ← AlgEquiv.toLinearMap_apply, ← LinearMap.comp_apply,
+    (QuantumSet.modAut_isCoalgHom _).1]
+  simp only [LinearMap.comp_apply, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,]
 
 open scoped schurMul
 theorem Qam.Nontracial.CompleteGraph.qam :

@@ -140,11 +140,45 @@ by
       LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
       QuantumSet.modAut_apply_modAut, add_comm]
 
+lemma lTensor_modAut_comp_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+    [hA : QuantumSet A] [hB : QuantumSet B] (t₂ r₁ r₂ : ℝ) :
+  (LinearMap.lTensor B (hA.modAut r₁).op.toLinearMap)
+    ∘ₗ (hA.Psi t₂ r₂).toLinearMap
+  = (hA.Psi t₂ (-r₁ + r₂)).toLinearMap :=
+by
+  nth_rw 2 [← zero_add t₂]
+  rw [← modAut_map_comp_Psi, QuantumSet.modAut_zero]
+  rfl
+lemma rTensor_modAut_comp_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+    [hA : QuantumSet A] [hB : QuantumSet B] (t₁ t₂ r₂ : ℝ) :
+  (LinearMap.rTensor Aᵐᵒᵖ (hB.modAut t₁).toLinearMap)
+    ∘ₗ (hA.Psi t₂ r₂).toLinearMap
+  = (hA.Psi (t₁ + t₂) r₂).toLinearMap :=
+by
+  nth_rw 2 [← zero_add r₂]
+  rw [← neg_zero, ← modAut_map_comp_Psi, QuantumSet.modAut_zero]
+  rfl
+
 open scoped TensorProduct
+
+@[simp]
+theorem AlgEquiv.symm_one {R A : Type*} [CommSemiring R] [Semiring A] [Algebra R A] :
+  (1 : A ≃ₐ[R] A).symm = 1 :=
+rfl
+theorem LinearMap.lTensor_eq {R M N P : Type*} [CommSemiring R]
+  [AddCommMonoid M] [AddCommMonoid N] [AddCommMonoid P] [Module R M]
+  [Module R N] [Module R P] (f : N →ₗ[R] P) :
+  lTensor M f = TensorProduct.map LinearMap.id f :=
+rfl
+theorem AlgEquiv.symm_op
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A ≃ₐ[R] B) :
+  (AlgEquiv.op f).symm = AlgEquiv.op f.symm :=
+rfl
 
 lemma isReal_iff_Psi {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
-  LinearMap.IsReal f ↔ star (hA.Psi t r f) = hA.Psi (-t) (1 - r) f :=
+  LinearMap.IsReal f ↔ star (hA.Psi t r f) = hA.Psi (-t) ((2 * hA.k) + 1 - r) f :=
 by
   simp_rw [LinearMap.isReal_iff, ← Function.Injective.eq_iff (hA.Psi t r).injective,
     Psi.real_apply]
@@ -159,14 +193,26 @@ by
   simp only [← LinearEquiv.coe_toLinearMap, ← AlgEquiv.toLinearMap_apply,
     ← LinearMap.comp_apply, AlgEquiv.TensorProduct.map_toLinearMap, modAut_map_comp_Psi,
     two_mul, neg_add, neg_sub, sub_add]
-  norm_num
+  ring_nf
+  simp only [← AlgEquiv.TensorProduct.map_toLinearMap,
+    AlgEquiv.toLinearMap_apply]
+  rw [eq_comm, AlgEquiv.eq_apply_iff_symm_eq, AlgEquiv.TensorProduct.map_symm,
+    AlgEquiv.symm_one, ← AlgEquiv.toLinearMap_apply,
+    AlgEquiv.TensorProduct.map_toLinearMap, AlgEquiv.one_toLinearMap,
+    LinearMap.one_eq_id, ← LinearMap.lTensor_eq,
+    AlgEquiv.symm_op, QuantumSet.modAut_symm]
+  simp_rw [← LinearMap.comp_apply, LinearEquiv.coe_toLinearMap]
+  rw [lTensor_modAut_comp_Psi, neg_neg, eq_comm, LinearEquiv.coe_toLinearMap]
+  ring_nf
+
 
 lemma isReal_iff_Psi_isSelfAdjoint {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
     [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) :
-  LinearMap.IsReal f ↔ IsSelfAdjoint (hA.Psi 0 (1 / 2) f) :=
+  LinearMap.IsReal f ↔ IsSelfAdjoint (hA.Psi 0 (hA.k + (1 / 2)) f) :=
 by
-  rw [_root_.IsSelfAdjoint, isReal_iff_Psi f 0 (1 / 2)]
-  norm_num
+  rw [_root_.IsSelfAdjoint, isReal_iff_Psi f 0 (hA.k + 1/2)]
+  ring_nf
+
 
 class schurProjection {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
   [hA : QuantumSet A] [hB : QuantumSet B] (f : A →ₗ[ℂ] B) :

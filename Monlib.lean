@@ -66,8 +66,8 @@ import Monlib.LinearAlgebra.Matrix.Reshape
 import Monlib.LinearAlgebra.Matrix.Spectra
 import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 import Monlib.LinearAlgebra.tensorProduct
-import Monlib.LinearAlgebra.CoalgebraLemmas
-import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
+import Monlib.LinearAlgebra.Coalgebra.Lemmas
+import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
 import Monlib.LinearAlgebra.PosMap_isReal
 import Monlib.LinearAlgebra.TensorProduct.OrthonormalBasis
 import Monlib.LinearAlgebra.QuantumSet.TensorProduct

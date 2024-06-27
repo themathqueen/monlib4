@@ -55,10 +55,13 @@ noncomputable instance Module.Dual.IsFaithfulPosMap.quantumSet [hφ : φ.IsFaith
     simp_rw [← AlgEquiv.toLinearMap_apply]
     nth_rw 1 [← sig_adjoint]
     simp_rw [LinearMap.adjoint_inner_left]
+  k := 0
   -- modAut_isCoalgHom r := Module.Dual.IsFaithfulPosMap.sig_isCoalgHom _ _
-  inner_star_left x y z := by simp_rw [inner_left_hMul]; rfl
+  inner_star_left x y z := by simp_rw [neg_zero, sig_zero,
+    inner_left_hMul, star_eq_conjTranspose]
   inner_conj_left x y z := by
-    simp_rw [Module.Dual.IsFaithfulPosMap.inner_right_conj, sig_apply, neg_neg,
+    simp_rw [neg_zero, zero_sub,
+      Module.Dual.IsFaithfulPosMap.inner_right_conj, sig_apply, neg_neg,
       PosDef.rpow_one_eq_self, PosDef.rpow_neg_one_eq_inv_self]
     rfl
   n := n × n
@@ -130,10 +133,11 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
     by simp only; exact Module.Dual.pi.IsFaithfulPosMap.sig_isSymmetric hψ _ _ _
   -- modAut_isCoalgHom r :=
   --   by simp only; exact Module.Dual.pi.IsFaithfulPosMap.sig_isCoalgHom hψ r
+  k := 0
   inner_star_left x y z := by
-    simp_rw [inner_left_hMul]
+    simp_rw [neg_zero, sig_zero, inner_left_hMul]
   inner_conj_left x y z := by
-    simp_rw [Module.Dual.pi.IsFaithfulPosMap.inner_right_conj']
+    simp_rw [neg_zero, zero_sub, Module.Dual.pi.IsFaithfulPosMap.inner_right_conj']
   n := Σ i, (s i) × (s i)
   n_isFintype := by infer_instance
   n_isDecidableEq := by infer_instance

@@ -88,6 +88,15 @@ by
   simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply]
   rfl
 
+lemma AlgEquiv.TensorProduct.map_symm
+  {R : Type _} [CommSemiring R] {B D E F : Type _}
+    [Semiring B] [Semiring D] [Semiring E] [Semiring F]
+    [Algebra R B] [Algebra R D] [Algebra R E] [Algebra R F]
+    (h : B ≃ₐ[R] E) (i : D ≃ₐ[R] F) :
+  (AlgEquiv.TensorProduct.map h i).symm
+    = (AlgEquiv.TensorProduct.map h.symm i.symm) :=
+rfl
+
 lemma AlgEquiv.op_trans {R A B C : Type*} [CommSemiring R] [Semiring A]
   [Semiring B] [Semiring C] [Algebra R A] [Algebra R B] [Algebra R C]
   (f : A ≃ₐ[R] B) (g : B ≃ₐ[R] C) :

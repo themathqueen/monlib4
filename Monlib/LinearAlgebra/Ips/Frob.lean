@@ -7,7 +7,7 @@ import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.Ips.Nontracial
 import Monlib.LinearAlgebra.DirectSumFromTo
 import Monlib.LinearAlgebra.PiDirectSum
-import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
+import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
 
 #align_import linear_algebra.my_ips.frob
 

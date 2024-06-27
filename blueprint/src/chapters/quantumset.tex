@@ -106,6 +106,40 @@
   \end{align*}
  \end{proof}
 
+ \begin{lemma}\label{counit_mul_modAut_symm'}
+  \uses{QuantumSet}
+  \lean{counit_mul_modAut_symm'}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma)$, we get
+  \[\eta^*(a\sigma_r(b)) = \eta^*(\sigma_{r + 1}(b)a),\]
+  for any $r\in\mathbb{R}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  \begin{align*}
+   \eta^*(a\sigma_r(b)) &= \ip{1}{a\sigma_r(b)} = \ip{\sigma_{-(r+1)}(b^*)}{a}\\
+   &= \ip{{\sigma_{r+1}(b)}^*}{a}=\eta^*(\sigma_{r+1}(b)a).
+  \end{align*}
+ \end{proof}
+
+ \begin{corollary}\label{moving_twists}
+  \uses{counit_mul_modAut_symm'}
+  \lean{counit_comp_mul_comp_rTensor_modAut}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma)$, we get
+  \[\eta^* m(\sigma_{1}\otimes\id)=\eta^*\circ m\circ\varkappa.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Lemma \ref{counit_mul_modAut_symm'}.
+ \end{proof}
+ \begin{corollary}\label{moving_twists_2}
+  \uses{counit_mul_modAut_symm'}
+  \lean{counit_comp_mul_comp_lTensor_modAut}\leanok
+  Given a quantum set $(\mathcal{A},m,\eta,\sigma)$, we get
+  \[\eta^* m(\id\otimes\sigma_{-1})=\eta^*\circ m\circ\varkappa.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  Use Lemma \ref{counit_mul_modAut_symm'}.
+ \end{proof}
+ 
+ % =\unitadjoint\mul(\id\otimes\,\ext{-1})$.
  \begin{definition}\label{QuantumSet.Psi}
   \uses{QuantumSet}
   \lean{QuantumSet.Psi}\leanok

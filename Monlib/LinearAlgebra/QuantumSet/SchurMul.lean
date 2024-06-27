@@ -13,7 +13,7 @@ import Monlib.LinearAlgebra.TensorFinite
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.Nacgor
-import Monlib.LinearAlgebra.CoalgebraFiniteDimensional
+import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
 
 #align_import quantum_graph.schur_idempotent
 

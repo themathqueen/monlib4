@@ -76,12 +76,12 @@ variable {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
 
 theorem symmMap_rankOne_apply (a : A) (b : B) :
     symmMap _ _ _ (|a⟩⟨b| : B →ₗ[ℂ] A) =
-      |hB.modAut (-1) (star b)⟩⟨star a| :=
+      |hB.modAut (-(2*hB.k)-1) (star b)⟩⟨star a| :=
 by rw [symmMap_apply, rankOne_real, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint]
 
 theorem symmMap_symm_rankOne_apply (a : A) (b : B) :
     (symmMap _ _ _).symm (|a⟩⟨b| : B →ₗ[ℂ] A) =
-      |star b⟩⟨hA.modAut (-1) (star a)| :=
+      |star b⟩⟨hA.modAut (-(2*hA.k)-1) (star a)| :=
 by rw [symmMap_symm_apply, ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint, rankOne_real]
 
 open scoped BigOperators
@@ -113,14 +113,15 @@ rfl
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 open Coalgebra LinearMap in
-theorem symmMap_eq (f : A →ₗ[ℂ] B) :
+theorem symmMap_eq (f : A →ₗ[ℂ] B)
+  (gns₁ : hA.k = 0) (gns₂ : hB.k = 0) :
   (symmMap ℂ A _) f = (TensorProduct.rid ℂ _).toLinearMap
     ∘ₗ (lTensor _ (counit ∘ₗ m _))
     ∘ₗ (υ _ _ _).toLinearMap
     ∘ₗ (rTensor _ (lTensor _ f))
     ∘ₗ (rTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
     ∘ₗ (τ⁻¹ _) :=
-  by
+by
   rw [← symmMapAux_apply]
   revert f
   rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.ext_iff]
@@ -143,6 +144,8 @@ theorem symmMap_eq (f : A →ₗ[ℂ] B) :
     ← Finset.mul_sum, mul_comm ⟪_, y⟫_ℂ, ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
     adjoint_inner_left, mul'_apply, inner_tmul, QuantumSet.inner_star_left,
     ← inner_conj_symm (1 : A), QuantumSet.inner_conj_left, mul_one, one_mul, inner_conj_symm]
+  simp only [gns₁, gns₂, zero_mul, zero_add, neg_zero, mul_zero, zero_sub,
+    QuantumSet.modAut_zero, AlgEquiv.one_apply]
 
 open Coalgebra LinearMap in
 private noncomputable def symmMapSymmAux :
@@ -170,7 +173,8 @@ rfl
 open LinearMap Coalgebra in
 -- set_option maxHeartbeats 700000 in
 -- set_option synthInstance.maxHeartbeats 0 in
-theorem symmMap_symm_eq (f : A →ₗ[ℂ] B) :
+theorem symmMap_symm_eq (f : A →ₗ[ℂ] B)
+  (gns₁ : hA.k = 0) (gns₂ : hB.k = 0) :
   (symmMap ℂ _ _).symm f = (TensorProduct.lid ℂ A).toLinearMap
     ∘ₗ (rTensor _ (counit ∘ₗ m _))
     ∘ₗ (rTensor _ (lTensor _ f))
@@ -200,14 +204,18 @@ theorem symmMap_symm_eq (f : A →ₗ[ℂ] B) :
     ← Finset.mul_sum, ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
     adjoint_inner_left, mul'_apply, inner_tmul, QuantumSet.inner_star_left,
     mul_one, ← inner_conj_symm (1 : A), QuantumSet.inner_star_left, mul_one, inner_conj_symm]
-  nth_rw 1 [QuantumSet.inner_conj, star_star]
+  nth_rw 1 [QuantumSet.inner_conj]
+  simp only [gns₁, gns₂, zero_mul, zero_add, neg_zero, mul_zero, zero_sub,
+    QuantumSet.modAut_zero, star_star, AlgEquiv.one_apply]
 
 open Coalgebra in
-theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) :
+theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) (gns : hB.k = 0) :
     List.TFAE
-      [symmMap _ _ _ f = f, (symmMap _ _ _).symm f = f, f.real = LinearMap.adjoint f,
+      [symmMap _ _ _ f = f,
+        (symmMap _ _ _).symm f = f,
+        f.real = LinearMap.adjoint f,
         ∀ x y : B, counit (f x * y) = (counit (x * f y) : ℂ)] :=
-  by
+by
   tfae_have 1 ↔ 2
   · rw [← LinearEquiv.eq_symm_apply, eq_comm]
   tfae_have 2 ↔ 3
@@ -216,18 +224,21 @@ theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) :
   · intro h x y
     calc
       counit (f x * y) = ⟪star (f x), y⟫_ℂ := by
-        rw [QuantumSet.inner_eq_counit, star_star]
+        rw [QuantumSet.inner_eq_counit, star_star, gns, hB.modAut_zero,
+          AlgEquiv.one_apply]
       _ = ⟪f.real (star x), y⟫_ℂ := by simp_rw [LinearMap.real_apply, star_star]
       _ = ⟪LinearMap.adjoint f (star x), y⟫_ℂ := by rw [h]
       _ = ⟪star x, f y⟫_ℂ := by rw [LinearMap.adjoint_inner_left]
-      _ = counit (x * f y) := by rw [hB.inner_eq_counit, star_star]
+      _ = counit (x * f y) := by rw [hB.inner_eq_counit, star_star, gns,
+        hB.modAut_zero, AlgEquiv.one_apply]
   tfae_have 4 → 3
   · intro h
     rw [LinearMap.ext_iff_inner_map]
     intro u
     rw [LinearMap.adjoint_inner_left]
     nth_rw 2 [hB.inner_eq_counit]
-    rw [← h, LinearMap.real_apply, hB.inner_eq_counit, star_star]
+    simp only [gns, hB.modAut_zero, AlgEquiv.one_apply, hB.inner_eq_counit]
+    rw [← h, LinearMap.real_apply, star_star]
   tfae_finish
 
 theorem commute_real_real {R A : Type _} [Semiring R] [StarRing R] [AddCommMonoid A] [Module R A]
@@ -274,29 +285,34 @@ theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
   rw [eq_comm]
   simp_rw [LinearMap.comp_assoc]
 
-theorem symmMap_apply_eq_symmMap_symm_apply_iff (f : B →ₗ[ℂ] B) :
+theorem symmMap_apply_eq_symmMap_symm_apply_iff
+  (f : A →ₗ[ℂ] B) :
     symmMap ℂ _ _ f = (symmMap ℂ _ _).symm f ↔
-      Commute f (hB.modAut 1).toLinearMap :=
+      f ∘ₗ (hA.modAut (2*hA.k + 1)).toLinearMap = (hB.modAut (2 * hB.k + 1)).toLinearMap ∘ₗ f :=
   by
-  rw [symmMap_apply, symmMap_symm_apply, LinearMap.adjoint_real_eq, ←
-    commute_real_real, ← commute_star_star]
-  simp_rw [LinearMap.star_eq_adjoint, hB.modAut_real,
-    LinearMap.isSelfAdjoint_iff'.mp (hB.modAut_isSelfAdjoint _),
-    ← linearMap_commute_modAut_pos_neg 1]
-  simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp, AlgEquiv.linearMap_comp_eq_iff,
-    LinearMap.comp_assoc, hB.modAut_symm]
+  rw [symmMap_apply, symmMap_symm_apply, LinearMap.adjoint_real_eq]
+  simp_rw [@eq_comm _ (LinearMap.adjoint _), AlgEquiv.comp_linearMap_eq_iff,
+    neg_sub_left, QuantumSet.modAut_symm]
+  nth_rw 1 [← QuantumSet.modAut_isSelfAdjoint]
+  nth_rw 2 [← QuantumSet.modAut_isSelfAdjoint]
+  simp_rw [LinearMap.star_eq_adjoint, ← LinearMap.adjoint_comp,
+    Function.Injective.eq_iff (LinearEquiv.injective _)]
+  nth_rw 1 [LinearMap.real_inj_eq]
+  simp only [LinearMap.real_comp, LinearMap.real_real, QuantumSet.modAut_real]
+  rw [eq_comm]
+  ring_nf
 
 theorem Psi.real_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hA.Psi r₁ r₂ f.real =
       ((hB.modAut (2 * r₁)).toLinearMap ⊗ₘ
-        ((hA.modAut (1 - 2 * r₂)).op.toLinearMap))
+        ((hA.modAut (1 - 2 * (r₂ - hA.k))).op.toLinearMap))
       (star (hA.Psi r₁ r₂ f)) :=
 by
   suffices
     ∀ (a : B) (b : A),
       hA.Psi r₁ r₂ (LinearMap.real |a⟩⟨b|) =
         ((hB.modAut (2 * r₁)).toLinearMap ⊗ₘ
-            (hA.modAut (1 - 2 * r₂)).op.toLinearMap)
+            (hA.modAut (1 - 2 * (r₂ - hA.k))).op.toLinearMap)
           (star (hA.Psi r₁ r₂ |a⟩⟨b|))
     by
     obtain ⟨α, β, rfl⟩ := f.exists_sum_rankOne
@@ -305,8 +321,9 @@ by
   simp_rw [rankOne_real, hA.Psi_apply, hA.Psi_toFun_apply,
     star_tmul, map_tmul, AlgEquiv.toLinearMap_apply, AlgEquiv.op_apply_apply, ←
     MulOpposite.op_star, MulOpposite.unop_op, star_star, QuantumSet.modAut_star,
-    QuantumSet.modAut_apply_modAut, star_star, two_mul, neg_neg, sub_eq_add_neg,
-    add_assoc, neg_add, add_neg_cancel_comm_assoc, neg_add_cancel_comm, add_comm]
+    QuantumSet.modAut_apply_modAut, star_star, neg_sub,
+    sub_neg_eq_add]
+  ring_nf
 
 -- set_option maxHeartbeats 700000 in
 -- set_option synthInstance.maxHeartbeats 0 in
@@ -334,7 +351,7 @@ theorem Psi.adjoint_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
 
 theorem Psi.symmMap_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ (symmMap _ _ _ f) =
-      ((hA.modAut (r₁ + r₂ - 1)).toLinearMap ⊗ₘ
+      ((hA.modAut (r₁ + r₂ - 1 - (2 * hA.k))).toLinearMap ⊗ₘ
           (hB.modAut (-r₁ - r₂)).op.toLinearMap)
         (tenSwap (hA.Psi r₁ r₂ f)) :=
   by
@@ -348,14 +365,15 @@ theorem Psi.symmMap_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     tenSwap_apply', map_tmul, AlgEquiv.toLinearMap_apply, AlgEquiv.op_apply_apply,
     MulOpposite.unop_op, QuantumSet.modAut_star,
     QuantumSet.modAut_apply_modAut, star_star, sub_eq_add_neg,
-    neg_add_cancel_comm, add_assoc, add_neg_cancel_comm_assoc]
+    neg_add_cancel_comm, add_assoc]
+  ring_nf
 
 theorem Psi.symmMap_symm_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ ((symmMap _ _ _).symm f) =
       ((hA.modAut (r₁ + r₂)).toLinearMap ⊗ₘ
-          (hB.modAut (1 - r₁ - r₂)).op.toLinearMap)
+          (hB.modAut (1 - r₁ - r₂ + (2 * hB.k))).op.toLinearMap)
         (tenSwap (hA.Psi r₁ r₂ f)) :=
-  by
+by
   simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply]
   revert f
   simp_rw [← LinearMap.ext_iff]
@@ -365,8 +383,8 @@ theorem Psi.symmMap_symm_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
     tenSwap_apply', map_tmul, AlgEquiv.toLinearMap_apply, AlgEquiv.op_apply_apply,
     MulOpposite.unop_op, QuantumSet.modAut_star,
-    QuantumSet.modAut_apply_modAut, star_star, sub_eq_add_neg, add_assoc,
-    neg_add_cancel_comm_assoc, add_neg_self, add_zero, neg_neg, add_comm]
+    QuantumSet.modAut_apply_modAut, star_star, sub_eq_add_neg, add_assoc]
+  ring_nf
 
 theorem symmMap_apply_adjoint (x : A →ₗ[ℂ] B) :
     LinearMap.adjoint (symmMap ℂ A _ x)

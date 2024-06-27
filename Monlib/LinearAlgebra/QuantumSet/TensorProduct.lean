@@ -39,9 +39,9 @@ noncomputable instance :
 
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 60000 in
-noncomputable instance QuantumSet.tensorProduct :
+noncomputable instance QuantumSet.tensorProduct [h : Fact (hA.k = hB.k)] :
     QuantumSet (A ⊗[ℂ] B) where
-  modAut r := AlgEquiv.TensorProduct.map (hA.modAut r) (hB.modAut r)
+  modAut r := AlgEquiv.TensorProduct.map (hA.modAut r) (hB.modAut (r))
   modAut_trans r s := by
     simp_rw [AlgEquiv.ext_iff, ← AlgEquiv.toLinearMap_apply, ← LinearMap.ext_iff]
     apply TensorProduct.ext'
@@ -60,23 +60,26 @@ noncomputable instance QuantumSet.tensorProduct :
     nth_rw 1 [← @modAut_isSelfAdjoint B]
     simp_rw [LinearMap.star_eq_adjoint, ← TensorProduct.map_adjoint]
     exact LinearMap.adjoint_inner_left _ _ _
+  k := hA.k
   inner_star_left a b c := by
-    obtain ⟨α,β,h⟩ := a.eq_span
+    obtain ⟨α,β,h'⟩ := a.eq_span
     obtain ⟨α₂,β₂,h₂⟩ := b.eq_span
     obtain ⟨α₃,β₃,h₃⟩ := c.eq_span
-    rw [← h]
-    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner]
+    rw [← h']
+    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner, map_sum]
     simp_rw [← h₂]
-    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner]
+    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner, map_sum]
     simp_rw [← h₃]
-    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner]
+    simp only [star_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner, map_sum]
     simp only [TensorProduct.star_tmul, Algebra.TensorProduct.tmul_mul_tmul,
-      QuantumSet.inner_star_left, TensorProduct.inner_tmul]
+      QuantumSet.inner_star_left, TensorProduct.inner_tmul,
+      AlgEquiv.TensorProduct.map_tmul]
+    rw [h.out]
   inner_conj_left a b c := by
-    obtain ⟨α,β,h⟩ := a.eq_span
+    obtain ⟨α,β,h'⟩ := a.eq_span
     obtain ⟨α₂,β₂,h₂⟩ := b.eq_span
     obtain ⟨α₃,β₃,h₃⟩ := c.eq_span
-    rw [← h]
+    rw [← h']
     simp only [star_sum, map_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner]
     simp_rw [← h₂]
     simp only [star_sum, map_sum, Finset.sum_mul, Finset.mul_sum, inner_sum, sum_inner]
@@ -89,25 +92,34 @@ noncomputable instance QuantumSet.tensorProduct :
       TensorProduct.inner_tmul,
       QuantumSet.inner_conj_left,
       ]
+    rw [h.out]
   onb := hA.onb.tensorProduct hB.onb
   n_isDecidableEq := by infer_instance
 
-theorem modAut_tensor (r : ℝ) :
+theorem modAut_tensor [Fact (hA.k = hB.k)] (r : ℝ) :
   QuantumSet.tensorProduct.modAut r =
     AlgEquiv.TensorProduct.map (hA.modAut r) (hB.modAut r) :=
 rfl
+theorem QuantumSet.tensorProduct.k_eq₁ [Fact (hA.k = hB.k)] :
+  (QuantumSet.tensorProduct : QuantumSet (A ⊗[ℂ] B)).k = hA.k :=
+rfl
+theorem QuantumSet.tensorProduct.k_eq₂ [h : Fact (hA.k = hB.k)] :
+  (QuantumSet.tensorProduct : QuantumSet (A ⊗[ℂ] B)).k = hB.k :=
+by rw [← h.out]; rfl
 
 theorem comul_real :
   (Coalgebra.comul : A →ₗ[ℂ] A ⊗[ℂ] A).real = (TensorProduct.comm ℂ A A).toLinearMap ∘ₗ Coalgebra.comul :=
 by
+  haveI := Fact.mk (rfl : hA.k = hA.k)
   rw [Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_real_eq,
     LinearMap.mul'_real, LinearMap.adjoint_comp, TensorProduct.comm_adjoint,
     LinearMap.comp_assoc, ← LinearMap.comp_assoc, modAut_tensor,
     AlgEquiv.TensorProduct.map_toLinearMap,
     ← TensorProduct.comm_symm_map, ← Coalgebra.comul_eq_mul_adjoint]
   simp_rw [LinearMap.comp_assoc, ← LinearMap.comp_assoc _ _ (TensorProduct.map _ _),
-    (QuantumSet.modAut_isCoalgHom 1).2, LinearMap.comp_assoc, ← AlgEquiv.trans_toLinearMap,
-    QuantumSet.modAut_trans, neg_add_self, QuantumSet.modAut_zero]
+    (QuantumSet.modAut_isCoalgHom _).2, LinearMap.comp_assoc, ← AlgEquiv.trans_toLinearMap,
+    QuantumSet.modAut_trans, neg_sub_left, add_comm,
+    QuantumSet.tensorProduct.k_eq₁, neg_add_self, QuantumSet.modAut_zero]
   rfl
 
 -- calc Coalgebra.comul.real = (LinearMap.adjoint (LinearMap.mul' ℂ A)).real :=

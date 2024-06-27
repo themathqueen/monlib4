@@ -27,9 +27,13 @@ open scoped TensorProduct BigOperators
 
 section
 
-variable {𝕜 E F G : Type _} [Field 𝕜] [AddCommGroup E] [AddCommGroup F] [AddCommGroup G]
-  [StarAddMonoid E] [StarAddMonoid F] [StarAddMonoid G] [Module 𝕜 E] [Module 𝕜 F] [Module 𝕜 G]
-  [StarRing 𝕜] [StarModule 𝕜 G] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+variable {𝕜 E F G : Type _}
+  [Field 𝕜] [StarRing 𝕜]
+  [AddCommGroup E] [AddCommGroup F] [AddCommGroup G]
+  [StarAddMonoid E] [StarAddMonoid F] [StarAddMonoid G]
+  [Module 𝕜 E] [Module 𝕜 F] [Module 𝕜 G]
+  [StarModule 𝕜 G]
+  [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
   [FiniteDimensional 𝕜 G]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/

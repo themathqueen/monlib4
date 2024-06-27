@@ -212,11 +212,10 @@ theorem StarAlgEquiv.IsIsometry.commutes_with_mul'_adjoint
 
 theorem Qam.reflIdempotent_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)} (hf : StarAlgEquiv.IsIsometry f) (A B : l((Matrix n n ℂ))) :
-    Qam.reflIdempotent hφ (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap)
-        (f.toLinearMap ∘ₗ B ∘ₗ f.symm.toLinearMap) =
-      f.toLinearMap ∘ₗ Qam.reflIdempotent hφ A B ∘ₗ f.symm.toLinearMap :=
+    (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) •ₛ (f.toLinearMap ∘ₗ B ∘ₗ f.symm.toLinearMap) =
+      f.toLinearMap ∘ₗ (A •ₛ B) ∘ₗ f.symm.toLinearMap :=
   by
-  simp only [Qam.reflIdempotent, schurMul_apply_apply, TensorProduct.map_comp, ←
+  simp only [schurMul_apply_apply, TensorProduct.map_comp, ←
     LinearMap.comp_assoc, f.commutes_with_mul']
   have : StarAlgEquiv.IsIsometry f.symm :=
     by
@@ -230,140 +229,27 @@ theorem Qam.reflIdempotent_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap] [Nontri
   simp only [LinearMap.comp_assoc, Coalgebra.comul_eq_mul_adjoint,
     this.commutes_with_mul'_adjoint, hf.commutes_with_mul'_adjoint]
 
+
 theorem InnerAut.reflIdempotent [hφ : φ.IsFaithfulPosMap]
   [Nontrivial n] {U : unitaryGroup n ℂ} (hU : Commute φ.matrix U)
     (A B : l((Matrix n n ℂ))) :
-    Qam.reflIdempotent hφ (f_{U} ∘ₗ A ∘ₗ f_{star U}) (f_{U} ∘ₗ B ∘ₗ f_{star U}) =
-      f_{U} ∘ₗ Qam.reflIdempotent hφ A B ∘ₗ f_{star U} :=
+    (f_{U} ∘ₗ A ∘ₗ f_{star U}) •ₛ (f_{U} ∘ₗ B ∘ₗ f_{star U}) =
+      f_{U} ∘ₗ (A •ₛ B) ∘ₗ f_{star U} :=
   by
   rw [← innerAut_inv_eq_star, ← innerAutStarAlg_equiv_symm_toLinearMap, ←
     innerAutStarAlg_equiv_toLinearMap]
   rw [unitary_commutes_with_hφ_matrix_iff_isIsometry hφ U] at hU
   exact Qam.reflIdempotent_starAlgEquiv_conj hU _ _
 
-theorem qam_starAlgEquiv_conj_iff [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)}
-  (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-  Qam φ (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) ↔ Qam φ A := by
-simp_rw [Qam, Qam.reflIdempotent_starAlgEquiv_conj hf, StarAlgEquiv.comp_inj,
-  StarAlgEquiv.inj_comp]
-
-theorem qam_symm_starAlgEquiv_conj_iff [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)}
-  (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-  @Qam.IsSymm n _ _ φ _ (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) ↔
-    @Qam.IsSymm n _ _ φ _ A :=
-by
-simp only [Qam.IsSymm, Qam.symm_apply_starAlgEquiv_conj hf, StarAlgEquiv.comp_inj,
-  StarAlgEquiv.inj_comp]
-
-theorem qam_isSelfAdjoint_starAlgEquiv_conj_iff [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)}
-    (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-    IsSelfAdjoint (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) ↔
-      IsSelfAdjoint A :=
-  by
-  simp only [LinearMap.isSelfAdjoint_iff', LinearMap.adjoint_comp]
-  have :=
-    List.TFAE.out (@Module.Dual.IsFaithfulPosMap.starAlgEquiv_is_isometry_tFAE n _ _ φ _ _ f) 4 1
-  rw [StarAlgEquiv.IsIsometry, isometry_iff_norm, this] at hf
-  simp_rw [hf, ← LinearMap.comp_assoc, StarAlgEquiv.inj_comp, ← hf, LinearMap.adjoint_adjoint,
-    StarAlgEquiv.comp_inj]
-
-theorem qam_ir_reflexive_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)}
-  (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-  Qam.reflIdempotent hφ (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) 1 =
-    f.toLinearMap ∘ₗ Qam.reflIdempotent hφ A 1 ∘ₗ f.symm.toLinearMap :=
-by
-  calc
-    Qam.reflIdempotent hφ
-          (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) 1 =
-        Qam.reflIdempotent hφ
-          (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap)
-          (f.toLinearMap ∘ₗ 1 ∘ₗ f.symm.toLinearMap) :=
-      ?_
-    _ =
-        f.toLinearMap ∘ₗ
-          Qam.reflIdempotent hφ A 1 ∘ₗ f.symm.toLinearMap :=
-      Qam.reflIdempotent_starAlgEquiv_conj hf _ _
-  congr
-  simp only [LinearMap.one_comp, ← StarAlgEquiv.comp_eq_iff]
-
-theorem qam_ir_reflexive'_starAlgEquiv_conj [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)}
-  (hf : StarAlgEquiv.IsIsometry f) (A : l((Matrix n n ℂ))) :
-  Qam.reflIdempotent hφ 1 (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) =
-    f.toLinearMap ∘ₗ Qam.reflIdempotent hφ 1 A ∘ₗ f.symm.toLinearMap :=
-by
-  calc
-    Qam.reflIdempotent hφ (1 : l((Matrix n n ℂ)))
-          (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) =
-        Qam.reflIdempotent hφ
-          (f.toLinearMap ∘ₗ 1 ∘ₗ f.symm.toLinearMap)
-          (f.toLinearMap ∘ₗ A ∘ₗ f.symm.toLinearMap) :=
-      ?_
-    _ =
-        f.toLinearMap ∘ₗ
-          Qam.reflIdempotent hφ 1 A ∘ₗ f.symm.toLinearMap :=
-      Qam.reflIdempotent_starAlgEquiv_conj hf _ _
-  -- congr,
-  simp only [LinearMap.one_comp]
-  have : 1 = f.toLinearMap.comp f.symm.toLinearMap := by
-    simp only [← StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
-  simp only [← this]
-
-theorem InnerAut.qam [hφ : φ.IsFaithfulPosMap] [Nontrivial n] {U : Matrix.unitaryGroup n ℂ}
-    (hU : Commute φ.matrix U) (A : l((Matrix n n ℂ))) : Qam φ (f_{U} ∘ₗ A ∘ₗ f_{star U}) ↔ Qam φ A :=
-  by
-  rw [← innerAut_inv_eq_star, ← innerAutStarAlg_equiv_symm_toLinearMap, ←
-    innerAutStarAlg_equiv_toLinearMap]
-  exact qam_starAlgEquiv_conj_iff ((unitary_commutes_with_hφ_matrix_iff_isIsometry _ U).mp hU) _
-
-theorem InnerAut.ir_reflexive [hφ : φ.IsFaithfulPosMap]
-  [Nontrivial n] {U : Matrix.unitaryGroup n ℂ} (hU : Commute φ.matrix U)
-  (A : l((Matrix n n ℂ))) :
-  Qam.reflIdempotent hφ (f_{U} ∘ₗ A ∘ₗ f_{star U}) 1 =
-    f_{U} ∘ₗ Qam.reflIdempotent hφ A 1 ∘ₗ f_{star U} :=
-by
-  rw [← innerAut_inv_eq_star, ← innerAutStarAlg_equiv_symm_toLinearMap, ←
-    innerAutStarAlg_equiv_toLinearMap]
-  exact
-    qam_ir_reflexive_starAlgEquiv_conj ((unitary_commutes_with_hφ_matrix_iff_isIsometry _ U).mp hU) _
-
-theorem InnerAut.qam_is_reflexive [hφ : φ.IsFaithfulPosMap] [Nontrivial n] {U : Matrix.unitaryGroup n ℂ}
-    (hU : Commute φ.matrix U) {A : l((Matrix n n ℂ))} :
-    @QamLmNontracialIsReflexive n _ _ φ hφ (f_{U} ∘ₗ A ∘ₗ f_{star U}) ↔
-      @QamLmNontracialIsReflexive _ _ _ _ hφ A :=
-by
-  simp_rw [QamLmNontracialIsReflexive, InnerAut.ir_reflexive hU]
-  nth_rw 1 [LinearMap.ext_iff]
-  simp_rw [LinearMap.comp_apply, innerAut_eq_iff, LinearMap.one_apply, ← LinearMap.comp_apply, ←
-    LinearMap.ext_iff]
-  rw [← LinearMap.one_comp (innerAut U⁻¹)]
-  simp_rw [innerAut_inv_eq_star, ← innerAut.inj_comp (star U)]
-
-theorem InnerAut.qam_is_irreflexive [hφ : φ.IsFaithfulPosMap] [Nontrivial n] {U : Matrix.unitaryGroup n ℂ}
-    (hU : Commute φ.matrix U) {A : l((Matrix n n ℂ))} :
-    @QamLmNontracialIsUnreflexive _ _ _ _ hφ (f_{U} ∘ₗ A ∘ₗ f_{star U}) ↔
-      @QamLmNontracialIsUnreflexive _ _ _ _ hφ A :=
-  by
-  simp_rw [QamLmNontracialIsUnreflexive, InnerAut.ir_reflexive hU, LinearMap.ext_iff,
-    LinearMap.comp_apply, innerAut_eq_iff, LinearMap.zero_apply, LinearMap.map_zero]
-  refine' ⟨fun h x => _, fun h x => by rw [h]⟩
-  specialize h (f_{U} x)
-  simp_rw [← innerAut_inv_eq_star, innerAut_inv_apply_innerAut_self] at h
-  exact h
-
 def Qam.Iso (A B : l((Matrix n n ℂ))) : Prop :=
   ∃ f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ),
     A ∘ₗ f.toLinearMap = f.toLinearMap ∘ₗ B ∧ f φ.matrix = φ.matrix
 
-structure QamIso [hφ : φ.IsFaithfulPosMap] {A B : l((Matrix n n ℂ))} (hA : Qam φ A) (hB : Qam φ B) extends
-    StarAlgEquiv ℂ (Matrix n n ℂ) (Matrix n n ℂ) where
-  IsHom :=
-    A ∘ₗ toStarAlgEquiv.toLinearMap = toStarAlgEquiv.toLinearMap ∘ₗ B
-  is_iso := toFun φ.matrix = φ.matrix
+-- structure QamIso [hφ : φ.IsFaithfulPosMap] {A B : l((Matrix n n ℂ))} (hA : Qam φ A) (hB : Qam φ B) extends
+--     StarAlgEquiv ℂ (Matrix n n ℂ) (Matrix n n ℂ) where
+--   IsHom :=
+--     A ∘ₗ toStarAlgEquiv.toLinearMap = toStarAlgEquiv.toLinearMap ∘ₗ B
+--   is_iso := toFun φ.matrix = φ.matrix
 
 -- -- TODO:
 -- def qam.lm.reflexive.iso {A B : l((Matrix n n ℂ))} (hA : qam_lm_is_reflexive A)
