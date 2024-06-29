@@ -566,7 +566,7 @@ theorem Matrix.one_eq_zero_iff {𝕜 n : Type*} [DecidableEq n]
 by rw [← not_nonempty_iff, ← @one_ne_zero_iff 𝕜 n, not_ne_iff]
 
 theorem AlgEquiv.matrix_prod_aut {𝕜 n m : Type*} [Field 𝕜] [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
-  [Nonempty n] [Nonempty m]
+  -- [Nonempty n] [Nonempty m]
   (f : (Matrix n n 𝕜 × Matrix m m 𝕜) ≃ₐ[𝕜] (Matrix n n 𝕜 × Matrix m m 𝕜)) :
   (f (1, 0) = (1, 0) ∧ f (0, 1) = (0, 1)) ∨ (f (1, 0) = (0, 1) ∧ f (0, 1) = (1, 0)) :=
 by
@@ -630,45 +630,83 @@ by
   obtain ⟨c, d, hcd⟩ := ha1
   obtain ⟨c₂, d₂, hcd2⟩ := hb1
   have h₈ : f (e₁ * e₂) = 0 := by rw [h₂, _root_.map_zero]
-  have h₉ : f (e₁ + e₂) = 1 := by rw [h₁, _root_.map_one]
-  simp_rw [_root_.map_mul, ← h₆, ← h₇, add_mul, mul_add, smul_mul_smul, h₂, h₃, h₄, h₅, smul_zero,
-    add_zero, zero_add, h10, h11, Prod.mk_add_mk, add_zero, zero_add, Prod.zero_eq_mk,
-    Prod.ext_iff, smul_eq_zero, mul_eq_zero, one_ne_zero, or_false] at h₈
-  rw [_root_.map_add, ← h₆, ← h₇, add_add_add_comm] at h₉
-  simp_rw [← add_smul, Prod.one_eq_mk, h10, h11, Prod.mk_add_mk, add_zero, zero_add,
-    Prod.ext_iff, smul_one_eq_one_iff, not_isEmpty_of_nonempty, or_false] at h₉
-  by_cases hα : α ≠ 0
-  . simp_rw [hα, false_or] at h₈
-    rw [h₈.1, add_zero] at h₉
-    rw [h₉.1] at h₆
-    rw [h₈.1, zero_smul, zero_add] at h₇
-    have hζ : ζ ≠ 0 := by
-      intro hζ
-      simp_rw [hζ, zero_smul, @eq_comm _ (0 : Matrix n n 𝕜 × Matrix m m 𝕜),
-        AlgEquiv.map_eq_zero_iff, he₂, Prod.zero_eq_mk, Prod.ext_iff,
-        one_ne_zero, and_false] at h₇
-    simp_rw [hζ, or_false] at h₈
-    rw [h₈.2, zero_add] at h₉
-    rw [h₉.2, one_smul] at h₇
-    rw [one_smul, h₈.2, zero_smul, add_zero] at h₆
-    left
-    exact ⟨h₆.symm, h₇.symm⟩
-  . rw [not_ne_iff] at hα
-    rw [hα] at h₈ h₉ h₆
-    simp only [true_or, zero_add, true_and] at h₈ h₉
-    rw [zero_smul, zero_add] at h₆
-    rw [h₉.1, one_smul] at h₇
-    have hβ : β ≠ 0 := by
-      intro hβ
-      simp_rw [hβ, zero_smul, @eq_comm _ (0 : Matrix n n 𝕜 × Matrix m m 𝕜),
-        AlgEquiv.map_eq_zero_iff, he₁, Prod.zero_eq_mk, Prod.ext_iff,
-        one_ne_zero, false_and] at h₆
-    simp_rw [hβ, false_or] at h₈
-    rw [h₈, add_zero] at h₉
-    rw [h₉.2, one_smul] at h₆
-    rw [h₈, zero_smul, add_zero] at h₇
-    right
-    exact ⟨h₆.symm, h₇.symm⟩
+  have h₉ : f (e₁ + e₂) = 1 := by simp [h₁, _root_.map_one]
+  by_cases Hem : IsEmpty n
+  . haveI : NeZero (1 : 𝕜) := by infer_instance
+    rw [← @Matrix.one_eq_zero_iff 𝕜] at Hem
+    rw [he₁, he₂, Hem]
+    simp_rw [← Prod.zero_eq_mk, map_zero, true_and, map_eq_zero_iff, eq_comm, and_self]
+    by_cases Hen : IsEmpty m
+    . rw [← @Matrix.one_eq_zero_iff 𝕜] at Hen
+      simp_rw [Hen, ← Prod.zero_eq_mk, map_zero]
+      simp only [Prod.fst_zero, Prod.snd_zero, and_self, or_self]
+    . rw [← @Matrix.one_eq_zero_iff 𝕜, eq_comm] at Hen
+      nth_rw 2 [Prod.eq_iff_fst_eq_snd_eq]
+      simp only [Prod.fst_zero, Prod.snd_zero, true_and, Hen, or_false]
+      simp_rw [← Hem, ← Prod.one_eq_mk, _root_.map_one]
+
+  . haveI : Nonempty n := not_isEmpty_iff.mp Hem
+    rw [← @Matrix.one_eq_zero_iff 𝕜] at Hem
+    simp_rw [_root_.map_mul, ← h₆, ← h₇, add_mul, mul_add, smul_mul_smul, h₂, h₃, h₄, h₅, smul_zero,
+      add_zero, zero_add, h10, h11, Prod.mk_add_mk, add_zero, zero_add, Prod.zero_eq_mk,
+      Prod.ext_iff, smul_eq_zero, mul_eq_zero, Hem, or_false] at h₈
+    rw [_root_.map_add, ← h₆, ← h₇, add_add_add_comm] at h₉
+    simp_rw [← add_smul, Prod.one_eq_mk, h10, h11, Prod.mk_add_mk, add_zero, zero_add,
+      Prod.ext_iff, smul_one_eq_one_iff, not_isEmpty_of_nonempty, or_false] at h₉
+    by_cases hα : α ≠ 0
+    . simp_rw [hα, false_or] at h₈
+      rw [h₈.1, add_zero] at h₉
+      rw [h₉.1] at h₆
+      rw [h₈.1, zero_smul, zero_add] at h₇
+
+      rcases h₈ with ⟨h₈1, ((h81|h81) | h82)⟩
+      . rw [h81, zero_add] at h₉
+        rw [h81, zero_smul, add_zero, one_smul] at h₆
+        rw [← h₆, ← h₇]
+        simp only [true_and, h10, h11, he₁, he₂, Prod.ext_iff, Hem, @eq_comm _ 0 (1 : Matrix n n 𝕜),
+          false_and, and_false, or_false]
+        rw [smul_one_eq_one_iff]
+        exact h₉.2
+      . simp_rw [h81, add_zero] at h₉
+        rw [h81, zero_smul, eq_comm, map_eq_zero_iff] at h₇
+        simp_rw [h₇, map_zero, map_eq_zero_iff, and_true]
+        rw [h₇, smul_zero, one_smul, add_zero] at h₆
+        left
+        exact h₆.symm
+      simp_rw [he₁, he₂, h82, ← Prod.zero_eq_mk, ← h82, ← Prod.one_eq_mk,
+        _root_.map_one, _root_.map_zero, Prod.ext_iff, Prod.fst_one, Prod.snd_one,
+        Prod.fst_zero, Prod.snd_zero, h82, Hem, true_and, true_or]
+    . rw [not_ne_iff] at hα
+      rw [hα] at h₈ h₉ h₆
+      simp only [true_or, zero_add, true_and] at h₈ h₉
+      rw [zero_smul, zero_add] at h₆
+      rw [h₉.1, one_smul] at h₇
+      have hβ : β ≠ 0 := by
+        intro hβ
+        simp_rw [hβ, zero_smul, @eq_comm _ (0 : Matrix n n 𝕜 × Matrix m m 𝕜),
+          AlgEquiv.map_eq_zero_iff, he₁, Prod.zero_eq_mk, Prod.ext_iff,
+          one_ne_zero, false_and] at h₆
+      simp_rw [hβ, false_or] at h₈
+      rcases h₈ with (h81 | h82)
+      .
+        rw [h81, add_zero] at h₉
+        rw [h81, zero_smul, add_zero] at h₇
+        rcases h₉ with ⟨h₉, (h91 | h92)⟩
+        . rw [h91, one_smul] at h₆
+          right
+          exact ⟨h₆.symm, h₇.symm⟩
+        . rw [← @Matrix.one_eq_zero_iff 𝕜] at h92
+          simp_rw [he₁, he₂, h92, ← Prod.zero_eq_mk, ← h92, ← Prod.one_eq_mk,
+            _root_.map_one, _root_.map_zero, Prod.ext_iff, Prod.fst_one, Prod.snd_one,
+            Prod.fst_zero, Prod.snd_zero, h92, Hem, true_and, true_or]
+      . simp_rw [he₁, he₂, h82, ← Prod.zero_eq_mk, ← h82, ← Prod.one_eq_mk,
+          _root_.map_one, _root_.map_zero, Prod.ext_iff, Prod.fst_one, Prod.snd_one,
+          Prod.fst_zero, Prod.snd_zero, h82, Hem, true_and, true_or]
+        -- rw [h₉.2, one_smul] at h₆
+        -- rw [h₈, zero_smul, add_zero] at h₇
+        -- right
+        -- exact ⟨h₆.symm, h₇.symm⟩
+
 
 lemma _root_.Algebra.prod_one_zero_mul {R₁ R₂ : Type*}
   [Semiring R₁] [Semiring R₂] (a : R₁ × R₂) :
@@ -804,7 +842,6 @@ def AlgEquiv.of_prod_map₂₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
     rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_fst, hf] }
 
 theorem AlgEquiv.matrix_prod_aut' {𝕜 n m : Type*} [Field 𝕜] [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
-  [Nonempty n] [Nonempty m]
   (f : (Matrix n n 𝕜 × Matrix m m 𝕜) ≃ₐ[𝕜] (Matrix n n 𝕜 × Matrix m m 𝕜)) :
   (∃ (f₁ : Matrix n n 𝕜 ≃ₐ[𝕜] Matrix n n 𝕜) (f₂ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix m m 𝕜),
     f = AlgEquiv.prod_map f₁ f₂)
@@ -853,6 +890,8 @@ by
   have := LinearEquiv.finrank_eq f'.toLinearEquiv
   simp [FiniteDimensional.finrank_matrix, ← pow_two] at this
   exact this.symm
+
+-- example {𝕜 : Type*} [Field 𝕜] {k : ℕ} {}
 
 -- def perm_perm_aux {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
 --   (σ : Equiv.Perm ι)
