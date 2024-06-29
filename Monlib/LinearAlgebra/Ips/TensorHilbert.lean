@@ -136,7 +136,7 @@ example (α β : 𝕜) (x y : E) :
   TensorProduct.inner_tmul _ _ _ _
 
 theorem TensorProduct.lid_adjoint :
-    LinearMap.adjoint (TensorProduct.lid 𝕜 E : 𝕜 ⊗[𝕜] E →ₗ[𝕜] E) = (TensorProduct.lid 𝕜 E).symm :=
+    LinearMap.adjoint (TensorProduct.lid 𝕜 E).toLinearMap = (TensorProduct.lid 𝕜 E).symm.toLinearMap :=
   by
   ext1
   apply @ext_inner_right 𝕜
@@ -151,8 +151,8 @@ theorem TensorProduct.lid_adjoint :
     (fun z w hz hw => by simp only [map_add, inner_add_right, hz, hw])
 
 theorem TensorProduct.comm_adjoint :
-    LinearMap.adjoint (TensorProduct.comm 𝕜 E F : E ⊗[𝕜] F →ₗ[𝕜] F ⊗[𝕜] E) =
-      (TensorProduct.comm 𝕜 E F).symm :=
+    LinearMap.adjoint (TensorProduct.comm 𝕜 E F).toLinearMap =
+      (TensorProduct.comm 𝕜 E F).symm.toLinearMap :=
   by
   apply TensorProduct.ext'
   intro x y
@@ -167,8 +167,8 @@ theorem TensorProduct.comm_adjoint :
 
 theorem TensorProduct.assoc_symm_adjoint {G : Type _} [NormedAddCommGroup G] [InnerProductSpace 𝕜 G]
     [FiniteDimensional 𝕜 G] :
-    LinearMap.adjoint ((TensorProduct.assoc 𝕜 E F G).symm : E ⊗[𝕜] F ⊗[𝕜] G →ₗ[𝕜] (E ⊗[𝕜] F) ⊗[𝕜] G)
-      = TensorProduct.assoc 𝕜 E F G :=
+    LinearMap.adjoint ((TensorProduct.assoc 𝕜 E F G).symm).toLinearMap
+      = (TensorProduct.assoc 𝕜 E F G).toLinearMap :=
   by
   apply TensorProduct.ext_threefold
   intro x y z
@@ -185,8 +185,8 @@ theorem TensorProduct.assoc_symm_adjoint {G : Type _} [NormedAddCommGroup G] [In
 
 theorem TensorProduct.assoc_adjoint {G : Type _} [NormedAddCommGroup G] [InnerProductSpace 𝕜 G]
     [FiniteDimensional 𝕜 G] :
-    LinearMap.adjoint (TensorProduct.assoc 𝕜 E F G : (E ⊗[𝕜] F) ⊗[𝕜] G →ₗ[𝕜] E ⊗[𝕜] F ⊗[𝕜] G)
-      = (TensorProduct.assoc 𝕜 E F G).symm :=
+    LinearMap.adjoint (TensorProduct.assoc 𝕜 E F G).toLinearMap
+      = (TensorProduct.assoc 𝕜 E F G).symm.toLinearMap :=
   by
   have := @TensorProduct.assoc_symm_adjoint 𝕜 E F _ _ _ _ _ _ _ G _ _ _
   apply_fun LinearMap.adjoint at this
@@ -239,8 +239,8 @@ theorem TensorProduct.inner_ext_iff' {𝕜 E F : Type _} [RCLike 𝕜] [NormedAd
 
 theorem TensorProduct.lid_symm_adjoint {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
-    LinearMap.adjoint (TensorProduct.lid 𝕜 E).symm
-      = (TensorProduct.lid 𝕜 E : 𝕜 ⊗[𝕜] E →ₗ[𝕜] E) :=
+    LinearMap.adjoint (TensorProduct.lid 𝕜 E).symm.toLinearMap
+      = (TensorProduct.lid 𝕜 E).toLinearMap :=
   by
   have := @TensorProduct.lid_adjoint 𝕜 E _ _ _ _
   apply_fun LinearMap.adjoint at this
@@ -250,8 +250,8 @@ theorem TensorProduct.lid_symm_adjoint {𝕜 E : Type _} [RCLike 𝕜] [NormedAd
 theorem TensorProduct.comm_symm_adjoint {𝕜 E V : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [NormedAddCommGroup V] [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 V] [FiniteDimensional 𝕜 E]
     [FiniteDimensional 𝕜 V] :
-    LinearMap.adjoint (TensorProduct.comm 𝕜 E V).symm
-      = (TensorProduct.comm 𝕜 E V : E ⊗[𝕜] V →ₗ[𝕜] V ⊗[𝕜] E) :=
+    LinearMap.adjoint (TensorProduct.comm 𝕜 E V).symm.toLinearMap
+      = (TensorProduct.comm 𝕜 E V).toLinearMap :=
   by
   have := @TensorProduct.comm_adjoint 𝕜 E V _ _ _ _ _ _ _
   apply_fun LinearMap.adjoint at this

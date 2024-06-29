@@ -1,4 +1,4 @@
-import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 
 variable  {𝕜 E F : Type*} [RCLike 𝕜]

@@ -8,7 +8,7 @@ import Monlib.LinearAlgebra.Ips.Nontracial
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.Ips.Frob
-import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.QuantumSet.SchurMul

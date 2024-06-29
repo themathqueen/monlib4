@@ -17,6 +17,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 -/
 
 
+set_option allowUnsafeReducibility true in
 /-- `normed_add_comm_group` structure extended by `ring` -/
 @[reducible]
 class NormedAddCommGroupOfRing (B : Type _) extends Ring B, NormedAddCommGroup B

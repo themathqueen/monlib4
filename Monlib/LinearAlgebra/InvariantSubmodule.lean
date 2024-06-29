@@ -3,7 +3,6 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Mathlib.LinearAlgebra.Basic
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Topology.Algebra.StarSubalgebra

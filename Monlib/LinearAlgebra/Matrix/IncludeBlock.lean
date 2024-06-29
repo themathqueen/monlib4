@@ -8,7 +8,7 @@ import Mathlib.LinearAlgebra.Matrix.Trace
 import Mathlib.Data.Matrix.Basis
 import Monlib.Preq.Dite
 import Mathlib.LinearAlgebra.Matrix.Hermitian
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Mathlib.Data.Matrix.Kronecker
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
 import Monlib.LinearAlgebra.Matrix.PiMat

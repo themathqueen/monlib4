@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.Matrix.Basic
-import Monlib.LinearAlgebra.InnerAut
 import Monlib.LinearAlgebra.Matrix.Reshape
+import Monlib.LinearAlgebra.InnerAut
+import Monlib.Preq.StarAlgEquiv
 
 #align_import linear_algebra.to_matrix_of_equiv
 
@@ -283,6 +284,7 @@ variable {n : Type _} [Fintype n] [DecidableEq n]
 theorem LinearMap.toMatrixOfAlgEquiv_toLinOfAlgEquiv (x : Matrix I J R →ₗ[R] Matrix I J R) :
     toLinOfAlgEquiv (toMatrixOfAlgEquiv x) = x := by
   rw [toLinOfAlgEquiv, AlgEquiv.symm_apply_apply]
+
 
 open scoped Kronecker Matrix
 

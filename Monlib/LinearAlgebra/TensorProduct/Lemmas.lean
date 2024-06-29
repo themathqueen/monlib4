@@ -1,4 +1,4 @@
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
 open scoped TensorProduct
 

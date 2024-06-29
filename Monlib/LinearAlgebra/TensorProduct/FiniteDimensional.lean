@@ -9,7 +9,7 @@ import Mathlib.Analysis.RCLike.Basic
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.Ips.MulOp
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
 #align_import linear_algebra.tensor_finite
 

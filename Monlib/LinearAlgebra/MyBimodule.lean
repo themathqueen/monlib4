@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.End
 import Mathlib.RingTheory.TensorProduct.Basic

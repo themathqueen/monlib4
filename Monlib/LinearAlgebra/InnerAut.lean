@@ -7,7 +7,7 @@ import Monlib.LinearAlgebra.MySpec
 import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.Matrix.IsAlmostHermitian
 import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.RepTheory.AutMat
 import Monlib.Preq.StarAlgEquiv
 -- import Mathlib.Tactic.Explode
@@ -113,7 +113,7 @@ theorem unitary.pi_mem {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [
   simp only [← unitary.coe_star, unitary.coe_mul_star_self, and_self]
   rfl
 
-@[reducible, inline]
+@[inline]
 abbrev unitary.pi {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [∀ i, StarMul (s i)]
   (U : ∀ i, unitary (s i)) :
   unitary (∀ i, s i) :=
@@ -144,7 +144,7 @@ theorem unitaryGroup.star_coe_eq_coe_star [DecidableEq n] (U : unitaryGroup n �
 
 /-- given a unitary $U$, we have the inner algebraic automorphism, given by
   $x \mapsto UxU^*$ with its inverse given by $x \mapsto U^* x U$ -/
-@[reducible, inline]
+@[inline]
 abbrev innerAutStarAlg [DecidableEq n] (a : unitaryGroup n 𝕜) : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜 :=
   unitary.innerAutStarAlg 𝕜 a
 
@@ -172,7 +172,6 @@ theorem innerAutStarAlg_symm [DecidableEq n] (U : unitaryGroup n 𝕜) :
   unitary.innerAutStarAlg_symm U
 
 /-- inner automorphism (`matrix.innerAut_star_alg`), but as a linear map -/
-@[reducible]
 abbrev innerAut [DecidableEq n] (U : unitaryGroup n 𝕜) : Matrix n n 𝕜 →ₗ[𝕜] Matrix n n 𝕜 :=
   (innerAutStarAlg U).toLinearMap
 

@@ -598,7 +598,8 @@ theorem rankOne_toMatrix_of_onb
   [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
   (b₁ : OrthonormalBasis ι₁ 𝕜 E₁) (b₂ : OrthonormalBasis ι₂ 𝕜 E₂) (x : E₁) (y : E₂) :
   LinearMap.toMatrix b₂.toBasis b₁.toBasis (rankOne 𝕜 x y).toLinearMap
-    = (Matrix.col (b₁.repr x)) * (Matrix.col (b₂.repr y))ᴴ :=
+    =
+    (Matrix.col (Fin 1) (b₁.repr x)) * (Matrix.col (Fin 1) (b₂.repr y))ᴴ :=
 by
   ext1 i j
   simp_rw [LinearMap.toMatrix_apply, ContinuousLinearMap.coe_coe, rankOne_apply,

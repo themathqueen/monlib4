@@ -974,7 +974,11 @@ lemma lmul_tmul {R A B : Type*} [CommSemiring R]
   [Semiring A] [Semiring B] [Module R A] [Module R B] [SMulCommClass R A A]
   [SMulCommClass R B B] [IsScalarTower R A A] [IsScalarTower R B B] (a : A) (b : B) :
   lmul (a ⊗ₜ[R] b) = TensorProduct.map (lmul a) (lmul b) :=
-rfl
+by
+  ext
+  simp only [TensorProduct.AlgebraTensorModule.curry_apply, TensorProduct.curry_apply,
+    LinearMap.coe_restrictScalars, TensorProduct.map_tmul, lmul_apply,
+    Algebra.TensorProduct.tmul_mul_tmul]
 
 lemma lmul_eq_lmul_iff {R A : Type*} [CommSemiring R]
   [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a b : A) :

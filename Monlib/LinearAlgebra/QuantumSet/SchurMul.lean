@@ -9,7 +9,7 @@ import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 import Monlib.LinearAlgebra.IsReal
 -- import Monlib.LinearAlgebra.MyIps.Frob
-import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.Nacgor
@@ -38,7 +38,7 @@ open Coalgebra
   `x •ₛ y := m ∘ (x ⊗ y) ∘ comul`  -/
 @[simps]
 noncomputable def schurMul {B C : Type _}
-  [NormedAddCommGroupOfRing B] [NormedAddCommGroupOfRing C]
+  [starAlgebra B] [starAlgebra C]
   [hB : QuantumSet B] [hC : QuantumSet C] :
   (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C) →ₗ[ℂ] (B →ₗ[ℂ] C)
     where
@@ -67,7 +67,7 @@ notation3:80 (name := schurMulNotation) x:81 " •ₛ " y:80 => schurMul x y
 open scoped schurMul
 
 variable {A B C : Type _}
-  [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B] [NormedAddCommGroupOfRing C]
+  [starAlgebra A] [starAlgebra B] [starAlgebra C]
   [hA : QuantumSet A] [hB : QuantumSet B] [hC : QuantumSet C]
 
 theorem schurMul.apply_rankOne
@@ -247,7 +247,7 @@ by
   simp_rw [comul_eq_mul_adjoint, ← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp,
     algHom_comp_mul]
 
-theorem schurMul_algHom_comp_coalgHom {D : Type*} [NormedAddCommGroupOfRing D]
+theorem schurMul_algHom_comp_coalgHom {D : Type*} [starAlgebra D]
   [hD : QuantumSet D] (g : C →ₐ[ℂ] D) (f : A →ₗc[ℂ] B) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ f.toLinearMap) •ₛ (g.toLinearMap ∘ₗ y ∘ₗ f.toLinearMap)
     = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ f.toLinearMap :=
@@ -259,7 +259,7 @@ by
   congr 1
   simp_rw [TensorProduct.map_comp]
 
-theorem schurMul_algHom_comp_algHom_adjoint {D : Type*} [NormedAddCommGroupOfRing D]
+theorem schurMul_algHom_comp_algHom_adjoint {D : Type*} [starAlgebra D]
   [hD : QuantumSet D] (g : C →ₐ[ℂ] D) (f : B →ₐ[ℂ] A) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap))
     •ₛ (g.toLinearMap ∘ₗ y ∘ₗ LinearMap.adjoint f.toLinearMap)

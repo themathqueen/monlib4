@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.Matrix.Basic
-import Monlib.LinearAlgebra.TensorFinite
+import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 
 #align_import linear_algebra.kronecker_to_tensor
 
@@ -22,13 +22,14 @@ section
 
 variable {R m n : Type _} [CommSemiring R] [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
 
+set_option synthInstance.maxHeartbeats 0 in
 noncomputable def TensorProduct.toKronecker : Matrix m m R ⊗[R] Matrix n n R →ₗ[R] Matrix (m × n) (m × n) R
     where
   toFun x ij kl := (matrixEquivTensor _ _ _).symm x ij.2 kl.2 ij.1 kl.1
-  map_add' x y := by simp_rw [AlgEquiv.map_add, Matrix.add_apply]; rfl
+  map_add' x y := by simp_rw [_root_.map_add, Matrix.add_apply]; rfl
   map_smul' r x :=
     by
-    simp only [AlgEquiv.map_smul, Pi.smul_apply, Algebra.id.smul_eq_mul, RingHom.id_apply]
+    simp only [_root_.map_smul, Pi.smul_apply, Algebra.id.smul_eq_mul, RingHom.id_apply]
     rfl
 
 theorem TensorProduct.toKronecker_apply (x : Matrix m m R) (y : Matrix n n R) :
@@ -42,12 +43,13 @@ theorem TensorProduct.toKronecker_apply (x : Matrix m m R) (y : Matrix n n R) :
     Matrix.smul_apply, smul_eq_mul, mul_one]
   rfl
 
+set_option synthInstance.maxHeartbeats 0 in
 noncomputable def Matrix.kroneckerToTensorProduct : Matrix (m × n) (m × n) R →ₗ[R] Matrix m m R ⊗[R] Matrix n n R
     where
   toFun x := (matrixEquivTensor _ (Matrix m m R) n) fun i j k l => x (k, i) (l, j)
-  map_add' x y := by simp_rw [Matrix.add_apply, ← AlgEquiv.map_add]; rfl
+  map_add' x y := by simp_rw [Matrix.add_apply, ← _root_.map_add]; rfl
   map_smul' r x := by
-    simp_rw [Matrix.smul_apply, ← AlgEquiv.map_smul, RingHom.id_apply]
+    simp_rw [Matrix.smul_apply, ← _root_.map_smul, RingHom.id_apply]
     rfl
 
 theorem TensorProduct.toKronecker_to_tensorProduct (x : Matrix m m R ⊗[R] Matrix n n R) :
@@ -124,16 +126,17 @@ theorem TensorProduct.matrix_eq_sum_std_basis (x : Matrix m m R ⊗[R] Matrix n 
     _ = kroneckerToTensorProduct (toKronecker x) := by rw [← Matrix.kronecker_eq_sum_std_basis]
     _ = x := TensorProduct.toKronecker_to_tensorProduct _
 
-set_option maxHeartbeats 500000 in
+-- set_option maxHeartbeats 900000 in
 theorem TensorProduct.toKronecker_hMul (x y : Matrix m m R ⊗[R] Matrix n n R) :
     toKronecker (x * y) = toKronecker x * toKronecker y :=
-  by
-  nth_rw 1 [x.matrix_eq_sum_std_basis]
-  nth_rw 1 [y.matrix_eq_sum_std_basis]
-  simp_rw [Finset.sum_mul, Finset.mul_sum, smul_mul_smul, map_sum]
-  simp only [_root_.map_smul, Algebra.TensorProduct.tmul_mul_tmul,
-    TensorProduct.toKronecker_apply, Matrix.mul_kronecker_mul, ← smul_mul_smul, ← Finset.mul_sum, ← Finset.sum_mul]
-  rw [← x.toKronecker.kronecker_eq_sum_std_basis, ← y.toKronecker.kronecker_eq_sum_std_basis]
+x.induction_on
+ (by simp only [zero_mul, map_zero])
+ (y.induction_on
+  (by simp only [mul_zero, map_zero, implies_true])
+  (λ _ _ _ _ => by
+    simp only [Algebra.TensorProduct.tmul_mul_tmul, toKronecker_apply, Matrix.mul_kronecker_mul])
+  (λ _ _ h1 h2 _ _ => by simp only [_root_.map_add, h1, h2, mul_add]))
+  (λ _ _ h1 h2 => by simp only [_root_.map_add, add_mul, h1, h2])
 
 theorem Matrix.kroneckerToTensorProduct_hMul (x y : Matrix m m R) (z w : Matrix n n R) :
     kroneckerToTensorProduct (x ⊗ₖ z * y ⊗ₖ w) =

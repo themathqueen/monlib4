@@ -63,19 +63,19 @@ theorem ext_vec {𝕜 n : Type _} (α β : n → 𝕜) : α = β ↔ ∀ i : n, 
   ext i; exact h i
 
 /-- the outer product of two nonzero vectors is nonzero -/
-theorem vecMulVec_ne_zero {R n : Type _} [Semiring R] [NoZeroDivisors R] {α β : n → R} (hα : α ≠ 0)
+theorem vecMulVec_ne_zero {R n : Type _} [Semiring R]
+  [NoZeroDivisors R] [NeZero (1 : R)] {α β : n → R} (hα : α ≠ 0)
     (hβ : β ≠ 0) : vecMulVec α β ≠ 0 :=
   by
   rw [ne_eq, ← ext_iff]
   rw [← vec_ne_zero] at hα hβ
   cases' hβ with i hiy
   cases' hα with j hju
-  simp_rw [vecMulVec_eq, mul_apply, Fintype.univ_punit, col_apply, row_apply, Finset.sum_const,
-    Finset.card_singleton, nsmul_eq_mul, Nat.cast_one,
-    one_mul, Matrix.zero_apply, mul_eq_zero, Classical.not_forall]
-  use j; use i
-  push_neg
-  exact ⟨hju, hiy⟩
+  simp_rw [vecMulVec_eq (Fin 1), mul_apply, col_apply, row_apply, Finset.sum_const,
+    nsmul_eq_mul, Matrix.zero_apply, mul_eq_zero, Classical.not_forall]
+  simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton,
+    Nat.cast_one, not_or, exists_and_left, exists_and_right]
+  exact ⟨one_ne_zero, ⟨⟨j, hju⟩, ⟨i, hiy⟩⟩⟩
 
 /-- the transpose of `vecMul_vec x y` is simply `vecMul_vec y x`  -/
 theorem vecMulVec_transpose {R n : Type _} [CommSemiring R] (x y : n → R) :
@@ -435,12 +435,13 @@ open Matrix
 
 theorem Matrix.dotProduct_eq_trace {R n : Type _} [CommSemiring R] [StarRing R] [Fintype n]
     (x : n → R) (y : Matrix n n R) :
-    star x ⬝ᵥ y.mulVec x = ((Matrix.col x * Matrix.row (star x))ᴴ * y).trace :=
+    star x ⬝ᵥ y.mulVec x = ((Matrix.col (Fin 1) x * Matrix.row (Fin 1) (star x))ᴴ * y).trace :=
   by
   simp_rw [trace_iff, dotProduct, conjTranspose_mul, conjTranspose_row, conjTranspose_col,
     star_star, mul_apply, mulVec, dotProduct, col_apply, row_apply, Pi.star_apply,
-    Fintype.univ_punit, Finset.sum_const, Finset.card_singleton, nsmul_eq_mul, Nat.cast_one,
-    one_mul, Finset.mul_sum, mul_comm (x _), mul_comm _ (x _), ← mul_assoc, mul_comm]
+    Finset.sum_const]
+  simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton, one_smul]
+  simp_rw [Finset.mul_sum, mul_comm (x _), mul_comm _ (x _), ← mul_assoc, mul_comm]
   rw [Finset.sum_comm]
 
 theorem forall_left_hMul {n R : Type _} [Fintype n] [DecidableEq n] [Semiring R]

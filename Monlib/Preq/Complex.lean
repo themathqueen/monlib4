@@ -88,7 +88,7 @@ theorem abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff (α₁ α₂ : ℂ) :
         congr
         ·
           simp only [Finset.sum_sdiff_eq_sub, Finset.subset_univ, Fin.sum_univ_two,
-            Finset.sum_singleton, add_sub_cancel']
+            Finset.sum_singleton, add_sub_cancel_left]
         · exact Finset.mem_univ _
   simp_rw [← h₀, ← h₁, ← hy.1, ← hy.2, abs_of_sum_sq_eq_sum_abs_sq_iff, Fin.forall_fin_two, h₀, h₁,
     true_and_iff, and_true_iff, eq_comm, and_self_iff]
@@ -188,7 +188,7 @@ theorem abs_of_sum_sq_eq_sum_abs_sq_iff'' {n : Type _} [Fintype n] (α : n → �
         contradiction
       · use β₁ * (β₄ / β₃)
         simp_rw [ofReal_mul, ← mul_assoc, ← hβ₁, hβ₃, mul_assoc, ← ofReal_mul,
-          mul_div_cancel' _ h', hβ₄]
+          mul_div_cancel₀ _ h', hβ₄]
   · rintro ⟨γ, hγ⟩ i j
     obtain ⟨β₁, hβ₁⟩ := hγ i
     obtain ⟨β₂, hβ₂⟩ := hγ j

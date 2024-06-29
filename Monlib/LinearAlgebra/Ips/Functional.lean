@@ -370,7 +370,7 @@ theorem Module.Dual.isPosMap_iff_of_matrix (φ : Module.Dual ℂ (Matrix n n ℂ
     have thiseq : ∀ y, star y ⬝ᵥ φ.matrix *ᵥ y = (φ.matrix * vecMulVec y (star y)).trace :=
       by
       intro y
-      rw [vecMulVec_eq, trace_mul_cycle', ← col_mulVec]
+      rw [vecMulVec_eq Unit, trace_mul_cycle', ← col_mulVec]
       simp_rw [Matrix.trace_iff', row_mul_col_apply, Fintype.univ_punit, Finset.sum_const,
         Finset.card_singleton, nsmul_eq_mul, Nat.cast_one, one_mul]
     simp_rw [PosSemidef.complex, thiseq]
@@ -403,7 +403,7 @@ theorem Module.Dual.IsPosMap.isFaithful_iff_of_matrix {φ : Module.Dual ℂ (Mat
       intro x hx
       have : star x ⬝ᵥ φ.matrix.mulVec x = (φ.matrix * vecMulVec x (star x)).trace :=
         by
-        rw [vecMulVec_eq, trace_mul_cycle', ← col_mulVec]
+        rw [vecMulVec_eq Unit, trace_mul_cycle', ← col_mulVec]
         simp_rw [Matrix.trace_iff', row_mul_col_apply, Fintype.univ_punit, Finset.sum_const,
           Finset.card_singleton, nsmul_eq_mul, Nat.cast_one, one_mul]
       rw [this]
@@ -846,8 +846,8 @@ noncomputable def Module.Dual.PiNormedAddCommGroup
   {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
   [Π i, (φ i).IsFaithfulPosMap] :
   _root_.NormedAddCommGroup (PiMat ℂ k s) :=
--- by
-  -- letI := fun i => (hφ i).NormedAddCommGroup
+-- -- by
+--   -- letI := fun i => (hφ i).NormedAddCommGroup
   PiLp.normedAddCommGroup 2 _
   -- letI := fun i => (hφ i).InnerProductSpace
   -- @InnerProductSpace.Core.toNormedAddCommGroup ℂ (Π i, Matrix (s i) (s i) ℂ) _ _ _
@@ -883,8 +883,12 @@ noncomputable def Module.Dual.pi.InnerProductSpace
   [Π i, (φ i).IsFaithfulPosMap] :
     -- letI := Module.Dual.PiNormedAddCommGroup hφ
   _root_.InnerProductSpace ℂ (PiMat ℂ k s) :=
--- letI := fun i => (hφ i).NormedAddCommGroup
--- letI := fun i => (hφ i).InnerProductSpace
+-- by
+  -- letI : _root_.NormedAddCommGroup (PiMat ℂ k s) := PiLp.normedAddCommGroup 2 _
+  -- letI this : Π i : k,
+  --   _root_.NormedAddCommGroup (Matrix (s i) (s i) ℂ) :=
+  --   -- fun i => (φ i).NormedAddCommGroup
+  -- letI := fun i => (φ i).InnerProductSpace
 PiLp.innerProductSpace _
   -- InnerProductSpace.ofCore _
 

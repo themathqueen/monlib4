@@ -1,6 +1,6 @@
 import Mathlib.RingTheory.Coalgebra.Basic
 import Mathlib.Algebra.Algebra.Bilinear
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
 theorem TensorProduct.map_left_up {R A B C D : Type*}
   [CommSemiring R]

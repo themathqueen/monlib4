@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Mathlib.LinearAlgebra.Basic
+-- import Mathlib.LinearAlgebra.Basic
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.Algebra.Module.LinearMap.Basic
@@ -55,9 +55,9 @@ open scoped Matrix
 private def mat_T [Semiring R] (f : (Mₙ n) →ₗ[R] Mₙ n) (y z : n → R) : (n → R) →ₗ[R] n → R
     where
   toFun x := (f (vecMulVec x y)).mulVec z
-  map_add' w p := by simp_rw [vecMulVec_eq, col_add w p, Matrix.add_mul, map_add, add_mulVec]
+  map_add' w p := by simp_rw [vecMulVec_eq (Fin 1), col_add w p, Matrix.add_mul, map_add, add_mulVec]
   map_smul' w r := by
-    simp_rw [vecMulVec_eq, RingHom.id_apply, col_smul, smul_mul, LinearMap.map_smul,
+    simp_rw [vecMulVec_eq (Fin 1), RingHom.id_apply, col_smul, smul_mul, LinearMap.map_smul,
       smul_mulVec_assoc]
 
 private theorem mat_T_apply [Semiring R] (f : (Mₙ n) →ₗ[R] Mₙ n) (y z r : n → R) :
@@ -114,8 +114,8 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
       _ = (f (vecMulVec (A *ᵥ x) y)) *ᵥ z := by
         rw [mat_T_apply, AlgEquiv.toLinearMap_apply]
       _ = (f (A * vecMulVec x y)) *ᵥ z := by
-        simp_rw [vecMulVec_eq, col_mulVec, ← Matrix.mul_assoc]
-      _ = (f A * f (vecMulVec x y)) *ᵥ z := by simp_rw [AlgEquiv.map_mul]
+        simp_rw [vecMulVec_eq (Fin 1), col_mulVec, ← Matrix.mul_assoc]
+      _ = (f A * f (vecMulVec x y)) *ᵥ z := by simp_rw [_root_.map_mul]
       _ = (f A) *ᵥ (T x) := by
         simp_rw [← mulVec_mulVec, ← AlgEquiv.toLinearMap_apply, ← mat_T_apply _ y z]
       _ = (f A * (LinearMap.toMatrix' T)) *ᵥ x := by
@@ -149,11 +149,13 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
     -- we use this `B` to show our desired result (i.e., `(f B) (T u) = w`)
     -- `(f B) (T u) = wd⋆ * (T u) |w⟩ * d * (T u) = w = w`
     use B
-    rw [hB, vecMulVec_eq, ← mulVec_mulVec]
-    suffices (row d) *ᵥ (T u) = 1 by
+    rw [hB, vecMulVec_eq (Fin 1), ← mulVec_mulVec]
+    suffices (row (Fin 1) d) *ᵥ (T u) = 1 by
       ext
-      simp_rw [this, mulVec, dotProduct, col_apply, Fintype.univ_punit, Pi.one_apply, mul_one,
-        Finset.sum_const, Finset.card_singleton, nsmul_eq_mul, Nat.cast_one, one_mul]
+      simp_rw [this, mulVec, dotProduct, col_apply, Pi.one_apply, mul_one,
+        Finset.sum_const, nsmul_eq_mul]
+      simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton,
+        Nat.cast_one, one_mul]
     ext
     simp_rw [mulVec, Pi.one_apply, ← hd, dotProduct, row_apply, mul_comm]
   -- now let `B ∈ Mₙ` be our matrix such that `(f B) (T u) = w`
@@ -296,8 +298,8 @@ def AlgEquiv.IsInner {R E : Type*} [CommSemiring R] [Semiring E]
   invFun := λ x i => (f i).symm (x i)
   left_inv := λ x => funext λ i => (f i).left_inv (x i)
   right_inv := λ x => funext λ i => (f i).right_inv (x i)
-  map_add' := λ x y => funext λ i => (f i).map_add (x i) (y i)
-  map_mul' := λ x y => funext λ i => (f i).map_mul (x i) (y i)
+  map_add' := λ x y => funext λ i => _root_.map_add _ (x i) (y i)
+  map_mul' := λ x y => funext λ i => _root_.map_mul _ (x i) (y i)
   commutes' := λ r => funext λ i => (f i).commutes r }
 
 instance Prod.invertible_fst {R₁ R₂ : Type*} [Semiring R₁] [Semiring R₂]
@@ -627,12 +629,12 @@ by
   simp_rw [this, SetLike.mem_coe, Submodule.mem_span_pair] at ha1 hb1
   obtain ⟨c, d, hcd⟩ := ha1
   obtain ⟨c₂, d₂, hcd2⟩ := hb1
-  have h₈ : f (e₁ * e₂) = 0 := by rw [h₂, f.map_zero]
-  have h₉ : f (e₁ + e₂) = 1 := by rw [h₁, f.map_one]
-  simp_rw [f.map_mul, ← h₆, ← h₇, add_mul, mul_add, smul_mul_smul, h₂, h₃, h₄, h₅, smul_zero,
+  have h₈ : f (e₁ * e₂) = 0 := by rw [h₂, _root_.map_zero]
+  have h₉ : f (e₁ + e₂) = 1 := by rw [h₁, _root_.map_one]
+  simp_rw [_root_.map_mul, ← h₆, ← h₇, add_mul, mul_add, smul_mul_smul, h₂, h₃, h₄, h₅, smul_zero,
     add_zero, zero_add, h10, h11, Prod.mk_add_mk, add_zero, zero_add, Prod.zero_eq_mk,
     Prod.ext_iff, smul_eq_zero, mul_eq_zero, one_ne_zero, or_false] at h₈
-  rw [f.map_add, ← h₆, ← h₇, add_add_add_comm] at h₉
+  rw [_root_.map_add, ← h₆, ← h₇, add_add_add_comm] at h₉
   simp_rw [← add_smul, Prod.one_eq_mk, h10, h11, Prod.mk_add_mk, add_zero, zero_add,
     Prod.ext_iff, smul_one_eq_one_iff, not_isEmpty_of_nonempty, or_false] at h₉
   by_cases hα : α ≠ 0
@@ -681,13 +683,13 @@ macro "prod_map_add" : tactic =>
   `(tactic|
     (simp only
      nth_rw 1 [← add_zero (0 : _)]
-     simp_rw [← Prod.mk_add_mk, AlgEquiv.map_add]
+     simp_rw [← Prod.mk_add_mk, _root_.map_add]
      rfl))
 macro "prod_map_mul" : tactic =>
   `(tactic|
     (simp only
      nth_rw 1 [← zero_mul (0 : _)]
-     simp_rw [← Prod.mk_mul_mk, AlgEquiv.map_mul]
+     simp_rw [← Prod.mk_mul_mk, _root_.map_mul]
      rfl))
 
 def AlgEquiv.of_prod_map₁₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
@@ -702,13 +704,13 @@ have Hf : (1, 0) = f.symm (1, 0) := by
   invFun := λ a => (f.symm (a, 0)).1
   left_inv := λ a => by
     have : ((f.symm ((f (a, 0)).1, 0)).1, 0) = (a, 0) := by
-      rw [← Algebra.prod_one_zero_mul, f.symm.map_mul, ← Hf, f.symm_apply_apply,
+      rw [← Algebra.prod_one_zero_mul, _root_.map_mul, ← Hf, f.symm_apply_apply,
         Algebra.prod_one_zero_mul]
     simp_rw [Prod.ext_iff, and_true] at this
     exact this
   right_inv := λ a => by
     have : ((f ((f.symm (a, 0)).1, 0)).1, 0) = (a, 0) := by
-      rw [← Algebra.prod_one_zero_mul, f.map_mul, hf, f.apply_symm_apply,
+      rw [← Algebra.prod_one_zero_mul, _root_.map_mul, hf, f.apply_symm_apply,
         Algebra.prod_one_zero_mul]
     simp_rw [Prod.ext_iff, and_true] at this
     exact this
@@ -718,7 +720,7 @@ have Hf : (1, 0) = f.symm (1, 0) := by
     simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
-    rw [← Prod.smul_mk, f.map_smul, Prod.smul_fst, hf] }
+    rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_fst, hf] }
 def AlgEquiv.of_prod_map₂₂ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   [Semiring R₁] [Semiring R₂] [Semiring R₃] [Semiring R₄]
   [Algebra K R₁] [Algebra K R₂] [Algebra K R₃] [Algebra K R₄]
@@ -731,13 +733,13 @@ have Hf : (0, 1) = f.symm (0, 1) := by
   invFun := λ a => (f.symm (0, a)).2
   left_inv := λ a => by
     have : (0, (f.symm (0, (f (0, a)).2)).2) = (0, a) := by
-      rw [← Algebra.prod_zero_one_mul, f.symm.map_mul, ← Hf, f.symm_apply_apply,
+      rw [← Algebra.prod_zero_one_mul, _root_.map_mul, ← Hf, f.symm_apply_apply,
         Algebra.prod_zero_one_mul]
     simp_rw [Prod.ext_iff, true_and] at this
     exact this
   right_inv := λ a => by
     have : (0, (f (0, (f.symm (0, a)).2)).2) = (0, a) := by
-      rw [← Algebra.prod_zero_one_mul, f.map_mul, hf, f.apply_symm_apply,
+      rw [← Algebra.prod_zero_one_mul, _root_.map_mul, hf, f.apply_symm_apply,
         Algebra.prod_zero_one_mul]
     simp_rw [Prod.ext_iff, true_and] at this
     exact this
@@ -747,7 +749,7 @@ have Hf : (0, 1) = f.symm (0, 1) := by
     simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
-    rw [← Prod.smul_mk, f.map_smul, Prod.smul_snd, hf] }
+    rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_snd, hf] }
 def AlgEquiv.of_prod_map₁₂ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   [Semiring R₁] [Semiring R₂] [Semiring R₃] [Semiring R₄]
   [Algebra K R₁] [Algebra K R₂] [Algebra K R₃] [Algebra K R₄]
@@ -758,13 +760,13 @@ def AlgEquiv.of_prod_map₁₂ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   invFun := λ x => (f.symm (0, x)).1
   left_inv := λ x => by
     have : ((f.symm (0, (f (x, 0)).2)).1, 0) = (x, 0) := by
-      rw [← Algebra.prod_zero_one_mul, f.symm.map_mul, ← hf, f.symm_apply_apply,
+      rw [← Algebra.prod_zero_one_mul, _root_.map_mul, ← hf, f.symm_apply_apply,
         Algebra.prod_one_zero_mul, f.symm_apply_apply]
     simp_rw [Prod.ext_iff, and_true] at this
     exact this
   right_inv := λ x => by
     have : (0, (f ((f.symm (0, x)).1, 0)).2) = (0, x) := by
-      rw [← Algebra.prod_one_zero_mul, f.map_mul, hf, f.apply_symm_apply, Algebra.prod_zero_one_mul]
+      rw [← Algebra.prod_one_zero_mul, _root_.map_mul, hf, f.apply_symm_apply, Algebra.prod_zero_one_mul]
     simp_rw [Prod.ext_iff, true_and] at this
     exact this
   map_add' := λ x y => by prod_map_add
@@ -773,7 +775,7 @@ def AlgEquiv.of_prod_map₁₂ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
     simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
-    rw [← Prod.smul_mk, f.map_smul, Prod.smul_snd, hf] }
+    rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_snd, hf] }
 def AlgEquiv.of_prod_map₂₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   [Semiring R₁] [Semiring R₂] [Semiring R₃] [Semiring R₄]
   [Algebra K R₁] [Algebra K R₂] [Algebra K R₃] [Algebra K R₄]
@@ -784,13 +786,13 @@ def AlgEquiv.of_prod_map₂₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   invFun := λ x => (f.symm (x, 0)).2
   left_inv := λ x => by
     have : (0, (f.symm ((f (0, x)).1, 0)).2) = (0, x) := by
-      rw [← Algebra.prod_one_zero_mul, f.symm.map_mul, ← hf, f.symm_apply_apply,
+      rw [← Algebra.prod_one_zero_mul, _root_.map_mul, ← hf, f.symm_apply_apply,
         Algebra.prod_zero_one_mul, f.symm_apply_apply]
     simp_rw [Prod.ext_iff, true_and] at this
     exact this
   right_inv := λ x => by
     have : ((f (0, (f.symm (x, 0)).2)).1, 0) = (x, 0) := by
-      rw [← Algebra.prod_zero_one_mul, f.map_mul, hf, f.apply_symm_apply, Algebra.prod_one_zero_mul]
+      rw [← Algebra.prod_zero_one_mul, _root_.map_mul, hf, f.apply_symm_apply, Algebra.prod_one_zero_mul]
     simp_rw [Prod.ext_iff, and_true] at this
     exact this
   map_add' := λ x y => by prod_map_add
@@ -799,7 +801,7 @@ def AlgEquiv.of_prod_map₂₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
     simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
-    rw [← Prod.smul_mk, f.map_smul, Prod.smul_fst, hf] }
+    rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_fst, hf] }
 
 theorem AlgEquiv.matrix_prod_aut' {𝕜 n m : Type*} [Field 𝕜] [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
   [Nonempty n] [Nonempty m]
@@ -816,12 +818,12 @@ by
     let f₂ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix m m 𝕜 := AlgEquiv.of_prod_map₂₂ f h.2
     use f₁, f₂
     ext1 x
-    simp_rw [AlgEquiv.prod_map_apply, Prod_map]
+    simp_rw [AlgEquiv.prod_map_apply, Prod.map_apply]
     calc f x = f (x.1, 0) + f (0, x.2) := by rw [← map_add, Prod.fst_add_snd]
       _ = f ((1,0) * (x.1, 0)) + f ((0,1) * (0, x.2)) := by
         rw [Prod.mul_def]; simp only [one_mul, mul_zero, Prod.mk_mul_mk]
       _ = (1, 0) * f (x.1, 0) + (0, 1) * f (0, x.2) := by
-        simp_rw [f.map_mul, h]
+        simp_rw [_root_.map_mul, h]
       _ = ((f (x.1, 0)).1, 0) + (0, (f (0, x.2)).2) := by
         simp_rw [Prod.mul_def, zero_mul, one_mul]
       _ = (f₁ x.1, 0) + (0, f₂ x.2) := rfl
@@ -831,12 +833,12 @@ by
     let g₂ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix n n 𝕜 := AlgEquiv.of_prod_map₂₁ f h.2
     use (AlgEquiv.prod_map g₂ g₁)
     ext1 x
-    simp_rw [Function.comp_apply, Prod.swap, AlgEquiv.prod_map_apply, Prod_map]
+    simp_rw [Function.comp_apply, Prod.swap, AlgEquiv.prod_map_apply, Prod.map_apply]
     calc f x = f (0, x.2) + f (x.1, 0) := by rw [← map_add, add_comm, Prod.fst_add_snd]
       _ = f ((0,1) * (0, x.2)) + f ((1,0) * (x.1, 0)) := by
         rw [Prod.mul_def]; simp only [one_mul, mul_zero, Prod.mk_mul_mk]
       _ = (1, 0) * f (0, x.2) + (0, 1) * f (x.1, 0) := by
-        simp_rw [f.map_mul, h]
+        simp_rw [_root_.map_mul, h]
       _ = ((f (0, x.2)).1, 0) + (0, (f (x.1, 0)).2) := by
         simp only [Prod.mk_add_mk, add_zero, zero_add, Prod.mul_def, zero_mul, one_mul]
       _ = (g₂ x.2, 0) + (0, g₁ x.1) := rfl

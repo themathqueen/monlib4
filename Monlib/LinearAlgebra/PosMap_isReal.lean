@@ -8,6 +8,7 @@ import Monlib.LinearAlgebra.OfNorm
 import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 import Monlib.LinearAlgebra.Matrix.PosDefRpow
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
+import Mathlib.Analysis.InnerProductSpace.Positive
 
 variable {A : Type _} [Ring A] [StarRing A] [Algebra ℂ A] [StarModule ℂ A] [PartialOrder A]
   [_root_.StarOrderedRing A]
@@ -74,7 +75,9 @@ by rw [← ContinuousLinearMap.toLinearMapAlgEquiv_apply, AlgEquiv.spectrum_eq]
 variable {B : Type*} [NormedAddCommGroup B] [InnerProductSpace ℂ B]
   [FiniteDimensional ℂ B]
 
-open scoped MatrixOrder ComplexOrder
+open scoped MatrixOrder ComplexOrder FiniteDimensional
+-- set_option synthInstance.checkSynthOrder false in
+-- attribute [instance] FiniteDimensional.complete
 theorem ContinuousLinearMap.nonneg_iff_isSelfAdjoint_and_nonneg_spectrum
   (T : B →L[ℂ] B) :
   0 ≤ T ↔ IsSelfAdjoint T ∧ spectrum ℂ T ⊆ {a : ℂ | 0 ≤ a} :=

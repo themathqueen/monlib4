@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.KroneckerToTensor
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 

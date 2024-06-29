@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Algebra.DirectSum.Basic
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.DirectSumFromTo
 
 #align_import linear_algebra.pi_direct_sum

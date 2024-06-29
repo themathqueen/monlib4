@@ -3,7 +3,11 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.QuantumGraph.Nontracial
+import Monlib.QuantumGraph.Basic
+import Monlib.LinearAlgebra.QuantumSet.Pi
+import Monlib.LinearAlgebra.QuantumSet.TensorProduct
+import Monlib.LinearAlgebra.Ips.MatIps
+import Monlib.LinearAlgebra.QuantumSet.Instances
 
 #align_import quantum_graph.example
 
@@ -71,7 +75,7 @@ theorem Qam.completeGraph_eq {E₁ E₂ : Type _} [One E₁] [One E₂] [NormedA
     Qam.completeGraph E₁ E₂ = |(1 : E₁)⟩⟨(1 : E₂)| :=
   rfl
 
-variable {A B : Type*} [NormedAddCommGroupOfRing A] [NormedAddCommGroupOfRing B]
+variable {A B : Type*} [ha:starAlgebra A] [hb:starAlgebra B]
   [hA : QuantumSet A] [hB : QuantumSet B]
 
 theorem Qam.completeGraph_eq' :
@@ -92,6 +96,8 @@ open scoped schurMul
 theorem Qam.Nontracial.CompleteGraph.qam :
   ((Qam.completeGraph A B) •ₛ (Qam.completeGraph A B)) = Qam.completeGraph A B :=
 schurMul_one_one_left _
+
+open scoped FiniteDimensional
 
 lemma Qam.Nontracial.CompleteGraph.adjoint_eq {E₁ E₂ : Type _} [NormedAddCommGroupOfRing E₁]
     [NormedAddCommGroupOfRing E₂] [InnerProductSpace ℂ E₁] [InnerProductSpace ℂ E₂]
@@ -126,8 +132,7 @@ by
   simp_rw [map_sum, Qam.completeGraph, schurMul.apply_rankOne, one_mul, ← hαβ]
 
 open scoped ComplexOrder
-@[reducible]
-class QuantumSetDeltaForm (A : Type*) [NormedAddCommGroupOfRing A] [QuantumSet A] where
+class QuantumSetDeltaForm (A : Type*) [starAlgebra A] [QuantumSet A] where
   delta : ℂ
   delta_pos : 0 < delta
   mul_comp_comul_eq : LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul = delta • 1
@@ -180,7 +185,7 @@ noncomputable instance PiMat.quantumSetDeltaForm [Nonempty p] [∀ i, Nontrivial
     exact hφ₂.out
 
 @[instance]
-noncomputable def QuantumSet.DeltaForm.mul_comp_comul_isInvertible {A : Type*} [NormedAddCommGroupOfRing A]
+noncomputable def QuantumSet.DeltaForm.mul_comp_comul_isInvertible {A : Type*} [starAlgebra A]
   [QuantumSet A] [hA2 : QuantumSetDeltaForm A] :
   Invertible (LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul) :=
 by
@@ -190,12 +195,12 @@ by
   exact ne_of_gt hA2.delta_pos
 
 
-noncomputable def Qam.trivialGraph (A : Type*) [NormedAddCommGroupOfRing A] [QuantumSet A]
+noncomputable def Qam.trivialGraph (A : Type*) [starAlgebra A] [QuantumSet A]
   [QuantumSetDeltaForm A] :
   l(A) :=
 ⅟ (LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul)
 
-variable {A : Type*} [NormedAddCommGroupOfRing A] [hA : QuantumSet A]
+variable {A : Type*} [ha:starAlgebra A] [hA : QuantumSet A]
 
 theorem Qam.trivialGraph_eq [hA2 : QuantumSetDeltaForm A] :
     Qam.trivialGraph A = hA2.delta⁻¹ • (1 : l(A)) :=
@@ -302,7 +307,6 @@ by
   · simp_rw [if_true, sub_eq_zero, eq_comm]
   · simp_rw [if_false, sub_eq_self]
 
-@[reducible]
 class QamReflexive (x : l(A)) : Prop :=
 toQam : x •ₛ x = x
 toRefl : x •ₛ 1 = 1
@@ -311,7 +315,6 @@ lemma QamReflexive_iff (x : l(A)) :
     QamReflexive x ↔ x •ₛ x = x ∧ x •ₛ 1 = 1 :=
 ⟨λ h => ⟨h.toQam, h.toRefl⟩, λ h => ⟨h.1, h.2⟩⟩
 
-@[reducible]
 class QamIrreflexive (x : l(A)) : Prop :=
 toQam : x •ₛ x = x
 toIrrefl : x •ₛ 1 = 0

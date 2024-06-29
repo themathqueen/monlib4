@@ -3,7 +3,6 @@ import Monlib.LinearAlgebra.Ips.Ips
 import Monlib.LinearAlgebra.Ips.RankOne
 import Monlib.Preq.RCLikeLe
 import Mathlib.Topology.Algebra.Module.WeakDual
-import Mathlib.Topology.MetricSpace.PseudoMetric
 import Mathlib.Analysis.NormedSpace.Dual
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Analysis.Convex.Extreme
@@ -594,7 +593,7 @@ by
   apply ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _) (λ x => _)
   intro x
   rw [ContinuousLinearMap.comp_apply, LinearIsometry.coe_toContinuousLinearMap, ← f.norm_map x]
-  exact h.le_op_norm _
+  exact h.le_opNorm _
 
 example {𝕜 X Y Z : Type _} [RCLike 𝕜] [NormedAddCommGroup X]
   [NormedAddCommGroup Y] [NormedAddCommGroup Z] [NormedSpace 𝕜 X] [NormedSpace 𝕜 Y] [NormedSpace 𝕜 Z]

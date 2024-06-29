@@ -52,7 +52,7 @@ by
 
 lemma TensorProduct.rid_adjoint {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
   [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
-  LinearMap.adjoint (TensorProduct.rid 𝕜 E : E ⊗[𝕜] 𝕜 →ₗ[𝕜] E) = (TensorProduct.rid 𝕜 E).symm :=
+  LinearMap.adjoint (TensorProduct.rid 𝕜 E).toLinearMap = (TensorProduct.rid 𝕜 E).symm.toLinearMap :=
   by
   ext1
   apply @ext_inner_right 𝕜
@@ -81,11 +81,12 @@ def Coalgebra.ofFiniteDimensionalHilbertAlgebra
   counit := (LinearMap.adjoint (Algebra.linearMap R A : R →ₗ[R] A) : A →ₗ[R] R)
   coassoc := by
     simp only
-    rw [← LinearMap.rTensor_adjoint, ← LinearMap.lTensor_adjoint]
-    simp_rw [← LinearMap.adjoint_comp, Algebra.mul_comp_rTensor_mul, LinearMap.adjoint_comp,
-      TensorProduct.assoc_adjoint, ← LinearMap.comp_assoc]
+    rw [← LinearMap.rTensor_adjoint, ← LinearMap.lTensor_adjoint, ← TensorProduct.assoc_symm_adjoint]
+    simp_rw [← LinearMap.adjoint_comp, Algebra.mul_comp_rTensor_mul]
+    simp_rw [LinearMap.comp_assoc]
     simp only [LinearEquiv.comp_coe, LinearEquiv.symm_trans_self, LinearEquiv.refl_toLinearMap,
       LinearMap.id_comp]
+    rfl
   rTensor_counit_comp_comul := by
     simp only
     rw [← LinearMap.rTensor_adjoint, ← LinearMap.adjoint_comp, Algebra.mul_comp_rTensor_unit,
@@ -244,9 +245,12 @@ theorem Coalgebra.lTensor_mul_comp_rTensor_comul_of
   (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
   (lT A (m A)) ∘ₗ (ϰ A A A).toLinearMap ∘ₗ (rT A comul) = comul ∘ₗ (m A) :=
 by
-  apply_fun LinearMap.adjoint using LinearEquiv.injective _
-  repeat rw [LinearMap.adjoint_comp]
-  simp_rw [lTensor_adjoint, rTensor_adjoint, Coalgebra.comul_eq_mul_adjoint, adjoint_adjoint,
+  apply_fun adjoint using LinearEquiv.injective _
+  simp_rw [comul_eq_mul_adjoint]
+  letI : NormedAddCommGroup (A ⊗[R] A) := by infer_instance
+  letI : InnerProductSpace R (A ⊗[R] A) := by infer_instance
+  simp_rw [LinearMap.adjoint_comp]
+  simp_rw [lTensor_adjoint, rTensor_adjoint,adjoint_adjoint,
     TensorProduct.assoc_adjoint, LinearMap.comp_assoc]
   exact Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint h
 

@@ -35,12 +35,12 @@ namespace Matrix
 
 open scoped ComplexOrder
 
-theorem PosSemidef.add {n : Type _} [Fintype n] {x y : Matrix n n ℂ} (hx : PosSemidef x)
-    (hy : PosSemidef y) : PosSemidef (x + y) :=
-  by
-  simp_rw [PosSemidef, Matrix.IsHermitian.add hx.1 hy.1, true_and_iff, Matrix.add_mulVec,
-    Matrix.dotProduct_add]
-  exact fun a => add_nonneg (hx.2 a) (hy.2 a)
+-- theorem PosSemidef.add {n : Type _} [Fintype n] {x y : Matrix n n ℂ} (hx : PosSemidef x)
+--     (hy : PosSemidef y) : PosSemidef (x + y) :=
+--   by
+--   simp_rw [PosSemidef, Matrix.IsHermitian.add hx.1 hy.1, true_and_iff, Matrix.add_mulVec,
+--     Matrix.dotProduct_add]
+--   exact fun a => add_nonneg (hx.2 a) (hy.2 a)
 
 open scoped Matrix
 

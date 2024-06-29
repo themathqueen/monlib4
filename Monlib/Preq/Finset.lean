@@ -22,7 +22,6 @@ namespace Finset
 
 open scoped BigOperators
 
-@[simp]
 theorem sum_rotate {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ} {u : Finset ζ}
     {f : α → γ → ζ → β} :
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z =
@@ -33,7 +32,6 @@ theorem sum_rotate {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t 
   ext x
   rw [Finset.sum_comm]
 
-@[simp]
 theorem sum_3_comm {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ} {u : Finset ζ}
     {f : α → γ → ζ → β} :
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z =
@@ -44,7 +42,6 @@ theorem sum_3_comm {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t 
   ext
   rw [Finset.sum_comm]
 
-@[simp]
 theorem sum_4_rotate {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ}
     {u : Finset ζ} {v : Finset ε} {f : α → γ → ζ → ε → β} :
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
@@ -55,7 +52,6 @@ theorem sum_4_rotate {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α
   ext x
   rw [Finset.sum_rotate]
 
-@[simp]
 theorem sum_sum_comm_sum {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ}
     {u : Finset ζ} {v : Finset ε} {f : α → γ → ζ → ε → β} :
     ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
@@ -67,7 +63,6 @@ theorem sum_sum_comm_sum {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finse
   ext y
   nth_rw 2 [Finset.sum_comm]
 
-@[simp]
 theorem sum_sum_sum {β α γ ζ : Type _} [AddCommMonoid β] {s : Finset γ} {t : Finset α}
     {g : Finset ζ} {f : γ → α → ζ → β} :
     ∑ x : γ in s, ∑ y : α in t, ∑ z : ζ in g, f x y z =
@@ -101,12 +96,14 @@ theorem sum_5_rotate {α β γ ζ ε κ : Type _} [AddCommMonoid β] {s : Finset
 
 end Finset
 
-@[simp]
 theorem Forall.rotate {α β γ : Sort _} {p : α → β → γ → Prop} :
     (∀ (x : α) (y : β) (z : γ), p x y z) ↔ ∀ (z : γ) (x : α) (y : β), p x y z :=
   ⟨fun h _ _ _ => h _ _ _, fun h _ _ _ => h _ _ _⟩
 
-@[simp]
 theorem forall_forall_comm {α β γ ζ : Sort _} {p : α → β → γ → ζ → Prop} :
     (∀ (x : α) (y : β) (z : γ) (w : ζ), p x y z w) ↔ ∀ (x : α) (z : γ) (y : β) (w : ζ), p x y z w :=
   ⟨fun h _ _ _ _ => h _ _ _ _, fun h _ _ _ _ => h _ _ _ _⟩
+
+theorem Finset.sum_product_univ {β α γ : Type _} [AddCommMonoid β] [Fintype α] [Fintype γ]
+    {f : γ × α → β} : ∑ x : γ × α, f x = ∑ x : γ, ∑ y : α, f (x, y) :=
+  Finset.sum_product

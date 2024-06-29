@@ -1,6 +1,5 @@
 import Mathlib.Data.Matrix.Basic
 
-@[reducible]
 abbrev PiMat (R k : Type*) (s : k → Type*) := Π i, Matrix (s i) (s i) R
 
 @[ext]

@@ -87,7 +87,7 @@ theorem nat_repr_mod_eq_sum_repr_mod {a n : ℕ} (x : Fin n → ℤ) (ha : 1 < a
     have : ∀ (c : ℤ) (d : ℕ), c * (a.succ : ℕ) ^ d % a = c % a := fun c d =>
       calc
         c * (a.succ : ℕ) ^ d % a = c * ((a.succ : ℕ) ^ d : ℕ) % (a : ℕ) := by
-          simp_rw [Int.coe_nat_pow]
+          simp_rw [Int.natCast_pow]
         _ = c % a := Int.hMul_nat_succ_pow_mod_nat _ ha
     simp_rw [this, ← Int.sum_mod]
 

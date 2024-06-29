@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Algebra.Algebra.Bilinear
-import Monlib.LinearAlgebra.MyTensorProduct
+import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
 #align_import linear_algebra.lmul_rmul
 

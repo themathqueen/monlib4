@@ -294,7 +294,7 @@ theorem rankOne.EuclideanSpace.toEuclideanLin_symm {𝕜 : Type _} [RCLike 𝕜]
     [Fintype m] [DecidableEq n] [DecidableEq m]
     (x : EuclideanSpace 𝕜 n) (y : EuclideanSpace 𝕜 m) :
     toEuclideanLin.symm (rankOne 𝕜 x y).toLinearMap =
-      col (x : n → 𝕜) * (col (y : m → 𝕜))ᴴ :=
+      col (Fin 1) (x : n → 𝕜) * (col (Fin 1) (y : m → 𝕜))ᴴ :=
   by
   simp_rw [← Matrix.ext_iff, toEuclideanLin_eq_toLin, toLin_symm, LinearMap.toMatrix_apply,
     ContinuousLinearMap.coe_coe, rankOne_apply, PiLp.basisFun_repr, PiLp.basisFun_apply,
@@ -309,13 +309,13 @@ theorem rankOne.EuclideanSpace.toMatrix' {𝕜 : Type _} [RCLike 𝕜] {n m : Ty
     [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
     (x : EuclideanSpace 𝕜 n) (y : EuclideanSpace 𝕜 m) :
     LinearMap.toMatrix' ((rankOne 𝕜 x y).toLinearMap : (m → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
-      col (x : n → 𝕜) * (col (y : m → 𝕜))ᴴ :=
+      col (Fin 1) (x : n → 𝕜) * (col (Fin 1) (y : m → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _
 theorem rankOne.Pi.toMatrix'' {𝕜 : Type _} [RCLike 𝕜] {n : Type _} [Fintype n]
     [DecidableEq n] (x y : n → 𝕜) :
     LinearMap.toMatrix' (((rankOne 𝕜 ((EuclideanSpace.equiv _ _).symm x) ((EuclideanSpace.equiv _ _).symm y)) : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n)
         : (n → 𝕜) →ₗ[𝕜] (n → 𝕜)) =
-      col (x : n → 𝕜) * (col (y : n → 𝕜))ᴴ :=
+      col (Fin 1) (x : n → 𝕜) * (col (Fin 1) (y : n → 𝕜))ᴴ :=
 rankOne.EuclideanSpace.toEuclideanLin_symm _ _
 
 /-- a matrix $x$ is positive semi-definite if and only if there exists vectors $(v_i)$ such that
@@ -324,14 +324,14 @@ theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col [Fintype n] [DecidableEq
     x.PosSemidef ↔
       ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
         x =
-          ∑ i : Fin m, col (v i : n → 𝕜) * (col (v i : n → 𝕜))ᴴ :=
+          ∑ i : Fin m, col (Fin 1) (v i : n → 𝕜) * (col (Fin 1) (v i : n → 𝕜))ᴴ :=
   by
   simp_rw [Matrix.posSemidef_iff_eq_rankOne, rankOne.EuclideanSpace.toMatrix']
 theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
       ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
         x =
-          ∑ i : m, col (v i : n → 𝕜) * (col (v i : n → 𝕜))ᴴ :=
+          ∑ i : m, col (Fin 1) (v i : n → 𝕜) * (col (Fin 1) (v i : n → 𝕜))ᴴ :=
 by
 simp_rw [Matrix.posSemidef_iff_eq_rankOne'', rankOne.EuclideanSpace.toMatrix']
 rfl
@@ -339,16 +339,16 @@ rfl
 theorem Matrix.posSemidef_iff_vecMulVec [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
   x.PosSemidef ↔ ∃ (m : ℕ) (v : Fin m → EuclideanSpace 𝕜 n),
     x = ∑ i : Fin m, vecMulVec (v i) (star (v i)) :=
-by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col, vecMulVec_eq, conjTranspose_col]
+by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col, vecMulVec_eq (Fin 1), conjTranspose_col]
 theorem Matrix.posSemidef_iff_vecMulVec' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
   x.PosSemidef ↔ ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
     x = ∑ i : m, vecMulVec (v i) (star (v i)) :=
-by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col', vecMulVec_eq, conjTranspose_col]
+by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col', vecMulVec_eq (Fin 1), conjTranspose_col]
 
 theorem vecMulVec_posSemidef [Fintype n] [DecidableEq n] (x : n → 𝕜) :
     (vecMulVec x (star x)).PosSemidef :=
   by
-  rw [vecMulVec_eq, ← conjTranspose_col]
+  rw [vecMulVec_eq (Fin 1), ← conjTranspose_col]
   exact Matrix.posSemidef_self_mul_conjTranspose _
 
 /-- the identity is a positive definite matrix -/
@@ -444,7 +444,7 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
         φ = (1 / Fintype.card n : 𝕜) • traceLinearMap n 𝕜 𝕜 :=
     by
     intro φ
-    have : (↑(Fintype.card n) : 𝕜)⁻¹ * ↑Finset.univ.card = 1 :=
+    have : (↑(Fintype.card n) : 𝕜)⁻¹ * ↑(@Finset.univ n _).card = 1 :=
       by
       rw [inv_mul_eq_one₀]
       · rfl
@@ -711,7 +711,7 @@ end Matrix
 namespace Matrix
 
 theorem PosSemidef.colMulConjTransposeCol [Fintype n] [DecidableEq n]
-    (x : n → 𝕜) : (col x * (col x)ᴴ : Matrix n n 𝕜).PosSemidef :=
+    (x : n → 𝕜) : (col (Fin 1) x * (col (Fin 1) x)ᴴ : Matrix n n 𝕜).PosSemidef :=
 Matrix.posSemidef_self_mul_conjTranspose _
 
 alias PosSemidef.mulConjTransposeSelf := Matrix.posSemidef_self_mul_conjTranspose

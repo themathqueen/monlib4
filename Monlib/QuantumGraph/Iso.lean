@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Monlib.QuantumGraph.Nontracial
+import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 
 #align_import quantum_graph.iso
@@ -135,18 +135,24 @@ theorem innerAutIsReal (U : unitaryGroup n ℂ) : LinearMap.IsReal (innerAut U) 
 @[reducible]
 alias StarAlgEquiv.IsIsometry := Isometry
 
+theorem Module.Dual.IsFaithfulPosMap.inner_coord' [hφ : φ.IsFaithfulPosMap] (ij : n × n)
+    (x : ℍ) : ⟪hφ.basis ij, x⟫_ℂ = (x * hφ.matrixIsPosDef.rpow (1 / 2)) ij.1 ij.2 := by
+  rw [IsFaithfulPosMap.basis_apply, ← IsFaithfulPosMap.orthonormalBasis_apply,
+    IsFaithfulPosMap.inner_coord _ ij x]
+
 theorem InnerAut.toMatrix [hφ : φ.IsFaithfulPosMap] (U : unitaryGroup n ℂ) :
-    hφ.toMatrix (innerAut U) = U ⊗ₖ (hφ.sig (-(1 / 2)) U)ᴴᵀ :=
+    hφ.toMatrix (innerAut U) = U ⊗ₖ (modAut (-(1 / 2)) U)ᴴᵀ :=
   by
   ext
   simp only [Module.Dual.IsFaithfulPosMap.toMatrix, LinearMap.toMatrixAlgEquiv_apply,
     StarAlgEquiv.toLinearMap_apply,
+    modAut, innerAutStarAlg_apply,
     Module.Dual.IsFaithfulPosMap.inner_coord', Module.Dual.IsFaithfulPosMap.basis_repr_apply,
     Module.Dual.IsFaithfulPosMap.inner_coord']
   simp only [innerAutStarAlg_apply, mul_apply, stdBasisMatrix, mul_ite, ite_mul,
     MulZeroClass.mul_zero, MulZeroClass.zero_mul, mul_one, one_mul, Finset.sum_ite_irrel,
     Finset.sum_ite_eq, Finset.sum_ite_eq', Finset.sum_const_zero, Finset.mem_univ, if_true, ite_and,
-    kroneckerMap, of_apply, conj_apply, Module.Dual.IsFaithfulPosMap.sig_apply, star_sum,
+    kroneckerMap, of_apply, conj_apply, sig_apply, star_sum,
     star_mul', neg_neg, Finset.mul_sum, Finset.sum_mul, mul_assoc, innerAut_apply',
     Module.Dual.IsFaithfulPosMap.basis_apply]
   simp_rw [← star_apply, star_eq_conjTranspose, (PosDef.rpow.isHermitian _ _).eq]

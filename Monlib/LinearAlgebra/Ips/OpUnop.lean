@@ -6,6 +6,7 @@ Authors: Monica Omar
 import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Algebra.Algebra.Basic
 import Mathlib.Algebra.Module.Opposites
+import Mathlib.Algebra.Star.Basic
 
 #align_import linear_algebra.my_ips.op_unop
 
