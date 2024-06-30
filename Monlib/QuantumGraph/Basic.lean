@@ -128,27 +128,87 @@ by
   rw [← neg_zero, ← modAut_map_comp_Psi, QuantumSet.modAut_zero]
   rfl
 
+open scoped TensorProduct
 variable {A B : Type*} [ha:starAlgebra A] [hb:starAlgebra B]
     [hA : QuantumSet A] [hB : QuantumSet B]
-open scoped TensorProduct
+
+private noncomputable def rmulMapLmul_apply_Upsilon_apply_aux :
+    (A →ₗ[ℂ] B) →ₗ[ℂ] ((A ⊗[ℂ] B) →ₗ[ℂ] (A ⊗[ℂ] B)) where
+  toFun x :=
+  { toFun := λ y => Upsilon (x •ₛ Upsilon.symm y)
+    map_add' := λ _ _ => by simp only [LinearEquiv.trans_symm, map_add, LinearEquiv.trans_apply,
+      LinearEquiv.TensorProduct.map_symm_apply, LinearEquiv.symm_symm, QuantumSet.Psi_symm_apply,
+      schurMul_apply_apply, QuantumSet.Psi_apply, LinearEquiv.TensorProduct.map_apply]
+    map_smul' := λ _ _ => by simp only [LinearEquiv.trans_symm, LinearMapClass.map_smul,
+      LinearEquiv.trans_apply, LinearEquiv.TensorProduct.map_symm_apply, LinearEquiv.symm_symm,
+      QuantumSet.Psi_symm_apply, schurMul_apply_apply, QuantumSet.Psi_apply,
+      LinearEquiv.TensorProduct.map_apply, RingHom.id_apply] }
+  map_add' _ _ := by
+    simp_rw [map_add, LinearMap.add_apply, map_add]; rfl
+  map_smul' _ _ := by
+    simp_rw [map_smul, LinearMap.smul_apply, map_smul]; rfl
+
+private lemma rmulMapLmul_apply_Upsilon_apply_aux_apply
+  (x : A →ₗ[ℂ] B) (y : A ⊗[ℂ] B) :
+  rmulMapLmul_apply_Upsilon_apply_aux x y = Upsilon (x •ₛ Upsilon.symm y) :=
+rfl
+
+lemma Upsilon_rankOne (a : A) (b : B) :
+  Upsilon (rankOne ℂ a b).toLinearMap = (modAut (- k B - 1) (star b)) ⊗ₜ[ℂ] a :=
+by
+  rw [Upsilon_apply, QuantumSet.Psi_toFun_apply, TensorProduct.comm_tmul,
+    TensorProduct.map_tmul, LinearEquiv.lTensor_tmul, starAlgebra.modAut_star,
+    starAlgebra.modAut_zero]
+  ring_nf
+  rfl
+lemma Upsilon_symm_tmul (a : A) (b : B) :
+  Upsilon.symm (a ⊗ₜ[ℂ] b) = (rankOne ℂ b (modAut (- k A - 1) (star a))).toLinearMap :=
+by
+  rw [Upsilon_symm_apply]
+  simp only [LinearEquiv.lTensor_symm_tmul, LinearEquiv.symm_symm, op_apply, TensorProduct.map_tmul,
+    LinearEquiv.coe_coe, unop_apply, MulOpposite.unop_op, TensorProduct.comm_symm_tmul, QuantumSet.Psi_invFun_apply,
+    starAlgebra.modAut_zero, neg_zero]
+  ring_nf
+  rfl
+
+theorem rmulMapLmul_apply_Upsilon_apply (x : A →ₗ[ℂ] B) (y : A ⊗[ℂ] B) :
+  (rmulMapLmul (Upsilon x)) y = Upsilon (x •ₛ Upsilon.symm y) :=
+by
+  rw [← rmulMapLmul_apply_Upsilon_apply_aux_apply, ← LinearEquiv.coe_toLinearMap,
+    ← LinearMap.comp_apply]
+  revert y x
+  simp_rw [← LinearMap.ext_iff]
+  apply LinearMap.ext_of_rank_one'
+  intro x y
+  rw [TensorProduct.ext_iff]
+  intro a b
+  simp only [rmulMapLmul_apply_Upsilon_apply_aux_apply, LinearMap.comp_apply,
+    LinearEquiv.coe_toLinearMap, Upsilon_rankOne, Upsilon_symm_tmul,
+    schurMul.apply_rankOne, rmulMapLmul_apply,
+    TensorProduct.map_tmul, star_mul, map_mul,
+    starAlgebra.modAut_star, QuantumSet.modAut_apply_modAut,
+    add_neg_self, QuantumSet.modAut_zero, star_star]
+  rfl
+
+
 theorem QuantumSet.comm_op_modAut_map_comul_one_eq_Psi (r : ℝ) (f : A →ₗ[ℂ] B) :
   (TensorProduct.comm _ _ _)
-  ((TensorProduct.map (op ∘ₗ (modAut r).toLinearMap) f) (Coalgebra.comul 1)) = Psi 0 (k A + 1 - r) f :=
+  ((TensorProduct.map ((op ℂ).toLinearMap ∘ₗ (modAut r).toLinearMap) f) (Coalgebra.comul 1)) = Psi 0 (k A + 1 - r) f :=
 by
   calc (TensorProduct.comm ℂ Aᵐᵒᵖ B)
         ((TensorProduct.map
-        ((op : A →ₗ[ℂ] Aᵐᵒᵖ) ∘ₗ (ha.modAut r).toLinearMap) f) (Coalgebra.comul 1 : A ⊗[ℂ] A))
+        ((op ℂ).toLinearMap ∘ₗ (ha.modAut r).toLinearMap) f) (Coalgebra.comul 1 : A ⊗[ℂ] A))
       = (TensorProduct.comm ℂ Aᵐᵒᵖ B)
-        ((TensorProduct.map (op ∘ₗ (modAut r).toLinearMap) unop)
-        (tenSwap (Psi 0 (k A + 1) f))) := ?_
+        ((TensorProduct.map ((op ℂ).toLinearMap ∘ₗ (modAut r).toLinearMap) (unop ℂ).toLinearMap)
+        (tenSwap ℂ (Psi 0 (k A + 1) f))) := ?_
     _ = (TensorProduct.comm _ _ _)
-        ((TensorProduct.map op unop)
-        (tenSwap
+        ((TensorProduct.map (op ℂ).toLinearMap (unop ℂ).toLinearMap)
+        (tenSwap ℂ
         ((LinearMap.lTensor _ (modAut r).op.toLinearMap)
         (Psi 0 (k A + 1) f)))) := ?_
     _ = (TensorProduct.comm _ _ _)
-      ((TensorProduct.map op unop)
-      (tenSwap
+      ((TensorProduct.map (op ℂ).toLinearMap (unop ℂ).toLinearMap)
+      (tenSwap ℂ
       (Psi 0 (k A + 1 - r) f))) := ?_
     _ = Psi 0 (k A + 1 - r) f := ?_
   . rw [← tenSwap_lTensor_comul_one_eq_Psi, tenSwap_apply_tenSwap]
@@ -158,11 +218,12 @@ by
   . congr 1
     simp_rw [AlgEquiv.op_toLinearMap, tenSwap_apply_lTensor,
       ← LinearMap.comp_apply,
+      ← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply,
       ← LinearMap.comp_assoc, LinearMap.map_comp_rTensor]
   . simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply,
       lTensor_modAut_comp_Psi]
     ring_nf
-  . suffices ∀ x, (TensorProduct.comm ℂ Aᵐᵒᵖ B) ((op ⊗ₘ unop) (tenSwap x)) = x by
+  . suffices ∀ x, (TensorProduct.comm ℂ Aᵐᵒᵖ B) (((op ℂ).toLinearMap ⊗ₘ (unop ℂ).toLinearMap) (tenSwap ℂ x)) = x by
       rw [this]
     intro x
     simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply]

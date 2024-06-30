@@ -327,14 +327,14 @@ theorem Psi.adjoint_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ (LinearMap.adjoint f) =
       ((ha.modAut (r₁ - r₂)).toLinearMap ⊗ₘ
           ((hb.modAut (r₁ - r₂)).op.toLinearMap))
-        (tenSwap (star (hA.Psi r₁ r₂ f))) :=
+        (tenSwap ℂ (star (hA.Psi r₁ r₂ f))) :=
   by
   suffices
     ∀ (a : B) (b : A),
       hB.Psi r₁ r₂ (LinearMap.adjoint ↑|a⟩⟨b|) =
         ((ha.modAut (r₁ - r₂)).toLinearMap ⊗ₘ
             (hb.modAut (r₁ - r₂)).op.toLinearMap )
-          (tenSwap (star (hA.Psi r₁ r₂ |a⟩⟨b|)))
+          (tenSwap ℂ (star (hA.Psi r₁ r₂ |a⟩⟨b|)))
     by
     obtain ⟨α, β, rfl⟩ := f.exists_sum_rankOne
     simp only [map_sum, star_sum, this]
@@ -349,7 +349,7 @@ theorem Psi.symmMap_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ (symmMap _ _ _ f) =
       ((ha.modAut (r₁ + r₂ - 1 - (2 * hA.k))).toLinearMap ⊗ₘ
           (hb.modAut (-r₁ - r₂)).op.toLinearMap)
-        (tenSwap (hA.Psi r₁ r₂ f)) :=
+        (tenSwap ℂ (hA.Psi r₁ r₂ f)) :=
   by
   simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply]
   revert f
@@ -368,7 +368,7 @@ theorem Psi.symmMap_symm_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ ((symmMap _ _ _).symm f) =
       ((ha.modAut (r₁ + r₂)).toLinearMap ⊗ₘ
           (hb.modAut (1 - r₁ - r₂ + (2 * hB.k))).op.toLinearMap)
-        (tenSwap (hA.Psi r₁ r₂ f)) :=
+        (tenSwap ℂ (hA.Psi r₁ r₂ f)) :=
 by
   simp_rw [← LinearEquiv.coe_coe, ← LinearMap.comp_apply]
   revert f

@@ -989,22 +989,23 @@ by
     StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
   tfae_finish
 
+set_option synthInstance.maxHeartbeats 0 in
 private noncomputable def tenSwap_Psi_aux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] (B ⊗[ℂ] Aᵐᵒᵖ) where
-  toFun f := tenSwap ((LinearMap.lTensor A (op ∘ₗ f)) (Coalgebra.comul 1))
+  toFun f := tenSwap ℂ ((LinearMap.lTensor A ((op ℂ).toLinearMap ∘ₗ f)) (Coalgebra.comul 1))
   map_add' x y := by
-    simp only [LinearMap.comp_add, LinearMap.lTensor_add,
-      LinearMap.add_apply, map_add]
+    simp only [LinearEquiv.trans_apply, LinearEquiv.TensorProduct.map_apply,
+      LinearMap.comp_add, LinearMap.lTensor_add, map_add, LinearMap.add_apply]
   map_smul' r x := by
     simp only [RingHom.id_apply, LinearMap.comp_smul, LinearMap.lTensor_smul,
       LinearMap.smul_apply, map_smul]
 private lemma tenSwap_Psi_aux_apply (f : A →ₗ[ℂ] B) :
-  tenSwap_Psi_aux f = tenSwap
-    ((LinearMap.lTensor A (op ∘ₗ f)) (Coalgebra.comul 1)) :=
+  tenSwap_Psi_aux f = tenSwap ℂ
+    ((LinearMap.lTensor A ((op ℂ).toLinearMap ∘ₗ f)) (Coalgebra.comul 1)) :=
 rfl
 
 theorem tenSwap_lTensor_comul_one_eq_Psi (f : A →ₗ[ℂ] B) :
-  tenSwap ((LinearMap.lTensor A (op ∘ₗ f)) (Coalgebra.comul 1))
+  tenSwap ℂ ((LinearMap.lTensor A ((op ℂ).toLinearMap ∘ₗ f)) (Coalgebra.comul 1))
     = Psi 0 (k A + 1) f :=
 by
   rw [← tenSwap_Psi_aux_apply, ← LinearEquiv.coe_toLinearMap]
@@ -1019,6 +1020,7 @@ by
   obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul 1 : A ⊗[ℂ] A)
   rw [← h]
   simp_rw [map_sum, LinearMap.lTensor_tmul, LinearMap.comp_apply,
+    LinearEquiv.coe_toLinearMap,
     op_apply, tenSwap_apply', ContinuousLinearMap.coe_coe, rankOne_apply,
     ← TensorProduct.smul_tmul', sum_inner, inner_smul_left, inner_conj_symm,
     TensorProduct.inner_tmul, MulOpposite.inner_eq, MulOpposite.unop_op,
@@ -1030,7 +1032,7 @@ by
 
 private noncomputable def map_op_comul_one_aux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] (B ⊗[ℂ] Aᵐᵒᵖ) where
-  toFun f := (TensorProduct.map f op) (Coalgebra.comul 1)
+  toFun f := (TensorProduct.map f (op ℂ).toLinearMap) (Coalgebra.comul 1)
   map_add' x y := by
     simp only [TensorProduct.map_add_left, LinearMap.add_apply]
   map_smul' r x := by
@@ -1038,11 +1040,11 @@ private noncomputable def map_op_comul_one_aux :
     rfl
 
 private lemma map_op_comul_one_aux_apply (f : A →ₗ[ℂ] B) :
-  map_op_comul_one_aux f = (TensorProduct.map f op) (Coalgebra.comul 1) :=
+  map_op_comul_one_aux f = (TensorProduct.map f (op ℂ).toLinearMap) (Coalgebra.comul 1) :=
 rfl
 
 theorem map_op_comul_one_eq_Psi (f : A →ₗ[ℂ] B) :
-  (TensorProduct.map f op) (Coalgebra.comul 1) = Psi 0 (k A) f :=
+  (TensorProduct.map f (op ℂ).toLinearMap) (Coalgebra.comul 1) = Psi 0 (k A) f :=
 by
   rw [← map_op_comul_one_aux_apply, ← LinearEquiv.coe_toLinearMap]
   revert f
@@ -1057,7 +1059,8 @@ by
   rw [← h]
   simp_rw [map_sum, sum_inner, TensorProduct.map_tmul,
     TensorProduct.inner_tmul, ContinuousLinearMap.coe_coe, rankOne_apply,
-    inner_smul_left, inner_conj_symm, MulOpposite.inner_eq, op_apply,
+    inner_smul_left, inner_conj_symm, MulOpposite.inner_eq,
+    LinearEquiv.coe_toLinearMap, op_apply,
     MulOpposite.unop_op, mul_assoc, mul_comm ⟪x, _⟫_ℂ,
     ← mul_assoc, ← Finset.sum_mul, ← TensorProduct.inner_tmul,
     ← sum_inner, h, Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_left,
@@ -1067,8 +1070,8 @@ by
 theorem _root_.tenSwap_apply_lTensor {R A B C : Type*}
   [CommSemiring R] [AddCommMonoid A] [AddCommMonoid C] [Module R A]
   [AddCommMonoid B] [Module R B] [Module R C] (f : B →ₗ[R] C) (x : A ⊗[R] Bᵐᵒᵖ) :
-  tenSwap ((LinearMap.lTensor _ f.op) x) =
-   (LinearMap.rTensor _ f) (tenSwap x) :=
+  (tenSwap R) ((LinearMap.lTensor A f.op) x) =
+   (LinearMap.rTensor _ f) (tenSwap R x) :=
 x.induction_on (by simp only [map_zero])
   (λ _ _ => by
     simp only [LinearMap.lTensor_tmul, LinearMap.op_apply, tenSwap_apply,
@@ -1077,8 +1080,8 @@ x.induction_on (by simp only [map_zero])
 
 theorem Psi_inv_comp_swap_lTensor_op_comp_comul_eq_rmul :
   (Psi 0 (k A + 1)).symm.toLinearMap
-    ∘ₗ tenSwap
-    ∘ₗ (LinearMap.lTensor A op)
+    ∘ₗ (tenSwap ℂ).toLinearMap
+    ∘ₗ (LinearMap.lTensor A (op ℂ).toLinearMap)
     ∘ₗ Coalgebra.comul
   = rmul :=
 by
@@ -1089,6 +1092,7 @@ by
   obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul x : A ⊗[ℂ] A)
   rw [← h]
   simp_rw [map_sum, LinearMap.sum_apply, inner_sum, LinearMap.lTensor_tmul,
+    LinearEquiv.coe_toLinearMap,
     op_apply, tenSwap_apply', Psi_invFun_apply, ContinuousLinearMap.coe_coe,
     rankOne_apply, neg_zero, starAlgebra.modAut_zero, AlgEquiv.one_apply,
     MulOpposite.unop_op, inner_smul_right, neg_add,
@@ -1099,3 +1103,69 @@ by
     LinearMap.mul'_apply, rmul_apply, inner_star_left, starAlgebra.modAut_star,
     modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero, star_star,
     AlgEquiv.one_apply]
+
+@[simps!]
+noncomputable abbrev Upsilon :
+  (A →ₗ[ℂ] B) ≃ₗ[ℂ] (A ⊗[ℂ] B) :=
+(Psi 0 (k A + 1)).trans ((tenSwap ℂ).trans (LinearEquiv.lTensor _ (unop ℂ)))
+
+private noncomputable def rmulMapLmul_apply_Upsilon_aux :
+  (A →ₗ[ℂ] B) →ₗ[ℂ] ((A ⊗[ℂ] B) →ₗ[ℂ] (A ⊗[ℂ] B)) where
+  toFun x := (LinearMap.lTensor _ (LinearMap.mul' ℂ B))
+      ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+      ∘ₗ (LinearMap.rTensor _ (LinearMap.lTensor _ x))
+      ∘ₗ LinearMap.rTensor _ (Coalgebra.comul)
+  map_add' _ _ := by simp only [LinearMap.lTensor_add, LinearMap.rTensor_add,
+    LinearMap.comp_add, LinearMap.add_comp]
+  map_smul' _ _ := by
+    simp only [LinearMap.lTensor_smul, LinearMap.rTensor_smul,
+      LinearMap.comp_smul, LinearMap.smul_comp]
+    rfl
+
+private lemma rmulMapLmul_apply_Upsilon_aux_apply (x : A →ₗ[ℂ] B) :
+  rmulMapLmul_apply_Upsilon_aux x =
+    (LinearMap.lTensor _ (LinearMap.mul' ℂ B))
+      ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+      ∘ₗ (LinearMap.rTensor _ (LinearMap.lTensor _ x))
+      ∘ₗ LinearMap.rTensor _ (Coalgebra.comul) :=
+rfl
+
+set_option synthInstance.maxHeartbeats 0 in
+lemma rmulMapLmul_apply_Upsilon_eq (x : A →ₗ[ℂ] B) :
+  rmulMapLmul (Upsilon x) =
+    (LinearMap.lTensor _ (LinearMap.mul' ℂ B))
+      ∘ₗ (TensorProduct.assoc _ _ _ _).toLinearMap
+      ∘ₗ (LinearMap.rTensor _ (LinearMap.lTensor _ x))
+      ∘ₗ LinearMap.rTensor _ (Coalgebra.comul) :=
+by
+  symm
+  rw [← rmulMapLmul_apply_Upsilon_aux_apply, ← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply]
+  revert x
+  rw [← LinearMap.ext_iff]
+  apply LinearMap.ext_of_rank_one'
+  intro x y
+  rw [TensorProduct.ext_iff]
+  intro a b
+  rw [TensorProduct.inner_ext_iff', rmulMapLmul_apply_Upsilon_aux_apply]
+  intro c d
+  obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul a : A ⊗[ℂ] A)
+  simp_rw [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply, LinearEquiv.trans_apply,
+    Psi_apply, LinearEquiv.TensorProduct.map_apply, LinearMap.rTensor_tmul,
+    Psi_toFun_apply, TensorProduct.comm_tmul,
+    TensorProduct.map_tmul, ← h, map_sum, TensorProduct.sum_tmul,
+    map_sum, sum_inner]
+  simp only [LinearMap.lTensor_tmul, ContinuousLinearMap.coe_coe, rankOne_apply_apply_toFun,
+    TensorProduct.tmul_smul, starAlgebra.modAut_star, neg_add_rev,
+    LinearEquiv.coe_coe, unop_apply, MulOpposite.unop_op, starAlgebra.modAut_zero,
+    AlgEquiv.one_apply, op_apply, LinearEquiv.lTensor_tmul,
+    ← TensorProduct.smul_tmul', map_smul, inner_smul_left, inner_conj_symm,
+    TensorProduct.assoc_tmul, TensorProduct.inner_tmul]
+  simp_rw [← mul_assoc, ← Finset.sum_mul, mul_comm ⟪β _, _⟫_ℂ,
+    ← TensorProduct.inner_tmul, ← sum_inner, h,
+    Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_left,
+    LinearMap.mul'_apply, rmulMapLmul_apply, TensorProduct.map_tmul,
+    TensorProduct.inner_tmul, rmul_apply, neg_add_eq_sub]
+  nth_rw 2 [inner_conj_left]
+  simp_rw [starAlgebra.modAut_star, modAut_apply_modAut, star_star,
+    add_neg_self, starAlgebra.modAut_zero]
+  rfl

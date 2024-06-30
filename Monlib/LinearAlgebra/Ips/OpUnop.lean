@@ -7,6 +7,7 @@ import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Algebra.Algebra.Basic
 import Mathlib.Algebra.Module.Opposites
 import Mathlib.Algebra.Star.Basic
+import Monlib.LinearAlgebra.TensorProduct.Lemmas
 
 #align_import linear_algebra.my_ips.op_unop
 
@@ -23,63 +24,78 @@ We also define `ten_swap` which is the linear automorphisms on `A ⊗[R] Aᵐᵒ
 
 variable {R A : Type _} [CommSemiring R] [AddCommMonoid A] [Module R A]
 
-def op : A →ₗ[R] Aᵐᵒᵖ :=
-  ((MulOpposite.opLinearEquiv R : A ≃ₗ[R] Aᵐᵒᵖ) : A →ₗ[R] Aᵐᵒᵖ)
+abbrev op (R : Type*) {A : Type _} [CommSemiring R] [AddCommMonoid A] [Module R A] :=
+(MulOpposite.opLinearEquiv R : A ≃ₗ[R] Aᵐᵒᵖ)
 
-theorem op_apply (x : A) : (op : A →ₗ[R] Aᵐᵒᵖ) x = MulOpposite.op x :=
+@[simp]
+theorem op_apply (x : A) : op R x = MulOpposite.op x :=
   rfl
 
-def unop : Aᵐᵒᵖ →ₗ[R] A :=
-  ((MulOpposite.opLinearEquiv R : A ≃ₗ[R] Aᵐᵒᵖ).symm : Aᵐᵒᵖ →ₗ[R] A)
+abbrev unop (R : Type*) {A : Type _} [CommSemiring R] [AddCommMonoid A] [Module R A] :
+  Aᵐᵒᵖ ≃ₗ[R] A :=
+(op R).symm
 
-theorem unop_apply (x : Aᵐᵒᵖ) : (unop : Aᵐᵒᵖ →ₗ[R] A) x = MulOpposite.unop x :=
+@[simp]
+theorem unop_apply (x : Aᵐᵒᵖ) : unop R x = MulOpposite.unop x :=
   rfl
 
-theorem unop_op (x : A) : (unop : Aᵐᵒᵖ →ₗ[R] A) ((op : A →ₗ[R] Aᵐᵒᵖ) x) = x :=
+@[simp]
+theorem unop_op (x : A) : unop R (op R x) = x :=
   rfl
 
-theorem op_unop (x : Aᵐᵒᵖ) : (op : A →ₗ[R] Aᵐᵒᵖ) ((unop : Aᵐᵒᵖ →ₗ[R] A) x) = x :=
+@[simp]
+theorem op_unop (x : Aᵐᵒᵖ) : op R (unop R x) = x :=
   rfl
 
-theorem unop_comp_op : unop ∘ₗ op = (1 : A →ₗ[R] A) :=
+theorem unop_comp_op : (unop R).toLinearMap ∘ₗ (op R).toLinearMap = (1 : A →ₗ[R] A) :=
   rfl
 
-theorem op_comp_unop : op ∘ₗ unop = (1 : Aᵐᵒᵖ →ₗ[R] Aᵐᵒᵖ) :=
+theorem op_comp_unop : (op R).toLinearMap ∘ₗ (unop R).toLinearMap = (1 : Aᵐᵒᵖ →ₗ[R] Aᵐᵒᵖ) :=
   rfl
 
 theorem op_star_apply [Star A] (a : A) :
-    (op : A →ₗ[R] Aᵐᵒᵖ) (star a) = star ((op : A →ₗ[R] Aᵐᵒᵖ) a) :=
+    op R (star a) = star (op R a) :=
   rfl
 
 theorem unop_star_apply [Star A] (a : Aᵐᵒᵖ) :
-    (unop : Aᵐᵒᵖ →ₗ[R] A) (star a) = star ((unop : Aᵐᵒᵖ →ₗ[R] A) a) :=
+    unop R (star a) = star (unop R a) :=
   rfl
 
 open scoped TensorProduct
 
 variable {B : Type*} [AddCommMonoid B] [Module R B]
-noncomputable def tenSwap : A ⊗[R] Bᵐᵒᵖ →ₗ[R] B ⊗[R] Aᵐᵒᵖ :=
-  TensorProduct.map (unop : Bᵐᵒᵖ →ₗ[R] B) (op : A →ₗ[R] Aᵐᵒᵖ) ∘ₗ
-    (TensorProduct.comm R A Bᵐᵒᵖ).toLinearMap
+noncomputable abbrev tenSwap (R : Type*)
+  {A B : Type*} [AddCommMonoid A] [AddCommMonoid B]
+  [CommSemiring R] [Module R A] [Module R B] :
+    A ⊗[R] Bᵐᵒᵖ ≃ₗ[R] B ⊗[R] Aᵐᵒᵖ :=
+(TensorProduct.comm R A Bᵐᵒᵖ).trans
+  (LinearEquiv.TensorProduct.map (unop R) (op R))
 
+@[simp]
 theorem tenSwap_apply (x : A) (y : Bᵐᵒᵖ) :
-    tenSwap (x ⊗ₜ[R] y) = MulOpposite.unop y ⊗ₜ[R] MulOpposite.op x :=
+    tenSwap R (x ⊗ₜ[R] y) = MulOpposite.unop y ⊗ₜ[R] MulOpposite.op x :=
   rfl
 
-theorem tenSwap_apply' (x : A) (y : B) : tenSwap (x ⊗ₜ MulOpposite.op y) = y ⊗ₜ[R] MulOpposite.op x :=
+theorem tenSwap_apply' (x : A) (y : B) : tenSwap R (x ⊗ₜ MulOpposite.op y) = y ⊗ₜ[R] MulOpposite.op x :=
   rfl
 
-theorem tenSwap_tenSwap : tenSwap ∘ₗ tenSwap = (1 : A ⊗[R] Bᵐᵒᵖ →ₗ[R] A ⊗[R] Bᵐᵒᵖ) :=
+@[simp]
+theorem tenSwap_symm :
+  (tenSwap R).symm = (tenSwap R : B ⊗[R] Aᵐᵒᵖ ≃ₗ[R] A ⊗[R] Bᵐᵒᵖ) :=
+by
+  rw [← LinearEquiv.toLinearMap_inj]
+  rw [TensorProduct.ext_iff]
+  intro _ _
+  rfl
+
+theorem tenSwap_comp_tenSwap : (tenSwap R).toLinearMap ∘ₗ (tenSwap R).toLinearMap = (1 : A ⊗[R] Bᵐᵒᵖ →ₗ[R] A ⊗[R] Bᵐᵒᵖ) :=
   by
   apply TensorProduct.ext'
-  intros
-  simp only [LinearMap.comp_apply, tenSwap_apply, MulOpposite.unop_op, MulOpposite.op_unop,
-    LinearMap.one_apply]
+  intro _ _
+  rfl
 
-theorem tenSwap_apply_tenSwap (x : A ⊗[R] Bᵐᵒᵖ) : tenSwap (tenSwap x) = x := by
-  rw [← LinearMap.comp_apply, tenSwap_tenSwap, LinearMap.one_apply]
-
-def tenSwap_injective : Function.Injective (tenSwap : A ⊗[R] Bᵐᵒᵖ →ₗ[R] B ⊗[R] Aᵐᵒᵖ) :=
-  by
-  intro a b h
-  rw [← tenSwap_apply_tenSwap a, h, tenSwap_apply_tenSwap]
+@[simp]
+theorem tenSwap_apply_tenSwap (x : A ⊗[R] Bᵐᵒᵖ) :
+    tenSwap R (tenSwap R x) = x := by
+  simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply,
+    tenSwap_comp_tenSwap]; rfl

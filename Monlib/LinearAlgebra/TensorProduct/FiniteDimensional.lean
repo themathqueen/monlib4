@@ -147,12 +147,12 @@ theorem TensorProduct.rid_real :
     TensorProduct.rid_tmul, star_star, star_smul]
 
 theorem tensor_op_star_apply (x : E) (y : Eᵐᵒᵖ) :
-    star (x ⊗ₜ[𝕜] y) = star x ⊗ₜ[𝕜] (op : E →ₗ[𝕜] Eᵐᵒᵖ) (star ((unop : Eᵐᵒᵖ →ₗ[𝕜] E) y)) :=
+    star (x ⊗ₜ[𝕜] y) = star x ⊗ₜ[𝕜] (op 𝕜) (star (unop 𝕜 y)) :=
   by
   simp only [TensorProduct.star_tmul]
   rfl
 
-theorem tenSwap_star (x : E ⊗[𝕜] Eᵐᵒᵖ) : star (tenSwap x) = tenSwap (star x) :=
+theorem tenSwap_star (x : E ⊗[𝕜] Eᵐᵒᵖ) : star (tenSwap 𝕜 x) = tenSwap 𝕜 (star x) :=
 x.induction_on
   (by simp only [star_zero, map_zero])
   (fun _ _ => by
