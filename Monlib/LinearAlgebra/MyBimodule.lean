@@ -298,3 +298,21 @@ theorem LinearMap.isBimoduleMap_iff' {f : l(R,H₁ ⊗[R] H₂)} :
   rw [isBimoduleMap_iff]
   intro a b c d
   rw [← h, ← Bimodule.lsmul_lsmul, ← Bimodule.rsmul_rsmul, Bimodule.lsmul_rsmul_assoc, h]
+
+theorem rmulMapLmul_apply_one (x : H₁ ⊗[R] H₂) :
+  rmulMapLmul x 1 = x := by
+calc rmulMapLmul x 1 =  rmulMapLmul x (1 ⊗ₜ[R] 1) := rfl
+  _ = 1 •ₗ x •ᵣ 1 := by rw [rmulMapLmul_apply_apply]
+  _ = x := by simp_rw [Bimodule.one_lsmul, Bimodule.rsmul_one]
+
+noncomputable def LinearEquiv.toIsBimoduleMap :
+    (H₁ ⊗[R] H₂) ≃ₗ[R] LinearMap.IsBimoduleMaps R H₁ H₂ where
+  toFun x := ⟨rmulMapLmul x, by simp_rw [LinearMap.isBimoduleMap_iff', rmulMapLmul_apply_one]⟩
+  invFun x := (x : l(R, H₁ ⊗[R] H₂)) 1
+  map_add' _ _ := by simp only [map_add]; rfl
+  map_smul' _ _ := by simp only [map_smulₛₗ]; rfl
+  left_inv _ := by simp only [rmulMapLmul_apply_one]
+  right_inv f := by
+    simp only
+    congr
+    rw [LinearMap.isBimoduleMap_iff'.mp f.property]

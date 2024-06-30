@@ -251,7 +251,7 @@ attribute [instance] isEquivToPiMat.hk₁
 attribute [instance] isEquivToPiMat.hk₂
 
 open scoped ComplexOrder
-def schurProjection.isPosMap [PartialOrder A] [PartialOrder B]
+theorem schurProjection.isPosMap [PartialOrder A] [PartialOrder B]
   [StarOrderedRing B]
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
   {δ : ℂ} (hδ : 0 ≤ δ)
@@ -280,7 +280,7 @@ by
   rw [this]
   exact star_mul_self_nonneg _
 
-def schurIdempotent.isSchurProjection_iff_isPosMap
+theorem schurIdempotent.isSchurProjection_iff_isPosMap
   [PartialOrder A] [PartialOrder B]
   [StarOrderedRing A] [StarOrderedRing B]
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)

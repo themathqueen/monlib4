@@ -178,15 +178,48 @@ by
 
 -- @[irreducible]
 def qS_GNS (A : Type*) := A
-instance qS_GNS.starAlgebra :
-  _root_.starAlgebra (qS_GNS A) := ha
-lemma qS_GNS.modAut_apply (r : ℝ) (x : qS_GNS A) :
-  (qS_GNS.starAlgebra).modAut r x = ha.modAut r x := rfl
+
+def toGNS_equiv {A : Type*} : A ≃ qS_GNS A := Equiv.refl _
+
+abbrev GNS (A : Type*) := qS_GNS A
+
+instance (A : Type*) : CoeFun (GNS A) (fun _ ↦ A) where
+  coe := toGNS_equiv
+
+instance (A : Type*) [h:Inhabited A] : Inhabited (GNS A) := h
+instance {A : Type*} [h:Ring A] : Ring (GNS A) := h
+instance {A : Type*} [Ring A] [h:Algebra ℂ A] : Algebra ℂ (GNS A) := h
+instance {A : Type*} [h : Star A] : Star (GNS A) := h
+instance {A : Type*} [h : SMul ℂ A] : SMul ℂ (GNS A) := h
+instance {A : Type*} [Ring A] [h:StarRing A] : StarRing (GNS A) := h
+instance {A : Type*} [Star A] [SMul ℂ A] [h:StarModule ℂ A] : StarModule ℂ (GNS A) := h
+
+def toGNS_algEquiv {A : Type*} [Ring A] [Algebra ℂ A] : A ≃ₐ[ℂ] GNS A := AlgEquiv.refl
+lemma toGNS_algEquiv_eq_toGNS_equiv {A : Type*} [Ring A] [Algebra ℂ A]  (x : A) :
+  toGNS_algEquiv x = toGNS_equiv x := rfl
+lemma toGNS_algEquiv_symm_eq_toGNS_equiv {A : Type*} [Ring A] [Algebra ℂ A] (x : GNS A) :
+  toGNS_algEquiv.symm x = toGNS_equiv.symm x := rfl
+
+instance GNS.starAlgebra :
+    _root_.starAlgebra (GNS A) where
+  modAut r := toGNS_algEquiv.symm.trans ((ha.modAut r).trans toGNS_algEquiv)
+  modAut_trans := ha.modAut_trans
+  modAut_zero := ha.modAut_zero
+  modAut_star := ha.modAut_star
+
+
+lemma GNS.modAut_apply (r : ℝ) (x : GNS A) :
+  (GNS.starAlgebra).modAut r x =
+    toGNS_equiv (ha.modAut r (toGNS_equiv.symm x)) := rfl
+lemma GNS.modAut_apply' (r : ℝ) (x : A) :
+  (GNS.starAlgebra).modAut r (toGNS_equiv x) = toGNS_equiv (ha.modAut r x) := rfl
 
 noncomputable def QuantumSet.GNS_normedAddCommGroup [hA : QuantumSet A] :
-    NormedAddCommGroup (qS_GNS A) :=
-  @InnerProductSpace.Core.toNormedAddCommGroup ℂ (qS_GNS A) _ _ _
-  { inner := λ x y => hA.inner (x : A) ((ha.modAut (-hA.k) (y : A)))
+    letI : starAlgebra (GNS A) := GNS.starAlgebra
+    NormedAddCommGroup (GNS A) :=
+  letI : starAlgebra (GNS A) := GNS.starAlgebra
+  @InnerProductSpace.Core.toNormedAddCommGroup ℂ (GNS A) _ _ _
+  { inner := λ x y => hA.inner (toGNS_equiv.symm x) ((ha.modAut (-hA.k) (toGNS_equiv.symm y)))
     conj_symm := λ _ _ => by simp only [inner_conj_symm, QuantumSet.modAut_isSymmetric]
     nonneg_re := λ _ => by
       simp only
@@ -198,20 +231,23 @@ noncomputable def QuantumSet.GNS_normedAddCommGroup [hA : QuantumSet A] :
       rw [← add_halves (-k A), ← QuantumSet.modAut_apply_modAut,
         ← QuantumSet.modAut_isSymmetric, inner_self_eq_zero,
         AlgEquiv.map_eq_zero_iff]
-      simp only [imp_self]
-    add_left := λ _ _ _ => by simp only [inner_add_left]
-    smul_left := λ _ _ _ => by simp only [inner_smul_left] }
+      exact λ h => h
+    add_left := λ _ _ _ => by simp only [← inner_add_left]; rfl
+    smul_left := λ _ _ _ => by simp only [← inner_smul_left]; rfl }
 noncomputable def QuantumSet.GNS_innerProductSpace (hA:QuantumSet A) :
   letI := hA.GNS_normedAddCommGroup
-  InnerProductSpace ℂ (qS_GNS A) :=
+  InnerProductSpace ℂ (GNS A) :=
+letI : starAlgebra (GNS A) := GNS.starAlgebra
 InnerProductSpace.ofCore _
 
 -- theorem GNS.normedAddCommGroup.norm_eq [hA : QuantumSet A] (x : qS_GNS A) :
 --   GNS.normedAddCommGroup.norm (x : qS_GNS A) = ‖modAut (- (hA.k / 2)) (x : A)‖ :=
 -- rfl
 
-noncomputable def QuantumSet.GNS_innerProductAlgebra (hA: QuantumSet A) :
-  InnerProductAlgebra (qS_GNS A) :=
+noncomputable instance QuantumSet.GNS_innerProductAlgebra (hA: QuantumSet A) :
+  letI : starAlgebra (GNS A) := GNS.starAlgebra
+  InnerProductAlgebra (GNS A) :=
+letI : starAlgebra (GNS A) := GNS.starAlgebra
 letI := hA.GNS_normedAddCommGroup
 letI := hA.GNS_innerProductSpace
 { norm_sq_eq_inner := λ _ => by
@@ -220,33 +256,65 @@ letI := hA.GNS_innerProductSpace
   add_left := inner_add_left
   smul_left := inner_smul_left }
 
-lemma qS_GNS.inner_eq [hA : QuantumSet A] (x y : qS_GNS A) :
+lemma qS_GNS.inner_eq [hA : QuantumSet A] (x y : GNS A) :
+  letI : starAlgebra (GNS A) := GNS.starAlgebra
   hA.GNS_innerProductAlgebra.inner x y
-    = hA.inner (x : A) ((ha.modAut (-hA.k) (y : A))) :=
+    = hA.inner (toGNS_equiv.symm x : A) (ha.modAut (-hA.k) (toGNS_equiv.symm y)) :=
 rfl
+alias GNS.inner_eq := qS_GNS.inner_eq
 lemma inner_eq_GNS [hA : QuantumSet A] (x y : A) :
+  letI : starAlgebra (GNS A) := GNS.starAlgebra
   hA.inner x y
-  = hA.GNS_innerProductAlgebra.inner x (ha.modAut (hA.k) y) :=
+  = hA.GNS_innerProductAlgebra.inner (toGNS_equiv x) (toGNS_equiv (ha.modAut (hA.k) y)) :=
 by
-  rw [qS_GNS.inner_eq, QuantumSet.modAut_apply_modAut, neg_add_self, starAlgebra.modAut_zero]
-  rfl
+  rw [GNS.inner_eq]
+  simp_rw [Equiv.symm_apply_apply, QuantumSet.modAut_apply_modAut, neg_add_self,
+    starAlgebra.modAut_zero, AlgEquiv.one_apply]
 
-open QuantumSet qS_GNS in
-noncomputable def QuantumSet.gns (hA : QuantumSet A) :
-    QuantumSet (qS_GNS A) :=
-letI := hA.GNS_innerProductAlgebra
-{ modAut_isSymmetric := λ _ _ _ => by
-    simp only [inner_eq, modAut_isSymmetric, modAut_apply, modAut_apply_modAut, add_comm]
+open QuantumSet GNS in
+noncomputable instance QuantumSet.gns (hA : QuantumSet A) :
+    letI : starAlgebra (GNS A) := GNS.starAlgebra
+    QuantumSet (GNS A) :=
+letI st : starAlgebra (GNS A) := GNS.starAlgebra
+letI gns := hA.GNS_innerProductAlgebra
+{ modAut_isSymmetric := λ r x y => by
+    calc gns.inner (st.modAut r x) y
+          = hA.inner (toGNS_equiv.symm (st.modAut r x))
+          (ha.modAut (-hA.k) (toGNS_equiv.symm y)) := rfl
+      _ = hA.inner (ha.modAut r (toGNS_equiv.symm x))
+        (ha.modAut (-hA.k) (toGNS_equiv.symm y)) := rfl
+      _ = hA.inner (toGNS_equiv.symm x)
+        (ha.modAut (-hA.k) (ha.modAut r (toGNS_equiv.symm y))) := by
+          simp_rw [modAut_isSymmetric, modAut_apply_modAut, add_comm]
+      _ = hA.inner (toGNS_equiv.symm x)
+        (ha.modAut (-hA.k) (toGNS_equiv.symm (st.modAut r y))) := rfl
+      _ = gns.inner x (st.modAut r y) := rfl
   k := 0
-  inner_star_left := λ _ _ _ =>
+  inner_star_left := λ x y z =>
   by
-    simp only [inner_eq, inner_star_left, neg_zero, starAlgebra.modAut_zero, AlgEquiv.one_apply, map_mul]
-  inner_conj_left := λ _ _ _ =>
-  by
-    simp_rw [inner_eq, inner_conj_left, neg_zero, zero_sub, map_mul,
-      modAut_apply,
-      modAut_apply_modAut]
-    rfl
+    calc gns.inner (x * y) z
+        = hA.inner (toGNS_equiv.symm (x * y))
+          (ha.modAut (-hA.k) (toGNS_equiv.symm z)) := rfl
+      _ = hA.inner (toGNS_equiv.symm x * toGNS_equiv.symm y)
+          (ha.modAut (-hA.k) (toGNS_equiv.symm z)) := by rfl
+      _ = hA.inner (toGNS_equiv.symm y)
+          (ha.modAut (-hA.k) (toGNS_equiv.symm (star x) * toGNS_equiv.symm z)) := by
+            rw [inner_star_left, map_mul]; rfl
+      _ = gns.inner y (star x * z) := rfl
+      _ = gns.inner y (st.modAut (-0) (star x) * z) := by
+            rw [neg_zero, starAlgebra.modAut_zero]; rfl
+  inner_conj_left := λ x y z =>
+  calc hA.GNS_innerProductAlgebra.inner (x * y) z
+      = hA.inner (toGNS_equiv.symm x * toGNS_equiv.symm y)
+        (ha.modAut (-hA.k) (toGNS_equiv.symm z)) := rfl
+    _ = hA.inner (toGNS_equiv.symm x)
+      (ha.modAut (-hA.k) ((toGNS_equiv.symm z) * ha.modAut (-1) (toGNS_equiv.symm (star y)))) := by
+          simp_rw [inner_conj_left, map_mul, modAut_apply_modAut]
+          ring_nf
+          rfl
+    _ = hA.GNS_innerProductAlgebra.inner x (z * GNS.starAlgebra.modAut (-0-1) (star y)) := by
+          ring_nf
+          rfl
   n := n A
   n_isFintype := QuantumSet.n_isFintype
   n_isDecidableEq := QuantumSet.n_isDecidableEq
@@ -276,15 +344,55 @@ letI := hA.GNS_innerProductAlgebra
 
 def LinearMap.toGNS {B : Type*} [starAlgebra B]
   [QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) :
-  qS_GNS A →ₗ[ℂ] qS_GNS B :=
+  GNS A →ₗ[ℂ] GNS B :=
 f
 def LinearMap.ofGNS {B : Type*} [starAlgebra B]
   [QuantumSet A] [QuantumSet B] (f : qS_GNS A →ₗ[ℂ] qS_GNS B) :
   A →ₗ[ℂ] B :=
 f
+
+@[simps]
+noncomputable def rankOneGNS {B : Type*} [starAlgebra B]
+  [hA:QuantumSet A] [QuantumSet B] (a : B) (b : A) :
+    qS_GNS A →ₗ[ℂ] qS_GNS B where
+  toFun x := (hA.gns.inner (toGNS_equiv b) x) • (toGNS_equiv a)
+  map_add' _ _ := by
+    letI := hA.gns
+    simp only [self_eq_add_right, smul_eq_zero, inner_self_eq_zero,
+      inner_add_right, add_smul]
+  map_smul' _ _ := by
+    letI := hA.gns
+    simp only [RingHom.id_apply, inner_smul_right, smul_smul]
+
 lemma LinearMap.toGNS_apply {B : Type*} [starAlgebra B]
-  [QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (x : A) :
-  f.toGNS x = f x := rfl
+  [QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (x : GNS A) :
+  f.toGNS x = toGNS_equiv (f (toGNS_equiv.symm x)) := rfl
+
+theorem rankOne_toGNS {B : Type*} [starAlgebra B]
+  [hA:QuantumSet A] [hB:QuantumSet B] (a : B) (b : A) :
+  (rankOne ℂ a b).toLinearMap.toGNS = rankOneGNS a (modAut (k A) b) :=
+by
+  ext
+  simp_rw [LinearMap.toGNS_apply, ContinuousLinearMap.coe_coe,
+    rankOne_apply, rankOneGNS_apply]
+  rw [qS_GNS.inner_eq, ← GNS.modAut_apply',
+    ← QuantumSet.modAut_isSymmetric, ← toGNS_algEquiv_eq_toGNS_equiv,
+    ← toGNS_algEquiv_symm_eq_toGNS_equiv, map_smul,
+    GNS.modAut_apply', Equiv.symm_apply_apply,
+    QuantumSet.modAut_apply_modAut,
+    neg_add_self, starAlgebra.modAut_zero, AlgEquiv.one_apply]
+  rfl
+
+theorem rankOneGNS_ofGNS {B : Type*} [starAlgebra B]
+  [hA:QuantumSet A] [hB:QuantumSet B] (a : B) (b : A) :
+  (rankOneGNS a b).ofGNS = (rankOne ℂ a (modAut (-k A) b)).toLinearMap :=
+by
+  have := rankOne_toGNS a (modAut (-k A) b)
+  simp only [QuantumSet.modAut_apply_modAut, add_right_neg, starAlgebra.modAut_zero,
+    AlgEquiv.one_apply] at this
+  rw [← this]
+  rfl
+
 noncomputable def gns_adjoint {B : Type*} [starAlgebra B]
   [hA:QuantumSet A] [hB:QuantumSet B]
   (f : A →ₗ[ℂ] B) :
