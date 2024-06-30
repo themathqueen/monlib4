@@ -19,6 +19,7 @@ import Monlib.LinearAlgebra.PiDirectSum
 import Monlib.LinearAlgebra.PiStarOrderedRing
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
 import Monlib.LinearAlgebra.PosMap_isReal
+import Monlib.LinearAlgebra.LinearMapOp
 
 import Monlib.Other.Sonia
 

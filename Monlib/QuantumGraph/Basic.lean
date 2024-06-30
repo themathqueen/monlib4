@@ -13,33 +13,6 @@ by
   rw [symmMap_apply, schurMul_real, schurMul_adjoint]
   rfl
 
-@[simps]
-def LinearMap.op {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
-  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
-  (f : M →ₛₗ[σ] M₂) : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ where
-    toFun x := MulOpposite.op (f (MulOpposite.unop x))
-    map_add' _ _ := by simp only [MulOpposite.unop_add, map_add, MulOpposite.op_add]
-    map_smul' _ _ := by simp only [MulOpposite.unop_smul, LinearMap.map_smulₛₗ, MulOpposite.op_smul]
-@[simps]
-def LinearMap.unop {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
-  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
-  (f : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ) : M →ₛₗ[σ] M₂ where
-    toFun x := MulOpposite.unop (f (MulOpposite.op x))
-    map_add' _ _ := by simp only [MulOpposite.unop_add, map_add, MulOpposite.op_add]
-    map_smul' _ _ := by simp only [MulOpposite.unop_smul, LinearMap.map_smulₛₗ, MulOpposite.op_smul]
-@[simp]
-lemma LinearMap.unop_op {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
-  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
-  (f : Mᵐᵒᵖ →ₛₗ[σ] M₂ᵐᵒᵖ) :
-  f.unop.op = f :=
-rfl
-@[simp]
-lemma LinearMap.op_unop {R S : Type*} [Semiring R] [Semiring S] {σ : R →+* S}
-  {M M₂ : Type*} [AddCommMonoid M] [AddCommMonoid M₂] [Module R M] [Module S M₂]
-  (f : M →ₛₗ[σ] M₂) :
-  f.op.unop = f :=
-rfl
-
 alias QuantumSet.modAut_star := starAlgebra.modAut_star
 alias QuantumSet.modAut_zero := starAlgebra.modAut_zero
 
@@ -110,12 +83,6 @@ by
   simp_rw [IsIdempotentElem, ← Psi.schurMul, Function.Injective.eq_iff (LinearEquiv.injective _)]
 
 @[simp]
-theorem AlgEquiv.op_toLinearMap
-  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A]
-  [Algebra R B] (f : A ≃ₐ[R] B) :
-  f.op.toLinearMap = f.toLinearMap.op :=
-rfl
-@[simp]
 theorem LinearMap.op_real {K E F : Type*}
   [AddCommMonoid E] [StarAddMonoid E] [AddCommMonoid F] [StarAddMonoid F]
   [Semiring K] [Module K E] [Module K F] [InvolutiveStar K] [StarModule K E]  [StarModule K F]
@@ -160,6 +127,53 @@ by
   nth_rw 2 [← zero_add r₂]
   rw [← neg_zero, ← modAut_map_comp_Psi, QuantumSet.modAut_zero]
   rfl
+
+variable {A B : Type*} [ha:starAlgebra A] [hb:starAlgebra B]
+    [hA : QuantumSet A] [hB : QuantumSet B]
+open scoped TensorProduct
+theorem QuantumSet.comm_op_modAut_map_comul_one_eq_Psi (r : ℝ) (f : A →ₗ[ℂ] B) :
+  (TensorProduct.comm _ _ _)
+  ((TensorProduct.map (op ∘ₗ (modAut r).toLinearMap) f) (Coalgebra.comul 1)) = Psi 0 (k A + 1 - r) f :=
+by
+  calc (TensorProduct.comm ℂ Aᵐᵒᵖ B)
+        ((TensorProduct.map
+        ((op : A →ₗ[ℂ] Aᵐᵒᵖ) ∘ₗ (ha.modAut r).toLinearMap) f) (Coalgebra.comul 1 : A ⊗[ℂ] A))
+      = (TensorProduct.comm ℂ Aᵐᵒᵖ B)
+        ((TensorProduct.map (op ∘ₗ (modAut r).toLinearMap) unop)
+        (tenSwap (Psi 0 (k A + 1) f))) := ?_
+    _ = (TensorProduct.comm _ _ _)
+        ((TensorProduct.map op unop)
+        (tenSwap
+        ((LinearMap.lTensor _ (modAut r).op.toLinearMap)
+        (Psi 0 (k A + 1) f)))) := ?_
+    _ = (TensorProduct.comm _ _ _)
+      ((TensorProduct.map op unop)
+      (tenSwap
+      (Psi 0 (k A + 1 - r) f))) := ?_
+    _ = Psi 0 (k A + 1 - r) f := ?_
+  . rw [← tenSwap_lTensor_comul_one_eq_Psi, tenSwap_apply_tenSwap]
+    simp_rw [LinearMap.lTensor, TensorProduct.map_apply_map_apply]
+    simp only [LinearMap.comp_id, EmbeddingLike.apply_eq_iff_eq, ← LinearMap.comp_assoc,
+      unop_comp_op, LinearMap.one_comp]
+  . congr 1
+    simp_rw [AlgEquiv.op_toLinearMap, tenSwap_apply_lTensor,
+      ← LinearMap.comp_apply,
+      ← LinearMap.comp_assoc, LinearMap.map_comp_rTensor]
+  . simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply,
+      lTensor_modAut_comp_Psi]
+    ring_nf
+  . suffices ∀ x, (TensorProduct.comm ℂ Aᵐᵒᵖ B) ((op ⊗ₘ unop) (tenSwap x)) = x by
+      rw [this]
+    intro x
+    simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply]
+    nth_rw 2 [← LinearMap.id_apply (R := ℂ) x]
+    revert x
+    rw [← LinearMap.ext_iff, TensorProduct.ext_iff]
+    intro a b
+    simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply, LinearMap.id_coe,
+      id_eq, tenSwap_apply, TensorProduct.map_tmul,
+      TensorProduct.comm_tmul]
+    rfl
 
 open scoped TensorProduct
 

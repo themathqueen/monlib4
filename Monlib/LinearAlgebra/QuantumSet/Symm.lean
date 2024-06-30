@@ -270,15 +270,6 @@ theorem _root_.AlgEquiv.comp_linearMap_eq_iff
   f.toLinearMap ∘ₗ x = y ↔ x = f.symm.toLinearMap ∘ₗ y :=
 by aesop
 
-@[simp]
-theorem QuantumSet.modAut_symm (r : ℝ) :
-  (ha.modAut r).symm = ha.modAut (-r) :=
-by
-  ext
-  apply_fun (ha.modAut r) using AlgEquiv.injective _
-  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_right_neg, ha.modAut_zero]
-  rfl
-
 theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
     Commute x (hb.modAut r).toLinearMap ↔
       Commute x (hb.modAut (-r)).toLinearMap :=
