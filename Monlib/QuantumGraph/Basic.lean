@@ -3,6 +3,7 @@ import Monlib.LinearAlgebra.QuantumSet.Symm
 import Monlib.LinearAlgebra.TensorProduct.Lemmas
 import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.LinearAlgebra.PosMap_isReal
+import Monlib.LinearAlgebra.MyBimodule
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
@@ -356,6 +357,91 @@ theorem schurIdempotent.isSchurProjection_iff_isPosMap
 class QuantumGraph (A : Type*) [starAlgebra A] [hA : QuantumSet A]
     (f : A →ₗ[ℂ] A) : Prop :=
   isIdempotentElem : f •ₛ f = f
+
+class QuantumGraph.IsReal {A : Type*} [starAlgebra A] [hA : QuantumSet A]
+    {f : A →ₗ[ℂ] A} (h : QuantumGraph A f) : Prop :=
+  isReal : LinearMap.IsReal f
+
+class QuantumGraph.Real (A : Type*) [starAlgebra A] [hA : QuantumSet A]
+    (f : A →ₗ[ℂ] A) : Prop where
+  isIdempotentElem : f •ₛ f = f
+  isReal : LinearMap.IsReal f
+
+theorem quantumGraphReal_iff_schurProjection {f : A →ₗ[ℂ] A} :
+  QuantumGraph.Real A f ↔ schurProjection f :=
+⟨λ h => ⟨h.isIdempotentElem, h.isReal⟩,
+ λ h => ⟨h.isIdempotentElem, h.isReal⟩⟩
+
+theorem quantumGraphReal_iff_Psi_isIdempotentElem_and_isSelfAdjoint {f : A →ₗ[ℂ] A} :
+  QuantumGraph.Real A f ↔
+  (IsIdempotentElem (hA.Psi 0 (hA.k + 1/2) f) ∧
+    IsSelfAdjoint (hA.Psi 0 (hA.k + 1/2) f)) :=
+by
+  rw [← schurIdempotent_iff_Psi_isIdempotentElem, ← isReal_iff_Psi_isSelfAdjoint]
+  exact ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
+
+theorem real_Upsilon_toBimodule {f : A →ₗ[ℂ] B} (gns₁ : hA.k = 0)
+  (gns₂ : hB.k = 0) :
+  (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f.real)).1
+    = LinearMap.adjoint
+      (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)).1 :=
+by
+  have : ∀ (a : B) (b : A),
+    (LinearEquiv.toIsBimoduleMap ℂ
+      (Upsilon (rankOne ℂ a b).toLinearMap.real)).1
+    = (LinearMap.adjoint (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ a b).toLinearMap)).1) :=
+  by
+    intro a b
+    simp_rw [Upsilon_rankOne, LinearEquiv.trans_apply, QuantumSet.Psi_apply,
+      rankOne_real, QuantumSet.Psi_toFun_apply,
+      LinearEquiv.TensorProduct.map_apply,
+      LinearEquiv.toIsBimoduleMap_apply_coe,
+      rmulMapLmul_apply, TensorProduct.map_adjoint,
+      TensorProduct.comm_tmul, TensorProduct.map_tmul,
+      LinearEquiv.lTensor_tmul, rmulMapLmul_apply,
+      rmul_adjoint, QuantumSet.modAut_star, QuantumSet.modAut_apply_modAut,
+      lmul_adjoint,]
+    ring_nf
+    simp only [neg_add_rev, neg_sub, sub_neg_eq_add, star_star, LinearEquiv.coe_coe, unop_apply,
+      MulOpposite.unop_op, starAlgebra.modAut_zero, AlgEquiv.one_apply, op_apply,
+      MulOpposite.op_star, MulOpposite.unop_star, gns₁, gns₂, neg_zero]
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f
+  simp only [map_sum, LinearMap.real_sum, Submodule.coe_sum, this]
+
+theorem schurMul_Upsilon_toBimodule {f g : A →ₗ[ℂ] B} :
+  (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (f •ₛ g))).1
+    = (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)) * (LinearEquiv.toIsBimoduleMap ℂ (Upsilon g)) :=
+by
+  have : ∀ (a c : B) (b d : A),
+    (LinearEquiv.toIsBimoduleMap ℂ
+      (Upsilon ((rankOne ℂ a b).toLinearMap •ₛ (rankOne ℂ c d).toLinearMap))).1
+    = (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ a b).toLinearMap)).1
+      * (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ c d).toLinearMap)).1 :=
+  by
+    intro a c b d
+    simp_rw [schurMul.apply_rankOne, Upsilon_rankOne, LinearEquiv.toIsBimoduleMap_apply_coe,
+      rmulMapLmul_apply, ← TensorProduct.map_mul,
+      rmul_eq_mul, LinearMap.mul_eq_comp, ← LinearMap.mulRight_mul,
+      lmul_eq_mul, ← LinearMap.mulLeft_mul, ← map_mul, ← star_mul]
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f
+  obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne g
+  simp only [map_sum, LinearMap.sum_apply, Finset.sum_mul,
+    Finset.mul_sum, Submodule.coe_sum, this]
+
+theorem quantumGraphReal_iff_Upsilon_toBimodule_orthogonalProjection
+  {f : A →ₗ[ℂ] A} (gns : hA.k = 0) :
+  QuantumGraph.Real A f ↔
+  ContinuousLinearMap.IsOrthogonalProjection
+  (LinearMap.toContinuousLinearMap
+    (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)).1) :=
+by
+  rw [LinearMap.isOrthogonalProjection_iff,
+    IsIdempotentElem, ← schurMul_Upsilon_toBimodule,
+    isSelfAdjoint_iff, LinearMap.star_eq_adjoint,
+    ← real_Upsilon_toBimodule gns gns]
+  simp_rw [Subtype.val_inj, (LinearEquiv.injective _).eq_iff,
+    ← LinearMap.isReal_iff]
+  exact ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
 -- class QuantumGraphHom {A B : Type*} [NormedAddCommGroupOfRing A]
 --   [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]

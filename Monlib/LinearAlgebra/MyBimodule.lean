@@ -67,12 +67,12 @@ theorem Bimodule.lsmul_add (x : H₁) (a b : H₁ ⊗[R] H₂) : x •ₗ (a + b
 theorem Bimodule.add_rsmul (x : H₂) (a b : H₁ ⊗[R] H₂) : (a + b) •ᵣ x = a •ᵣ x + b •ᵣ x :=
   map_add _ _ _
 
-theorem Bimodule.lsmul_sum (x : H₁) {k : Type _} [Fintype k] (a : k → H₁ ⊗[R] H₂) :
-    x •ₗ ∑ i, a i = ∑ i, x •ₗ a i :=
+theorem Bimodule.lsmul_sum (x : H₁) {k : Type _} {s : Finset k} (a : k → H₁ ⊗[R] H₂) :
+    x •ₗ ∑ i in s, a i = ∑ i in s, x •ₗ a i :=
   map_sum _ _ _
 
-theorem Bimodule.sum_rsmul (x : H₂) {k : Type _} [Fintype k] (a : k → H₁ ⊗[R] H₂) :
-    (∑ i, a i) •ᵣ x = ∑ i, a i •ᵣ x :=
+theorem Bimodule.sum_rsmul (x : H₂) {k : Type _} {s : Finset k} (a : k → H₁ ⊗[R] H₂) :
+    (∑ i in s, a i) •ᵣ x = ∑ i in s, a i •ᵣ x :=
   map_sum _ _ _
 
 theorem Bimodule.one_lsmul (x : H₁ ⊗[R] H₂) : 1 •ₗ x = x := by
@@ -110,11 +110,6 @@ local notation "l(" x "," y ")" => y →ₗ[x] y
 def LinearMap.IsBimoduleMap (P : l(R,H₁ ⊗[R] H₂)) : Prop :=
   ∀ (x : H₁) (y : H₂) (a : H₁ ⊗[R] H₂), P (x •ₗ a •ᵣ y) = x •ₗ P a •ᵣ y
 
-@[reducible]
-def LinearMap.IsBimoduleMaps (R H₁ H₂ : Type _) [CommSemiring R]
-  [Semiring H₁] [Semiring H₂] [Algebra R H₁] [Algebra R H₂] :=
-{ x : l(R,H₁ ⊗[R] H₂) // x.IsBimoduleMap }
-
 theorem LinearMap.IsBimoduleMap.lsmul {P : l(R,H₁ ⊗[R] H₂)} (hP : P.IsBimoduleMap) (x : H₁)
     (a : H₁ ⊗[R] H₂) : P (x •ₗ a) = x •ₗ P a :=
   by
@@ -151,18 +146,29 @@ theorem LinearMap.IsBimoduleMap.nsmul {x : l(R,H₁ ⊗[R] H₂)} (hx : x.IsBimo
   simp only [LinearMap.smul_apply, nsmul_eq_smul_cast R k, Bimodule.lsmul_smul, Bimodule.smul_rsmul]
   rw [hx]
 
-noncomputable instance LinearMap.IsBidmoduleMaps.Add :
-  Add (LinearMap.IsBimoduleMaps R H₁ H₂) :=
-⟨fun x y => ⟨↑x + ↑y, x.property.add y.property⟩⟩
-noncomputable instance LinearMap.IsBimoduleMaps.Zero :
-  Zero (LinearMap.IsBimoduleMaps R H₁ H₂) :=
-⟨⟨0, LinearMap.isBimoduleMap.zero⟩⟩
-noncomputable instance LinearMap.IsBimoduleMaps.Smul :
-  SMul R (LinearMap.IsBimoduleMaps R H₁ H₂) :=
-⟨fun a x => ⟨a • ↑x, x.property.smul a⟩⟩
-noncomputable instance LinearMap.IsBimoduleMaps.NSmul :
-  SMul ℕ (LinearMap.IsBimoduleMaps R H₁ H₂) :=
-⟨fun a x => ⟨a • ↑x, x.property.nsmul a⟩⟩
+def LinearMap.IsBimoduleMaps (R H₁ H₂ : Type _) [CommSemiring R]
+  [Semiring H₁] [Semiring H₂] [Algebra R H₁] [Algebra R H₂] :
+    Submodule R (l(R, H₁ ⊗[R] H₂)) where
+  carrier x := x.IsBimoduleMap
+  add_mem' x y := x.add y
+  zero_mem' := LinearMap.isBimoduleMap.zero
+  smul_mem' r _ x := x.smul r
+
+-- { x : l(R,H₁ ⊗[R] H₂) // x.IsBimoduleMap }
+
+
+-- noncomputable instance LinearMap.IsBidmoduleMaps.Add :
+--   Add (LinearMap.IsBimoduleMaps R H₁ H₂) :=
+-- ⟨fun x y => ⟨↑x + ↑y, x.property.add y.property⟩⟩
+-- noncomputable instance LinearMap.IsBimoduleMaps.Zero :
+--   Zero (LinearMap.IsBimoduleMaps R H₁ H₂) :=
+-- ⟨⟨0, LinearMap.isBimoduleMap.zero⟩⟩
+-- noncomputable instance LinearMap.IsBimoduleMaps.Smul :
+--   SMul R (LinearMap.IsBimoduleMaps R H₁ H₂) :=
+-- ⟨fun a x => ⟨a • ↑x, x.property.smul a⟩⟩
+-- noncomputable instance LinearMap.IsBimoduleMaps.NSmul :
+--   SMul ℕ (LinearMap.IsBimoduleMaps R H₁ H₂) :=
+-- ⟨fun a x => ⟨a • ↑x, x.property.nsmul a⟩⟩
 
 @[simp] lemma LinearMap.IsBimoduleMaps.coe_add (x y : IsBimoduleMaps R H₁ H₂) :
    ((x + y : IsBimoduleMaps R H₁ H₂) : H₁ ⊗[R] H₂ →ₗ[R] H₁ ⊗[R] H₂) = ↑x + ↑y := rfl
@@ -175,22 +181,22 @@ noncomputable instance LinearMap.IsBimoduleMaps.NSmul :
 @[simp] lemma LinearMap.IsBimoduleMaps.coe_zero :
    ((0 : IsBimoduleMaps R H₁ H₂) : H₁ ⊗[R] H₂ →ₗ[R] H₁ ⊗[R] H₂) = 0 := rfl
 
-@[instance]
-noncomputable def LinearMap.IsBimoduleMaps.AddCommMonoid : AddCommMonoid (IsBimoduleMaps R H₁ H₂)
-    where
-  add_assoc x y z := by ext; simp only [coe_add, add_assoc]
-  zero_add x := by ext; simp only [coe_zero, coe_add, zero_add]
-  add_zero x := by ext; simp only [coe_zero, coe_add, add_zero]
-  nsmul n x := n • x
-  nsmul_zero x := by ext; simp only [coe_nsmul, coe_zero, zero_smul]
-  nsmul_succ k x :=
-    by
-    ext
-    simp only [coe_add, coe_nsmul, add_smul, one_mul, add_comm,
-      nsmul_eq_mul, Nat.cast_one]
-  add_comm x y := by
-    rw [← Subtype.coe_inj]
-    simp_rw [coe_add, add_comm]
+-- @[instance]
+-- noncomputable def LinearMap.IsBimoduleMaps.AddCommMonoid : AddCommMonoid (IsBimoduleMaps R H₁ H₂)
+--     where
+--   add_assoc x y z := by ext; simp only [coe_add, add_assoc]
+--   zero_add x := by ext; simp only [coe_zero, coe_add, zero_add]
+--   add_zero x := by ext; simp only [coe_zero, coe_add, add_zero]
+--   nsmul n x := n • x
+--   nsmul_zero x := by ext; simp only [coe_nsmul, coe_zero, zero_smul]
+--   nsmul_succ k x :=
+--     by
+--     ext
+--     simp only [coe_add, coe_nsmul, add_smul, one_mul, add_comm,
+--       nsmul_eq_mul, Nat.cast_one]
+--   add_comm x y := by
+--     rw [← Subtype.coe_inj]
+--     simp_rw [coe_add, add_comm]
 
 theorem LinearMap.IsBimoduleMap.add_smul (a b : R) (x : (IsBimoduleMaps R H₁ H₂)) :
     (a + b) • x = a • x + b • x := by
@@ -198,29 +204,29 @@ theorem LinearMap.IsBimoduleMap.add_smul (a b : R) (x : (IsBimoduleMaps R H₁ H
   simp_rw [IsBimoduleMaps.coe_smul, IsBimoduleMaps.coe_add, _root_.add_smul]
   rfl
 
-open LinearMap.IsBimoduleMaps in
-noncomputable instance : MulAction R (LinearMap.IsBimoduleMaps R H₁ H₂)
-    where
-  one_smul x := by
-    simp_rw [← Subtype.coe_inj]
-    simp_rw [coe_smul, one_smul]
-  mul_smul x y a := by
-    simp_rw [← Subtype.coe_inj]
-    simp_rw [coe_smul, ← smul_smul]
+-- open LinearMap.IsBimoduleMaps in
+-- noncomputable instance : MulAction R (LinearMap.IsBimoduleMaps R H₁ H₂)
+--     where
+--   one_smul x := by
+--     simp_rw [← Subtype.coe_inj]
+--     simp_rw [coe_smul, one_smul]
+--   mul_smul x y a := by
+--     simp_rw [← Subtype.coe_inj]
+--     simp_rw [coe_smul, ← smul_smul]
 
-open LinearMap.IsBimoduleMaps in
-noncomputable instance : DistribMulAction R (LinearMap.IsBimoduleMaps R H₁ H₂)
-    where
-  smul_zero x := rfl
-  smul_add x y z := by
-    simp only [← Subtype.coe_inj, coe_smul, coe_add, smul_add]
+-- open LinearMap.IsBimoduleMaps in
+-- noncomputable instance : DistribMulAction R (LinearMap.IsBimoduleMaps R H₁ H₂)
+--     where
+--   smul_zero x := rfl
+--   smul_add x y z := by
+--     simp only [← Subtype.coe_inj, coe_smul, coe_add, smul_add]
 
-noncomputable instance LinearMap.IsBimoduleMaps.Module :
-  Module R (IsBimoduleMaps R H₁ H₂)
-    where
-  add_smul r s x := IsBimoduleMap.add_smul _ _ _
-  zero_smul x := by
-    simp_rw [← Subtype.coe_inj, coe_smul, zero_smul, coe_zero]
+-- noncomputable instance LinearMap.IsBimoduleMaps.Module :
+--   Module R (IsBimoduleMaps R H₁ H₂)
+--     where
+--   add_smul r s x := IsBimoduleMap.add_smul _ _ _
+--   zero_smul x := by
+--     simp_rw [← Subtype.coe_inj, coe_smul, zero_smul, coe_zero]
 
 -- @[reducible]
 -- def LinearMap.IsBimoduleMaps.submodule :
@@ -271,14 +277,19 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
     TensorProduct.tmul_eq_zero, sub_eq_zero, ha, hb, false_or_iff, or_false_iff] at H hxy
   exact ⟨H, fun _ _ => hxy _ _⟩
 
-noncomputable def LinearMap.IsBimoduleMap.sum {p : Type _} [Fintype p]
+noncomputable def LinearMap.IsBimoduleMap.sum {p : Type _} {s : Finset p}
   (x : p → (IsBimoduleMaps R H₁ H₂)) :
   (IsBimoduleMaps R H₁ H₂) :=
-⟨∑ i, x i, fun a b c =>
+⟨∑ i in s, (x i).1, fun a b c =>
   by
   simp_rw [LinearMap.sum_apply, Bimodule.lsmul_sum, Bimodule.sum_rsmul]
   apply Finset.sum_congr rfl; intros
   rw [Subtype.mem (x _)]⟩
+
+noncomputable def LinearMap.IsBimoduleMap.sum_coe {p : Type _} {s : Finset p}
+  (x : p → (IsBimoduleMaps R H₁ H₂)) :
+  (∑ i in s, x i : IsBimoduleMaps R H₁ H₂).1 = ∑ i in s, (x i).1 :=
+Submodule.coe_sum _ _ _
 
 theorem rmulMapLmul_apply_apply (x : H₁ ⊗[R] H₂) (a : H₁) (b : H₂) :
     rmulMapLmul x (a ⊗ₜ b) = a •ₗ x •ᵣ b :=
@@ -299,15 +310,30 @@ theorem LinearMap.isBimoduleMap_iff' {f : l(R,H₁ ⊗[R] H₂)} :
   intro a b c d
   rw [← h, ← Bimodule.lsmul_lsmul, ← Bimodule.rsmul_rsmul, Bimodule.lsmul_rsmul_assoc, h]
 
+@[simp]
 theorem rmulMapLmul_apply_one (x : H₁ ⊗[R] H₂) :
   rmulMapLmul x 1 = x := by
 calc rmulMapLmul x 1 =  rmulMapLmul x (1 ⊗ₜ[R] 1) := rfl
   _ = 1 •ₗ x •ᵣ 1 := by rw [rmulMapLmul_apply_apply]
   _ = x := by simp_rw [Bimodule.one_lsmul, Bimodule.rsmul_one]
 
-noncomputable def LinearEquiv.toIsBimoduleMap :
+@[simp]
+theorem LinearMap.mem_isBimoduleMaps_iff {x : l(R, H₁ ⊗[R] H₂)} :
+  x ∈ LinearMap.IsBimoduleMaps R H₁ H₂ ↔ x.IsBimoduleMap :=
+by rfl
+
+theorem rmulMapLmul_mem_isBimoduleMaps (x : H₁ ⊗[R] H₂) :
+  rmulMapLmul x ∈ LinearMap.IsBimoduleMaps R H₁ H₂ :=
+by
+  simp_rw [LinearMap.mem_isBimoduleMaps_iff, LinearMap.isBimoduleMap_iff',
+    rmulMapLmul_apply_one]
+
+@[simps]
+noncomputable def LinearEquiv.toIsBimoduleMap
+  (R : Type*) {H₁ H₂ : Type*} [CommSemiring R] [Semiring H₁]
+  [Semiring H₂] [Algebra R H₁] [Algebra R H₂] :
     (H₁ ⊗[R] H₂) ≃ₗ[R] LinearMap.IsBimoduleMaps R H₁ H₂ where
-  toFun x := ⟨rmulMapLmul x, by simp_rw [LinearMap.isBimoduleMap_iff', rmulMapLmul_apply_one]⟩
+  toFun x := ⟨rmulMapLmul x, rmulMapLmul_mem_isBimoduleMaps _⟩
   invFun x := (x : l(R, H₁ ⊗[R] H₂)) 1
   map_add' _ _ := by simp only [map_add]; rfl
   map_smul' _ _ := by simp only [map_smulₛₗ]; rfl
