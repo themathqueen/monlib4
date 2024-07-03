@@ -382,20 +382,19 @@ by
 
 theorem real_Upsilon_toBimodule {f : A →ₗ[ℂ] B} (gns₁ : hA.k = 0)
   (gns₂ : hB.k = 0) :
-  (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f.real)).1
+  (Upsilon f.real).toIsBimoduleMap.1
     = LinearMap.adjoint
-      (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)).1 :=
+      (Upsilon f).toIsBimoduleMap.1 :=
 by
   have : ∀ (a : B) (b : A),
-    (LinearEquiv.toIsBimoduleMap ℂ
-      (Upsilon (rankOne ℂ a b).toLinearMap.real)).1
-    = (LinearMap.adjoint (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ a b).toLinearMap)).1) :=
+    (Upsilon (rankOne ℂ a b).toLinearMap.real).toIsBimoduleMap.1
+    = LinearMap.adjoint (Upsilon (rankOne ℂ a b).toLinearMap).toIsBimoduleMap.1 :=
   by
     intro a b
     simp_rw [Upsilon_rankOne, LinearEquiv.trans_apply, QuantumSet.Psi_apply,
       rankOne_real, QuantumSet.Psi_toFun_apply,
       LinearEquiv.TensorProduct.map_apply,
-      LinearEquiv.toIsBimoduleMap_apply_coe,
+      TensorProduct.toIsBimoduleMap_apply_coe,
       rmulMapLmul_apply, TensorProduct.map_adjoint,
       TensorProduct.comm_tmul, TensorProduct.map_tmul,
       LinearEquiv.lTensor_tmul, rmulMapLmul_apply,
@@ -409,17 +408,16 @@ by
   simp only [map_sum, LinearMap.real_sum, Submodule.coe_sum, this]
 
 theorem schurMul_Upsilon_toBimodule {f g : A →ₗ[ℂ] B} :
-  (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (f •ₛ g))).1
-    = (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)) * (LinearEquiv.toIsBimoduleMap ℂ (Upsilon g)) :=
+  (Upsilon (f •ₛ g)).toIsBimoduleMap.1
+    = (Upsilon f).toIsBimoduleMap.1 * (Upsilon g).toIsBimoduleMap.1 :=
 by
   have : ∀ (a c : B) (b d : A),
-    (LinearEquiv.toIsBimoduleMap ℂ
-      (Upsilon ((rankOne ℂ a b).toLinearMap •ₛ (rankOne ℂ c d).toLinearMap))).1
-    = (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ a b).toLinearMap)).1
-      * (LinearEquiv.toIsBimoduleMap ℂ (Upsilon (rankOne ℂ c d).toLinearMap)).1 :=
+    (Upsilon ((rankOne ℂ a b).toLinearMap •ₛ (rankOne ℂ c d).toLinearMap)).toIsBimoduleMap.1
+    = (Upsilon (rankOne ℂ a b).toLinearMap).toIsBimoduleMap.1
+      * (Upsilon (rankOne ℂ c d).toLinearMap).toIsBimoduleMap.1 :=
   by
     intro a c b d
-    simp_rw [schurMul.apply_rankOne, Upsilon_rankOne, LinearEquiv.toIsBimoduleMap_apply_coe,
+    simp_rw [schurMul.apply_rankOne, Upsilon_rankOne, TensorProduct.toIsBimoduleMap_apply_coe,
       rmulMapLmul_apply, ← TensorProduct.map_mul,
       rmul_eq_mul, LinearMap.mul_eq_comp, ← LinearMap.mulRight_mul,
       lmul_eq_mul, ← LinearMap.mulLeft_mul, ← map_mul, ← star_mul]
@@ -433,7 +431,7 @@ theorem quantumGraphReal_iff_Upsilon_toBimodule_orthogonalProjection
   QuantumGraph.Real A f ↔
   ContinuousLinearMap.IsOrthogonalProjection
   (LinearMap.toContinuousLinearMap
-    (LinearEquiv.toIsBimoduleMap ℂ (Upsilon f)).1) :=
+    (Upsilon f).toIsBimoduleMap.1) :=
 by
   rw [LinearMap.isOrthogonalProjection_iff,
     IsIdempotentElem, ← schurMul_Upsilon_toBimodule,

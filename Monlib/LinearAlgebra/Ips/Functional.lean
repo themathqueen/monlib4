@@ -8,6 +8,7 @@ import Monlib.Preq.RCLikeLe
 import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.Matrix.IncludeBlock
 import Monlib.LinearAlgebra.PosMap_isReal
+import Monlib.LinearAlgebra.Matrix.Cast
 
 #align_import linear_algebra.my_ips.functional
 
@@ -33,22 +34,6 @@ section
 
 variable {R k : Type _} {s : k → Type _}
 
-theorem Matrix.cast_apply {i j : k} (x : Matrix (s i) (s i) R) (h : i = j) (p q : s j) :
-  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp x p q =
-    x (by rw [h]; exact p) (by rw [h]; exact q) :=
-by aesop
-theorem Matrix.cast_apply' {i j : k} (x : Matrix (s j) (s j) R) (h : j = i) (p q : s i) :
-  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mpr x p q =
-    x (by rw [h]; exact p) (by rw [h]; exact q) :=
-by aesop
-
-theorem Matrix.cast_hMul [Semiring R] [Π i, Fintype (s i)]
-  {i j : k} (x y : Matrix (s i) (s i) R) (h : i = j) :
-  (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp (x * y) =
-    (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp x *
-      (by rw [h] : Matrix (s i) (s i) R = Matrix (s j) (s j) R).mp y :=
-by aesop
-
 open Matrix in
 lemma includeBlock_apply_mul [CommSemiring R] [DecidableEq k] [Π i, Fintype (s i)] {i j : k} (x : Matrix (s i) (s i) R)
   (y : Matrix (s j) (s j) R) (p q : s j) :
@@ -62,11 +47,6 @@ lemma includeBlock_mul_apply [CommSemiring R] [DecidableEq k]
   (x * includeBlock y j) p q
     = if i = j then (x * includeBlock y j) p q else 0 :=
 by simp_rw [includeBlock_apply, hMul_dite, mul_zero]; aesop
-
-lemma dite_apply' {i β : Type*} {α : i → Type*} (P : Prop) [Decidable P]
-  {j : i} (f : P → (β → α j)) [Zero (α j)] (a : β) :
-  (if h : P then (f h) else 0) a = if h : P then f h a else 0 :=
-by aesop
 
 end
 

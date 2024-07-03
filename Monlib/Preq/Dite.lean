@@ -86,3 +86,8 @@ theorem LinearMap.apply_dite {R H₁ H₂ : Type _} [Semiring R] [AddCommMonoid 
     (b : ¬P → H₁) :
     f (dite P (fun h => a h) fun h => b h) = dite P (fun h => f (a h)) fun h => f (b h) := by
   split_ifs <;> simp
+
+lemma dite_apply' {i β : Type*} {α : i → Type*} (P : Prop) [Decidable P]
+  {j : i} (f : P → (β → α j)) [Zero (α j)] (a : β) :
+  (if h : P then (f h) else 0) a = if h : P then f h a else 0 :=
+by aesop

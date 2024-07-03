@@ -14,6 +14,8 @@ import Monlib.Preq.Submodule
 import Monlib.Preq.StarAlgEquiv
 import Monlib.LinearAlgebra.Matrix.PiMat
 import Monlib.LinearAlgebra.LmulRmul
+import Monlib.LinearAlgebra.Matrix.Cast
+import Monlib.Preq.Dite
 
 #align_import rep_theory.aut_mat
 
@@ -702,10 +704,276 @@ by
       . simp_rw [he₁, he₂, h82, ← Prod.zero_eq_mk, ← h82, ← Prod.one_eq_mk,
           _root_.map_one, _root_.map_zero, Prod.ext_iff, Prod.fst_one, Prod.snd_one,
           Prod.fst_zero, Prod.snd_zero, h82, Hem, true_and, true_or]
-        -- rw [h₉.2, one_smul] at h₆
-        -- rw [h₈, zero_smul, add_zero] at h₇
-        -- right
-        -- exact ⟨h₆.symm, h₇.symm⟩
+
+theorem Fin.fintwo_of_neZero {i : Fin 2} (hi : i ≠ 0) : i = 1 :=
+by
+  revert i
+  rw [Fin.forall_fin_two]
+  simp only [isValue, ne_eq, not_true_eq_false, _root_.zero_ne_one, imp_self, one_ne_zero,
+    not_false_eq_true, and_self]
+
+def matrixPiFin_algEquiv_PiFinTwo {𝕜 : Type*} [CommSemiring 𝕜]
+  {k : ℕ} {n : (Fin (k + 1)) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] :
+  (Π i : Fin (k + 1), Matrix (n i) (n i) 𝕜) ≃ₐ[𝕜]
+  ((Matrix (n ⟨0, _⟩) (n ⟨0, Nat.zero_lt_succ k⟩) 𝕜)
+    × (Π j : Fin k, Matrix (n j.succ) (n j.succ) 𝕜)) where
+  toFun x := (x 0, λ j => x j.succ)
+  invFun x i := if h : i = 0 then by rw [h]; exact x.1 else
+    (by rw [← Fin.succ_pred i h]; exact x.2 (Fin.pred i h))
+  left_inv x := by
+    refine funext ?h
+    simp_rw [Fin.forall_fin_succ]
+    simp only [↓reduceDite, eq_mpr_eq_cast, cast_eq, Fin.isValue, one_ne_zero, and_self]
+    simp only [true_and, Fin.succ_pred]
+    aesop
+  right_inv x := by rfl
+  map_add' _ _ := by rfl
+  map_mul' _ _ := by rfl
+  commutes' _ := by rfl
+
+theorem matrixPiFin_algEquiv_PiFinTwo_apply {𝕜 : Type*} [CommSemiring 𝕜]
+  {k : ℕ} {n : (Fin (k + 1)) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  (x : (Π i : Fin (k + 1), Matrix (n i) (n i) 𝕜)) :
+  matrixPiFin_algEquiv_PiFinTwo x
+    = (x 0, λ j : Fin k => x j.succ) :=
+rfl
+
+theorem matrixPiFin_algEquiv_PiFinTwo_symm_apply {𝕜 : Type*} [CommSemiring 𝕜]
+  {k : ℕ} {n : (Fin (k + 1)) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  (x : (Matrix (n 0) (n 0) 𝕜)
+    × (Π j : Fin k, Matrix (n j.succ) (n j.succ) 𝕜)) (i : Fin (k + 1)) :
+  matrixPiFin_algEquiv_PiFinTwo.symm x i
+    = if h : i = 0 then λ a b => x.1 (by rw [← h]; exact a) (by rw [← h]; exact b) else
+    (by
+      rw [← Fin.succ_pred i h]
+      exact x.2 (Fin.pred i h)) :=
+by
+  revert i
+  simp_rw [Fin.forall_fin_succ]
+  simp only [↓reduceDite, eq_mpr_eq_cast, cast_eq, Fin.isValue, one_ne_zero, and_self]
+  aesop
+
+def matrixPiFinTwo_algEquiv_prod {𝕜 : Type*} [CommSemiring 𝕜]
+  {n : (Fin 2) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] :
+  (Π i : Fin 2, Matrix (n i) (n i) 𝕜) ≃ₐ[𝕜]
+    (Matrix (n 0) (n 0) 𝕜 × Matrix (n 1) (n 1) 𝕜) where
+  toFun x := (x 0, x 1)
+  invFun x i := if h : i = 0 then by rw [h]; exact x.1 else
+    (by rw [Fin.fintwo_of_neZero h]; exact x.2)
+  left_inv x := by
+    refine funext ?h
+    simp_rw [Fin.forall_fin_two]
+    simp only [↓reduceDite, eq_mpr_eq_cast, cast_eq, Fin.isValue, one_ne_zero, and_self]
+  right_inv x := by ext <;> rfl
+  map_add' _ _ := by
+    simp_rw [Prod.add_def]
+    rfl
+  map_mul' _ _ := by
+    simp_rw [Prod.mul_def]
+    rfl
+  commutes' _ := by
+    simp_rw [Algebra.algebraMap_eq_smul_one, Prod.smul_def]
+    rfl
+
+@[simp]
+theorem matrixPiFinTwo_algEquiv_prod_apply {𝕜 : Type*} [CommSemiring 𝕜]
+  {n : (Fin 2) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (x : (Π i : Fin 2, Matrix (n i) (n i) 𝕜)) :
+  matrixPiFinTwo_algEquiv_prod x = (x 0, x 1) :=
+rfl
+@[simp]
+theorem matrixPiFinTwo_algEquiv_prod_symm_apply {𝕜 : Type*} [CommSemiring 𝕜]
+  {n : (Fin 2) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (x : Matrix (n 0) (n 0) 𝕜 × Matrix (n 1) (n 1) 𝕜) (i : Fin 2) :
+  matrixPiFinTwo_algEquiv_prod.symm x i
+    = if h : i = 0 then λ a b =>
+      x.1 (by rw [← h]; exact a) (by rw [← h]; exact b) else
+    λ a b => x.2 (by rw [← Fin.fintwo_of_neZero h]; exact a)
+      (by rw [← Fin.fintwo_of_neZero h]; exact b) :=
+by
+  revert i
+  simp_rw [Fin.forall_fin_two]
+  simp only [↓reduceDite, eq_mpr_eq_cast, cast_eq, Fin.isValue, one_ne_zero, and_self]
+  aesop
+
+theorem matrixPiFinTwo_algAut_apply_piSingle {𝕜 : Type*} [Field 𝕜] {n : (Fin 2) → Type*}
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  (f : (Π i : Fin 2, Matrix (n i) (n i) 𝕜) ≃ₐ[𝕜] (Π i : Fin 2, Matrix (n i) (n i) 𝕜)) :
+  ∃ σ : Equiv.Perm (Fin 2),
+    ∀ i, f ((Pi.single (σ i) 1)) = ((Pi.single i 1)) :=
+by
+  let f' := matrixPiFinTwo_algEquiv_prod.symm.trans (f.trans matrixPiFinTwo_algEquiv_prod)
+  have this1 :  matrixPiFinTwo_algEquiv_prod.symm ((1 : Matrix (n 0) (n 0) 𝕜), (0 : Matrix (n 1) (n 1) 𝕜)) = Pi.single 0 1 :=
+    by
+    refine funext ?h
+    rw [Fin.forall_fin_two, matrixPiFinTwo_algEquiv_prod_symm_apply]
+    simp only [Fin.isValue, eq_mpr_eq_cast, zero_apply]
+    simp only [↓reduceDite, cast_eq, Pi.single_eq_same, matrixPiFinTwo_algEquiv_prod_symm_apply,
+      Fin.isValue, one_ne_zero, eq_mpr_eq_cast, zero_apply, ne_eq, not_false_eq_true,
+      Pi.single_eq_of_ne, true_and]
+    rfl
+  have this2 :  matrixPiFinTwo_algEquiv_prod.symm ((0 : Matrix (n 0) (n 0) 𝕜), (1 : Matrix (n 1) (n 1) 𝕜)) = Pi.single 1 1 :=
+    by
+      refine funext ?_
+      rw [Fin.forall_fin_two, matrixPiFinTwo_algEquiv_prod_symm_apply]
+      simp only [Fin.isValue, eq_mpr_eq_cast, zero_apply]
+      simp only [↓reduceDite, cast_eq, Pi.single_eq_same, matrixPiFinTwo_algEquiv_prod_symm_apply,
+        Fin.isValue, one_ne_zero, eq_mpr_eq_cast, zero_apply, ne_eq, not_false_eq_true,
+        Pi.single_eq_of_ne, true_and]
+      simp only [Fin.isValue, ne_eq, zero_ne_one, not_false_eq_true, Pi.single_eq_of_ne, and_true]
+      rfl
+  obtain (⟨h1, h2⟩ | ⟨h1, h2⟩) := f'.matrix_prod_aut
+  . simp_rw [f', AlgEquiv.trans_apply, this1, this2, @eq_comm _ _] at h1 h2
+    rw [AlgEquiv.eq_apply_iff_symm_eq, this1] at h1
+    rw [AlgEquiv.eq_apply_iff_symm_eq, this2] at h2
+    use 1
+    rw [Fin.forall_fin_two, h1, h2]
+    simp only [Equiv.Perm.coe_one, id_eq, and_self]
+  . simp_rw [f', AlgEquiv.trans_apply, this1, this2, @eq_comm _ _] at h1 h2
+    rw [AlgEquiv.eq_apply_iff_symm_eq, this2] at h1
+    rw [AlgEquiv.eq_apply_iff_symm_eq, this1] at h2
+    use Equiv.swap 0 1
+    rw [Fin.forall_fin_two]
+    simp_rw [Equiv.swap_apply_def]
+    nth_rw 1 [h1]
+    nth_rw 1 [h2]
+    simp only [EmbeddingLike.apply_eq_iff_eq]
+    simp only [Function.funext_iff, Fin.forall_fin_two]
+    simp only [Fin.isValue, ↓reduceIte, ne_eq, zero_ne_one, not_false_eq_true, Pi.single_eq_of_ne,
+      Pi.single_eq_same, true_and, one_ne_zero, and_true]
+    simp only [Pi.single, Function.update]
+    simp only [Fin.isValue, ↓reduceIte, ↓reduceDite, one_ne_zero, and_self]
+
+-- example {𝕜 : Type*} [Field 𝕜] {k : Type*} [Fintype k] [DecidableEq k]
+--   {n : k → Type*}
+--   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+--   [Nonempty k]
+--   [Π i, Nonempty (n i)]
+--   (f : PiMat 𝕜 k n ≃ₐ[𝕜] PiMat 𝕜 k n) :
+--   ∃ σ : Equiv.Perm k,
+--     ∀ i, f ((Pi.single (σ i) 1)) = ((Pi.single i 1)) :=
+-- by
+--   let E : Π j : k, PiMat 𝕜 k n :=
+--   λ i => Pi.single i 1
+--   have hE₁ :
+--     ∀ i, E i = Pi.single i 1 := λ _ => by rfl
+--   have hE₂ :
+--     ∀ i j, E i j = if i = j then 1 else 0 := λ _ _ => by aesop
+--   have hE₃ : ∀ i, E i ∈ Set.center (PiMat 𝕜 k n) := λ i => by
+--     rw [PiMat.center]
+--     simp_rw [Matrix.center]
+--     simp only [Set.mem_setOf_eq, hE₂]
+--     simp only [SetLike.mem_coe, Submodule.mem_span_singleton,
+--       Matrix.smul_one_eq_diagonal, ← Matrix.ext_iff,
+--       diagonal_apply, ite_apply]
+--     aesop
+--   -- have hf := λ i =>
+--     -- (Set.ext_iff.mp (MulEquiv.image_center f) _).mpr (hE₃ i)
+--   have H :
+--     ∀ x : PiMat 𝕜 k n, x ∈ Set.center (PiMat 𝕜 k n)
+--         ↔ ∃ α : (k → 𝕜), ∑ j, α j • E j = x := by
+--       intro x
+--       simp_rw [PiMat.center, Matrix.center, SetLike.mem_coe,
+--         Submodule.mem_span_singleton]
+--       simp only [Set.mem_setOf_eq]
+--       simp_rw [Function.funext_iff, Finset.sum_apply, Pi.smul_apply,
+--         hE₂, smul_ite, smul_zero, Finset.sum_ite_eq',
+--         Finset.mem_univ, if_true]
+--       refine' ⟨λ hx => _, λ ⟨α, hα⟩ i => ⟨α i, hα i⟩⟩
+--       . let e : k → 𝕜 := λ (j : k) => (hx j).choose
+--         have he₁ : ∀ i, e i • 1 = x i := λ i => (hx i).choose_spec
+--         have he : ∑ j, e j • E j = x := by
+--           ext1
+--           simp only [Finset.sum_apply, Pi.smul_apply]
+--           simp_rw [hE₂, smul_ite, smul_zero, Finset.sum_ite_eq',
+--             Finset.mem_univ, if_true]
+--           exact he₁ _
+--         use e
+--   have hfE : ∀ i : k, f (E i) ∈ Set.center (PiMat 𝕜 k n) := λ i => by
+--     rw [← MulEquiv.image_center f]
+--     simp only [Set.mem_image, EmbeddingLike.apply_eq_iff_eq, exists_eq_right]
+--     exact hE₃ _
+--   obtain ⟨α, hα⟩ : ∃ α : k → k → 𝕜, ∀ i, ∑ j, α i j • E j = f (E i) :=
+--     ⟨(λ i : k => ((H (f (E i))).mp (hfE i)).choose),
+--       λ i => ((H (f (E i))).mp (hfE i)).choose_spec⟩
+--   have hE₄ : ∀ i j, E i * E j = if i = j then E i else 0 :=
+--   by
+--     intro i j
+--     ext1 p
+--     simp_rw [Pi.mul_apply, hE₂, boole_mul, ite_apply, Pi.zero_apply, hE₂]
+--     aesop
+--   have hEα : ∀ p q, p ≠ q → ∀ j, α p j * α q j = 0 := by
+--     intro p q hpq j
+--     have hE₄' := hE₄
+--     specialize hE₄ p q
+--     simp_rw [hpq, if_false] at hE₄
+--     apply_fun f at hE₄
+--     simp_rw [_root_.map_mul, map_zero, ← hα, Finset.sum_mul, Finset.mul_sum,
+--       smul_mul_smul, hE₄', smul_ite, smul_zero, Function.funext_iff,
+--       Finset.sum_apply, ite_apply, Pi.zero_apply, Pi.smul_apply,
+--       hE₂, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true,
+--       Finset.sum_ite_eq', Finset.mem_univ, if_true,
+--       smul_eq_zero, Matrix.one_eq_zero_iff] at hE₄
+--     simp only [not_isEmpty_of_nonempty, or_false] at hE₄
+--     exact hE₄ j
+--   have hE₅ : ∑ i : k, E i = 1 := by
+--     ext1 p
+--     simp only [Finset.sum_apply, hE₂, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+--     rfl
+--   have hEα₂ : ∀ j, ∑ i, α i j = 1 := λ j => by
+--     apply_fun f at hE₅
+--     simp only [map_sum, _root_.map_one, ← hα, Function.funext_iff,
+--       Finset.sum_apply, Pi.smul_apply, hE₂, smul_ite,
+--       smul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true,
+--       Pi.one_apply, ← Finset.sum_smul, smul_one_eq_one_iff] at hE₅
+--     simp only [not_isEmpty_of_nonempty, or_false] at hE₅
+--     exact hE₅ _
+--   have hE₆ : ∀ i, E i ≠ 0 := λ i => by
+--     simp_rw [ne_eq, Function.funext_iff, hE₂, Pi.zero_apply, not_forall]
+--     use i
+--     simp only [↓reduceIte, one_ne_zero, not_false_eq_true]
+--   have hEα₃ : ∀ i, ∃ j, α i j ≠ 0 := λ i => by
+--     specialize hE₆ i
+--     rw [ne_eq, ← (AlgEquiv.injective f).eq_iff, map_zero, ← hα] at hE₆
+--     simp_rw [Function.funext_iff, Finset.sum_apply, Pi.smul_apply,
+--       hE₂, smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true,
+--       Pi.zero_apply, smul_eq_zero] at hE₆
+--     simp only [one_ne_zero, or_false] at hE₆
+--     simp only [not_forall] at hE₆
+--     exact hE₆
+--   have : ∃ i j, ¬ α i j = 0 := by
+--     let i : k := (Nonempty.some (by infer_instance))
+--     exact ⟨i, (hEα₃ i)⟩
+--   -- obtain ⟨i, j, hij⟩ := this
+--   have hij_r : ∀ i j, α i j ≠ 0 → ∀ p ≠ i, α p j = 0 := λ i j hij p hp => by
+--     have := hEα _ _ hp j
+--     simp_rw [mul_eq_zero, hij, or_false] at this
+--     exact this
+--   have hij_1 : ∀ i j, α i j ≠ 0 → α i j = 1 := λ i j hij => by
+--     specialize hEα₂ j
+--     -- simp_rw [Finset.univ] at hEα₂
+--     rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ i)] at hEα₂
+--     have : ∀ p : k, p ≠ i ↔ p ∈ (Finset.univ \ {i}) := by
+--       intro p
+--       simp only [ne_eq, Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and]
+--     specialize hij_r i j hij
+--     simp_rw [this] at hij_r
+--     simp_rw [Finset.sum_eq_zero hij_r, add_zero] at hEα₂
+--     exact hEα₂
+--   have hij_c₁ :
+--     ∀ i j, α i j ≠ 0 → ∀ p ≠ i, ∃ q ≠ j, α p q ≠ 0 := λ i j hij p hp => by
+--     obtain ⟨r, hr⟩ := hEα₃ p
+--     have := hij_r _ _ hij _ hp
+--     have : r ≠ j := λ h => by rw [← h] at this; contradiction
+--     exact ⟨r, this, hr⟩
+
+-- --/
+
+
 
 
 lemma _root_.Algebra.prod_one_zero_mul {R₁ R₂ : Type*}
@@ -890,59 +1158,5 @@ by
   have := LinearEquiv.finrank_eq f'.toLinearEquiv
   simp [FiniteDimensional.finrank_matrix, ← pow_two] at this
   exact this.symm
-
--- example {𝕜 : Type*} [Field 𝕜] {k : ℕ} {}
-
--- def perm_perm_aux {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
---   (σ : Equiv.Perm ι)
---   -- (hσ : ∀ i, n (σ i) = n i)
---  (i : ι) :
---   Type u_3 :=
--- n (σ i)
--- have hσ' : ∀ i, n (σ.symm i) = n i := λ j => by
-  -- rw [← hσ, Equiv.apply_symm_apply]
-
--- @[simps]
--- def _root_.Pi.perm_of_perm {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι] {n : ι → Type*}
---   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (σ : Equiv.Perm ι) :
---   -- haveI : Π i, Fintype ((n ∘ σ) i) := λ i => by
---   --   simp [Function.comp_apply]
---   --   infer_instance
---   -- haveI : Π i, DecidableEq ((n ∘ σ) i) := λ i => by infer_instance
---   -- -- haveI : Semiring (PiMat R ι (n ∘ ⇑σ)) := by
---   --   -- infer_instance
---   -- -- haveI : Π i, Semiring (Matrix ((n ∘ ⇑σ) i) ((n ∘ σ) i) R) := by infer_instance
---   -- haveI : Π i, Algebra R (Matrix ((n ∘ ⇑σ) i) ((n ∘ σ) i) R) := by
---   --   intro i
---   --   infer_instance
---   -- haveI : Algebra R (PiMat R ι (n ∘ ⇑σ)) := Pi.algebra _ _
---   -- -- (hσ : ∀ i, n (σ i) = n i) :
---   PiMat R ι n ≃ₐ[R] σ (PiMat R ι n) :=
--- -- have hσ' : ∀ i, n (σ.symm i) = n i := λ j => by
--- --   rw [← hσ, Equiv.apply_symm_apply]
--- { toFun := λ x => ∑ i, perm_perm_aux σ x i
---   invFun := λ x => ∑ i, perm_perm_aux σ.symm x i
---   left_inv := λ x => by
---     ext1 i
---     simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
---     -- simp only [Equiv.symm_symm_apply, eq_mpr_eq_cast, cast_cast]
---     -- simp_all [hσ, hσ', Equiv.symm_apply_apply, cast_eq_iff_heq]
-
---   right_inv := λ x => by
---     ext1 i
---     simp only [Finset.sum_apply, perm_perm_aux, Finset.sum_ite_eq', Finset.mem_univ, if_true]
---   map_add' := λ x y => by
---     ext1 i
---     simp only [Finset.sum_apply, perm_perm_aux, Pi.add_apply]
---     simp only [Finset.sum_add_distrib, ite_add_zero]
---   map_mul' := λ x y => by
---     ext1 i
---     simp only [Finset.sum_apply, perm_perm_aux, Pi.mul_apply]
---     simp only [Finset.sum_mul, Finset.mul_sum, ite_mul, zero_mul, mul_ite, mul_zero,
---       Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
---   commutes' := λ r => by
---     ext1 i
---     simp only [Finset.sum_apply, perm_perm_aux, Pi.smul_apply, Algebra.algebraMap_eq_smul_one]
---     simp only [Pi.one_apply, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte] }
 
 end Matrix

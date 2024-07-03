@@ -57,28 +57,7 @@ theorem traceModuleDual_matrix {n : Type _} [Fintype n] [DecidableEq n] :
 
 open scoped BigOperators
 
-theorem Matrix.IsHermitian.eigenvectorMatrix_conjTranspose_mul
-  {x : ℍ} (hx : x.IsHermitian) :
-    hx.eigenvectorMatrixᴴ * hx.eigenvectorMatrix = 1 :=
-by
-  rw [eigenvectorUnitary_coe_eq_eigenvectorMatrix, ← star_eq_conjTranspose]
-  exact UnitaryGroup.star_mul_self _
-
 open scoped ComplexOrder
-theorem posDefOne_rpow (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
-    (posDefOne : PosDef (1 : Matrix n n ℂ)).rpow r = 1 :=
-  by
-  rw [PosDef.rpow, innerAut_eq_iff, innerAut_apply_one]
-  symm
-  nth_rw 1 [← diagonal_one]
-  rw [diagonal_eq_diagonal_iff]
-  intro i
-  simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq', one_mulVec]
-  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply,
-    ← mul_apply, IsHermitian.eigenvectorMatrix_conjTranspose_mul, one_apply_eq,
-    RCLike.one_re]
-  exact (Real.one_rpow _).symm
 
 private theorem PosDef_one_rpow_eq_trace_matrix_rpow (r : ℝ) :
     (posDefOne : PosDef (1 : Matrix n n ℂ)).rpow r =

@@ -277,16 +277,16 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
     TensorProduct.tmul_eq_zero, sub_eq_zero, ha, hb, false_or_iff, or_false_iff] at H hxy
   exact ⟨H, fun _ _ => hxy _ _⟩
 
-noncomputable def LinearMap.IsBimoduleMap.sum {p : Type _} {s : Finset p}
-  (x : p → (IsBimoduleMaps R H₁ H₂)) :
-  (IsBimoduleMaps R H₁ H₂) :=
-⟨∑ i in s, (x i).1, fun a b c =>
-  by
-  simp_rw [LinearMap.sum_apply, Bimodule.lsmul_sum, Bimodule.sum_rsmul]
-  apply Finset.sum_congr rfl; intros
-  rw [Subtype.mem (x _)]⟩
+-- noncomputable def LinearMap.IsBimoduleMap.sum {p : Type _} {s : Finset p}
+--   (x : p → (IsBimoduleMaps R H₁ H₂)) :
+--   (IsBimoduleMaps R H₁ H₂) :=
+-- ⟨∑ i in s, (x i).1, fun a b c =>
+--   by
+--   simp_rw [LinearMap.sum_apply, Bimodule.lsmul_sum, Bimodule.sum_rsmul]
+--   apply Finset.sum_congr rfl; intros
+--   rw [Subtype.mem (x _)]⟩
 
-noncomputable def LinearMap.IsBimoduleMap.sum_coe {p : Type _} {s : Finset p}
+theorem LinearMap.IsBimoduleMap.sum_coe {p : Type _} {s : Finset p}
   (x : p → (IsBimoduleMaps R H₁ H₂)) :
   (∑ i in s, x i : IsBimoduleMaps R H₁ H₂).1 = ∑ i in s, (x i).1 :=
 Submodule.coe_sum _ _ _
@@ -329,13 +329,13 @@ by
     rmulMapLmul_apply_one]
 
 @[simps]
-noncomputable def LinearEquiv.toIsBimoduleMap
-  (R : Type*) {H₁ H₂ : Type*} [CommSemiring R] [Semiring H₁]
+noncomputable def TensorProduct.toIsBimoduleMap
+  {R : Type*} {H₁ H₂ : Type*} [CommSemiring R] [Semiring H₁]
   [Semiring H₂] [Algebra R H₁] [Algebra R H₂] :
     (H₁ ⊗[R] H₂) ≃ₗ[R] LinearMap.IsBimoduleMaps R H₁ H₂ where
   toFun x := ⟨rmulMapLmul x, rmulMapLmul_mem_isBimoduleMaps _⟩
   invFun x := (x : l(R, H₁ ⊗[R] H₂)) 1
-  map_add' _ _ := by simp only [map_add]; rfl
+  map_add' _ _ := by simp only [_root_.map_add]; rfl
   map_smul' _ _ := by simp only [map_smulₛₗ]; rfl
   left_inv _ := by simp only [rmulMapLmul_apply_one]
   right_inv f := by

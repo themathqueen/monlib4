@@ -67,6 +67,7 @@ import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.Matrix.Reshape
 import Monlib.LinearAlgebra.Matrix.Spectra
 import Monlib.LinearAlgebra.Matrix.StarOrderedRing
+import Monlib.LinearAlgebra.Matrix.Cast
 
 import Monlib.LinearAlgebra.Coalgebra.Lemmas
 import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
