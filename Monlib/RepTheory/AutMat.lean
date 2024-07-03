@@ -851,7 +851,7 @@ by
 -- example {𝕜 : Type*} [Field 𝕜] {k : Type*} [Fintype k] [DecidableEq k]
 --   {n : k → Type*}
 --   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
---   [Nonempty k]
+--   [Nontrivial k]
 --   [Π i, Nonempty (n i)]
 --   (f : PiMat 𝕜 k n ≃ₐ[𝕜] PiMat 𝕜 k n) :
 --   ∃ σ : Equiv.Perm k,
@@ -953,13 +953,14 @@ by
 --     have := hEα _ _ hp j
 --     simp_rw [mul_eq_zero, hij, or_false] at this
 --     exact this
---   have hij_1 : ∀ i j, α i j ≠ 0 → α i j = 1 := λ i j hij => by
+--   have hij_1 : ∀ i j, α i j ≠ 0 ↔ α i j = 1 := λ i j => by
 --     specialize hEα₂ j
 --     -- simp_rw [Finset.univ] at hEα₂
 --     rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ i)] at hEα₂
 --     have : ∀ p : k, p ≠ i ↔ p ∈ (Finset.univ \ {i}) := by
 --       intro p
 --       simp only [ne_eq, Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and]
+--     refine ⟨λ hij => ?_, λ hij => by rw [hij]; exact one_ne_zero⟩
 --     specialize hij_r i j hij
 --     simp_rw [this] at hij_r
 --     simp_rw [Finset.sum_eq_zero hij_r, add_zero] at hEα₂
@@ -970,8 +971,17 @@ by
 --     have := hij_r _ _ hij _ hp
 --     have : r ≠ j := λ h => by rw [← h] at this; contradiction
 --     exact ⟨r, this, hr⟩
-
--- --/
+--   have hh : ∀ p, ∃ q, α q p ≠ 0 := λ p => by
+--     rw [exists_comm] at this
+--     obtain ⟨q, hq⟩ := this
+--     contrapose! hq
+--     specialize hEα₂ p
+--     simp only [hq, Finset.sum_const_zero, zero_ne_one] at hEα₂
+--   have hh1 : ∀ i j, α i j ≠ 0 → ∃ q ≠ j, ∃ p ≠ i, α p q ≠ 0 := λ i j hij => by
+--     obtain ⟨p, hp⟩ : ∃ p : k, p ≠ i := exists_ne i
+--     obtain ⟨q, hq, hqq⟩ := hij_c₁ i j hij p hp
+--     exact ⟨q, hq, p, hp, hqq⟩
+-- -- --/
 
 
 
