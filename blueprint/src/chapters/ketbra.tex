@@ -47,33 +47,40 @@
  \end{proof}
 
 \section{Ket-bras}
-\begin{definition}\label{rankOne}\uses{ket, bra}\lean{rankOne}\leanok
+ \begin{definition}\label{rankOne}\uses{ket, bra}\lean{rankOne}\leanok
   A \textit{ket-bra} operator $\ketbra{\cdot}{\cdot}$ is defined as the linear map from $E_2$ to the anti-linear map $E_1\to\Bcal(E_1,E_2)$ and is given by
   \begin{align*}
-    x\mapsto(y\mapsto(u\mapsto\ip{y}{u}x)).
+   x\mapsto(y\mapsto(u\mapsto\ip{y}{u}x)).
   \end{align*}
   This is exactly $\ketbra{\cdot}{\cdot}=\ket{\cdot}\,\circ\,\bra{\cdot}$.
-\end{definition}
-Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
-So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
+ \end{definition}
+ Let $E_1,E_2,E_3$ be inner product spaces over $\CC$.
+ So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $u\mapsto\ip{y}{u}x$.
 
- \begin{lemma}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
-  Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
+ \begin{lemma}\label{rankOne_trace}\uses{rankOne}\lean{rankOne_trace}\leanok
+  Given $x$ and $y$ in a finite-dimensional Hilbert space $A$, we get $\operatorname{Tr}(\ketbra{x}{y})=\ip{y}{x}$.
  \end{lemma}
+ \begin{proof}\leanok
+  Obvious.
+ \end{proof}
+
+ \begin{corollary}\label{linearMap_comp_rankOne}\uses{rankOne}\lean{ContinuousLinearMap.comp_rankOne}\leanok
+  Given a linear map $T_1\in\Bcal(E_2,E_3)$ and elements $x\in E_2$, $y\in{E_1}$, we get, $T_1\circ\ketbra{x}{y}=\ketbra{T_1(x)}{y}$
+ \end{corollary}
  \begin{proof}\uses{linearMap_comp_ket}\leanok
   Straightforward computation.
  \end{proof}
  
- \begin{lemma}\label{rankOne_comp_linearMap}\uses{rankOne}\lean{ContinuousLinearMap.rankOne_comp}\leanok
+ \begin{corollary}\label{rankOne_comp_linearMap}\uses{rankOne}\lean{ContinuousLinearMap.rankOne_comp}\leanok
   Given a linear map $T_2\in\Bcal(E_3,E_1)$ and elements $x\in E_2$, $y\in E_1$, we get $\ketbra{x}{y}\circ T_2=\ketbra{x}{T_2^*(y)}$.
- \end{lemma}
+ \end{corollary}
  \begin{proof}\uses{bra_comp_linearMap}\leanok
   Straightforward computation.
  \end{proof}
  
- \begin{lemma}\label{rankOne_adjoint}\uses{rankOne}\lean{rankOne_adjoint}\leanok
+ \begin{corollary}\label{rankOne_adjoint}\uses{rankOne}\lean{rankOne_adjoint}\leanok
   Given $x\in E_2$ and $y\in E_1$, we get $\ketbra{x}{y}^*=\ketbra{y}{x}$.
- \end{lemma}
+ \end{corollary}
  \begin{proof}\uses{bra_adjoint_eq_ket}\leanok
   Using Lemma \ref{bra_adjoint_eq_ket}.
  \end{proof}
@@ -104,6 +111,23 @@ So given $x\in{E_2}$ and $y\in{E_1}$, we write $\ketbra{x}{y}$ to mean the map $
   Suppose $\ketbra{x}{x}=\ketbra{y}{y}$. Then it is clear that we get $x=0$ if and only if $y=0$. So we assume $x\neq0$ (and so $y\neq0$), otherwise this is trivial.
   Then we have \[\norm{x}^2x=\ketbra{x}{x}(x)=\ketbra{y}{y}(x)=\ip{y}{x}y.\]
   And as $x\neq0$, we get $x=\dfrac{\ip{y}{x}}{\norm{x}^2}y$. We have $\ip{y}{x}\neq0$ (otherwise, this would mean $x=0$ which is a contradiction). Thus we can let $\alpha=\ip{y}{x}/\norm{x}^2\neq0$ such that $x=\alpha{y}$.
+ \end{proof}
+
+ \begin{proposition}\label{colinear_of_rankOne_eq_rankOne}
+    \uses{rankOne}\lean{colinear_of_ne_zero_rankOne_eq_rankOne}\leanok
+  Let $\Hcal_1,\Hcal_2$ be Hilbert spaces, and let $a,c\in\Hcal_1\setminus\{0\}$ and $b,d\in\Hcal_2\setminus\{0\}$.
+  Then if $\ketbra{a}{b}=\ketbra{c}{d}$, then there exists some $0\neq\alpha,\beta\in\CC$ such that
+  $a = \alpha c$ and $b=\alpha\beta d$.
+ \end{proposition}
+ \begin{proof}\leanok
+  As $\ketbra{a}{b}=\ketbra{c}{d}$, we get
+  $\ip{b}{b}a = \ip{d}{b}c$ (so $a = \dfrac{\ip{d}{b}}{\norm{b}^2}c$).
+  Taking adjoints of the hypothesis, we get $\ketbra{b}{a}=\ketbra{d}{c}$, and so
+  \begin{align*}
+   b &= \frac{\ip{c}{a}}{\norm{a}^2}d\\
+   &= \frac{\ip{d}{b}\norm{c}^2}{\norm{a}^2\norm{b}^2}d.
+  \end{align*}
+  Clearly, $\ip{d}{b}\neq0$ (otherwise, we get $a=0$). So then we can let $\alpha=\ip{d}{b}/\norm{b}^2$ and $\beta=\norm{c}^2/\norm{a}^2$.
  \end{proof}
 
 

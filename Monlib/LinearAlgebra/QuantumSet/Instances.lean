@@ -48,7 +48,7 @@ theorem posDefOne_rpow {𝕜 : Type*} [RCLike 𝕜]
   (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
     (posDefOne : PosDef (1 : Matrix n n 𝕜)).rpow r = 1 :=
   by
-  rw [PosDef.rpow, innerAut_eq_iff, innerAut_apply_one]
+  rw [PosDef.rpow_eq, innerAut_eq_iff, innerAut_apply_one]
   symm
   nth_rw 1 [← diagonal_one]
   rw [diagonal_eq_diagonal_iff]
@@ -77,7 +77,7 @@ theorem posSemidefOne_smul_rpow {𝕜 : Type*} [RCLike 𝕜]
       PosSemidef ((((α : NNReal) : ℝ) : 𝕜) • 1 : Matrix n n 𝕜)).rpow r
         = ((((α : NNReal) : ℝ) ^ r : ℝ) : 𝕜) • 1 :=
 by
-  rw [PosSemidef.rpow, innerAut_eq_iff, _root_.map_smul, innerAut_apply_one]
+  rw [PosSemidef.rpow, IsHermitian.rpow, innerAut_eq_iff, _root_.map_smul, innerAut_apply_one]
   symm
   nth_rw 1 [← diagonal_one]
   rw [← diagonal_smul]
@@ -102,7 +102,7 @@ theorem posDefOne_smul_rpow {𝕜 : Type*} [RCLike 𝕜]
       PosDef ((((α : NNReal) : ℝ) : 𝕜) • 1 : Matrix n n 𝕜)).rpow r
         = ((((α : NNReal) : ℝ) ^ r : ℝ) : 𝕜) • 1 :=
 by
-  rw [PosDef.rpow, innerAut_eq_iff, _root_.map_smul, innerAut_apply_one]
+  rw [PosDef.rpow_eq, innerAut_eq_iff, _root_.map_smul, innerAut_apply_one]
   symm
   nth_rw 1 [← diagonal_one]
   rw [← diagonal_smul]
@@ -128,43 +128,29 @@ by
   simp only [sig_apply, neg_zero, PosDef.rpow_zero, one_mul, mul_one,
     AlgEquiv.one_apply]
 
-lemma Matrix.PosDef.rpow_eq {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
-  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) :
-  hQ.rpow r =
-  Matrix.innerAut hQ.1.eigenvectorUnitary
-    (Matrix.diagonal (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ r : n → ℝ) : n → 𝕜)) :=
-rfl
-
+lemma Matrix.IsHermitian.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
+  {Q : Matrix n n 𝕜} (hQ : Q.IsHermitian) (r : ℝ)
+  {S : Matrix n n 𝕜}
+  (hQS : Q = S) :
+  hQ.rpow r = (by rw [← hQS]; exact hQ : IsHermitian S).rpow r :=
+by aesop
 lemma Matrix.PosDef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
   {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ)
   {S : Matrix n n 𝕜}
   (hQS : Q = S) :
   hQ.rpow r = (by rw [← hQS]; exact hQ : PosDef S).rpow r :=
-by aesop
+Matrix.IsHermitian.rpow_cast _ _ hQS
 lemma Matrix.PosSemidef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
   {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) (r : ℝ)
   {S : Matrix n n 𝕜}
   (hQS : Q = S) :
   hQ.rpow r = (by rw [← hQS]; exact hQ : PosSemidef S).rpow r :=
-by aesop
+Matrix.IsHermitian.rpow_cast _ _ hQS
 
 lemma AlgEquiv.apply_eq_id {R M : Type*} [CommSemiring R]
   [Semiring M] [Algebra R M] {f : M ≃ₐ[R] M} :
   (∀ (x : M), f x = x) ↔ f = 1 :=
 by simp only [AlgEquiv.ext_iff, AlgEquiv.one_apply]
-
-lemma Matrix.inv_diagonal' {R n : Type*} [Field R]
-  [Fintype n] [DecidableEq n]
-  (d : n → R) [Invertible d] :
-  (Matrix.diagonal d)⁻¹ = Matrix.diagonal d⁻¹ :=
-by
-  haveI := Matrix.diagonalInvertible d
-  rw [← invOf_eq_nonsing_inv, invOf_diagonal_eq]
-  simp only [diagonal_eq_diagonal_iff, Pi.inv_apply]
-  intro
-  refine eq_inv_of_mul_eq_one_left ?h
-  rw [← Pi.mul_apply, invOf_mul_self]
-  rfl
 
 theorem Matrix.PosDef.rpow_neg_eq_inv_rpow {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
   {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) :

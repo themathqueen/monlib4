@@ -439,7 +439,7 @@ theorem basis_is_orthonormal (hφ : φ.IsFaithfulPosMap) : Orthonormal ℂ  hφ.
   by
   rw [orthonormal_iff_ite]
   simp_rw [Module.Dual.IsFaithfulPosMap.basis_apply]
-  simp_rw [inner_eq', conjTranspose_mul, (PosDef.rpow.isHermitian _ _).eq,
+  simp_rw [inner_eq', conjTranspose_mul, (PosDef.rpow.isPosDef _ _).1.eq,
     stdBasisMatrix.star_one, Matrix.mul_assoc, ← Matrix.mul_assoc _ (stdBasisMatrix _ _ _),
     stdBasisMatrix_hMul, one_mul, Matrix.smul_mul, Matrix.mul_smul, trace_smul, smul_eq_mul,
     boole_mul]
@@ -462,7 +462,7 @@ theorem basis_is_orthonormal (hφ : φ.IsFaithfulPosMap) : Orthonormal ℂ  hφ.
         simp_rw [Matrix.mul_assoc]
       _ = (hQ.rpow (-(1 / 2) + 1 + -(1 / 2) : ℝ) * stdBasisMatrix i j 1).trace := by
         simp_rw [PosDef.rpow_mul_rpow]
-      _ = (hQ.rpow 0 * stdBasisMatrix i j 1).trace := by norm_num
+      _ = (hQ.rpow 0 * stdBasisMatrix i j 1).trace := by ring_nf
       _ = ite (i = j) 1 0 := by simp_rw [PosDef.rpow_zero, Matrix.one_mul, stdBasisMatrix.trace]
   simp_rw [this, ← ite_and, ← Prod.eq_iff_fst_eq_snd_eq, forall₂_true_iff]
 
@@ -485,14 +485,14 @@ theorem inner_coord (hφ : φ.IsFaithfulPosMap) (ij : n × n) (y : Matrix n n �
   let Q := φ.matrix
   let hQ :=  hφ.matrixIsPosDef
   simp_rw [inner_eq', hφ.orthonormalBasis_apply, conjTranspose_mul,
-    (Matrix.PosDef.rpow.isHermitian hQ _).eq, ← Matrix.mul_assoc, stdBasisMatrix_conjTranspose,
+    (Matrix.PosDef.rpow.isPosDef hQ _).1.eq, ← Matrix.mul_assoc, stdBasisMatrix_conjTranspose,
     star_one]
   have :=
     calc
       Q * hQ.rpow (-(1 / 2)) = hQ.rpow 1 * hQ.rpow (-(1 / 2)) := by
         rw [Matrix.PosDef.rpow_one_eq_self]
       _ = hQ.rpow (1 + -(1 / 2)) := by rw [Matrix.PosDef.rpow_mul_rpow]
-      _ = hQ.rpow (1 / 2) := by norm_num
+      _ = hQ.rpow (1 / 2) := by ring_nf
   rw [this]
   simp_rw [trace_iff, mul_apply, stdBasisMatrix, mul_boole, ite_and]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true, ite_mul, MulZeroClass.zero_mul]
@@ -660,7 +660,7 @@ protected theorem basis_apply (hψ : ∀ i, (ψ i).IsFaithfulPosMap) (ijk : Σ i
     Matrix.cast_apply]
   simp_rw [@eq_comm _ i]
   split_ifs with h
-  · simp only [h, eq_self_iff_true, dif_pos, Module.Dual.IsFaithfulPosMap.basis_apply]
+  · rw [← Module.Dual.IsFaithfulPosMap.basis_apply (hψ _)]
     aesop
   · simp only [zero_apply]
 

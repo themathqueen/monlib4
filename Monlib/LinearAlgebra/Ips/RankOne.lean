@@ -201,7 +201,6 @@ theorem ContinuousLinearMap.rankOne_comp {E₃ : Type*} [NormedAddCommGroup E₃
   simp_rw [comp_apply, rankOne_apply, adjoint_inner_left]
 
 /-- rank one operators given by norm one vectors are automatically idempotent -/
-@[simp]
 theorem rankOne_self_isIdempotentElem_of_normOne {x : E₁} (h : ‖x‖ = 1) :
   IsIdempotentElem (rankOne 𝕜 x x) := by
 simp_rw [IsIdempotentElem, ContinuousLinearMap.ext_iff, mul_def, rankOne.apply_rankOne,
@@ -307,6 +306,45 @@ by
         (div_ne_zero ugh ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx))
     simp_rw [div_eq_inv_mul, Units.val_mk0, mul_smul, ← h, smul_smul,
       inv_mul_cancel ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx), one_smul]
+
+theorem colinear_of_ne_zero_rankOne_eq_rankOne [CompleteSpace E₂] [CompleteSpace E₁]
+  {a c : E₁} {b d : E₂} (h : rankOne 𝕜 a b = rankOne 𝕜 c d)
+  (ha : a ≠ 0) (hb : b ≠ 0) :
+    (∃ α β : 𝕜ˣ, a = (α : 𝕜) • c ∧ b = (α * β : 𝕜) • d) :=
+by
+  have h₂ := h
+  apply_fun ContinuousLinearMap.adjoint at h₂
+  simp only [rankOne_adjoint, ContinuousLinearMap.ext_iff, rankOne_apply] at h h₂
+  specialize h b
+  specialize h₂ a
+  have h₃ : a = (⟪d, b⟫_𝕜 / ⟪b, b⟫_𝕜) • c := by
+    calc a = (⟪b, b⟫_𝕜 / ⟪b, b⟫_𝕜) • a := by
+          rw [div_self, one_smul]
+          simp only [ne_eq, inner_self_eq_zero]; exact hb
+      _ = (1 / ⟪b, b⟫_𝕜) • (⟪b, b⟫_𝕜 • a) := by simp only [smul_smul]; ring_nf
+      _ = (1 / ⟪b, b⟫_𝕜) • (⟪d, b⟫_𝕜 • c) := by rw [h]
+      _ = (⟪d, b⟫_𝕜 / ⟪b, b⟫_𝕜) • c := by simp only [smul_smul]; ring_nf
+  have h₄ :=
+  calc b = (⟪a, a⟫_𝕜 / ⟪a, a⟫_𝕜) • b := by
+          rw [div_self, one_smul]
+          simp only [ne_eq, inner_self_eq_zero]; exact ha
+      _ = (1 / ⟪a, a⟫_𝕜) • (⟪a, a⟫_𝕜 • b) := by simp only [smul_smul]; ring_nf
+      _ = (1 / ⟪a, a⟫_𝕜) • (⟪c, a⟫_𝕜 • d) := by rw [h₂]
+      _ = (1 / ⟪a, a⟫_𝕜) • (⟪c, (⟪d, b⟫_𝕜 / ⟪b, b⟫_𝕜) • c⟫_𝕜 • d) := by rw [h₃]
+      _ = ((⟪d, b⟫_𝕜 / ⟪b, b⟫_𝕜) * (⟪c, c⟫_𝕜 / (⟪a, a⟫_𝕜))) • d := by
+        simp only [inner_smul_right, smul_smul]; ring_nf
+  have h₅ : ⟪d, b⟫_𝕜 ≠ 0 := by
+    intro h
+    rw [h, zero_div, zero_mul, zero_smul] at h₄
+    exact hb h₄
+  let α := Units.mk0 (⟪d, b⟫_𝕜 / ⟪b, b⟫_𝕜) (div_ne_zero h₅ (inner_self_ne_zero.mpr hb))
+  have h₆ : c ≠ 0 := by
+    rintro rfl
+    simp only [smul_zero] at h₃
+    exact ha h₃
+  let β := Units.mk0 (⟪c, c⟫_𝕜 / ⟪a, a⟫_𝕜)
+    (div_ne_zero (inner_self_ne_zero.mpr h₆) (inner_self_ne_zero.mpr ha))
+  exact ⟨α, β, h₃, h₄⟩
 
 theorem ContinuousLinearMap.ext_inner_map {F : Type _} [NormedAddCommGroup F]
   [InnerProductSpace 𝕜 F] (T S : E₁ →L[𝕜] F) :

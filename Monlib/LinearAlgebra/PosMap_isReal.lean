@@ -524,3 +524,85 @@ by
   have : f = f' := rfl
   rw [this]
   exact StarAlgHom.isPosMap hA _
+
+theorem Matrix.innerAut.map_zpow {n : Type*} [Fintype n] [DecidableEq n]
+  {𝕜 : Type*} [RCLike 𝕜] (U : ↥(Matrix.unitaryGroup n 𝕜)) (x : Matrix n n 𝕜) (z : ℤ) :
+  (Matrix.innerAut U) x ^ z = (Matrix.innerAut U) (x ^ z) :=
+by
+  induction z using Int.induction_on
+  . exact map_pow _ _ _
+  . exact map_pow _ _ _
+  . rename_i i _
+    calc (innerAut U x ^ (-(i:ℤ)-1))
+      = (innerAut U x ^ (i + 1))⁻¹ :=
+        by rw [← Matrix.zpow_neg_natCast, neg_sub_left, add_comm]; rfl
+    _ = (innerAut U (x ^ (i + 1)))⁻¹ := by rw [innerAut.map_pow]
+    _ = innerAut U ((x ^ (i + 1))⁻¹) := by rw [map_inv]
+    _ = innerAut U (x ^ (-(i:ℤ)-1)) := by
+      rw [← Matrix.zpow_neg_natCast, neg_sub_left, add_comm]; rfl
+
+lemma Matrix.inv_diagonal' {R n : Type*} [Field R]
+  [Fintype n] [DecidableEq n]
+  (d : n → R) [Invertible d] :
+  (Matrix.diagonal d)⁻¹ = Matrix.diagonal d⁻¹ :=
+by
+  haveI := Matrix.diagonalInvertible d
+  rw [← invOf_eq_nonsing_inv, invOf_diagonal_eq]
+  simp only [diagonal_eq_diagonal_iff, Pi.inv_apply]
+  intro
+  refine eq_inv_of_mul_eq_one_left ?h
+  rw [← Pi.mul_apply, invOf_mul_self]
+  rfl
+
+theorem Matrix.diagonal_zpow
+  {𝕜 : Type*} [Field 𝕜] (x : n → 𝕜) [Invertible x] (z : ℤ) :
+  (Matrix.diagonal x) ^ z = Matrix.diagonal (x ^ z) :=
+by
+  induction z using Int.induction_on
+  . simp only [zpow_zero]; rfl
+  . norm_cast
+    exact diagonal_pow x _
+  . rename_i i _
+    rw [neg_sub_left, add_comm]
+    calc diagonal x ^ (-((i : ℤ)+1)) = (diagonal x ^ (-((i + 1 : ℕ) : ℤ))) := rfl
+      _ = (diagonal x ^ (i + 1))⁻¹ := by rw [Matrix.zpow_neg_natCast]
+      _ = (diagonal (x ^ (i + 1)))⁻¹ := by rw [diagonal_pow]
+      _ = diagonal ((x ^ (i + 1))⁻¹) := by rw [inv_diagonal']
+      _ = diagonal ((x ^ ((i : ℤ) + 1))⁻¹) := by norm_cast
+      _ = diagonal (x ^ (-((i:ℤ)+1))) := by
+        rw [← _root_.zpow_neg, neg_add]
+
+theorem Matrix.PosDef.rpow_zpow {𝕜 : Type*} [RCLike 𝕜]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) (z : ℤ) :
+  (hQ.rpow r) ^ z = hQ.rpow (r * (z : ℝ)) :=
+by
+  have := PosDef.rpow.isPosDef hQ r
+  rw [hQ.rpow_eq, innerAut_posDef_iff, Matrix.PosDef.diagonal] at this
+  have : Invertible (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ r) : n → 𝕜) :=
+  by
+    simp only [Function.comp_apply, Pi.pow_apply, RCLike.ofReal_pos] at this
+    use RCLike.ofReal ∘ (hQ.1.eigenvalues ^ (-r))
+    <;>
+    { ext i
+      simp only [Pi.mul_apply, Function.comp_apply, Pi.pow_apply, Pi.one_apply,
+        ← RCLike.ofReal_mul]
+      rw [← Real.rpow_add (hQ.eigenvalues_pos _)]
+      simp only [neg_add_self, add_neg_self, Real.rpow_zero, RCLike.ofReal_one] }
+  simp_rw [rpow_eq, innerAut.map_zpow, diagonal_zpow]
+  congr
+  simp only [diagonal_eq_diagonal_iff, Pi.pow_apply, Function.comp_apply,
+    ← RCLike.ofReal_zpow, RCLike.ofReal_inj]
+  intro
+  rw [Real.rpow_mul (le_of_lt (hQ.eigenvalues_pos _))]
+  norm_cast
+
+theorem Matrix.PosDef.eq_of_zpow_inv_eq_zpow_inv {𝕜 : Type*} [RCLike 𝕜]
+  {Q R : Matrix n n 𝕜} (hQ : Q.PosDef) (hR : R.PosDef)
+  {r : ℤˣ} (hQR : hQ.rpow r⁻¹ = hR.rpow r⁻¹) : Q = R :=
+by
+  have : (hQ.rpow r⁻¹) ^ (r : ℤ) = (hR.rpow r⁻¹) ^ (r : ℤ) := by rw [hQR]
+  simp_rw [rpow_zpow, mul_comm] at this
+  rw [mul_inv_cancel] at this
+  simp_rw [rpow_one_eq_self] at this
+  exact this
+  simp only [ne_eq, Int.cast_eq_zero, Units.ne_zero, not_false_eq_true]
