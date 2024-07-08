@@ -711,22 +711,6 @@ theorem Module.Dual.pi.IsFaithfulPosMap.norm_eq {ψ : ∀ i, Module.Dual ℂ (Ma
   simp_rw [← Module.Dual.pi.IsFaithfulPosMap.inner_eq]
   exact norm_eq_sqrt_inner _
 
-theorem norm_hMul_norm_eq_norm_tmul {𝕜 B C : Type _} [RCLike 𝕜] [NormedAddCommGroup B]
-    [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
-    [FiniteDimensional 𝕜 C] (x : B) (y : C) : ‖x‖ * ‖y‖ = ‖x ⊗ₜ[𝕜] y‖ := by
-  calc
-    ‖x‖ * ‖y‖ = Real.sqrt (RCLike.re (inner x x : 𝕜)) * Real.sqrt (RCLike.re (inner y y : 𝕜)) := by
-      simp_rw [@norm_eq_sqrt_inner 𝕜]
-    _ = Real.sqrt (RCLike.re (inner x x : 𝕜) * RCLike.re (inner y y : 𝕜)) := by
-      rw [Real.sqrt_mul inner_self_nonneg]
-    _ = Real.sqrt (RCLike.re ((inner x x : 𝕜) * (inner y y : 𝕜))) :=
-      by
-      congr 1
-      simp only [RCLike.mul_re, @inner_self_im 𝕜, MulZeroClass.zero_mul, sub_zero]
-    _ = Real.sqrt (RCLike.re (inner (x ⊗ₜ[𝕜] y) (x ⊗ₜ[𝕜] y) : 𝕜)) := by
-      rw [TensorProduct.inner_tmul]
-    _ = ‖x ⊗ₜ[𝕜] y‖ := by rw [@norm_eq_sqrt_inner 𝕜]
-
 -- instance Matrix.is_fd : FiniteDimensional ℂ (Matrix n n ℂ) := by infer_instance
 
 -- instance Matrix.is_starModule {n : Type _} [Fintype n] [DecidableEq n] :

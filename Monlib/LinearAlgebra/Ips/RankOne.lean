@@ -346,6 +346,24 @@ by
     (div_ne_zero (inner_self_ne_zero.mpr h₆) (inner_self_ne_zero.mpr ha))
   exact ⟨α, β, h₃, h₄⟩
 
+theorem ket_eq_ket_iff {x y : E₁} :
+  ket 𝕜 x = ket 𝕜 y ↔ x = y :=
+by
+  simp only [ContinuousLinearMap.ext_iff, ket_apply_apply,
+    ← @sub_eq_zero _ _ (_ • _), ← @sub_eq_zero _ _ x]
+  simp only [← smul_sub, smul_eq_zero, forall_or_right,
+    or_iff_right_iff_imp]
+  intro h
+  specialize h 1
+  simp only [one_ne_zero] at h
+
+theorem bra_eq_bra_iff {x y : E₁} :
+  bra 𝕜 x = bra 𝕜 y ↔ x = y :=
+by
+  simp only [ContinuousLinearMap.ext_iff, bra_apply_apply,
+    ← @sub_eq_zero _ _ ⟪_, _⟫_𝕜, ← @sub_eq_zero _ _ x]
+  simp only [← inner_sub_left, forall_inner_eq_zero_iff]
+
 theorem ContinuousLinearMap.ext_inner_map {F : Type _} [NormedAddCommGroup F]
   [InnerProductSpace 𝕜 F] (T S : E₁ →L[𝕜] F) :
       T = S ↔ ∀ x y, ⟪T x,y⟫_𝕜 = ⟪S x,y⟫_𝕜 :=

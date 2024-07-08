@@ -174,12 +174,12 @@ theorem directSumTensor_apply {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ 
     (i : ι₁ × ι₂) : directSumTensor (x ⊗ₜ[R] y) i = x i.1 ⊗ₜ[R] y i.2 :=
   rfl
 
-instance {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
-    [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
-    {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)]
-    [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)] :
-  ZeroHomClass (((i : ι₁) → M₁ i) ⊗[R] ((i : ι₂) → M₂ i) →ₗ[R] (i : ι₁ × ι₂) → M₁ i.1 ⊗[R] M₂ i.2) _ _ :=
-⟨fun x => by simp only [LinearMap.zero_apply, LinearMap.map_zero]⟩
+-- instance {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
+--     [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
+--     {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)]
+--     [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)] :
+--   ZeroHomClass (((i : ι₁) → M₁ i) ⊗[R] ((i : ι₂) → M₂ i) →ₗ[R] (i : ι₁ × ι₂) → M₁ i.1 ⊗[R] M₂ i.2) _ _ :=
+-- ⟨fun x => by simp only [LinearMap.zero_apply, LinearMap.map_zero]⟩
 
 theorem directSumTensorToFun.map_mul {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
     [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
@@ -187,6 +187,8 @@ theorem directSumTensorToFun.map_mul {R : Type _} [CommRing R] {ι₁ : Type _} 
     [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)]
     (x y : (∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) :
     directSumTensorToFun (x * y) = directSumTensorToFun x * directSumTensorToFun y :=
+letI : ZeroHomClass (((i : ι₁) → M₁ i) ⊗[R] ((i : ι₂) → M₂ i) →ₗ[R] (i : ι₁ × ι₂) → M₁ i.1 ⊗[R] M₂ i.2) _ _ :=
+⟨fun x => by simp only [LinearMap.zero_apply, LinearMap.map_zero]⟩
 x.induction_on
   (by
     simp only [zero_mul, map_zero]
