@@ -7,6 +7,7 @@ import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Algebra.Equiv
 import Mathlib.Algebra.Ring.Idempotents
 import Mathlib.LinearAlgebra.Span
+import Mathlib.Algebra.Star.Pi
 
 #align_import preq.star_alg_equiv
 
@@ -237,3 +238,20 @@ by
   have := _root_.NonUnitalAlgEquiv.image_span_center f
   rw [← Submodule.map_coe] at this
   norm_cast at this
+
+@[simps apply]
+def StarAlgEquiv.piCongrRight {R ι : Type*} {A₁ A₂ : ι → Type*}
+  [(i : ι) → Add (A₁ i)] [(i : ι) → Add (A₂ i)]
+  [(i : ι) → Mul (A₁ i)] [(i : ι) → Mul (A₂ i)]
+  [(i : ι) → Star (A₁ i)] [(i : ι) → Star (A₂ i)]
+  [(i : ι) → SMul R (A₁ i)] [(i : ι) → SMul R (A₂ i)]
+  (e : (i : ι) → A₁ i ≃⋆ₐ[R] A₂ i) :
+  ((i : ι) → A₁ i) ≃⋆ₐ[R] (i : ι) → A₂ i where
+    toFun x j := e j (x j)
+    invFun x j := (e j).symm (x j)
+    map_add' _ _ := by simp only [Pi.add_apply, map_add]; rfl
+    map_mul' _ _ := by simp only [Pi.mul_apply, map_mul]; rfl
+    map_star' _ := by simp only [Pi.star_apply, map_star]; rfl
+    map_smul' _ _ := by simp only [Pi.smul_apply, map_smul]; rfl
+    left_inv _ := by simp only [symm_apply_apply]
+    right_inv _ := by simp only [apply_symm_apply]

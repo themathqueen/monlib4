@@ -33,6 +33,7 @@ import Monlib.Preq.StarAlgEquiv
 
 import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
+import Monlib.QuantumGraph.PiMat
 -- import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 -- import Monlib.QuantumGraph.Nontracial
@@ -76,6 +77,7 @@ import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.TensorProduct.Lemmas
 import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 import Monlib.LinearAlgebra.TensorProduct.OrthonormalBasis
+import Monlib.LinearAlgebra.TensorProduct.Submodule
 
 import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 import Monlib.LinearAlgebra.QuantumSet.Pi

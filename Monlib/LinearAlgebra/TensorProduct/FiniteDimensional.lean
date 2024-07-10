@@ -161,3 +161,95 @@ x.induction_on
   (fun z w hz hw => by simp only [map_add, StarAddMonoid.star_add, hz, hw])
 
 end
+
+noncomputable def starAlgEquivOfLinearEquivTensorProduct
+  {R A B C : Type*} [RCLike R] [Ring A]
+  [StarAddMonoid A]
+  [Algebra R A] [StarModule R A]
+  [Ring B] [StarAddMonoid B] [Algebra R B] [StarModule R B]
+  [Semiring C] [Algebra R C]
+  [FiniteDimensional R A] [FiniteDimensional R B] [StarAddMonoid C]
+  (f : TensorProduct R A B ≃ₗ[R] C)
+  (h_mul : ∀ (a₁ a₂ : A) (b₁ b₂ : B),
+    f ((a₁ * a₂) ⊗ₜ[R] (b₁ * b₂)) = f (a₁ ⊗ₜ[R] b₁) * f (a₂ ⊗ₜ[R] b₂))
+  (h_one : f (1 ⊗ₜ[R] 1) = 1)
+  (h_star : ∀ (x : A) (y : B), f (star (x ⊗ₜ[R] y)) = star (f (x ⊗ₜ[R] y))) :
+  TensorProduct R A B ≃⋆ₐ[R] C :=
+StarAlgEquiv.ofAlgEquiv
+  (Algebra.TensorProduct.algEquivOfLinearEquivTensorProduct f h_mul h_one)
+  (λ x => x.induction_on (by simp only [star_zero, map_zero])
+    h_star
+    (λ _ _ h1 h2 => by simp only [star_add, map_add, h1, h2]))
+
+noncomputable def StarAlgEquiv.TensorProduct.map {R A B C D : Type*} [RCLike R]
+  [Ring A] [Ring B] [Ring C] [Ring D]
+  [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C] [StarAddMonoid D]
+  [StarModule R A] [StarModule R B] [StarModule R C] [StarModule R D]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C] [Module.Finite R D]
+  (f : A ≃⋆ₐ[R] B) (g : C ≃⋆ₐ[R] D) :
+  TensorProduct R A C ≃⋆ₐ[R] TensorProduct R B D :=
+StarAlgEquiv.ofAlgEquiv
+  (AlgEquiv.TensorProduct.map f.toAlgEquiv g.toAlgEquiv)
+  (λ x => x.induction_on
+    (by simp only [star_zero, map_zero])
+    (λ _ _ => by simp only [TensorProduct.star_tmul, AlgEquiv.TensorProduct.map_tmul,
+      coe_toAlgEquiv, map_star])
+    (λ _ _ h1 h2 => by simp only [star_add, map_add, h1, h2]))
+
+theorem StarAlgEquiv.TensorProduct.map_tmul {R A B C D : Type*} [RCLike R]
+  [Ring A] [Ring B] [Ring C] [Ring D]
+  [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C] [StarAddMonoid D]
+  [StarModule R A] [StarModule R B] [StarModule R C] [StarModule R D]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C] [Module.Finite R D]
+  (f : A ≃⋆ₐ[R] B) (g : C ≃⋆ₐ[R] D) (x : A) (y : C) :
+  (StarAlgEquiv.TensorProduct.map f g) (x ⊗ₜ[R] y) = f x ⊗ₜ g y :=
+rfl
+theorem StarAlgEquiv.TensorProduct.map_symm_tmul {R A B C D : Type*} [RCLike R]
+  [Ring A] [Ring B] [Ring C] [Ring D]
+  [Algebra R A] [Algebra R B] [Algebra R C] [Algebra R D]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C] [StarAddMonoid D]
+  [StarModule R A] [StarModule R B] [StarModule R C] [StarModule R D]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C] [Module.Finite R D]
+  (f : A ≃⋆ₐ[R] B) (g : C ≃⋆ₐ[R] D) (x : B) (y : D) :
+  (StarAlgEquiv.TensorProduct.map f g).symm (x ⊗ₜ[R] y) = f.symm x ⊗ₜ g.symm y :=
+rfl
+
+
+noncomputable def StarAlgEquiv.lTensor {R A B : Type*} (C : Type*) [RCLike R]
+  [Ring A]
+  [Ring B] [Ring C] [Algebra R A] [Algebra R B] [Algebra R C]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C]
+  [StarModule R A] [StarModule R B] [StarModule R C]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C]
+  (f : A ≃⋆ₐ[R] B) :
+  (C ⊗[R] A) ≃⋆ₐ[R] (C ⊗[R] B) :=
+starAlgEquivOfLinearEquivTensorProduct
+  (LinearEquiv.lTensor C f.toLinearEquiv)
+  (by
+    simp only [toLinearEquiv_apply, LinearEquiv.lTensor_tmul, Algebra.TensorProduct.tmul_mul_tmul,
+      _root_.map_mul, implies_true])
+  (by simp only [toLinearEquiv_apply, map_one, LinearEquiv.lTensor_tmul]; rfl)
+  (λ _ _ => by simp only [TensorProduct.star_tmul,
+    LinearEquiv.lTensor_tmul, toLinearEquiv_apply, map_star])
+
+lemma StarAlgEquiv.lTensor_tmul {R A B C : Type*}
+  [RCLike R]
+  [Ring A]
+  [Ring B] [Ring C] [Algebra R A] [Algebra R B] [Algebra R C]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C]
+  [StarModule R A] [StarModule R B] [StarModule R C]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C]
+  (f : A ≃⋆ₐ[R] B) (x : C) (y : A) :
+  (StarAlgEquiv.lTensor C f) (x ⊗ₜ[R] y) = x ⊗ₜ f (y) :=
+rfl
+lemma StarAlgEquiv.lTensor_symm_tmul {R A B C : Type*} [RCLike R]
+  [Ring A]
+  [Ring B] [Ring C] [Algebra R A] [Algebra R B] [Algebra R C]
+  [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid C]
+  [StarModule R A] [StarModule R B] [StarModule R C]
+  [Module.Finite R A] [Module.Finite R B] [Module.Finite R C]
+  (f : A ≃⋆ₐ[R] B) (x : C) (y : B) :
+  (StarAlgEquiv.lTensor C f).symm (x ⊗ₜ[R] y) = x ⊗ₜ f.symm (y) :=
+rfl

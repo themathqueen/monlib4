@@ -107,50 +107,6 @@ theorem Matrix.stdBasisMatrix.transpose {R n m : Type _} [DecidableEq n] [Decida
   ext
   simp_rw [transpose_apply, stdBasisMatrix, and_comm]
 
-section Move
-
-/-- obviously, `n × unit → R` is linearly equiv to `n → R` -/
-def piProdUnitEquivPi {R n : Type _} [Semiring R] : (n × Unit → R) ≃ₗ[R] n → R
-    where
-  toFun x i := x (i, PUnit.unit)
-  invFun x i := x i.1
-  left_inv x := by
-    ext; simp
-  right_inv x := by ext1; simp only [col_apply]
-  map_add' x y := by simp only [Pi.add_apply]; rfl
-  map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
-
-/-- `matrix.col` written as a linear equivalence -/
-def Matrix.ofCol {R n : Type _} [Semiring R] : Matrix n Unit R ≃ₗ[R] n → R :=
-  (reshape : Matrix n Unit R ≃ₗ[R] n × Unit → R).trans piProdUnitEquivPi
-
-/-- obviously, `matrix n (m × unit)` is linearly equivalent to `matrix n m R` -/
-def matrixProdUnitRight {R n m : Type _} [Semiring R] : Matrix n (m × Unit) R ≃ₗ[R] Matrix n m R
-    where
-  toFun x i j := x i (j, PUnit.unit)
-  invFun x i j := x i j.1
-  left_inv x := by
-    ext; simp
-  right_inv x := by ext1; simp only [col_apply]
-  map_add' x y := by simp only [Pi.add_apply]; rfl
-  map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
-
-/-- `vec_mulVec (reshape x) (star (reshape y))` written as a kronecker product of their
-  corresponding vectors (via `reshape`). -/
-theorem col_hMul_col_conjTranspose_is_kronecker_of_vectors {R m n p q : Type _} [Semiring R]
-    [Star R] (x : Matrix m n R) (y : Matrix p q R) :
-    col (reshape x) * (col (reshape y))ᴴ =
-      (reshape : Matrix _ _ R ≃ₗ[R] _ × _ → R).symm
-        (Matrix.ofCol (matrixProdUnitRight (col (reshape x) ⊗ₖ col (reshape yᴴᵀ)))) :=
-  by
-  ext
-  simp_rw [reshape_symm_apply, Matrix.ofCol, matrixProdUnitRight, piProdUnitEquivPi,
-    LinearEquiv.trans_apply, LinearEquiv.coe_mk, reshape_apply, kronecker_apply, col_apply,
-    conjTranspose_col, ← vecMulVec_eq, vecMulVec_apply, Pi.star_apply, reshape_apply,
-    conj_apply]
-
-end Move
-
 open scoped TensorProduct
 
 open scoped ComplexConjugate

@@ -441,6 +441,35 @@ by
     ← LinearMap.isReal_iff]
   exact ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
+section
+
+noncomputable def QuantumGraph.Real.upsilonSubmodule
+  {f : A →ₗ[ℂ] A} (gns : hA.k = 0)
+  (hf : QuantumGraph.Real A f) :
+  Submodule ℂ (A ⊗[ℂ] A) :=
+by
+  choose U _ using
+    (orthogonal_projection_iff.mpr
+    (And.comm.mp
+    (ContinuousLinearMap.isOrthogonalProjection_iff'.mp
+      ((quantumGraphReal_iff_Upsilon_toBimodule_orthogonalProjection gns).mp hf))))
+  exact U
+
+theorem QuantumGraph.Real.upsilonOrthogonalProjection {f : A →ₗ[ℂ] A}
+  (gns : hA.k = 0)
+  (hf : QuantumGraph.Real A f) :
+  orthogonalProjection' (upsilonSubmodule gns hf)
+    = LinearMap.toContinuousLinearMap
+      ((TensorProduct.toIsBimoduleMap (Upsilon f)).1) :=
+(QuantumGraph.Real.upsilonSubmodule.proof_14 gns hf)
+
+noncomputable def QuantumGraph.Real.upsilonOrthonormalBasis {f : A →ₗ[ℂ] A}
+  (gns : hA.k = 0) (hf : QuantumGraph.Real A f) :
+  OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (upsilonSubmodule gns hf))) ℂ (upsilonSubmodule gns hf) :=
+stdOrthonormalBasis ℂ (upsilonSubmodule gns hf)
+
+end
+
 -- class QuantumGraphHom {A B : Type*} [NormedAddCommGroupOfRing A]
 --   [NormedAddCommGroupOfRing B] [hA : QuantumSet A] [hB : QuantumSet B]
 --   {x : A →ₗ[ℂ] A} (hx : QuantumGraph A x)
