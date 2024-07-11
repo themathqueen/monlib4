@@ -11,7 +11,7 @@ variable {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
 open scoped Functional MatrixOrder ComplexOrder TensorProduct Matrix
 
 set_option synthInstance.maxHeartbeats 0 in
-private noncomputable def PiMatTensorTo (ι : Type*)
+private noncomputable abbrev PiMatTensorTo (ι : Type*)
   (p : ι → Type*) [Fintype ι] [DecidableEq ι]
   [Π i, DecidableEq (p i)] [Π i, Fintype (p i)] :
   (PiMat ℂ ι p ⊗[ℂ] PiMat ℂ ι p) ≃⋆ₐ[ℂ] (i : ι × ι) → (Matrix (p i.1) (p i.1) ℂ ⊗[ℂ] Matrix (p i.2) (p i.2) ℂ) :=
@@ -45,7 +45,7 @@ noncomputable def PiMat.transposeStarAlgEquiv
 
 set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 0 in
-private noncomputable def homEuclideanTensor
+private noncomputable abbrev homEuclideanTensor
   (p : ι → Type*)
   [Π i, Fintype (p i)] [Π i, DecidableEq (p i)]
   (i j : ι) :
@@ -70,7 +70,7 @@ starAlgEquivOfLinearEquivTensorProduct
     simp only [homTensorHomEquiv_apply, TensorProduct.homTensorHomMap_apply]
     simp only [LinearMap.star_eq_adjoint, TensorProduct.map_adjoint])
 
-private noncomputable def matToEuclideanStarAlgEquiv
+private noncomputable abbrev matToEuclideanStarAlgEquiv
   {n : Type*} [Fintype n] [DecidableEq n] :
   (Matrix n n ℂ) ≃⋆ₐ[ℂ] EuclideanSpace ℂ n →ₗ[ℂ] EuclideanSpace ℂ n :=
 StarAlgEquiv.ofAlgEquiv
@@ -87,7 +87,7 @@ StarAlgEquiv.ofAlgEquiv
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
-private noncomputable def mat_tensor_toEuclidean
+noncomputable abbrev mat_tensor_toEuclidean
   (ι : Type*) (p : ι → Type*) [Fintype ι] [DecidableEq ι]
   [Π i, Fintype (p i)] [Π i, DecidableEq (p i)] :
   (PiMat ℂ ι p ⊗[ℂ] PiMat ℂ ι p)
@@ -128,30 +128,17 @@ by
     (quantumGraphReal_iff_Psi_isIdempotentElem_and_isSelfAdjoint.mp hA).2.star_eq, and_self]
 
 set_option synthInstance.maxHeartbeats 0 in
-set_option maxHeartbeats 1000000 in
-theorem QuantumGraph.Real.PiMat_existsSubmodule {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
-  (hA : QuantumGraph.Real (PiMat ℂ ι p) A) :
-  ∃ U : Π i : ι × ι, Submodule ℂ (EuclideanSpace ℂ (p i.1) ⊗[ℂ] EuclideanSpace ℂ (p i.2)),
-  ∀ i : ι × ι,
-  orthogonalProjection' (U i) =
-  (LinearMap.toContinuousLinearMap
-  (((mat_tensor_toEuclidean ι p)
-  ((StarAlgEquiv.lTensor (PiMat ℂ ι p) (PiMat.transposeStarAlgEquiv ι p).symm)
-  (QuantumSet.Psi 0 ((1/2)) A))) i)) :=
-by
-  have := λ i => hA.PiMat_isOrthogonalProjection i
-  simp_rw [ContinuousLinearMap.isOrthogonalProjection_iff',
-    @and_comm (IsIdempotentElem _), ← orthogonal_projection_iff] at this
-  exact ⟨λ _ => (this _).choose, λ _ => (this _).choose_spec⟩
-
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 0 in
 noncomputable def QuantumGraph.Real.PiMat_submodule {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hA : QuantumGraph.Real (PiMat ℂ ι p) A) :
   Π i : ι × ι, Submodule ℂ (EuclideanSpace ℂ (p i.1)
     ⊗[ℂ] EuclideanSpace ℂ (p i.2)) :=
 by
-  choose y _ using QuantumGraph.Real.PiMat_existsSubmodule hA
+  intro i
+  choose y _ using
+    (orthogonal_projection_iff.mpr
+    (And.comm.mp
+    (ContinuousLinearMap.isOrthogonalProjection_iff'.mp
+      (QuantumGraph.Real.PiMat_isOrthogonalProjection hA i))))
   exact y
 
 set_option maxHeartbeats 1000000 in
