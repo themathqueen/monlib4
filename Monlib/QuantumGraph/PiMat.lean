@@ -344,3 +344,168 @@ noncomputable def QuantumGraph.Real.PiMat_orthonormalBasis {A : PiMat ℂ ι p �
   (hA : QuantumGraph.Real (PiMat ℂ ι p) A) (i : ι × ι) :
   OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i))) ℂ (hA.PiMat_submodule i) :=
 stdOrthonormalBasis ℂ (hA.PiMat_submodule i)
+
+set_option synthInstance.maxHeartbeats 0 in
+theorem EuclideanSpace.prod_exists_finset {n m : Type*} [Fintype n] [DecidableEq n]
+  [Fintype m] [DecidableEq m] (x : EuclideanSpace ℂ (n × m)) :
+  ∃ S : Finset ((EuclideanSpace ℂ n) × EuclideanSpace ℂ m),
+    x = ∑ s in S, euclideanSpaceTensor' (s.1 ⊗ₜ[ℂ] s.2) :=
+by
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset (euclideanSpaceTensor'.symm x)
+  use S
+  apply_fun euclideanSpaceTensor'.symm using LinearEquiv.injective _
+  simp only [map_sum, LinearEquiv.symm_apply_apply, hS]
+
+theorem QuantumSet.PiMat_n :
+  n (PiMat ℂ ι p) = ((i : ι) × (p i × p i)) :=
+rfl
+
+open Kronecker
+
+@[simp]
+theorem Matrix.ite_kronecker {α n m p q : Type*} [MulZeroClass α] (x₁ : Matrix n m α)
+  (x₂ : Matrix p q α) (P : Prop) [Decidable P] :
+  (if P then x₁ else 0) ⊗ₖ x₂ = if P then x₁ ⊗ₖ x₂ else 0 :=
+by
+  split
+  next h => simp_all only
+  next h => simp_all only [zero_mul, implies_true, kroneckerMap_zero_left]
+@[simp]
+theorem Matrix.dite_kronecker {α n m p q : Type*} [MulZeroClass α]
+  (P : Prop) [Decidable P]
+  (x₁ : P → Matrix n m α) (x₂ : Matrix p q α) :
+  (dite P (λ p => x₁ p) (λ _ => 0)) ⊗ₖ x₂ = dite P (λ p => x₁ p ⊗ₖ x₂) (λ _ => 0) :=
+by
+  split
+  next h => simp_all only
+  next h => simp_all only [zero_mul, implies_true, kroneckerMap_zero_left]
+
+@[simp]
+theorem Matrix.kronecker_ite {α n m p q : Type*} [MulZeroClass α] (x₁ : Matrix n m α)
+  (x₂ : Matrix p q α) (P : Prop) [Decidable P] :
+  x₁ ⊗ₖ (if P then x₂ else 0) = if P then x₁ ⊗ₖ x₂ else 0 :=
+by
+  split
+  next h => simp_all only
+  next h => simp_all only [mul_zero, implies_true, kroneckerMap_zero_right]
+@[simp]
+theorem Matrix.kronecker_dite {α n m p q : Type*} [MulZeroClass α]
+  (x₁ : Matrix n m α) (P : Prop) [Decidable P] (x₂ : P → Matrix p q α) :
+  x₁ ⊗ₖ (dite P (λ p => x₂ p) (λ _ => 0)) = dite P (λ p => x₁ ⊗ₖ x₂ p) (λ _ => 0) :=
+by
+  split
+  next h => simp_all only
+  next h => simp_all only [mul_zero, implies_true, kroneckerMap_zero_right]
+
+theorem Matrix.vecMulVec_kronecker_vecMulVec {α n m p q : Type*} [CommSemiring α]
+    (x : n → α) (y : m → α) (z : p → α) (w : q → α) :
+  (vecMulVec x y) ⊗ₖ (vecMulVec z w) =
+    vecMulVec (reshape (vecMulVec x z)) (reshape (vecMulVec y w)) :=
+by
+  ext
+  simp only [kroneckerMap_apply, zero_apply, vecMulVec_apply, reshape_apply]
+  ring_nf
+
+@[simp]
+theorem Matrix.vecMulVec_toEuclideanLin {n m : Type*} [Fintype n] [DecidableEq n]
+  [Fintype m] [DecidableEq m] (x : EuclideanSpace ℂ n) (y : EuclideanSpace ℂ m) :
+  toEuclideanLin (vecMulVec x y) = rankOne ℂ x (star y) :=
+by
+  apply_fun Matrix.toEuclideanLin.symm using LinearEquiv.injective _
+  simp only [LinearEquiv.symm_apply_apply, rankOne.EuclideanSpace.toEuclideanLin_symm]
+  simp only [conjTranspose_col, star_star]
+  simp only [← vecMulVec_eq]
+
+open Matrix in
+theorem EuclideanSpaceTensor_apply_eq_reshape_vecMulVec {n m : Type*} [Fintype n]
+  [DecidableEq n] [Fintype m] [DecidableEq m]
+  (x : EuclideanSpace ℂ n) (y : EuclideanSpace ℂ m) :
+  euclideanSpaceTensor' (x ⊗ₜ[ℂ] y) = reshape (vecMulVec x y) :=
+by
+  ext1
+  simp only [euclideanSpaceTensor'_apply, reshape_apply, vecMulVec_apply]
+
+theorem Matrix.vecMulVec_conj {α n m : Type*} [CommSemiring α] [StarMul α] (x : n → α) (y : m → α) :
+  (vecMulVec x y)ᴴᵀ = vecMulVec (star x) (star y) :=
+by
+  ext
+  simp only [conj_apply, vecMulVec_apply, Pi.star_apply, star_mul']
+
+noncomputable def TensorProduct.chooseFinset {R M N : Type*} [CommSemiring R]
+  [AddCommMonoid M] [AddCommMonoid N] [Module R M] [Module R N]
+  (x : TensorProduct R M N) :
+    Finset (M × N) :=
+by
+  choose S _ using TensorProduct.exists_finset x
+  exact S
+theorem TensorProduct.chooseFinset_spec {R M N : Type*} [CommSemiring R]
+  [AddCommMonoid M] [AddCommMonoid N] [Module R M] [Module R N]
+  (x : TensorProduct R M N) :
+  x = ∑ s in (TensorProduct.chooseFinset x), s.1 ⊗ₜ s.2 :=
+TensorProduct.chooseFinset.proof_1 x
+
+noncomputable def EuclideanSpace.prod_chooseFinset {n m : Type*} [Fintype n] [DecidableEq n]
+  [Fintype m] [DecidableEq m] (x : EuclideanSpace ℂ (n × m)) :
+  Finset ((EuclideanSpace ℂ n) × EuclideanSpace ℂ m) :=
+by
+  choose S _ using EuclideanSpace.prod_exists_finset x
+  exact S
+theorem EuclideanSpace.prod_chooseFinset_spec {n m : Type*} [Fintype n] [DecidableEq n]
+  [Fintype m] [DecidableEq m] (x : EuclideanSpace ℂ (n × m)) :
+  x = ∑ s in (EuclideanSpace.prod_chooseFinset x), euclideanSpaceTensor' (s.1 ⊗ₜ s.2) :=
+EuclideanSpace.prod_chooseFinset.proof_2 x
+
+set_option synthInstance.maxHeartbeats 0 in
+set_option maxHeartbeats 0 in
+theorem QuantumGraph.Real.PiMat_eq {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hA : QuantumGraph.Real (PiMat ℂ ι p) A) :
+  let S : (i : ι × ι) →
+    (j : (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i)))) → Finset (((EuclideanSpace ℂ (p i.1)) × (EuclideanSpace ℂ (p i.2))))
+    := λ i j => (hA.PiMat_orthonormalBasis i j : EuclideanSpace ℂ _).prod_chooseFinset
+  A = ∑ i : ι × ι, ∑ j, ∑ s in S i j, ∑ p in S i j,
+    rankOne ℂ (Matrix.includeBlock
+      (Matrix.vecMulVec s.1 (star p.1)))
+      (modAut (- (1 / 2)) (Matrix.includeBlock
+        ((Matrix.vecMulVec s.2 (star p.2))ᴴᵀ))) :=
+by
+  intro S
+  have hS : ∀ (i : ι × ι) j, (hA.PiMat_orthonormalBasis i j) = ∑ t in S i j,
+    euclideanSpaceTensor' (t.1 ⊗ₜ[ℂ] t.2) :=
+  λ i j => EuclideanSpace.prod_chooseFinset_spec _
+  apply_fun (QuantumSet.Psi 0 (1/2)) using LinearEquiv.injective _
+  apply_fun
+    (StarAlgEquiv.lTensor (PiMat ℂ ι p) (PiMat.transposeStarAlgEquiv ι p).symm).trans
+    (PiMatTensorProductEquiv.trans PiMat_toEuclideanLM)
+  simp only [StarAlgEquiv.trans_apply]
+  ext1 i
+  apply_fun LinearMap.toContinuousLinearMap using LinearEquiv.injective _
+  rw [← QuantumGraph.Real.PiMat_submoduleOrthogonalProjection hA i,
+    OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne (hA.PiMat_orthonormalBasis i)]
+  simp only [ContinuousLinearMap.coe_sum, map_sum,
+    QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
+    StarAlgEquiv.lTensor_tmul,
+    PiMat_toEuclideanLM, PiMatTensorProductEquiv_apply]
+  simp only [starAlgebra.modAut_zero, Matrix.conjTranspose_col, AlgEquiv.one_apply, one_div,
+    starAlgebra.modAut_star, Finset.sum_apply, StarAlgEquiv.piCongrRight_apply,
+    PiMatTensorProductEquiv_apply, StarAlgEquiv.ofAlgEquiv_coe, AlgEquiv.ofLinearEquiv_apply,
+    Fintype.sum_prod_type, map_sum, directSumTensorToFun_apply,
+    PiMat.transposeStarAlgEquiv_symm_apply,
+    MulOpposite.unop_op]
+  simp only [TensorProduct.toKronecker_apply, Matrix.toEuclideanLin_apply']
+  simp only [QuantumSet.modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero]
+  simp only [Matrix.includeBlock_conjTranspose, Matrix.conj_conjTranspose, Matrix.transpose_apply]
+  simp_rw [hS, AlgEquiv.one_apply, Matrix.includeBlock_apply]
+  simp only [ContinuousLinearMap.sum_apply, map_sum, Matrix.dite_kronecker,
+    Matrix.kronecker_dite, apply_dite, Matrix.transpose_zero, map_zero,
+    Matrix.transpose_transpose, Matrix.kronecker_zero]
+  simp only [Finset.sum_dite_irrel, Finset.sum_const_zero,
+    Finset.sum_dite_eq', Finset.sum_dite_eq,
+    Finset.mem_univ, if_true]
+  simp only [LinearMap.coeFn_sum, Finset.sum_apply, eq_mp_eq_cast, cast_eq,
+    Matrix.transpose_transpose, Matrix.vecMulVec_kronecker_vecMulVec,
+    Matrix.vecMulVec_toEuclideanLin, EuclideanSpaceTensor_apply_eq_reshape_vecMulVec]
+  simp only [Matrix.reshape_aux_star (R := ℂ), Matrix.vecMulVec_conj, star_star]
+  congr 1
+  ext1
+  rw [Finset.sum_comm]
+  rfl

@@ -372,6 +372,10 @@ theorem quantumGraphReal_iff_schurProjection {f : A →ₗ[ℂ] A} :
 ⟨λ h => ⟨h.isIdempotentElem, h.isReal⟩,
  λ h => ⟨h.isIdempotentElem, h.isReal⟩⟩
 
+theorem QuantumGraph.Real.toQuantumGraph {f : A →ₗ[ℂ] A} (h : QuantumGraph.Real A f) :
+  QuantumGraph A f :=
+⟨h.isIdempotentElem⟩
+
 theorem quantumGraphReal_iff_Psi_isIdempotentElem_and_isSelfAdjoint {f : A →ₗ[ℂ] A} :
   QuantumGraph.Real A f ↔
   (IsIdempotentElem (hA.Psi 0 (hA.k + 1/2) f) ∧

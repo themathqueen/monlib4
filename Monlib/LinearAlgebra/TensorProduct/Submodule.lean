@@ -256,6 +256,19 @@ lemma euclideanSpaceTensor_apply {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
   euclideanSpaceTensor (x ⊗ₜ y) i = x i.1 ⊗ₜ y i.2 :=
 rfl
 
+noncomputable def euclideanSpaceTensor' {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
+  [Fintype ι₁] [Fintype ι₂]
+  [DecidableEq ι₁] [DecidableEq ι₂] :
+   (EuclideanSpace R ι₁ ⊗[R] EuclideanSpace R ι₂) ≃ₗ[R]
+   EuclideanSpace R (ι₁ × ι₂) :=
+directSumTensor.trans (LinearEquiv.piCongrRight (λ _ => TensorProduct.lid _ _))
+lemma euclideanSpaceTensor'_apply {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
+  [Fintype ι₁] [Fintype ι₂]
+  [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂)
+  (i : ι₁ × ι₂) :
+  euclideanSpaceTensor' (x ⊗ₜ y) i = x i.1 * y i.2 :=
+rfl
+
 theorem euclideanSpaceTensor_norm_map {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
   [Fintype ι₁] [Fintype ι₂]
   [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂) :
