@@ -525,15 +525,6 @@ theorem RealQam.edges_eq_zero_iff [hφ : φ.IsFaithfulPosMap] {A : l(ℍ)} (hA :
   norm_cast
   simp_rw [Matrix.zero_mul, LinearMap.mulLeft_zero_eq_zero, MulZeroClass.zero_mul]
 
-theorem orthogonal_projection_of_top {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] [CompleteSpace ↥(⊤ : Submodule 𝕜 E)] :
-    orthogonalProjection' (⊤ : Submodule 𝕜 E) = 1 :=
-  by
-  ext1
-  simp_rw [ContinuousLinearMap.one_apply, orthogonalProjection'_apply]
-  rw [orthogonalProjection_eq_self_iff]
-  simp only [Submodule.mem_top]
-
 theorem psi_apply_complete_graph [hφ : φ.IsFaithfulPosMap] {t s : ℝ} : hφ.psi t s |(1 : ℍ)⟩⟨(1 : ℍ)| = 1 :=
   by
   simp only [Module.Dual.IsFaithfulPosMap.psi, LinearEquiv.coe_mk,

@@ -155,19 +155,22 @@ theorem StarAlgEquiv.map_eq_zero_iff {R A B : Type _}
     f x = 0 ↔ x = 0 :=
   RingEquiv.map_eq_zero_iff f.toRingEquiv
 
-theorem IsIdempotentElem.mulEquiv {H₁ H₂ : Type _} [Mul H₁] [Mul H₂] (f : H₁ ≃* H₂)
-    {x : H₁} : IsIdempotentElem (f x) ↔ IsIdempotentElem x := by
-  simp_rw [IsIdempotentElem, ← _root_.map_mul, Function.Injective.eq_iff f.injective]
+theorem IsIdempotentElem.mulEquiv {H₁ H₂ : Type _} [Mul H₁] [Mul H₂]
+  -- (f : H₁ ≃* H₂)
+  {F : Type*} [EquivLike F H₁ H₂] [MulEquivClass F H₁ H₂] {f : F} {x : H₁} :
+    IsIdempotentElem (f x) ↔ IsIdempotentElem x := by
+  simp_rw [IsIdempotentElem, ← _root_.map_mul]
+  exact EmbeddingLike.apply_eq_iff_eq f
 
 theorem IsIdempotentElem.algEquiv {R H₁ H₂ : Type _} [CommSemiring R] [Semiring H₁] [Semiring H₂]
     [Algebra R H₁] [Algebra R H₂] (f : H₁ ≃ₐ[R] H₂) {x : H₁} :
     IsIdempotentElem (f x) ↔ IsIdempotentElem x :=
-  IsIdempotentElem.mulEquiv f.toMulEquiv
+IsIdempotentElem.mulEquiv
 
 theorem IsIdempotentElem.starAlgEquiv {R A B : Type _}
    [Add A] [Add B] [Mul A] [Mul B] [SMul R A] [SMul R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) {x : A} :
     IsIdempotentElem (f x) ↔ IsIdempotentElem x :=
-IsIdempotentElem.mulEquiv f.toRingEquiv.toMulEquiv
+IsIdempotentElem.mulEquiv
 
 lemma _root_.isIdempotentElem_pi_iff
   {ι : Type*} {A : ι → Type*} [Π i, Mul (A i)] {a : Π i, A i} :

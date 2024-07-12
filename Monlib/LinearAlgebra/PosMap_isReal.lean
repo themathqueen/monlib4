@@ -118,58 +118,88 @@ by
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- matrix of orthogonalProjection -/
-noncomputable def Matrix.orthogonalProjection (U : Submodule ℂ (EuclideanSpace ℂ n)) :
+noncomputable def Matrix.orthogonalProjection
+  (U : Submodule ℂ (EuclideanSpace ℂ n)) :
   Matrix n n ℂ :=
-toEuclideanCLM.symm.toFun (orthogonalProjection' U)
+(Matrix.toEuclideanCLM (𝕜 := ℂ)).symm (orthogonalProjection' U)
+
+noncomputable def PiMat.orthogonalProjection
+  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  (U : Π i, Submodule ℂ (EuclideanSpace ℂ (n i))) :
+    PiMat ℂ k n :=
+λ i => Matrix.orthogonalProjection (U i)
+
+lemma Matrix.toEuclideanLin_symm {𝕜 n : Type*} [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  (x : EuclideanSpace 𝕜 n →ₗ[𝕜] EuclideanSpace 𝕜 n) :
+  (Matrix.toEuclideanLin.symm x) = LinearMap.toMatrix' x :=
+rfl
+lemma EuclideanSpace.trace_eq_matrix_trace' {𝕜 n : Type*}  [RCLike 𝕜] [Fintype n] [DecidableEq n] (f : (EuclideanSpace 𝕜 n) →ₗ[𝕜] (EuclideanSpace 𝕜 n)) :
+  LinearMap.trace 𝕜 _ f = Matrix.trace (Matrix.toEuclideanLin.symm f) :=
+by
+  rw [Matrix.toEuclideanLin_symm, ← LinearMap.toMatrix_eq_toMatrix',
+    ← LinearMap.trace_eq_matrix_trace]
+  rfl
+
+theorem Matrix.coe_toEuclideanCLM_symm_eq_toEuclideanLin_symm {𝕜 n : Type*}
+  [RCLike 𝕜] [Fintype n] [DecidableEq n]
+  (A : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) :
+  (toEuclideanCLM (𝕜 := 𝕜)).symm A = toEuclideanLin.symm A :=
+rfl
+
+theorem Matrix.orthogonalProjection_trace {U : Submodule ℂ (EuclideanSpace ℂ n)} :
+  (Matrix.orthogonalProjection U).trace = FiniteDimensional.finrank ℂ U :=
+by
+  rw [orthogonalProjection, Matrix.coe_toEuclideanCLM_symm_eq_toEuclideanLin_symm, ← EuclideanSpace.trace_eq_matrix_trace']
+  exact _root_.orthogonalProjection_trace _
+
+theorem PiMat.orthogonalProjection_trace {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  (U : Π i, Submodule ℂ (EuclideanSpace ℂ (n i))) :
+  (Matrix.blockDiagonal' (PiMat.orthogonalProjection U)).trace
+    = ∑ i, FiniteDimensional.finrank ℂ (U i) :=
+by
+  simp_rw [Matrix.trace_blockDiagonal', PiMat.orthogonalProjection,
+    Matrix.orthogonalProjection_trace, Nat.cast_sum]
 
 lemma Matrix.isIdempotentElem_toEuclideanCLM {n : Type*} [Fintype n] [DecidableEq n]
   (x : Matrix n n ℂ) :
-  IsIdempotentElem x ↔ IsIdempotentElem (toEuclideanCLM.toFun x) :=
+  IsIdempotentElem x ↔ IsIdempotentElem (toEuclideanCLM (𝕜 := ℂ) x) :=
 by
-  simp_rw [IsIdempotentElem]
-  simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, LinearEquiv.coe_coe,
-    LinearEquiv.invFun_eq_symm, LinearMap.coe_toContinuousLinearMap_symm,
-    StarAlgEquiv.toRingEquiv_eq_coe, RingEquiv.toEquiv_eq_coe, Equiv.toFun_as_coe,
-    EquivLike.coe_coe, ← _root_.map_mul]
-  rw [Function.Injective.eq_iff (RingEquiv.injective _)]
+  simp_rw [IsIdempotentElem, ← _root_.map_mul]
+  exact Iff.symm (EmbeddingLike.apply_eq_iff_eq toEuclideanCLM)
 
 lemma Matrix.CLM_apply_orthogonalProjection {U : Submodule ℂ (EuclideanSpace ℂ n)} :
-  Matrix.toEuclideanCLM.toFun (Matrix.orthogonalProjection U)
+  Matrix.toEuclideanCLM (𝕜 := ℂ) (Matrix.orthogonalProjection U)
     = orthogonalProjection' U :=
 by
   ext1
   simp [orthogonalProjection', orthogonalProjection]
 
-lemma StarAlgEquiv.toFun_eq {R A B : Type*} [Add A] [Add B] [Mul A] [Mul B]
-  [SMul R A] [SMul R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) (a : A) :
-  f.toFun a = f a :=
-rfl
-
 lemma Matrix.orthogonalProjection_ortho_eq {U : Submodule ℂ (EuclideanSpace ℂ n)} :
   Matrix.orthogonalProjection Uᗮ = 1 - Matrix.orthogonalProjection U :=
 by
-  apply_fun Matrix.toEuclideanCLM.toFun
-  simp only [StarAlgEquiv.toFun_eq, _root_.map_mul, map_sub, _root_.map_one]
-  simp only [← StarAlgEquiv.toFun_eq, Matrix.CLM_apply_orthogonalProjection]
+  apply_fun Matrix.toEuclideanCLM (𝕜 := ℂ)
+  simp only [_root_.map_mul, map_sub, _root_.map_one]
+  simp only [Matrix.CLM_apply_orthogonalProjection]
   exact orthogonalProjection.orthogonal_complement_eq U
 
 lemma Matrix.orthogonalProjection_isPosSemidef {U : Submodule ℂ (EuclideanSpace ℂ n)} :
   (Matrix.orthogonalProjection U).PosSemidef :=
 by
   rw [posSemidef_eq_linearMap_positive, ← coe_toEuclideanCLM_eq_toEuclideanLin,
-    ← StarAlgEquiv.toFun_eq, Matrix.CLM_apply_orthogonalProjection,
+    Matrix.CLM_apply_orthogonalProjection,
     ContinuousLinearMap.IsPositive.toLinearMap,
     ← ContinuousLinearMap.nonneg_iff_isPositive]
   exact orthogonalProjection.is_positive
 
 lemma Matrix.IsHermitian.orthogonalProjection_ker_apply_self {x : Matrix n n ℂ}
   (hx : x.IsHermitian) :
-  Matrix.orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun x)) * x = 0 :=
+  Matrix.orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) x)) * x = 0 :=
 by
-  apply_fun Matrix.toEuclideanCLM.toFun
-  simp only [StarAlgEquiv.toFun_eq, _root_.map_mul, map_zero]
-  simp only [← StarAlgEquiv.toFun_eq, Matrix.CLM_apply_orthogonalProjection]
-  simp only [StarAlgEquiv.toFun_eq]
+  apply_fun Matrix.toEuclideanCLM (𝕜 := ℂ)
+  simp only [_root_.map_mul, map_zero]
+  simp only [Matrix.CLM_apply_orthogonalProjection]
   ext1
   simp only [ContinuousLinearMap.mul_apply, ContinuousLinearMap.zero_apply]
   simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL',
@@ -177,17 +207,15 @@ by
     orthogonalProjection_eq_zero_iff]
   rw [ContinuousLinearMap.ker_eq_ortho_adjoint_range, Submodule.orthogonal_orthogonal,
     ← ContinuousLinearMap.star_eq_adjoint]
-  simp only [← StarAlgEquiv.toFun_eq, ← StarAlgEquiv.map_star', star_eq_conjTranspose,
-    hx.eq]
+  simp only [← map_star, star_eq_conjTranspose, hx.eq]
   exact LinearMap.mem_range_self _ _
 
 private lemma auxaux_2 {T S : Matrix n n ℂ} (h : T * S = 0) :
-  Matrix.orthogonalProjection (LinearMap.ker (Matrix.toEuclideanCLM.toFun T)) * S = S :=
+  Matrix.orthogonalProjection (LinearMap.ker (Matrix.toEuclideanCLM (𝕜 := ℂ) T)) * S = S :=
 by
-  apply_fun Matrix.toEuclideanCLM.toFun at h ⊢
-  simp only [StarAlgEquiv.toFun_eq, _root_.map_mul, map_zero] at h ⊢
-  simp only [← StarAlgEquiv.toFun_eq, Matrix.CLM_apply_orthogonalProjection]
-  simp only [StarAlgEquiv.toFun_eq]
+  apply_fun Matrix.toEuclideanCLM (𝕜 := ℂ) at h ⊢
+  simp only [_root_.map_mul, map_zero] at h ⊢
+  simp only [Matrix.CLM_apply_orthogonalProjection]
   exact auxaux h
 
 theorem Matrix.nonneg_def {x : Matrix n n ℂ} :
@@ -314,16 +342,16 @@ by
     simp_rw [IsHermitian.posSemidefDecomposition_left, IsHermitian.posSemidefDecomposition_right,
       ← smul_add, add_add_sub_cancel, ← two_smul ℂ, smul_smul]
     norm_num
-  have h₄ : orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun (x₊))) * hx.out.sqSqrt = x₋ :=
+  have h₄ : orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) (x₊))) * hx.out.sqSqrt = x₋ :=
   by
     rw [h₃, mul_add, h₂, Matrix.IsHermitian.orthogonalProjection_ker_apply_self
       IsHermitian.posSemidefDecomposition_left_isHermitian, zero_add]
-  have h₅ : x = (1 - (2 : ℂ) • (orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun (x₊)))))
+  have h₅ : x = (1 - (2 : ℂ) • (orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) (x₊)))))
     * hx.out.sqSqrt :=
   by
     rw [sub_mul, smul_mul_assoc, h₄, h₃, one_mul, two_smul, add_sub_add_right_eq_sub]
     exact IsHermitian.posSemidefDecomposition_eq _
-  have h₆ : x₊ = (orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun (x₊)))ᗮ)
+  have h₆ : x₊ = (orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) (x₊)))ᗮ)
     * hx.out.sqSqrt :=
   by
     nth_rw 1 [IsHermitian.posSemidefDecomposition_left]
@@ -332,11 +360,11 @@ by
     simp_rw [sub_mul, one_mul, smul_add, smul_sub, smul_mul_assoc,
       h₄, smul_smul, add_sub, ← smul_add, ← two_smul ℂ, smul_smul]
     norm_num
-  have h₄' : x₋ = hx.out.sqSqrt * (orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun (x₊)))) :=
+  have h₄' : x₋ = hx.out.sqSqrt * (orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) (x₊)))) :=
   by rw [← IsHermitian.posSemidefDecomposition_right_isHermitian, ← h₄,
     conjTranspose_mul, (IsHermitian.sqSqrt_isPosSemidef _).1.eq,
     Matrix.orthogonalProjection_isPosSemidef.1.eq]
-  have h₆' : x₊ = hx.out.sqSqrt * (orthogonalProjection (LinearMap.ker (toEuclideanCLM.toFun (x₊)))ᗮ) :=
+  have h₆' : x₊ = hx.out.sqSqrt * (orthogonalProjection (LinearMap.ker (toEuclideanCLM (𝕜 := ℂ) (x₊)))ᗮ) :=
   by
     nth_rw 1 [← IsHermitian.posSemidefDecomposition_left_isHermitian, h₆]
     rw [conjTranspose_mul, (IsHermitian.sqSqrt_isPosSemidef _).1.eq,
@@ -390,8 +418,7 @@ by
   let e := stdOrthonormalBasis ℂ B
   have hx' : Matrix.IsHermitian (e.toMatrix x.toLinearMap) :=
   by
-    rw [Matrix.IsHermitian, ← Matrix.star_eq_conjTranspose, ← StarAlgEquiv.toFun_eq,
-      ← StarAlgEquiv.map_star']
+    rw [Matrix.IsHermitian, ← Matrix.star_eq_conjTranspose, ← map_star]
     congr
     rw [isSelfAdjoint_iff_isSymmetric, LinearMap.isSymmetric_iff_isSelfAdjoint] at hx
     exact hx
@@ -401,7 +428,7 @@ by
   use a', b'
   apply_fun e.toMatrix.symm at hab
   simp_rw [StarAlgEquiv.symm_apply_apply, map_sub, map_mul, ← Matrix.star_eq_conjTranspose,
-    ← StarAlgEquiv.toFun_eq, StarAlgEquiv.map_star'] at hab
+    map_star] at hab
   calc x = LinearMap.toContinuousLinearMap (x.toLinearMap) := rfl
     _ = LinearMap.toContinuousLinearMap (star (e.toMatrix.symm a)) * a' -
       LinearMap.toContinuousLinearMap (star (e.toMatrix.symm b)) * b' := ?_
@@ -417,12 +444,11 @@ theorem IsSelfAdjoint.isPositiveDecomposition_of_starAlgEquiv_piMat
   ∃ a b, x = star a * a - star b * b :=
 by
   have : IsSelfAdjoint (φ x) := by
-    rw [IsSelfAdjoint, ← StarAlgEquiv.toFun_eq, ← StarAlgEquiv.map_star', hx]
+    rw [IsSelfAdjoint, ← map_star, hx]
   obtain ⟨α, β, h⟩ := PiMat.IsSelfAdjoint.posSemidefDecomposition this
   use φ.symm α, φ.symm β
   apply_fun φ
-  simp_rw [h, map_sub, map_mul, ← StarAlgEquiv.toFun_eq, StarAlgEquiv.map_star',
-    StarAlgEquiv.toFun_eq, StarAlgEquiv.apply_symm_apply]
+  simp_rw [h, map_sub, map_mul, map_star, StarAlgEquiv.apply_symm_apply]
 
 /-- if a map preserves positivity, then it is star-preserving -/
 theorem isReal_of_isPosMap

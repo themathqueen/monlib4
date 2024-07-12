@@ -154,6 +154,7 @@ theorem directSumTensorToFun_apply_inv_fun {R : Type _} [CommRing R] {ι₁ : Ty
   simp only [← Finset.sum_product', Finset.univ_product_univ, Finset.sum_ite_eq,
     Finset.sum_apply, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
+@[simps]
 noncomputable def directSumTensor {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
     [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
     [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
@@ -166,20 +167,6 @@ noncomputable def directSumTensor {R : Type _} [CommRing R] {ι₁ : Type _} {ι
   right_inv x := directSumTensorToFun_apply_inv_fun x
   map_add' _ _ := map_add _ _ _
   map_smul' _ _ := _root_.map_smul _ _ _
-
-theorem directSumTensor_apply {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
-    [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}
-    [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₂ : ι₂, AddCommGroup (M₂ i₂)]
-    [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x : ∀ i, M₁ i) (y : ∀ i, M₂ i)
-    (i : ι₁ × ι₂) : directSumTensor (x ⊗ₜ[R] y) i = x i.1 ⊗ₜ[R] y i.2 :=
-  rfl
-
--- instance {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
---     [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
---     {M₂ : ι₂ → Type _} [∀ i₁ : ι₁, Ring (M₁ i₁)] [∀ i₂ : ι₂, Ring (M₂ i₂)]
---     [∀ i₁ : ι₁, Algebra R (M₁ i₁)] [∀ i₂ : ι₂, Algebra R (M₂ i₂)] :
---   ZeroHomClass (((i : ι₁) → M₁ i) ⊗[R] ((i : ι₂) → M₂ i) →ₗ[R] (i : ι₁ × ι₂) → M₁ i.1 ⊗[R] M₂ i.2) _ _ :=
--- ⟨fun x => by simp only [LinearMap.zero_apply, LinearMap.map_zero]⟩
 
 theorem directSumTensorToFun.map_mul {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _}
     [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _}
@@ -253,9 +240,8 @@ theorem Pi.tensor_ext_iff {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Ty
     [∀ i₁ : ι₁, Module R (M₁ i₁)] [∀ i₂ : ι₂, Module R (M₂ i₂)] (x z : ∀ i, M₁ i)
     (y w : ∀ i, M₂ i) : x ⊗ₜ[R] y = z ⊗ₜ[R] w ↔ ∀ i j, x i ⊗ₜ[R] y j = z i ⊗ₜ[R] w j :=
   by
-  rw [← Function.Injective.eq_iff (directSumTensor :
-    ((∀ i, M₁ i) ⊗[R] ∀ i, M₂ i) ≃ₗ[R] ∀ i : ι₁ × ι₂, M₁ i.fst ⊗[R] M₂ i.snd).injective]
-  simp_rw [Function.funext_iff, directSumTensor_apply, Prod.forall]
+  rw [← Function.Injective.eq_iff directSumTensor.injective]
+  simp_rw [Function.funext_iff, directSumTensor_apply, directSumTensorToFun_apply, Prod.forall]
 
 theorem Pi.tensor_ext {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
     [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}

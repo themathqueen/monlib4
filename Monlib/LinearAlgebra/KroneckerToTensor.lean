@@ -5,6 +5,7 @@ Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
+import Mathlib.LinearAlgebra.TensorProduct.Finiteness
 
 #align_import linear_algebra.kronecker_to_tensor
 
@@ -72,17 +73,15 @@ theorem TensorProduct.matrix_star {R m n : Type _} [Field R] [StarRing R] [Finty
     (x : Matrix m m R) (y : Matrix n n R) : star (x ⊗ₜ[R] y) = xᴴ ⊗ₜ yᴴ :=
   TensorProduct.star_tmul _ _
 
-theorem TensorProduct.toKronecker_star {R m n : Type _} [RCLike R] [Fintype m] [Fintype n]
-    [DecidableEq m] [DecidableEq n] (x : Matrix m m R) (y : Matrix n n R) :
-    star (toKronecker (x ⊗ₜ y)) = toKronecker (star (x ⊗ₜ y)) := by
-  simp_rw [TensorProduct.matrix_star, TensorProduct.toKronecker_apply, Matrix.star_eq_conjTranspose,
+set_option synthInstance.maxHeartbeats 22296 in
+theorem TensorProduct.toKronecker_star {R m n : Type _} [Field R] [StarRing R]
+  [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
+  (x : Matrix m m R ⊗[R] Matrix n n R) :
+    star (toKronecker x) = toKronecker (star x) := by
+  obtain ⟨s, rfl⟩ := TensorProduct.exists_finset x
+  simp only [map_sum, star_sum,
+    TensorProduct.matrix_star, TensorProduct.toKronecker_apply, Matrix.star_eq_conjTranspose,
     Matrix.kronecker_conjTranspose]
-
-theorem Matrix.kroneckerToTensorProduct_star {R m n : Type _} [RCLike R] [Fintype m] [Fintype n]
-    [DecidableEq m] [DecidableEq n] (x : Matrix m m R) (y : Matrix n n R) :
-    star (kroneckerToTensorProduct (x ⊗ₖ y)) = kroneckerToTensorProduct (star (x ⊗ₖ y)) := by
-  simp only [Matrix.kroneckerToTensorProduct_apply, TensorProduct.matrix_star,
-    Matrix.star_eq_conjTranspose, Matrix.kronecker_conjTranspose]
 
 open Matrix
 
@@ -163,6 +162,13 @@ noncomputable def tensorToKronecker : Matrix m m R ⊗[R] Matrix n n R ≃ₐ[R]
 @[simps!]
 noncomputable def kroneckerToTensor : Matrix (m × n) (m × n) R ≃ₐ[R] Matrix m m R ⊗[R] Matrix n n R :=
   tensorToKronecker.symm
+
+theorem Matrix.kroneckerToTensorProduct_star {R m n : Type _} [Field R] [StarRing R]
+  [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
+  (x : Matrix (m × n) (m × n) R) :
+    star (kroneckerToTensorProduct x) = kroneckerToTensorProduct (star x) := by
+  apply_fun TensorProduct.toKronecker using AlgEquiv.injective tensorToKronecker
+  simp only [← TensorProduct.toKronecker_star, kroneckerToTensorProduct_toKronecker]
 
 theorem kroneckerToTensor_toLinearMap_eq :
     (kroneckerToTensor : Matrix (n × m) (n × m) R ≃ₐ[R] _).toLinearMap =

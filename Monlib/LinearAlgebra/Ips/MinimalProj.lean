@@ -998,3 +998,33 @@ lemma isIdempotentElem_algEquiv_iff {R A B : Type*} [CommSemiring R]
   IsIdempotentElem (φ a : B) ↔ IsIdempotentElem a :=
 by
   simp_rw [IsIdempotentElem, ← map_mul, Function.Injective.eq_iff (AlgEquiv.injective _)]
+
+theorem orthogonalProjection'_isProj {R M : Type*} [RCLike R] [NormedAddCommGroup M]
+  [InnerProductSpace R M] (U : Submodule R M) [HasOrthogonalProjection U] :
+  LinearMap.IsProj U (orthogonalProjection' U) :=
+by
+  constructor <;>
+  simp only [orthogonalProjection'_eq, coe_comp', Submodule.coe_subtypeL', Submodule.coeSubtype,
+    Function.comp_apply, SetLike.coe_mem, implies_true,
+    orthogonalProjection_eq_self_iff, imp_self, implies_true]
+
+theorem LinearMap.isProj_iff {S M F : Type*} [Semiring S] [AddCommMonoid M]
+    [Module S M] (m : Submodule S M) [FunLike F M M] (f : F) :
+  LinearMap.IsProj m f ↔ (∀ x, f x ∈ m) ∧ (∀ x ∈ m, f x = x) :=
+⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
+
+theorem LinearMap.isProj_coe {R M : Type*} [RCLike R] [NormedAddCommGroup M]
+  [InnerProductSpace R M] (T : M →L[R] M) (U : Submodule R M) :
+  LinearMap.IsProj U T.toLinearMap ↔ LinearMap.IsProj U T :=
+by simp_rw [LinearMap.isProj_iff, coe_coe]
+
+open LinearMap in
+lemma orthogonalProjection_trace {R M : Type*} [RCLike R] [NormedAddCommGroup M] [InnerProductSpace R M]
+  [FiniteDimensional R M]
+  (U : Submodule R M) :
+  (trace R M) (orthogonalProjection' U).toLinearMap
+    = FiniteDimensional.finrank R U :=
+by
+  refine IsProj.trace ?_
+  rw [isProj_coe]
+  exact orthogonalProjection'_isProj U

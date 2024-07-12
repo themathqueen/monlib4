@@ -268,31 +268,6 @@ noncomputable def directSumTensorMatrix :
   @directSumTensor ℂ _ k k _ _ _ _ (fun i => Matrix (s i) (s i) ℂ) (fun i => Matrix (s i) (s i) ℂ) _
     _ (fun _ => Matrix.module) fun _ => Matrix.module
 
-set_option maxHeartbeats 0 in
-set_option synthInstance.maxHeartbeats 0 in
-noncomputable def directSumTensorToKronecker :
-    (PiMat ℂ k s) ⊗[ℂ] (PiMat ℂ k s) ≃ₗ[ℂ] PiMat ℂ (k × k) (fun i : k × k => s i.1 × s i.2)
-    -- ∀ i : k × k, Matrix (s i.fst × s i.snd) (s i.fst × s i.snd) ℂ
-    where
-  toFun x i := TensorProduct.toKronecker (directSumTensorMatrix x i)
-  invFun x := directSumTensorMatrix.symm (fun i => kroneckerToTensorProduct (x i))
-  left_inv x := by
-    simp only [TensorProduct.toKronecker_to_tensorProduct, LinearEquiv.symm_apply_apply]
-  right_inv x := by
-    simp only [LinearEquiv.apply_symm_apply, kroneckerToTensorProduct_toKronecker]
-  map_add' x y := by
-    ext1 i
-    simp only [Pi.add_apply, LinearEquiv.map_add, map_add]
-  map_smul' r x :=
-    by
-    ext1 i
-    simp only [_root_.map_smul, Pi.smul_apply, RingHom.id_apply, LinearEquiv.map_smul]
-
-theorem directSumTensorToKronecker_apply (x y : (PiMat ℂ k s)) (r : k × k) (a b : s r.1 × s r.2) :
-    (directSumTensorToKronecker (x ⊗ₜ[ℂ] y)) r a b = x r.1 a.1 b.1 * y r.2 a.2 b.2 := by
-  simp_rw [directSumTensorToKronecker, LinearEquiv.coe_mk, directSumTensorMatrix,
-    directSumTensor_apply, TensorProduct.toKronecker_apply, kroneckerMap, of_apply]
-
 @[simp]
 theorem Module.Dual.IsFaithfulPosMap.sig_apply' [hφ : φ.IsFaithfulPosMap] {r : ℝ}
   {x : ℍ} : hφ.sig r x = hφ.matrixIsPosDef.rpow (-r) * x * hφ.matrixIsPosDef.rpow r :=
