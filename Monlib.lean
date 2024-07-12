@@ -34,6 +34,7 @@ import Monlib.Preq.StarAlgEquiv
 import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 import Monlib.QuantumGraph.PiMat
+import Monlib.QuantumGraph.OfClassicalGraph
 -- import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 -- import Monlib.QuantumGraph.Nontracial
