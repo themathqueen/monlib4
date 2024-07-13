@@ -622,13 +622,47 @@ by
   rw [Real.rpow_mul (le_of_lt (hQ.eigenvalues_pos _))]
   norm_cast
 
+theorem Matrix.PosDef.rpow_eq_pow {𝕜 : Type*} [RCLike 𝕜]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℕ) :
+  hQ.rpow r = Q ^ r :=
+by
+  nth_rw 2 [hQ.1.spectral_theorem'']
+  simp only [innerAut.map_pow, diagonal_pow]
+  rw [rpow_eq]
+  congr
+  simp only [diagonal_eq_diagonal_iff, Function.comp_apply, Pi.pow_apply, Real.rpow_natCast,
+    RCLike.ofReal_pow, implies_true]
+theorem Matrix.PosDef.rpow_eq_zpow {𝕜 : Type*} [RCLike 𝕜]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℤ) :
+  hQ.rpow r = Q ^ r :=
+by
+  letI := PosDef.eigenvaluesInvertible' hQ
+  nth_rw 2 [hQ.1.spectral_theorem'']
+  simp only [innerAut.map_zpow, diagonal_zpow]
+  rw [rpow_eq]
+  congr
+  simp only [diagonal_eq_diagonal_iff, Function.comp_apply, Pi.pow_apply, Real.rpow_intCast,
+    RCLike.ofReal_zpow, implies_true]
+
+theorem Matrix.PosDef.rpow_rzpow {𝕜 : Type*} [RCLike 𝕜]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) (z : ℤ) :
+  (PosDef.rpow.isPosDef hQ r).rpow z = hQ.rpow (r * (z : ℝ)) :=
+by rw [rpow_eq_zpow, rpow_zpow]
+
+theorem Matrix.PosDef.eq_zpow_of_zpow_inv_eq {𝕜 : Type*} [RCLike 𝕜]
+  {Q R : Matrix n n 𝕜} (hQ : Q.PosDef)
+  {z : ℤ} (hz : z ≠ 0)
+  (h : hQ.rpow (z⁻¹) = R) : Q = R ^ z :=
+by
+  have : (hQ.rpow z⁻¹) ^ (z : ℤ) = R ^ (z : ℤ) := by rw [h]
+  rw [rpow_zpow, inv_mul_cancel (Int.cast_ne_zero.mpr hz), rpow_one_eq_self] at this
+  exact this
+
 theorem Matrix.PosDef.eq_of_zpow_inv_eq_zpow_inv {𝕜 : Type*} [RCLike 𝕜]
   {Q R : Matrix n n 𝕜} (hQ : Q.PosDef) (hR : R.PosDef)
-  {r : ℤˣ} (hQR : hQ.rpow r⁻¹ = hR.rpow r⁻¹) : Q = R :=
+  {r : ℤ} (hr : r ≠ 0) (hQR : hQ.rpow r⁻¹ = hR.rpow r⁻¹) : Q = R :=
 by
-  have : (hQ.rpow r⁻¹) ^ (r : ℤ) = (hR.rpow r⁻¹) ^ (r : ℤ) := by rw [hQR]
-  simp_rw [rpow_zpow, mul_comm] at this
-  rw [mul_inv_cancel] at this
-  simp_rw [rpow_one_eq_self] at this
+  have := eq_zpow_of_zpow_inv_eq hQ hr hQR
+  rw [rpow_zpow, inv_mul_cancel (Int.cast_ne_zero.mpr hr),
+    rpow_one_eq_self] at this
   exact this
-  simp only [ne_eq, Int.cast_eq_zero, Units.ne_zero, not_false_eq_true]

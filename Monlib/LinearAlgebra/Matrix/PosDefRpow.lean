@@ -182,4 +182,46 @@ theorem PosDef.rpow_ne_zero [Nonempty n] {Q : Matrix n n ℂ} (hQ : Q.PosDef) {r
     (NeZero.of_pos (hQ.pos_eigenvalues _)).out, false_and_iff, imp_false, Classical.not_forall,
     Classical.not_not, exists_eq', exists_const]
 
+lemma IsHermitian.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
+  {Q : Matrix n n 𝕜} (hQ : Q.IsHermitian) (r : ℝ)
+  {S : Matrix n n 𝕜}
+  (hQS : Q = S) :
+  hQ.rpow r = (by rw [← hQS]; exact hQ : IsHermitian S).rpow r :=
+by aesop
+lemma PosDef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ)
+  {S : Matrix n n 𝕜}
+  (hQS : Q = S) :
+  hQ.rpow r = (by rw [← hQS]; exact hQ : PosDef S).rpow r :=
+Matrix.IsHermitian.rpow_cast _ _ hQS
+lemma PosSemidef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
+  {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) (r : ℝ)
+  {S : Matrix n n 𝕜}
+  (hQS : Q = S) :
+  hQ.rpow r = (by rw [← hQS]; exact hQ : PosSemidef S).rpow r :=
+Matrix.IsHermitian.rpow_cast _ _ hQS
+
+theorem IsHermitian.eigenvectorMatrix_conjTranspose_mul
+  {𝕜 : Type*} [RCLike 𝕜] {x : Matrix n n 𝕜} (hx : x.IsHermitian) :
+    hx.eigenvectorMatrixᴴ * hx.eigenvectorMatrix = 1 :=
+by
+  rw [eigenvectorUnitary_coe_eq_eigenvectorMatrix, ← star_eq_conjTranspose]
+  exact UnitaryGroup.star_mul_self _
+
+theorem posDefOne_rpow {𝕜 : Type*} [RCLike 𝕜]
+  (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
+    (posDefOne : PosDef (1 : Matrix n n 𝕜)).rpow r = 1 :=
+  by
+  rw [PosDef.rpow_eq, innerAut_eq_iff, innerAut_apply_one]
+  symm
+  nth_rw 1 [← diagonal_one]
+  rw [diagonal_eq_diagonal_iff]
+  intro i
+  simp_rw [Function.comp_apply, Pi.pow_apply]
+  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq', one_mulVec]
+  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply,
+    ← mul_apply, IsHermitian.eigenvectorMatrix_conjTranspose_mul, one_apply_eq,
+    RCLike.one_re]
+  exact (Real.one_rpow _).symm
+
 end Matrix

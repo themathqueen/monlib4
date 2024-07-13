@@ -84,17 +84,36 @@ StarAlgEquiv.ofAlgEquiv
     simp only [TensorProduct.star_tmul, directSumTensor_apply, map_sum, Finset.sum_apply, star_sum,
       directSumTensorToFun_apply, Pi.star_apply, TensorProduct.toKronecker_star])
 
+theorem PiMatTensorProductEquiv_tmul_apply
+  {ι₁ ι₂ : Type*} {p₁ : ι₁ → Type*} {p₂ : ι₂ → Type*}
+  [Fintype ι₁] [DecidableEq ι₁] [Fintype ι₂] [DecidableEq ι₂]
+  [Π i, Fintype (p₁ i)] [Π i, DecidableEq (p₁ i)]
+  [Π i, Fintype (p₂ i)] [Π i, DecidableEq (p₂ i)]
+  (x : PiMat ℂ ι₁ p₁) (y : PiMat ℂ ι₂ p₂) (r : ι₁ × ι₂)
+  (a b : p₁ r.1 × p₂ r.2) :
+    (PiMatTensorProductEquiv (x ⊗ₜ[ℂ] y)) r a b = x r.1 a.1 b.1 * y r.2 a.2 b.2 := by
+  simp_rw [PiMatTensorProductEquiv_apply, directSumTensorToFun_apply,
+    TensorProduct.toKronecker_apply]
+  rfl
+open scoped Kronecker
 theorem PiMatTensorProductEquiv_tmul
+  {ι₁ ι₂ : Type*} {p₁ : ι₁ → Type*} {p₂ : ι₂ → Type*}
+  [Fintype ι₁] [DecidableEq ι₁] [Fintype ι₂] [DecidableEq ι₂]
+  [Π i, Fintype (p₁ i)] [Π i, DecidableEq (p₁ i)]
+  [Π i, Fintype (p₂ i)] [Π i, DecidableEq (p₂ i)]
+  (x : PiMat ℂ ι₁ p₁) (y : PiMat ℂ ι₂ p₂) (r : ι₁ × ι₂) :
+    (PiMatTensorProductEquiv (x ⊗ₜ[ℂ] y)) r = (x r.1 ⊗ₖ y r.2) := by
+  ext; simp only [PiMatTensorProductEquiv_tmul_apply, Matrix.kronecker_apply]; rfl
+
+theorem PiMatTensorProductEquiv_tmul_apply'
   {ι₁ ι₂ : Type*} {p₁ : ι₁ → Type*} {p₂ : ι₂ → Type*}
   [Fintype ι₁] [DecidableEq ι₁] [Fintype ι₂] [DecidableEq ι₂]
   [Π i, Fintype (p₁ i)] [Π i, DecidableEq (p₁ i)]
   [Π i, Fintype (p₂ i)] [Π i, DecidableEq (p₂ i)]
   (x : PiMat ℂ ι₁ p₁) (y : PiMat ℂ ι₂ p₂) (r : ι₁ × ι₂)
   (a c : p₁ r.1) (b d : p₂ r.2) :
-    (PiMatTensorProductEquiv (x ⊗ₜ[ℂ] y)) r (a, b) (c, d) = x r.1 a c * y r.2 b d := by
-  simp_rw [PiMatTensorProductEquiv_apply, directSumTensorToFun_apply,
-    TensorProduct.toKronecker_apply]
-  rfl
+    (PiMatTensorProductEquiv (x ⊗ₜ[ℂ] y)) r (a, b) (c, d) = x r.1 a c * y r.2 b d :=
+PiMatTensorProductEquiv_tmul_apply _ _ _ _ _
 
 open scoped FiniteDimensional in
 noncomputable def ContinuousLinearMap.toLinearMapStarAlgEquiv {𝕜 B : Type*} [RCLike 𝕜]
@@ -509,3 +528,96 @@ by
   ext1
   rw [Finset.sum_comm]
   rfl
+
+section deltaForm
+variable {d : ℂ} [Nonempty ι] [hφ₂ : Fact (∀ i, (φ i).matrix⁻¹.trace = d)]
+  [Π i, Nontrivial (p i)]
+
+theorem QuantumGraph.trivialGraph :
+  QuantumGraph _ (Qam.trivialGraph (PiMat ℂ ι p)) :=
+⟨Qam.Nontracial.TrivialGraph.qam⟩
+
+theorem PiMat.piAlgEquiv_trace_apply
+  (f : (i : ι) → (Matrix (p i) (p i) ℂ ≃ₐ[ℂ] Matrix (p i) (p i) ℂ))
+  (x : PiMat ℂ ι p) (a : ι) :
+  ((AlgEquiv.piCongrRight f x) a).trace = (x a).trace :=
+by
+  calc (((AlgEquiv.piCongrRight f) x) a).trace
+      = ((f a) (x a)).trace := rfl
+    _ = (x a).trace := AlgEquiv.apply_matrix_trace _ _
+theorem PiMat.modAut_trace_apply (r : ℝ) (x : PiMat ℂ ι p) (a : ι) :
+  (modAut r x a).trace = (x a).trace :=
+PiMat.piAlgEquiv_trace_apply _ _ _
+
+theorem PiMat.orthonormalBasis_trace (a : n (PiMat ℂ ι p)) (i : ι) :
+  (QuantumSet.onb (A := (PiMat ℂ ι p)) a i).trace =
+    if a.1 = i then (hφ a.1).matrixIsPosDef.rpow (-(1 / 2)) a.2.2 a.2.1 else 0 :=
+by
+  calc (QuantumSet.onb (A := (PiMat ℂ ι p)) a i).trace
+      = ∑ j, QuantumSet.onb (A := PiMat ℂ ι p) a i j j := rfl
+    _ = ∑ j, (Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis hφ) a i j j := rfl
+    _ = ∑ j, Matrix.includeBlock (Matrix.stdBasisMatrix a.2.1 a.2.2 1
+      * (hφ a.1).matrixIsPosDef.rpow (-(1 / 2))) i j j
+      := by simp only [Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis_apply]
+    _ = if a.1 = i then (hφ a.1).matrixIsPosDef.rpow (-(1 / 2)) a.2.2 a.2.1 else 0 :=
+      by
+        split
+        next h =>
+          subst h
+          simp only [Matrix.includeBlock_apply, dif_pos]
+          simp only [one_div, eq_mp_eq_cast, cast_eq]
+          simp only [← Matrix.trace_iff, Matrix.stdBasisMatrix_hMul_trace]
+        next h =>
+          simp_all only [one_div, Matrix.includeBlock_apply, h, dif_neg]
+          simp only [↓reduceDite, Matrix.zero_apply, Finset.sum_const_zero]
+
+open QuantumSet in
+set_option synthInstance.maxHeartbeats 0 in
+theorem QuantumGraph.trivialGraph_numOfEdges :
+  (QuantumGraph.trivialGraph : QuantumGraph _ (Qam.trivialGraph (PiMat ℂ ι p))).NumOfEdges
+    = Fintype.card ι :=
+by
+  rw [← Nat.cast_inj (R := ℂ)]
+  rw [QuantumGraph.numOfEdges_eq_trace, Qam.trivialGraph_eq]
+  simp_rw [map_smul]
+  rw [← rankOne.sum_orthonormalBasis_eq_id_lm (QuantumSet.onb)]
+  simp only [map_sum, Psi_apply, Psi_toFun_apply, StarAlgEquiv.lTensor_tmul,
+    ]
+  simp only [starAlgebra.modAut_zero, AlgEquiv.one_apply, one_div, starAlgebra.modAut_star,
+    LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply, Matrix.traceLinearMap_apply,
+    smul_eq_mul]
+  simp only [Matrix.blockDiagonal'AlgHom_apply, Matrix.trace_blockDiagonal']
+  simp only [PiMatTensorProductEquiv_tmul, Matrix.trace_kronecker,
+    PiMat.transposeStarAlgEquiv_symm_apply, MulOpposite.unop_op]
+  simp only [Matrix.trace_transpose (R:=ℂ), AlgEquiv.apply_matrix_trace,
+    PiMat.orthonormalBasis_trace, PiMat.modAut_trace_apply]
+  simp only [Pi.star_apply, Matrix.star_eq_conjTranspose, Matrix.trace_conjTranspose,
+    PiMat.orthonormalBasis_trace]
+  simp only [ite_mul, zero_mul, star_ite, star_zero, star_one, mul_ite, mul_zero]
+  simp only [Finset.sum_product_univ, Finset.sum_ite_eq, Finset.mem_univ, if_true]
+  simp only [← Matrix.conjTranspose_apply, (Matrix.PosDef.rpow.isPosDef _ _).1.eq]
+  simp only [QuantumSet.n, Finset.sum_sigma_univ, Finset.sum_product_univ]
+  calc
+    (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
+      ∑ x, ∑ x_1, ∑ x_2, (hφ x).matrixIsPosDef.rpow (-(1 / 2)) x_2 x_1
+        * (hφ x).matrixIsPosDef.rpow (-(1 / 2)) x_1 x_2
+    = (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
+      ∑ x, ∑ x_1, ∑ x_2, (hφ x).matrixIsPosDef.rpow (-(1 / 2)) x_1 x_2
+        * (hφ x).matrixIsPosDef.rpow (-(1 / 2)) x_2 x_1 := by simp only [mul_comm]
+  _ = (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
+      ∑ x, ∑ x_1, ((hφ x).matrixIsPosDef.rpow (-(1 / 2)) * (hφ x).matrixIsPosDef.rpow (-(1 / 2))) x_1 x_1 := by simp only [← Matrix.mul_apply]
+  _ = (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
+        ∑ x, (φ x).matrix⁻¹.trace := by
+      simp only [Matrix.PosDef.rpow_mul_rpow, Matrix.trace_iff]
+      ring_nf
+      simp only [Matrix.PosDef.rpow_neg_one_eq_inv_self]
+  _ = (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
+    ∑ _ : ι, (QuantumSetDeltaForm.delta (PiMat ℂ ι p)) := by simp only [hφ₂.out]; rfl
+  _ = Fintype.card ι := by
+    rw [Finset.sum_const, mul_smul_comm, inv_mul_cancel (ne_of_gt QuantumSetDeltaForm.delta_pos)]
+    rw [nsmul_eq_mul, mul_one]
+    rfl
+
+
+
+end deltaForm

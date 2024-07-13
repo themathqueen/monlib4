@@ -37,28 +37,6 @@ theorem Module.Dual.IsFaithfulPosMap.sig_trans_sig [hφ : φ.IsFaithfulPosMap] (
     mul_assoc, PosDef.rpow_mul_rpow, neg_add, add_comm]
 
 open scoped ComplexOrder
-theorem Matrix.IsHermitian.eigenvectorMatrix_conjTranspose_mul
-  {𝕜 : Type*} [RCLike 𝕜] {x : Matrix n n 𝕜} (hx : x.IsHermitian) :
-    hx.eigenvectorMatrixᴴ * hx.eigenvectorMatrix = 1 :=
-by
-  rw [eigenvectorUnitary_coe_eq_eigenvectorMatrix, ← star_eq_conjTranspose]
-  exact UnitaryGroup.star_mul_self _
-
-theorem posDefOne_rpow {𝕜 : Type*} [RCLike 𝕜]
-  (n : Type _) [Fintype n] [DecidableEq n] (r : ℝ) :
-    (posDefOne : PosDef (1 : Matrix n n 𝕜)).rpow r = 1 :=
-  by
-  rw [PosDef.rpow_eq, innerAut_eq_iff, innerAut_apply_one]
-  symm
-  nth_rw 1 [← diagonal_one]
-  rw [diagonal_eq_diagonal_iff]
-  intro i
-  simp_rw [Function.comp_apply, Pi.pow_apply]
-  rw [← RCLike.ofReal_one, RCLike.ofReal_inj, IsHermitian.eigenvalues_eq', one_mulVec]
-  simp_rw [dotProduct, Pi.star_apply, transpose_apply, ← conjTranspose_apply,
-    ← mul_apply, IsHermitian.eigenvectorMatrix_conjTranspose_mul, one_apply_eq,
-    RCLike.one_re]
-  exact (Real.one_rpow _).symm
 
 theorem PosDef.smul {𝕜 : Type*} [RCLike 𝕜] [Fintype n]
   {x : Matrix n n 𝕜} (hx : x.PosDef) (α : NNRealˣ) :
@@ -127,25 +105,6 @@ by
   ext1
   simp only [sig_apply, neg_zero, PosDef.rpow_zero, one_mul, mul_one,
     AlgEquiv.one_apply]
-
-lemma Matrix.IsHermitian.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
-  {Q : Matrix n n 𝕜} (hQ : Q.IsHermitian) (r : ℝ)
-  {S : Matrix n n 𝕜}
-  (hQS : Q = S) :
-  hQ.rpow r = (by rw [← hQS]; exact hQ : IsHermitian S).rpow r :=
-by aesop
-lemma Matrix.PosDef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
-  {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ)
-  {S : Matrix n n 𝕜}
-  (hQS : Q = S) :
-  hQ.rpow r = (by rw [← hQS]; exact hQ : PosDef S).rpow r :=
-Matrix.IsHermitian.rpow_cast _ _ hQS
-lemma Matrix.PosSemidef.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]
-  {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) (r : ℝ)
-  {S : Matrix n n 𝕜}
-  (hQS : Q = S) :
-  hQ.rpow r = (by rw [← hQS]; exact hQ : PosSemidef S).rpow r :=
-Matrix.IsHermitian.rpow_cast _ _ hQS
 
 lemma AlgEquiv.apply_eq_id {R M : Type*} [CommSemiring R]
   [Semiring M] [Algebra R M] {f : M ≃ₐ[R] M} :
@@ -544,7 +503,15 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
     QuantumSet (PiMat ℂ k s) :=
   letI : Fact (∀ (i : k), QuantumSet.k (Matrix (s i) (s i) ℂ) = 0) :=
   by apply Fact.mk; intro; rfl
-  Pi.quantumSet
+  letI : starAlgebra (PiQ fun i ↦ (fun j ↦ Matrix (s j) (s j) ℂ) i) := PiMat.isStarAlgebra
+  { k := 0
+    inner_star_left := Pi.quantumSet.inner_star_left
+    modAut_isSymmetric := Pi.quantumSet.modAut_isSymmetric
+    inner_conj_left := Pi.quantumSet.inner_conj_left
+    n := Σ i, (s i) × (s i)
+    n_isFintype := by infer_instance
+    n_isDecidableEq := by infer_instance
+    onb := Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis hψ }
   -- modAut r := (Module.Dual.pi.IsFaithfulPosMap.sig hψ r : PiMat ℂ k s ≃ₐ[ℂ] PiMat ℂ k s)
   -- modAut_trans r s := Module.Dual.pi.IsFaithfulPosMap.sig_trans_sig hψ _ _
   -- modAut_zero := Module.Dual.pi.IsFaithfulPosMap.sig_zero'
@@ -558,10 +525,6 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
   --   simp_rw [neg_zero, sig_zero, inner_left_hMul]
   -- inner_conj_left x y z := by
   --   simp_rw [neg_zero, zero_sub, Module.Dual.pi.IsFaithfulPosMap.inner_right_conj']
-  -- n := Σ i, (s i) × (s i)
-  -- n_isFintype := by infer_instance
-  -- n_isDecidableEq := by infer_instance
-  -- onb := Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis hψ
   -- commutes' a f := by ext1; simp only [RingHom.coe_mk, MonoidHom.coe_mk, Pi.mul_apply]
   -- smul_def' a f := by ext1; simp only [Pi.smul_apply, RingHom.coe_mk, MonoidHom.coe_mk,
   --   Pi.mul_apply]
