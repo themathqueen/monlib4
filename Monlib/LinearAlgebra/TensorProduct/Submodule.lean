@@ -61,7 +61,7 @@ variable {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
   [NormedAddCommGroup F] [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
 variable [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
 
-theorem norm_tmul {𝕜 B C : Type _} [RCLike 𝕜] [NormedAddCommGroup B]
+theorem norm_tmul {𝕜 B C : Type*} [RCLike 𝕜] [NormedAddCommGroup B]
     [NormedAddCommGroup C] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [FiniteDimensional 𝕜 B]
     [FiniteDimensional 𝕜 C] (x : B) (y : C) : ‖x ⊗ₜ[𝕜] y‖ = ‖x‖ * ‖y‖ := by
   symm
@@ -116,8 +116,7 @@ by
   simp only [OrthonormalBasis.tensorProduct_apply']
   rfl
 
-theorem Submodule.tensorProduct_finrank {V : Submodule 𝕜 E} {W : Submodule 𝕜 F}
-  [FiniteDimensional 𝕜 V] [FiniteDimensional 𝕜 W] :
+theorem Submodule.tensorProduct_finrank {V : Submodule 𝕜 E} {W : Submodule 𝕜 F} :
   FiniteDimensional.finrank 𝕜 (V.tensorProduct W) = FiniteDimensional.finrank 𝕜 V * FiniteDimensional.finrank 𝕜 W :=
 by
   simp only [← FiniteDimensional.finrank_tensorProduct]
@@ -205,7 +204,7 @@ local notation x" ⊗ₘ "y => TensorProduct.map x y
 
 open Matrix
 
-def piProdUnitEquivPi {R n : Type _} [Semiring R] : (n × Unit → R) ≃ₗ[R] n → R
+def piProdUnitEquivPi {R n : Type*} [Semiring R] : (n × Unit → R) ≃ₗ[R] n → R
     where
   toFun x i := x (i, PUnit.unit)
   invFun x i := x i.1
@@ -216,10 +215,10 @@ def piProdUnitEquivPi {R n : Type _} [Semiring R] : (n × Unit → R) ≃ₗ[R] 
   map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
 
 /-- `matrix.col` written as a linear equivalence -/
-def Matrix.ofCol {R n : Type _} [Semiring R] : Matrix n Unit R ≃ₗ[R] n → R :=
+def Matrix.ofCol {R n : Type*} [Semiring R] : Matrix n Unit R ≃ₗ[R] n → R :=
   (reshape : Matrix n Unit R ≃ₗ[R] n × Unit → R).trans piProdUnitEquivPi
 
-def matrixProdUnitRight {R n m : Type _} [Semiring R] : Matrix n (m × Unit) R ≃ₗ[R] Matrix n m R
+def matrixProdUnitRight {R n m : Type*} [Semiring R] : Matrix n (m × Unit) R ≃ₗ[R] Matrix n m R
     where
   toFun x i j := x i (j, PUnit.unit)
   invFun x i j := x i j.1
@@ -231,7 +230,7 @@ def matrixProdUnitRight {R n m : Type _} [Semiring R] : Matrix n (m × Unit) R �
 
 open Kronecker
 /-- `vec_mulVec x y` written as a kronecker product -/
-theorem col_hMul_col_conjTranspose_is_kronecker_of_vectors {R m n : Type _} [Semiring R]
+theorem col_hMul_col_conjTranspose_is_kronecker_of_vectors {R m n : Type*} [Semiring R]
     (x : m → R) (y : n → R) :
     vecMulVec x y =
       reshape.symm
@@ -242,51 +241,99 @@ by
     LinearEquiv.trans_apply, LinearEquiv.coe_mk, reshape_apply, kronecker_apply, col_apply,
     vecMulVec_apply]
 
-noncomputable def euclideanSpaceTensor {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
-  [Fintype ι₁] [Fintype ι₂]
-  [DecidableEq ι₁] [DecidableEq ι₂] :
-   (EuclideanSpace R ι₁ ⊗[R] EuclideanSpace R ι₂) ≃ₗ[R]
-   EuclideanSpace (R ⊗[R] R) (ι₁ × ι₂) :=
+section
+
+variable {ι₁ ι₂ : Type*} [DecidableEq ι₁] [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂]
+    {M₁ : ι₁ → Type*} {M₂ : ι₂ → Type*}
+    [(i₁ : ι₁) → NormedAddCommGroup (M₁ i₁)] [(i₂ : ι₂) → NormedAddCommGroup (M₂ i₂)]
+    [(i₁ : ι₁) → InnerProductSpace 𝕜 (M₁ i₁)] [(i₂ : ι₂) → InnerProductSpace 𝕜 (M₂ i₂)]
+    [(i : ι₁) → FiniteDimensional 𝕜 (M₁ i)] [(i : ι₂) → FiniteDimensional 𝕜 (M₂ i)]
+
+@[simps!]
+noncomputable def PiLp_tensorEquiv :
+  (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂) ≃ₗ[𝕜] PiLp 2 (λ (i : ι₁ × ι₂) => (M₁ i.1) ⊗[𝕜] (M₂ i.2)) :=
 directSumTensor
 
-lemma euclideanSpaceTensor_apply {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
-  [Fintype ι₁] [Fintype ι₂]
-  [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂)
-  (i : ι₁ × ι₂) :
-  euclideanSpaceTensor (x ⊗ₜ y) i = x i.1 ⊗ₜ y i.2 :=
+theorem PiLp_tensorEquiv_tmul (x : PiLp 2 M₁) (y : PiLp 2 M₂) (i : ι₁ × ι₂) :
+  PiLp_tensorEquiv (x ⊗ₜ y) i = x i.1 ⊗ₜ[𝕜] y i.2 :=
 rfl
 
-noncomputable def euclideanSpaceTensor' {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
+@[simp]
+theorem PiLp_tensorEquiv_norm_map
+  (x : (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂)) :
+  ‖(PiLp_tensorEquiv x : PiLp 2 (λ i : ι₁ × ι₂ => M₁ i.1 ⊗[𝕜] M₂ i.2))‖ = ‖x‖ :=
+by
+  simp_rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
+  obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
+  simp_rw [map_sum, sum_inner, inner_sum]
+  simp_rw [TensorProduct.inner_tmul, PiLp.inner_apply, PiLp_tensorEquiv_tmul, Finset.sum_mul,
+    Finset.mul_sum, Finset.sum_product_univ]
+  simp only [TensorProduct.inner_tmul]
+
+@[simps!]
+noncomputable abbrev PiLp_tensorLinearIsometryEquiv :
+    (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂) ≃ₗᵢ[𝕜] PiLp 2 (λ (i : ι₁ × ι₂) => (M₁ i.1) ⊗[𝕜] (M₂ i.2)) where
+  toLinearEquiv := PiLp_tensorEquiv
+  norm_map' := PiLp_tensorEquiv_norm_map
+
+theorem PiLp_tensorLinearIsometryEquiv_tmul (x : PiLp 2 M₁) (y : PiLp 2 M₂) (i : ι₁ × ι₂) :
+  PiLp_tensorLinearIsometryEquiv (x ⊗ₜ y) i = x i.1 ⊗ₜ[𝕜] y i.2 :=
+rfl
+
+end
+
+noncomputable abbrev euclideanSpaceTensor {R : Type*} [RCLike R] {ι₁ ι₂ : Type*}
   [Fintype ι₁] [Fintype ι₂]
   [DecidableEq ι₁] [DecidableEq ι₂] :
-   (EuclideanSpace R ι₁ ⊗[R] EuclideanSpace R ι₂) ≃ₗ[R]
-   EuclideanSpace R (ι₁ × ι₂) :=
-directSumTensor.trans (LinearEquiv.piCongrRight (λ _ => TensorProduct.lid _ _))
-lemma euclideanSpaceTensor'_apply {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
+   (EuclideanSpace R ι₁ ⊗[R] EuclideanSpace R ι₂) ≃ₗᵢ[R]
+   EuclideanSpace (R ⊗[R] R) (ι₁ × ι₂) :=
+PiLp_tensorLinearIsometryEquiv
+
+lemma euclideanSpaceTensor_apply {R : Type*} [RCLike R] {ι₁ ι₂ : Type*}
   [Fintype ι₁] [Fintype ι₂]
   [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂)
   (i : ι₁ × ι₂) :
-  euclideanSpaceTensor' (x ⊗ₜ y) i = x i.1 * y i.2 :=
+  euclideanSpaceTensor (R := R) (x ⊗ₜ y) i = x i.1 ⊗ₜ y i.2 :=
 rfl
 
-theorem euclideanSpaceTensor_norm_map {R : Type _} [RCLike R] {ι₁ ι₂ : Type _}
+@[simps!]
+noncomputable def TensorProduct.lid_linearIsometryEquiv
+  (𝕜 E : Type*) [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
+    (𝕜 ⊗[𝕜] E) ≃ₗᵢ[𝕜] E where
+  toLinearEquiv := TensorProduct.lid _ _
+  norm_map' x := by
+    rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
+    simp only [← LinearEquiv.coe_toLinearMap, ← LinearMap.adjoint_inner_left, TensorProduct.lid_adjoint]
+    simp only [LinearEquiv.coe_coe, LinearEquiv.symm_apply_apply, ← norm_eq_sqrt_inner]
+
+noncomputable abbrev euclideanSpaceTensor' {R : Type*} [RCLike R] {ι₁ ι₂ : Type*}
   [Fintype ι₁] [Fintype ι₂]
-  [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂) :
-  ‖euclideanSpaceTensor (x ⊗ₜ[R] y)‖ = ‖x ⊗ₜ[R] y‖ :=
-by
-  rw [PiLp.norm_eq_of_L2]
-  simp_rw [euclideanSpaceTensor_apply, norm_tmul]
-  rw [Finset.sum_product_univ]
-  simp_rw [mul_pow, ← Finset.mul_sum, ← Finset.sum_mul,
-    Real.sqrt_mul (Finset.sum_nonneg (λ _ _ => (sq_nonneg _))),
-    ← PiLp.norm_eq_of_L2]
+  [DecidableEq ι₁] [DecidableEq ι₂] :
+   (EuclideanSpace R ι₁ ⊗[R] EuclideanSpace R ι₂) ≃ₗᵢ[R]
+   EuclideanSpace R (ι₁ × ι₂) :=
+(euclideanSpaceTensor (R := R)).trans
+  (LinearIsometryEquiv.piLpCongrRight 2 (λ _ => TensorProduct.lid_linearIsometryEquiv R _))
+lemma euclideanSpaceTensor'_apply {R : Type*} [RCLike R] {ι₁ ι₂ : Type*}
+  [Fintype ι₁] [Fintype ι₂]
+  [DecidableEq ι₁] [DecidableEq ι₂] (x : EuclideanSpace R ι₁) (y : EuclideanSpace R ι₂)
+  (i : ι₁ × ι₂) :
+  euclideanSpaceTensor' (R := R) (x ⊗ₜ y) i = x i.1 * y i.2 :=
+rfl
+
+open scoped FiniteDimensional
+theorem LinearIsometryEquiv.linearMap_adjoint {f : E ≃ₗᵢ[𝕜] F} :
+  LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap :=
+calc LinearMap.adjoint f.toLinearMap = ContinuousLinearMap.adjoint (LinearIsometry.toContinuousLinearMap f.toLinearIsometry) := rfl
+    _ = LinearIsometry.toContinuousLinearMap f.symm.toLinearIsometry := by
+      simp only [ContinuousLinearMap.coe_inj]
+      exact adjoint_eq_symm _
+    _ = f.symm.toLinearMap := rfl
 
 theorem TensorProduct.ring_tmul {R : Type*} [CommRing R] (x : R ⊗[R] R) :
   ∃ (a b : R), x = a ⊗ₜ[R] b :=
 TensorProduct.singleton_tmul x (Basis.singleton _ _) (Basis.singleton _ _)
 
 theorem submodule_neq_tensorProduct_of {R : Type*} [RCLike R]
-  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
   {E F : Type*} [NormedAddCommGroup E] [NormedAddCommGroup F]
   [InnerProductSpace R E] [InnerProductSpace R F]
   [FiniteDimensional R E] [FiniteDimensional R F]
