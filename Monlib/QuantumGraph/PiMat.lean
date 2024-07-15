@@ -735,14 +735,71 @@ theorem orthogonalProjection_submoduleMap' {E E' : Type*} [NormedAddCommGroup E]
       ∘ₗ f.toLinearMap :=
 orthogonalProjection_submoduleMap f.symm
 
+theorem StarAlgEquiv.piCongrRight_symm {R ι : Type*} {A₁ A₂ : ι → Type*}
+  [(i : ι) → Add (A₁ i)] [(i : ι) → Add (A₂ i)] [(i : ι) → Mul (A₁ i)] [(i : ι) → Mul (A₂ i)]
+  [(i : ι) → Star (A₁ i)] [(i : ι) → Star (A₂ i)] [(i : ι) → SMul R (A₁ i)] [(i : ι) → SMul R (A₂ i)]
+  (e : (i : ι) → A₁ i ≃⋆ₐ[R] A₂ i) :
+  (StarAlgEquiv.piCongrRight e).symm = StarAlgEquiv.piCongrRight (λ i => (e i).symm) :=
+rfl
+
+theorem Matrix.k {n : Type*} [Fintype n] [DecidableEq n]
+  {φ : Module.Dual ℂ (Matrix n n ℂ)} [φ.IsFaithfulPosMap] :
+  k (Matrix n n ℂ) = 0 :=
+rfl
+
+theorem unitary.mul_inv_eq_iff {A : Type*} [Monoid A] [StarMul A] (U : ↥(unitary A))
+    (x : A) (y : A) : x * (U⁻¹ : unitary A) = y ↔ x = y * U :=
+  by
+    rw [unitary.inj_hMul (U : unitary A), mul_assoc]
+    rw [← unitary.star_eq_inv]
+    simp only [coe_star, SetLike.coe_mem, star_mul_self_of_mem, mul_one]
+
+noncomputable abbrev piInnerAut (U : (i : ι) → Matrix.unitaryGroup (p i) ℂ) :=
+(StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i)))
+
+theorem piInnerAut_apply_dualMatrix_iff' {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} :
+  piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ ↔
+  ∀ i, Matrix.innerAutStarAlg (U i) (φ i).matrix = (φ i).matrix :=
+by
+  simp only [Function.funext_iff, StarAlgEquiv.piCongrRight_apply,
+    Module.Dual.pi.matrixBlock_apply]
+
+theorem piInnerAut_apply_dualMatrix_iff {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} :
+  piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ ↔
+    ∀ (a : ι), (U a) * (φ a).matrix = (φ a).matrix * (U a) :=
+by
+  simp only [piInnerAut_apply_dualMatrix_iff', Matrix.innerAutStarAlg_apply']
+  simp_rw [unitary.mul_inv_eq_iff]
+
+theorem innerAutStarAlg_adjoint_eq_symm_of {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
+  (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
+  LinearMap.adjoint (piInnerAut U).toLinearMap = (piInnerAut U).symm.toLinearMap :=
+by
+  apply LinearMap.ext
+  intro
+  apply ext_inner_left ℂ
+  intro
+  simp only [LinearMap.adjoint_inner_right, StarAlgEquiv.toLinearMap_apply]
+  simp only [PiLp.inner_apply (𝕜 := ℂ), StarAlgEquiv.piCongrRight_apply (R := ℂ),
+    StarAlgEquiv.piCongrRight_symm, Matrix.innerAutStarAlg_apply,
+    Matrix.innerAutStarAlg_symm_apply]
+  congr
+  ext i
+  rw [mul_assoc, QuantumSet.inner_star_left, Matrix.k, neg_zero, starAlgebra.modAut_zero,
+    AlgEquiv.one_apply, QuantumSet.inner_conj_left, Matrix.k, neg_zero, zero_sub,
+    ← Matrix.unitaryGroup.star_coe_eq_coe_star, star_star]
+  rw [piInnerAut_apply_dualMatrix_iff] at hU
+  simp_rw [modAut, sig_apply, neg_neg, Matrix.PosDef.rpow_one_eq_self,
+    Matrix.PosDef.rpow_neg_one_eq_inv_self, ← hU]
+  letI := (hφ i).matrixIsPosDef.invertible
+  rw [Matrix.mul_inv_cancel_right_of_invertible]
+
 def QuantumGraph.Real.piMat_conj_unitary
   {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real (PiMat ℂ ι p) A)
   {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
-  (hU : LinearMap.adjoint (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i))).toLinearMap =
-    (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i))).symm.toLinearMap) :
-  let f : PiMat ℂ ι p ≃⋆ₐ[ℂ] PiMat ℂ ι p := StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i))
-  QuantumGraph.Real _ (f.toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint f.toLinearMap) :=
-QuantumGraph.Real_conj_starAlgEquiv hA hU
+  (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
+  QuantumGraph.Real _ ((piInnerAut U).toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint (piInnerAut U).toLinearMap) :=
+QuantumGraph.Real_conj_starAlgEquiv hA (innerAutStarAlg_adjoint_eq_symm_of hU)
 
 noncomputable abbrev Matrix.UnitaryGroup.toEuclideanLinearEquiv {n : Type*} [Fintype n] [DecidableEq n]
   (A : ↥(Matrix.unitaryGroup n ℂ)) :
@@ -954,20 +1011,44 @@ by
     Matrix.innerAut.map_pow]
   simp_rw [pow_two, Matrix.PosDef.rpow_mul_rpow, add_halves, Matrix.PosDef.rpow_one_eq_self]
 
+theorem PiMat.modAut {r : ℝ} :
+  (modAut r : PiMat ℂ ι p ≃ₐ[ℂ] PiMat ℂ ι p) =
+    AlgEquiv.piCongrRight (λ _ => modAut r) :=
+rfl
+
+theorem unitary.mul_inj {A : Type*} [Monoid A] [StarMul A] (U : ↥(unitary A)) (x y : A) :
+  ↑U * x = ↑U * y ↔ x = y :=
+by
+  rw [← unitary.val_toUnits_apply]
+  exact (Units.mul_right_inj (toUnits U))
+
+theorem piInnerAut_modAut_commutes_of {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} {r : ℝ}
+  (h : ∀ i, (Matrix.innerAutStarAlg (U i)) ((hφ i).matrixIsPosDef.rpow r)
+      = (hφ i).matrixIsPosDef.rpow r) :
+  ∀ x, (piInnerAut U) ((modAut (-r)) x) = (modAut (-r)) ((piInnerAut U) x) :=
+by
+  simp only [Function.funext_iff, Function.comp_apply, piInnerAut,
+    PiMat.modAut, StarAlgEquiv.piCongrRight_apply, AlgEquiv.piCongrRight_apply,
+    modAut, sig_apply, Matrix.innerAutStarAlg_apply', unitary.mul_inv_eq_iff] at h ⊢
+  simp only [mul_assoc, neg_neg]
+  simp only [Matrix.PosDef.rpow_neg_eq_inv_rpow, inv_inv]
+  simp only [← unitary.star_eq_inv, unitary.coe_star, ← mul_assoc, ← h]
+  intro _ i
+  letI := (Matrix.PosDef.rpow.isPosDef (hφ i).matrixIsPosDef r).invertible
+  simp only [mul_assoc, unitary.mul_inj, Matrix.mul_right_inj_of_invertible]
+  rw [Matrix.mul_inv_eq_iff_eq_mul_of_invertible]
+  simp only [mul_assoc, h]
+  simp only [Matrix.inv_mul_cancel_left_of_invertible, unitary.coe_star_mul_self, mul_one]
+
 theorem QuantumGraph.Real.PiMat_applyConjInnerAut
   {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real (PiMat ℂ ι p) A)
   {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
-  (hU₂ : ∀ x,
-    (StarAlgEquiv.piCongrRight
-      (λ i => Matrix.innerAutStarAlg (U i))) (modAut (- (1 / 2)) x)
-    = modAut (- (1 / 2))
-      (((StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i)))) x)) :
-  let f := StarAlgEquiv.piCongrRight fun i ↦ Matrix.innerAutStarAlg (U i)
+  (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
   let S : (i : ι × ι) →
     (j : (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i))))
       → (((p i.1) × (p i.2)) → (((EuclideanSpace ℂ (p i.1)) × (EuclideanSpace ℂ (p i.2)))))
     := λ i j => (hA.PiMat_orthonormalBasis i j : EuclideanSpace ℂ _).prod_choose
-  f.toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint f.toLinearMap
+  (piInnerAut U).toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint (piInnerAut U).toLinearMap
     = ∑ i : ι × ι, ∑ j, ∑ s : (p i.1 × p i.2), ∑ l : (p i.1 × p i.2),
     rankOne ℂ (Matrix.includeBlock
       (Matrix.vecMulVec ((U i.1 : Matrix (p i.1) (p i.1) ℂ) *ᵥ (S i j s).1)
@@ -977,16 +1058,18 @@ theorem QuantumGraph.Real.PiMat_applyConjInnerAut
           (star ((U i.2 : Matrix (p i.2) (p i.2) ℂ)ᴴᵀ *ᵥ (S i j l).2)))ᴴᵀ)))
      :=
 by
-  intro f S
+  intro S
+  simp_rw [piInnerAut_apply_dualMatrix_iff', innerAutStarAlg_apply_dualMatrix_eq_iff_eq_sqrt] at hU
+  have hU₂ := piInnerAut_modAut_commutes_of hU
   nth_rw 1 [QuantumGraph.Real.PiMat_eq hA]
+  simp only [piInnerAut] at hU₂ ⊢
   simp only [ContinuousLinearMap.coe_sum, LinearMap.sum_comp, LinearMap.comp_sum,
     LinearMap.rankOne_comp', LinearMap.comp_rankOne, StarAlgEquiv.toLinearMap_apply, hU₂]
   repeat apply Finset.sum_congr rfl; intro _ _
-  congr
-  . simp only [f]
-    rw [StarAlgEquiv.piCongrRight_apply_includeBlock, Matrix.innerAutStarAlg_apply_vecMulVec_star]
+  congr 2
+  . rw [StarAlgEquiv.piCongrRight_apply_includeBlock, Matrix.innerAutStarAlg_apply_vecMulVec_star]
   . rw [StarAlgEquiv.piCongrRight_apply_includeBlock, Matrix.vecMulVec_conj, star_star,
-      Matrix.innerAutStarAlg_apply_star_vecMulVec]
+    Matrix.innerAutStarAlg_apply_star_vecMulVec]
 
 open QuantumSet in
 set_option synthInstance.maxHeartbeats 0 in
@@ -995,13 +1078,7 @@ set_option maxRecDepth 1000 in
 theorem QuantumGraph.Real.PiMat_conj_unitary_submodule_eq_map
   {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real (PiMat ℂ ι p) A)
   {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
-  (hU : LinearMap.adjoint (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i))).toLinearMap =
-    (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i))).symm.toLinearMap)
-  (hU₂ : ∀ x,
-    (StarAlgEquiv.piCongrRight
-      (λ i => Matrix.innerAutStarAlg (U i))) (modAut (- (1 / 2)) x)
-    = modAut (- (1 / 2))
-      (((StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i)))) x)) (i : ι × ι) :
+  (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) (i : ι × ι) :
   QuantumGraph.Real.PiMat_submodule (hA.piMat_conj_unitary hU) i
     = Submodule.map (unitaryTensorEuclidean U i) (hA.PiMat_submodule i)
      :=
@@ -1010,7 +1087,7 @@ by
   rw [orthogonalProjection_submoduleMap]
   nth_rw 1 [OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne (hA.PiMat_orthonormalBasis i)]
   simp_rw [QuantumGraph.Real.PiMat_submoduleOrthogonalProjection]
-  rw [QuantumGraph.Real.PiMat_applyConjInnerAut hA hU₂]
+  rw [QuantumGraph.Real.PiMat_applyConjInnerAut hA hU]
   simp only [ContinuousLinearMap.coe_sum, map_sum, Psi_apply, Psi_toFun_apply,
     Finset.sum_apply, StarAlgEquiv.lTensor_tmul, PiMatTensorProductEquiv_tmul,
     TensorProduct.map_tmul, PiMat_toEuclideanLM, StarAlgEquiv.piCongrRight_apply]
