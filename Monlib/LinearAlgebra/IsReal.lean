@@ -107,8 +107,11 @@ by
   ext
   simp only [LinearMap.real_apply, LinearMap.comp_apply, star_star]
 
-theorem LinearMap.real_starAlgEquiv_conj {E K : Type _} [CommSemiring K] [Semiring E] [Algebra K E]
-    [InvolutiveStar K] [StarAddMonoid E] [StarModule K E] (f : E →ₗ[K] E) (φ : E ≃⋆ₐ[K] E) :
+theorem LinearMap.real_starAlgEquiv_conj {E K F : Type _} [CommSemiring K] [Semiring E]
+    [Semiring F] [Algebra K E] [Algebra K F]
+    [InvolutiveStar K] [StarAddMonoid E] [StarAddMonoid F]
+    [StarModule K E] [StarModule K F]
+    (f : E →ₗ[K] E) (φ : E ≃⋆ₐ[K] F) :
     (φ.toLinearMap ∘ₗ
           f ∘ₗ φ.symm.toLinearMap).real =
       φ.toLinearMap ∘ₗ
@@ -118,9 +121,12 @@ by
   simp only [LinearMap.real_apply, LinearMap.comp_apply,
     StarAlgEquiv.toLinearMap_apply, map_star]
 
-theorem LinearMap.real_starAlgEquiv_conj_iff {E K : Type _} [CommSemiring K] [Semiring E]
-    [Algebra K E] [InvolutiveStar K] [StarAddMonoid E] [StarModule K E] (f : E →ₗ[K] E)
-    (φ : E ≃⋆ₐ[K] E) :
+theorem LinearMap.real_starAlgEquiv_conj_iff
+  {E F K : Type _} [CommSemiring K] [Semiring E] [Semiring F]
+  [Algebra K E] [Algebra K F]
+  [InvolutiveStar K] [StarAddMonoid E] [StarAddMonoid F]
+  [StarModule K E] [StarModule K F] (f : E →ₗ[K] E)
+    (φ : E ≃⋆ₐ[K] F) :
     LinearMap.IsReal (φ.toLinearMap ∘ₗ
       f ∘ₗ φ.symm.toLinearMap) ↔
     LinearMap.IsReal f :=

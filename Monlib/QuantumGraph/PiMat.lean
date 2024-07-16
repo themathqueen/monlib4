@@ -767,29 +767,6 @@ theorem Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv_apply' {n : Type*} [F
   (Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv A).symm x = (A : Matrix n n ℂ)ᴴ *ᵥ x :=
 rfl
 
-@[simps!]
-noncomputable def LinearIsometryEquiv.TensorProduct.map {𝕜 A B C D : Type*} [RCLike 𝕜]
-  [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C] [NormedAddCommGroup D]
-  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [InnerProductSpace 𝕜 D]
-  [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B] [FiniteDimensional 𝕜 C] [FiniteDimensional 𝕜 D]
-  (f : A ≃ₗᵢ[𝕜] B) (g : C ≃ₗᵢ[𝕜] D) :
-    A ⊗[𝕜] C ≃ₗᵢ[𝕜] B ⊗[𝕜] D where
-  toLinearEquiv := LinearEquiv.TensorProduct.map f.toLinearEquiv g.toLinearEquiv
-  norm_map' x := by
-    simp_rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
-    obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
-    simp only [map_sum, sum_inner, inner_sum, LinearEquiv.TensorProduct.map_tmul]
-    simp only [coe_toLinearEquiv, TensorProduct.inner_tmul, inner_map_map, RCLike.mul_re,
-      Finset.sum_sub_distrib]
-
-theorem LinearIsometryEquiv.TensorProduct.map_tmul {𝕜 A B C D : Type*} [RCLike 𝕜]
-  [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C] [NormedAddCommGroup D]
-  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [InnerProductSpace 𝕜 D]
-  [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B] [FiniteDimensional 𝕜 C] [FiniteDimensional 𝕜 D]
-  (f : A ≃ₗᵢ[𝕜] B) (g : C ≃ₗᵢ[𝕜] D) (x : A) (y : C) :
-  (LinearIsometryEquiv.TensorProduct.map f g) (x ⊗ₜ y) = f x ⊗ₜ g y :=
-rfl
-
 noncomputable abbrev unitaryTensorEuclidean (U : (i : ι) → Matrix.unitaryGroup (p i) ℂ) (i : ι × ι) :=
 (euclideanSpaceTensor'.symm.trans
     ((LinearIsometryEquiv.TensorProduct.map (Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv (U i.1))

@@ -5,6 +5,7 @@ import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.LinearAlgebra.PosMap_isReal
 import Monlib.LinearAlgebra.MyBimodule
 import Monlib.LinearAlgebra.TensorProduct.Submodule
+-- import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
@@ -454,9 +455,11 @@ theorem StarAlgEquiv.toAlgEquiv_toAlgHom_toLinearMap
     f.toAlgEquiv.toAlgHom.toLinearMap = f.toLinearMap :=
 rfl
 
-def QuantumGraph.Real_conj_starAlgEquiv {A : Type*} [starAlgebra A] [QuantumSet A]
+def QuantumGraph.Real_conj_starAlgEquiv
+  {A B : Type*} [starAlgebra A] [starAlgebra B]
+  [QuantumSet A] [QuantumSet B]
   {x : A →ₗ[ℂ] A} (hx : QuantumGraph.Real A x)
-  {f : A ≃⋆ₐ[ℂ] A} (hf : Isometry f) :
+  {f : A ≃⋆ₐ[ℂ] B} (hf : Isometry f) :
   QuantumGraph.Real _ (f.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap)) :=
 by
   constructor
@@ -516,6 +519,54 @@ by
   rw [← orthogonalProjection_map_apply]
   rfl
 
+theorem orthogonalProjection_submoduleMap_isometry {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
+  {U : Submodule ℂ E}
+  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E']
+  {f : E ≃ₗ[ℂ] E'} (hf : Isometry f) :
+  (orthogonalProjection' (Submodule.map f U)).toLinearMap
+    = f.toLinearMap
+      ∘ₗ (orthogonalProjection' U).toLinearMap
+      ∘ₗ f.symm.toLinearMap :=
+by
+  ext x
+  simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL,
+    LinearMap.coe_comp, Submodule.coeSubtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
+    LinearEquiv.coe_coe]
+  let f' : E ≃ₗᵢ[ℂ] E' := ⟨f, (isometry_iff_norm _).mp hf⟩
+  calc ↑((orthogonalProjection (Submodule.map f U)) x)
+      = ↑(orthogonalProjection (Submodule.map f'.toLinearEquiv U) x) := rfl
+    _ = f' ↑((orthogonalProjection U) (f'.symm x)) := orthogonalProjection_map_apply _ _ _
+    _ = f ↑((orthogonalProjection U) (f.symm x)) := rfl
+
+ instance
+   StarAlgEquivClass.instLinearMapClass
+  {R A B : Type*} [Semiring R] [AddCommMonoid A] [AddCommMonoid B]
+  [Mul A] [Mul B] [Module R A] [Module R B] [Star A] [Star B]
+  {F : Type*} [EquivLike F A B] [NonUnitalAlgEquivClass F R A B]
+  [StarAlgEquivClass F R A B] :
+  LinearMapClass F R A B :=
+SemilinearMapClass.mk
+
+theorem orthogonalProjection_submoduleMap_isometry_starAlgEquiv
+  {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
+  {U : Submodule ℂ E}
+  [Mul E] [Mul E'] [Star E] [Star E']
+  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E']
+  {f : E ≃⋆ₐ[ℂ] E'} (hf : Isometry f) :
+  (orthogonalProjection' (Submodule.map f U)).toLinearMap
+    = f.toLinearMap
+      ∘ₗ (orthogonalProjection' U).toLinearMap
+      ∘ₗ f.symm.toLinearMap :=
+by
+  have hf' : Isometry f.toLinearEquiv := hf
+  calc (orthogonalProjection' (Submodule.map f U)).toLinearMap
+      = (orthogonalProjection' (Submodule.map f.toLinearEquiv U)).toLinearMap := rfl
+    _ = f.toLinearEquiv.toLinearMap
+      ∘ₗ (orthogonalProjection' U).toLinearMap
+      ∘ₗ f.toLinearEquiv.symm.toLinearMap := orthogonalProjection_submoduleMap_isometry hf'
+
 theorem orthogonalProjection_submoduleMap' {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
   [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
   {U : Submodule ℂ E}
@@ -549,6 +600,17 @@ theorem QuantumGraph.Real.upsilonOrthogonalProjection {f : A →ₗ[ℂ] A}
       ((TensorProduct.toIsBimoduleMap (Upsilon f)).1) :=
 (QuantumGraph.Real.upsilonSubmodule.proof_14 gns hf)
 
+theorem QuantumGraph.Real.upsilonOrthogonalProjection' {f : A →ₗ[ℂ] A}
+  (gns : hA.k = 0)
+  (hf : QuantumGraph.Real A f) :
+  (orthogonalProjection' (upsilonSubmodule gns hf)).toLinearMap
+    = rmulMapLmul ((orthogonalProjection' (upsilonSubmodule gns hf)).toLinearMap 1) :=
+by
+  symm
+  rw [← LinearMap.isBimoduleMap_iff', ← LinearMap.mem_isBimoduleMaps_iff]
+  rw [upsilonOrthogonalProjection gns hf, LinearMap.coe_toContinuousLinearMap]
+  exact Submodule.coe_mem (TensorProduct.toIsBimoduleMap (Upsilon f))
+
 noncomputable def QuantumGraph.Real.upsilonOrthonormalBasis {f : A →ₗ[ℂ] A}
   (gns : hA.k = 0) (hf : QuantumGraph.Real A f) :
   OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (upsilonSubmodule gns hf))) ℂ (upsilonSubmodule gns hf) :=
@@ -564,13 +626,68 @@ theorem OrthonormalBasis.tensorProduct_toBasis {𝕜 E F : Type*}
   (b₁.tensorProduct b₂).toBasis = b₁.toBasis.tensorProduct b₂.toBasis :=
 by aesop
 
+theorem TensorProduct.of_orthonormalBasis_eq_span
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] (x : TensorProduct 𝕜 E F)
+  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁]
+  [DecidableEq ι₂] (b₁ : OrthonormalBasis ι₁ 𝕜 E)
+  (b₂ : OrthonormalBasis ι₂ 𝕜 F) :
+  letI := FiniteDimensional.of_fintype_basis b₁.toBasis
+  letI := FiniteDimensional.of_fintype_basis b₂.toBasis
+  x = ∑ i : ι₁, ∑ j : ι₂, ((b₁.tensorProduct b₂).repr x) (i, j) • b₁ i ⊗ₜ[𝕜] b₂ j :=
+by
+  nth_rw 1 [TensorProduct.of_basis_eq_span x b₁.toBasis b₂.toBasis]
+  rfl
+
+noncomputable def TensorProduct.of_orthonormalBasis_prod
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] (x : TensorProduct 𝕜 E F)
+  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁]
+  [DecidableEq ι₂] (b₁ : OrthonormalBasis ι₁ 𝕜 E)
+  (b₂ : OrthonormalBasis ι₂ 𝕜 F) :
+  letI := FiniteDimensional.of_fintype_basis b₁.toBasis
+  letI := FiniteDimensional.of_fintype_basis b₂.toBasis
+  (ι₁ × ι₂) → (E × F) :=
+letI := FiniteDimensional.of_fintype_basis b₁.toBasis
+letI := FiniteDimensional.of_fintype_basis b₂.toBasis
+λ (i,j) => ((((b₁.tensorProduct b₂).repr x) (i,j)) • b₁ i, b₂ j)
+
+@[simp]
+theorem TensorProduct.of_othonormalBasis_prod_eq
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] (x : E ⊗[𝕜] F)
+  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁]
+  [DecidableEq ι₂]
+  (b₁ : OrthonormalBasis ι₁ 𝕜 E) (b₂ : OrthonormalBasis ι₂ 𝕜 F) :
+  ∑ i : ι₁ × ι₂,
+    (x.of_orthonormalBasis_prod b₁ b₂ i).1 ⊗ₜ[𝕜] (x.of_orthonormalBasis_prod b₁ b₂ i).2
+      = x :=
+by
+  nth_rw 3 [TensorProduct.of_orthonormalBasis_eq_span x b₁ b₂]
+  simp_rw [smul_tmul', Finset.sum_product_univ]
+  rfl
+@[simp]
+theorem TensorProduct.of_othonormalBasis_prod_eq'
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] (x : E ⊗[𝕜] F)
+  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁]
+  [DecidableEq ι₂]
+  (b₁ : OrthonormalBasis ι₁ 𝕜 E) (b₂ : OrthonormalBasis ι₂ 𝕜 F) :
+  ∑ i : ι₁ × ι₂,
+    (x.of_orthonormalBasis_prod b₁ b₂ i).1 ⊗ₜ[𝕜] b₂ i.2
+      = x :=
+by
+  nth_rw 2 [TensorProduct.of_orthonormalBasis_eq_span x b₁ b₂]
+  simp_rw [smul_tmul', Finset.sum_product_univ]
+  rfl
+
 theorem
-  QuantumGraph.Real.upsilon_eq {f : A →ₗ[ℂ] A} (gns : hA.k = 0)
-    (hf : QuantumGraph.Real A f) :
+  QuantumGraph.Real.upsilon_eq {f : A →ₗ[ℂ] A}
+    (hf : QuantumGraph.Real A f) (gns : hA.k = 0) :
   let u := QuantumGraph.Real.upsilonOrthonormalBasis gns hf
   let b := hA.onb
   let a := λ (x : A ⊗[ℂ] A) =>
-    λ i : (n A) × (n A) => (((b.tensorProduct b).repr x) i • b i.1)
+    λ i : (n A) × (n A) => (x.of_orthonormalBasis_prod b b i).1
   f = ∑ i, ∑ j, ⟪(u i : A ⊗[ℂ] A), 1⟫_ℂ
     • rankOne ℂ (b j.2) (modAut (-1) (star (a (u i : A ⊗[ℂ] A) j))) :=
 by
@@ -580,21 +697,147 @@ by
   simp only [gns, neg_zero, zero_sub] at this
   simp_rw [ContinuousLinearMap.coe_sum, ContinuousLinearMap.coe_smul,
     ← this, ← map_smul]
-  have : ∀ x, ∑ x_1, a (↑(u x)) x_1 ⊗ₜ[ℂ] b x_1.2 = u x :=
-  λ x => by
-    simp only [a, ← TensorProduct.smul_tmul']
-    symm
-    nth_rw 1 [TensorProduct.of_basis_eq_span (u x) b.toBasis b.toBasis]
-    simp only [OrthonormalBasis.coe_toBasis, Fintype.sum_prod_type,
-      ← OrthonormalBasis.tensorProduct_toBasis,
-      OrthonormalBasis.coe_toBasis_repr_apply]
-  simp_rw [← map_sum, ← Finset.smul_sum, this, ← rankOne_apply (𝕜 := ℂ) (1 : A ⊗[ℂ] A),
+  simp_rw [← map_sum, ← Finset.smul_sum, TensorProduct.of_othonormalBasis_prod_eq',
+    ← rankOne_apply (𝕜 := ℂ) (1 : A ⊗[ℂ] A),
     ← ContinuousLinearMap.sum_apply,
     ← OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne]
   rw [upsilonOrthogonalProjection]
   simp_rw [TensorProduct.toIsBimoduleMap_apply_coe,
     LinearMap.coe_toContinuousLinearMap',
     rmulMapLmul_apply_one, LinearEquiv.symm_apply_apply]
+
+@[simp]
+theorem AlgEquiv.coe_comp
+  {R A₁ A₂ A₃ : Type*} [CommSemiring R] [Semiring A₁] [Semiring A₂]
+  [Semiring A₃] [Algebra R A₁] [Algebra R A₂] [Algebra R A₃]
+  (e : A₁ ≃ₐ[R] A₂) (e₂ : A₂ ≃ₐ[R] A₃) :
+  e₂.toLinearMap.comp e.toLinearMap = (e.trans e₂).toLinearMap :=
+rfl
+
+@[simp]
+theorem AlgEquiv.self_trans_symm
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A ≃ₐ[R] B) :
+  f.trans f.symm = AlgEquiv.refl :=
+by aesop
+@[simp]
+theorem AlgEquiv.symm_trans_self
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A ≃ₐ[R] B) :
+  f.symm.trans f = AlgEquiv.refl :=
+by aesop
+
+theorem QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry''
+  {A B : Type*} [hb : starAlgebra B] [ha : starAlgebra A]
+  [hA : QuantumSet A] [hB : QuantumSet B] {f : A ≃⋆ₐ[ℂ] B}
+  (hf : Isometry f) :
+  f.toLinearMap ∘ₗ (modAut (-(2 * k A + 1))).toLinearMap
+    = (modAut (-(2 * k B + 1))).toLinearMap ∘ₗ f.toLinearMap :=
+by
+  rw [← modAut_symm, AlgEquiv.linearMap_comp_eq_iff, AlgEquiv.symm_symm,
+    LinearMap.comp_assoc, starAlgEquiv_commutes_with_modAut_of_isometry' hf,
+    ← LinearMap.comp_assoc, ← modAut_symm]
+  simp only [AlgEquiv.coe_comp, AlgEquiv.self_trans_symm]
+  rfl
+
+theorem LinearMap.tensorProduct_map_isometry_of {𝕜 A B C D : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C] [NormedAddCommGroup D]
+  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [InnerProductSpace 𝕜 D]
+  [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B] [FiniteDimensional 𝕜 C] [FiniteDimensional 𝕜 D]
+  {f : A →ₗ[𝕜] B} (hf : Isometry f) {g : C →ₗ[𝕜] D} (hg : Isometry g) :
+  Isometry (f ⊗ₘ g) :=
+by
+  rw [isometry_iff_inner] at hf hg
+  rw [isometry_iff_norm]
+  intro x
+  simp_rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
+  obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
+  simp only [map_sum, sum_inner, inner_sum, TensorProduct.map_tmul]
+  simp only [TensorProduct.inner_tmul, hf, hg, RCLike.mul_re,
+    Finset.sum_sub_distrib]
+
+theorem StarAlgEquiv.tensorProduct_map_isometry_of
+  {A B C D : Type*} [starAlgebra A] [starAlgebra B] [starAlgebra C] [starAlgebra D]
+  [QuantumSet A] [QuantumSet B] [QuantumSet C] [QuantumSet D]
+  {f : A ≃⋆ₐ[ℂ] B} (hf : Isometry f) {g : C ≃⋆ₐ[ℂ] D}
+  (hg : Isometry g) :
+  Isometry (StarAlgEquiv.TensorProduct.map f g) :=
+LinearMap.tensorProduct_map_isometry_of hf hg
+
+@[simps!]
+noncomputable def LinearIsometryEquiv.TensorProduct.map {𝕜 A B C D : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C] [NormedAddCommGroup D]
+  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [InnerProductSpace 𝕜 D]
+  [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B] [FiniteDimensional 𝕜 C] [FiniteDimensional 𝕜 D]
+  (f : A ≃ₗᵢ[𝕜] B) (g : C ≃ₗᵢ[𝕜] D) :
+    A ⊗[𝕜] C ≃ₗᵢ[𝕜] B ⊗[𝕜] D where
+  toLinearEquiv := LinearEquiv.TensorProduct.map f.toLinearEquiv g.toLinearEquiv
+  norm_map' := by
+    rw [← isometry_iff_norm]
+    exact LinearMap.tensorProduct_map_isometry_of f.isometry g.isometry
+
+theorem LinearIsometryEquiv.TensorProduct.map_tmul
+  {𝕜 A B C D : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C] [NormedAddCommGroup D]
+  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B] [InnerProductSpace 𝕜 C] [InnerProductSpace 𝕜 D]
+  [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B] [FiniteDimensional 𝕜 C] [FiniteDimensional 𝕜 D]
+  (f : A ≃ₗᵢ[𝕜] B) (g : C ≃ₗᵢ[𝕜] D) (x : A) (y : C) :
+  (LinearIsometryEquiv.TensorProduct.map f g) (x ⊗ₜ y) = f x ⊗ₜ g y :=
+rfl
+
+theorem oneHom_isometry_inner_one_right
+  {𝕜 A B : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup A] [NormedAddCommGroup B]
+  [InnerProductSpace 𝕜 A] [InnerProductSpace 𝕜 B]
+  [One A] [One B]
+  {F : Type*} [FunLike F A B] [LinearMapClass F 𝕜 A B]
+  [OneHomClass F A B] {f : F}
+  (hf : Isometry f) (x : A) :
+  ⟪f x, 1⟫_𝕜 = ⟪x, 1⟫_𝕜 :=
+by
+  rw [← map_one f]
+  exact (isometry_iff_inner _).mp hf _ _
+
+theorem
+  QuantumGraph.Real.upsilon_starAlgEquiv_conj_eq
+  {f : A →ₗ[ℂ] A} (gns : hA.k = 0) (gns₂ : hB.k = 0)
+  (hf : QuantumGraph.Real A f)
+  {φ : A ≃⋆ₐ[ℂ] B} (hφ : Isometry φ) :
+  let u := QuantumGraph.Real.upsilonOrthonormalBasis gns hf
+  let b := hA.onb
+  let a := λ (x : A ⊗[ℂ] A) =>
+    λ i : (n A) × (n A) => (x.of_orthonormalBasis_prod b b i).1
+  φ.toLinearMap ∘ₗ f ∘ₗ LinearMap.adjoint φ.toLinearMap
+    = ∑ i, ∑ j, ∑ p,
+      (⟪φ (a (u i : A ⊗[ℂ] A) p), 1⟫_ℂ
+        * ⟪φ (b p.2), 1⟫_ℂ)
+      • rankOne ℂ (φ (b j.2)) (modAut (-1) (star (φ (a (u i : A ⊗[ℂ] A) j)))) :=
+by
+  intro u b a
+  nth_rw 1 [hf.upsilon_eq gns]
+  simp only [ContinuousLinearMap.coe_sum,
+    ContinuousLinearMap.coe_smul,
+    LinearMap.comp_sum, LinearMap.sum_comp,
+    LinearMap.smul_comp, LinearMap.comp_smul,
+    LinearMap.comp_rankOne, LinearMap.rankOne_comp']
+  simp only [StarAlgEquiv.toLinearMap_apply]
+  have := QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry'' hφ
+  simp only [gns, gns₂, mul_zero, zero_add, LinearMap.ext_iff,
+    LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
+    StarAlgEquiv.toLinearMap_apply] at this
+  simp_rw [this, map_star, oneHom_isometry_inner_one_right hφ,
+    ← TensorProduct.inner_tmul, ← Finset.sum_smul,
+    ← sum_inner, ← Algebra.TensorProduct.one_def, TensorProduct.of_othonormalBasis_prod_eq']
+
+theorem LinearMapClass.apply_rankOne_apply
+  {E₁ E₂ E₃ 𝕜 : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup E₁] [NormedAddCommGroup E₂] [NormedAddCommGroup E₃]
+  [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂] [InnerProductSpace 𝕜 E₃]
+  {F : Type*}
+  [FunLike F E₁ E₃] [LinearMapClass F 𝕜 E₁ E₃]
+  (x : E₁) (y z : E₂) (u : F) :
+    u ((rankOne 𝕜 x y) z) = rankOne 𝕜 (u x) y z :=
+by simp only [rankOne_apply, map_smul]
 
 end
 
