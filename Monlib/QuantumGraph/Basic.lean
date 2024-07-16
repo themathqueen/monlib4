@@ -4,6 +4,7 @@ import Monlib.LinearAlgebra.TensorProduct.Lemmas
 import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.LinearAlgebra.PosMap_isReal
 import Monlib.LinearAlgebra.MyBimodule
+import Monlib.LinearAlgebra.TensorProduct.Submodule
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
 
@@ -447,6 +448,87 @@ by
 
 section
 
+theorem StarAlgEquiv.toAlgEquiv_toAlgHom_toLinearMap
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  [Star A] [Star B] (f : A ≃⋆ₐ[R] B) :
+    f.toAlgEquiv.toAlgHom.toLinearMap = f.toLinearMap :=
+rfl
+
+def QuantumGraph.Real_conj_starAlgEquiv {A : Type*} [starAlgebra A] [QuantumSet A]
+  {x : A →ₗ[ℂ] A} (hx : QuantumGraph.Real A x)
+  {f : A ≃⋆ₐ[ℂ] A} (hf : Isometry f) :
+  QuantumGraph.Real _ (f.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap)) :=
+by
+  constructor
+  . rw [← StarAlgEquiv.toAlgEquiv_toAlgHom_toLinearMap,
+      schurMul_algHom_comp_algHom_adjoint, hx.1]
+  . suffices LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap from ?_
+    . simp_rw [this]
+      rw [LinearMap.real_starAlgEquiv_conj_iff]
+      exact QuantumGraph.Real.isReal
+    . exact QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm.mp hf
+
+theorem Submodule.eq_iff_orthogonalProjection_eq
+  {E : Type u_1} [NormedAddCommGroup E] [InnerProductSpace ℂ E] {U : Submodule ℂ E}
+  {V : Submodule ℂ E} [CompleteSpace E] [CompleteSpace ↥U] [CompleteSpace ↥V] :
+  U = V ↔ orthogonalProjection' U = orthogonalProjection' V :=
+by simp_rw [le_antisymm_iff, orthogonalProjection.is_le_iff_subset]
+
+open scoped FiniteDimensional in
+theorem Submodule.adjoint_subtype {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+    [FiniteDimensional ℂ E] {U : Submodule ℂ E} :
+  LinearMap.adjoint U.subtype = (orthogonalProjection U).toLinearMap :=
+by
+  rw [← Submodule.adjoint_subtypeL]
+  rfl
+
+theorem Submodule.map_orthogonalProjection_self {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+    [FiniteDimensional ℂ E] {U : Submodule ℂ E} :
+  Submodule.map (orthogonalProjection U).toLinearMap U = ⊤ :=
+by
+  ext x
+  simp only [mem_map, ContinuousLinearMap.coe_coe, mem_top, iff_true]
+  use x
+  simp only [SetLike.coe_mem, orthogonalProjection_mem_subspace_eq_self, and_self]
+
+theorem OrthonormalBasis.orthogonalProjection_eq_sum_rankOne {ι 𝕜 : Type _} [RCLike 𝕜] {E : Type _}
+    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [Fintype ι] {U : Submodule 𝕜 E}
+    [CompleteSpace U] (b : OrthonormalBasis ι 𝕜 ↥U) :
+    orthogonalProjection U = ∑ i : ι, rankOne 𝕜 (b i) (b i : E) :=
+by
+  ext
+  simp_rw [b.orthogonalProjection_eq_sum, ContinuousLinearMap.sum_apply, rankOne_apply]
+
+
+theorem orthogonalProjection_submoduleMap {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
+  {U : Submodule ℂ E}
+  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E'] (f : E ≃ₗᵢ[ℂ] E') :
+  (orthogonalProjection' (Submodule.map f U)).toLinearMap
+    = f.toLinearMap
+      ∘ₗ (orthogonalProjection' U).toLinearMap
+      ∘ₗ f.symm.toLinearMap :=
+by
+  ext
+  simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL,
+    LinearMap.coe_comp, Submodule.coeSubtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
+    LinearEquiv.coe_coe, LinearIsometryEquiv.coe_toLinearEquiv]
+  rw [← orthogonalProjection_map_apply]
+  rfl
+
+theorem orthogonalProjection_submoduleMap' {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
+  {U : Submodule ℂ E}
+  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E'] (f : E' ≃ₗᵢ[ℂ] E) :
+  (orthogonalProjection' (Submodule.map f.symm U)).toLinearMap
+    = f.symm.toLinearMap
+      ∘ₗ (orthogonalProjection' U).toLinearMap
+      ∘ₗ f.toLinearMap :=
+orthogonalProjection_submoduleMap f.symm
+
+end
+section
+
 noncomputable def QuantumGraph.Real.upsilonSubmodule
   {f : A →ₗ[ℂ] A} (gns : hA.k = 0)
   (hf : QuantumGraph.Real A f) :
@@ -471,6 +553,48 @@ noncomputable def QuantumGraph.Real.upsilonOrthonormalBasis {f : A →ₗ[ℂ] A
   (gns : hA.k = 0) (hf : QuantumGraph.Real A f) :
   OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (upsilonSubmodule gns hf))) ℂ (upsilonSubmodule gns hf) :=
 stdOrthonormalBasis ℂ (upsilonSubmodule gns hf)
+
+@[simp]
+theorem OrthonormalBasis.tensorProduct_toBasis {𝕜 E F : Type*}
+  [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
+  [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
+  [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+  {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁]
+  [DecidableEq ι₂] (b₁ : OrthonormalBasis ι₁ 𝕜 E) (b₂ : OrthonormalBasis ι₂ 𝕜 F) :
+  (b₁.tensorProduct b₂).toBasis = b₁.toBasis.tensorProduct b₂.toBasis :=
+by aesop
+
+theorem
+  QuantumGraph.Real.upsilon_eq {f : A →ₗ[ℂ] A} (gns : hA.k = 0)
+    (hf : QuantumGraph.Real A f) :
+  let u := QuantumGraph.Real.upsilonOrthonormalBasis gns hf
+  let b := hA.onb
+  let a := λ (x : A ⊗[ℂ] A) =>
+    λ i : (n A) × (n A) => (((b.tensorProduct b).repr x) i • b i.1)
+  f = ∑ i, ∑ j, ⟪(u i : A ⊗[ℂ] A), 1⟫_ℂ
+    • rankOne ℂ (b j.2) (modAut (-1) (star (a (u i : A ⊗[ℂ] A) j))) :=
+by
+  intro u b a
+  symm
+  have := Upsilon_symm_tmul (A := A) (B:=A)
+  simp only [gns, neg_zero, zero_sub] at this
+  simp_rw [ContinuousLinearMap.coe_sum, ContinuousLinearMap.coe_smul,
+    ← this, ← map_smul]
+  have : ∀ x, ∑ x_1, a (↑(u x)) x_1 ⊗ₜ[ℂ] b x_1.2 = u x :=
+  λ x => by
+    simp only [a, ← TensorProduct.smul_tmul']
+    symm
+    nth_rw 1 [TensorProduct.of_basis_eq_span (u x) b.toBasis b.toBasis]
+    simp only [OrthonormalBasis.coe_toBasis, Fintype.sum_prod_type,
+      ← OrthonormalBasis.tensorProduct_toBasis,
+      OrthonormalBasis.coe_toBasis_repr_apply]
+  simp_rw [← map_sum, ← Finset.smul_sum, this, ← rankOne_apply (𝕜 := ℂ) (1 : A ⊗[ℂ] A),
+    ← ContinuousLinearMap.sum_apply,
+    ← OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne]
+  rw [upsilonOrthogonalProjection]
+  simp_rw [TensorProduct.toIsBimoduleMap_apply_coe,
+    LinearMap.coe_toContinuousLinearMap',
+    rmulMapLmul_apply_one, LinearEquiv.symm_apply_apply]
 
 end
 

@@ -986,16 +986,16 @@ lemma _root_.LinearMap.apply_eq_id {R M : Type*} [Semiring R] [AddCommMonoid M]
 by simp_rw [LinearMap.ext_iff, LinearMap.one_apply]
 
 theorem _root_.QuantumSet.starAlgEquiv_is_isometry_tfae
-    (gns₁ : hA.k = 0) (gns₂ : hB.k = 0)
+    -- (gns₁ : hA.k = 0) (gns₂ : hB.k = 0)
     (f : A ≃⋆ₐ[ℂ] B) :
     List.TFAE
-      [LinearMap.adjoint f.toLinearMap =
-          f.symm.toLinearMap,
-        Coalgebra.counit ∘ₗ f.toLinearMap = Coalgebra.counit,
+      [LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap,
+
         ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
-        ∀ x, ‖f x‖ = ‖x‖] :=
+        ∀ x, ‖f x‖ = ‖x‖,
+        Isometry f] :=
 by
-  tfae_have 4 ↔ 1
+  tfae_have 3 ↔ 1
   · simp_rw [@norm_eq_sqrt_inner ℂ, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← @RCLike.ofReal_inj ℂ, @inner_self_re ℂ, ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
     have :
@@ -1008,20 +1008,98 @@ by
         LinearMap.adjoint_inner_left, StarAlgEquiv.toLinearMap_apply]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]
-  rw [tfae_4_iff_1]
-  tfae_have 3 ↔ 2
-  ·
-    simp_rw [QuantumSet.inner_eq_counit, ← map_star f,
-      LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
-        gns₁, gns₂, starAlgebra.modAut_zero, AlgEquiv.one_apply, ← map_mul]
-    refine' ⟨fun h x => _, fun h x y => h _⟩
-    rw [← one_mul x, ← star_one]
-    exact h _ _
-  rw [← tfae_3_iff_2]
+  rw [tfae_3_iff_1]
+  -- tfae_have 3 ↔ 2
+  -- ·
+  --
   simp_rw [← StarAlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_left,
     ← ext_inner_left_iff, ← LinearMap.comp_apply, _root_.LinearMap.apply_eq_id,
     StarAlgEquiv.comp_eq_iff, LinearMap.one_comp]
+  rw [AddMonoidHomClass.isometry_iff_norm]
   tfae_finish
+
+theorem _root_.QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm
+    {f : A ≃⋆ₐ[ℂ] B} :
+    Isometry f ↔ LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap :=
+List.TFAE.out (starAlgEquiv_is_isometry_tfae f) 3 0
+
+theorem QuantumSet.starAlgEquiv_isometry_iff_coalgHom
+  (gns₁ : hA.k = 0) (gns₂ : hB.k = 0)
+  {f : A ≃⋆ₐ[ℂ] B} :
+  Isometry f ↔
+  Coalgebra.counit ∘ₗ f.toLinearMap = Coalgebra.counit :=
+by
+  simp_rw [isometry_iff_inner,
+    QuantumSet.inner_eq_counit, ← map_star f,
+    LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
+    gns₁, gns₂, starAlgebra.modAut_zero, AlgEquiv.one_apply, ← map_mul]
+  refine' ⟨fun h x => _, fun h x y => h _⟩
+  rw [← one_mul x, ← star_one]
+  exact h _ _
+
+theorem _root_.StarAlgEquiv.isReal {R A B : Type*} [Semiring R]
+  [AddCommMonoid A] [AddCommMonoid B] [Mul A] [Mul B] [Module R A]
+  [Module R B] [Star A] [Star B] (f : A ≃⋆ₐ[R] B) :
+    LinearMap.IsReal f.toLinearMap :=
+by
+  intro
+  simp only [StarAlgEquiv.toLinearMap_apply, map_star]
+
+theorem QuantumSet.modAut_real (r : ℝ) :
+    (ha.modAut r).toLinearMap.real = (ha.modAut (-r)).toLinearMap :=
+by
+  rw [LinearMap.ext_iff]
+  intro
+  simp_rw [LinearMap.real_apply, AlgEquiv.toLinearMap_apply, ha.modAut_star, star_star]
+
+theorem _root_.AlgEquiv.linearMap_comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
+    [AddCommMonoid E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
+    (f : E₁ ≃ₐ[R] E₂) (x : E₂ →ₗ[R] E₃) (y : E₁ →ₗ[R] E₃) :
+    x ∘ₗ f.toLinearMap = y ↔ x = y ∘ₗ f.symm.toLinearMap :=
+by aesop
+theorem _root_.AlgEquiv.comp_linearMap_eq_iff
+  {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
+  [AddCommMonoid E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
+  (f : E₁ ≃ₐ[R] E₂) (x : E₃ →ₗ[R] E₁) (y : E₃ →ₗ[R] E₂) :
+  f.toLinearMap ∘ₗ x = y ↔ x = f.symm.toLinearMap ∘ₗ y :=
+by aesop
+
+lemma QuantumSet.modAut_adjoint (r : ℝ) :
+  LinearMap.adjoint (ha.modAut r).toLinearMap = (ha.modAut r).toLinearMap :=
+by
+  rw [← LinearMap.isSelfAdjoint_iff']
+  exact modAut_isSelfAdjoint r
+
+theorem _root_.QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry
+  {f : A ≃⋆ₐ[ℂ] B} (hf : Isometry f) :
+  (modAut ((2 * k A) + 1)).trans f.toAlgEquiv = f.toAlgEquiv.trans (modAut ((2 * k B) + 1)) :=
+by
+  rw [starAlgEquiv_isometry_iff_adjoint_eq_symm] at hf
+  have := LinearMap.adjoint_real_eq f.toLinearMap
+  rw [← neg_sub] at this
+  simp only [sub_neg_eq_add,
+    LinearMap.real_of_isReal (_root_.StarAlgEquiv.isReal _), hf] at this
+  simp only [← LinearMap.comp_assoc, ← modAut_symm,
+    ← AlgEquiv.linearMap_comp_eq_iff] at this
+  apply_fun LinearMap.adjoint at this
+  simp only [LinearMap.adjoint_comp, ← hf, LinearMap.adjoint_adjoint,
+    QuantumSet.modAut_adjoint] at this
+  simp only [LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply,
+    AlgEquiv.toLinearMap_apply] at this
+  simp only [AlgEquiv.ext_iff, AlgEquiv.trans_apply, StarAlgEquiv.coe_toAlgEquiv]
+  nth_rw 2 [add_comm]
+  exact λ _ => (this _).symm
+
+theorem _root_.QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry'
+  {f : A ≃⋆ₐ[ℂ] B} (hf : Isometry f) :
+  f.toLinearMap.comp (modAut ((2 * k A) + 1)).toLinearMap =
+    (modAut ((2 * k B) + 1)).toLinearMap.comp f.toLinearMap :=
+by
+  have := _root_.QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry hf
+  simp only [AlgEquiv.ext_iff, AlgEquiv.trans_apply,
+    LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.coe_toAlgEquiv,
+    StarAlgEquiv.toLinearMap_apply, AlgEquiv.toLinearMap_apply] at this ⊢
+  exact this
 
 set_option synthInstance.maxHeartbeats 0 in
 private noncomputable def tenSwap_Psi_aux :

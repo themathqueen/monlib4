@@ -149,3 +149,54 @@ lemma inner_self_nonpos' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 
   ⟪x, x⟫_𝕜 ≤ 0 ↔ x = 0 :=
 by
 simp_rw [@RCLike.nonpos_def 𝕜, inner_self_nonpos, inner_self_im, and_true]
+
+
+lemma _root_.isometry_iff_norm {E F : Type _} [SeminormedAddGroup E] [SeminormedAddGroup F]
+  {e : Type*} [FunLike e E F]
+  [AddMonoidHomClass e E F]
+  (f : e) :
+  Isometry f ↔ ∀ x, ‖f x‖ = ‖x‖ :=
+by
+  rw [isometry_iff_dist_eq]
+  simp_rw [dist_eq_norm, ← map_sub]
+  constructor
+  . intro h x
+    specialize h x 0
+    simp_rw [sub_zero] at h
+    exact h
+  . intro h x y
+    exact h _
+lemma _root_.isometry_iff_norm' {E F : Type _} [_root_.NormedAddCommGroup E] [_root_.NormedAddCommGroup F]
+  {e : Type*} [FunLike e E F]
+  [AddMonoidHomClass e E F]
+  (f : e) :
+  Isometry f ↔ ∀ x, ‖f x‖ = ‖x‖ :=
+isometry_iff_norm _
+lemma _root_.isometry_iff_inner {R E F : Type _} [RCLike R]
+  [_root_.NormedAddCommGroup E] [_root_.NormedAddCommGroup F]
+  [_root_.InnerProductSpace R E] [_root_.InnerProductSpace R F]
+  {M : Type*} [FunLike M E F] [LinearMapClass M R E F]
+  (f : M) :
+  Isometry f ↔ ∀ x y, ⟪f x, f y⟫_R = ⟪x, y⟫_R :=
+by
+  rw [isometry_iff_dist_eq]
+  simp_rw [dist_eq_norm, ← map_sub]
+  constructor
+  . simp_rw [inner_eq_sum_norm_sq_div_four, ← _root_.map_smul, ← map_add, ← map_sub]
+    intro h x y
+    have := λ x => h x 0
+    simp_rw [sub_zero] at this
+    simp_rw [this]
+  . intro h x y
+    simp_rw [@norm_eq_sqrt_inner R, h]
+lemma _root_.isometry_iff_inner_norm'
+  {R E F : Type _} [RCLike R] [_root_.NormedAddCommGroup E] [_root_.NormedAddCommGroup F]
+  [_root_.InnerProductSpace R E] [_root_.InnerProductSpace R F]
+  {M : Type*} [FunLike M E F] [LinearMapClass M R E F] (f : M) :
+  (∀ x, ‖f x‖ = ‖x‖) ↔ ∀ x y, ⟪f x, f y⟫_R = ⟪x, y⟫_R :=
+by rw [← isometry_iff_inner, isometry_iff_norm]
+
+lemma _root_.seminormedAddGroup_norm_eq_norm_NormedAddCommGroup
+  {E : Type _} [_root_.NormedAddCommGroup E] (x : E) :
+  @norm E SeminormedAddGroup.toNorm x = @norm E _root_.NormedAddCommGroup.toNorm x :=
+rfl

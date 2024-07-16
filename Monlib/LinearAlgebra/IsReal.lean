@@ -27,6 +27,14 @@ def LinearMap.IsReal {M₁ M₂ : Type*} {F : Type*} [FunLike F M₁ M₂]
   [Star M₁] [Star M₂] (φ : F) : Prop :=
 ∀ x, φ (star x) = star (φ x)
 
+@[simp]
+theorem starHomClass.linearMap_isReal {M₁ M₂ : Type*} {F : Type*} [FunLike F M₁ M₂]
+  [Star M₁] [Star M₂] [StarHomClass F M₁ M₂] (φ : F) :
+    LinearMap.IsReal φ :=
+by
+  intro
+  simp only [map_star]
+
 section Sec
 
 variable {E F K : Type _} [AddCommMonoid E] [StarAddMonoid E] [AddCommMonoid F] [StarAddMonoid F]
@@ -83,6 +91,11 @@ theorem LinearMap.isReal_iff
   (φ : E →ₗ[K] F) : IsReal φ ↔ real φ = φ := by
   simp_rw [LinearMap.IsReal, LinearMap.ext_iff, LinearMap.real_apply,
     @eq_star_iff_eq_star _ _ (φ (star _)), eq_comm]
+
+theorem LinearMap.real_of_isReal {φ : E →ₗ[K] F}
+   (hφ : LinearMap.IsReal φ) :
+  φ.real = φ :=
+(LinearMap.isReal_iff φ).mp hφ
 
 open scoped BigOperators
 

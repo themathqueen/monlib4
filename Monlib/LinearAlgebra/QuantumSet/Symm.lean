@@ -251,25 +251,6 @@ theorem commute_real_real {R A : Type _} [Semiring R] [StarRing R] [AddCommMonoi
   simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp, ← LinearMap.real_comp, ←
     LinearMap.real_inj_eq]
 
-theorem QuantumSet.modAut_real (r : ℝ) :
-    (ha.modAut r).toLinearMap.real = (ha.modAut (-r)).toLinearMap :=
-by
-  rw [LinearMap.ext_iff]
-  intro
-  simp_rw [LinearMap.real_apply, AlgEquiv.toLinearMap_apply, ha.modAut_star, star_star]
-
-theorem _root_.AlgEquiv.linearMap_comp_eq_iff {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-    [AddCommMonoid E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
-    (f : E₁ ≃ₐ[R] E₂) (x : E₂ →ₗ[R] E₃) (y : E₁ →ₗ[R] E₃) :
-    x ∘ₗ f.toLinearMap = y ↔ x = y ∘ₗ f.symm.toLinearMap :=
-by aesop
-theorem _root_.AlgEquiv.comp_linearMap_eq_iff
-  {R E₁ E₂ E₃ : Type _} [CommSemiring R] [Semiring E₁] [Semiring E₂]
-  [AddCommMonoid E₃] [Algebra R E₁] [Algebra R E₂] [Module R E₃]
-  (f : E₁ ≃ₐ[R] E₂) (x : E₃ →ₗ[R] E₁) (y : E₃ →ₗ[R] E₂) :
-  f.toLinearMap ∘ₗ x = y ↔ x = f.symm.toLinearMap ∘ₗ y :=
-by aesop
-
 theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
     Commute x (hb.modAut r).toLinearMap ↔
       Commute x (hb.modAut (-r)).toLinearMap :=

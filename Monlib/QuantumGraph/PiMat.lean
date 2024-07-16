@@ -242,17 +242,6 @@ by
     rw [← id_apply (R := S) x]
     exact hf.map_mem x
 
-theorem QuantumSet.Psi_apply_completeGraph {A : Type*} {B : Type*} [starAlgebra A]
-    [starAlgebra B] [QuantumSet A] [QuantumSet B] (t r : ℝ) :
-  QuantumSet.Psi t r (Qam.completeGraph A B) = 1 :=
-by
-  simp only [Qam.completeGraph, Psi_apply, Psi_toFun_apply]
-  simp only [map_one, star_one, MulOpposite.op_one, Algebra.TensorProduct.one_def]
-theorem QuantumSet.Psi_symm_one {A B : Type*} [starAlgebra A]
-  [starAlgebra B] [QuantumSet A] [QuantumSet B] (t r : ℝ) :
-  (QuantumSet.Psi t r).symm 1 = Qam.completeGraph A B :=
-by rw [← QuantumSet.Psi_apply_completeGraph t r, LinearEquiv.symm_apply_apply]
-
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
 theorem QuantumGraph.numOfEdges_eq_rank_top_iff
@@ -657,84 +646,6 @@ by
 
 end deltaForm
 
-theorem StarAlgEquiv.toAlgEquiv_toAlgHom_toLinearMap
-  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
-  [Star A] [Star B] (f : A ≃⋆ₐ[R] B) :
-    f.toAlgEquiv.toAlgHom.toLinearMap = f.toLinearMap :=
-rfl
-
-def QuantumGraph.Real_conj_starAlgEquiv {A : Type*} [starAlgebra A] [QuantumSet A]
-  {x : A →ₗ[ℂ] A} (hx : QuantumGraph.Real A x)
-  {f : A ≃⋆ₐ[ℂ] A} (hf : LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap) :
-  QuantumGraph.Real _ (f.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap)) :=
-by
-  constructor
-  . rw [← StarAlgEquiv.toAlgEquiv_toAlgHom_toLinearMap,
-      schurMul_algHom_comp_algHom_adjoint, hx.1]
-  . suffices LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap from ?_
-    . simp_rw [this]
-      rw [LinearMap.real_starAlgEquiv_conj_iff]
-      exact QuantumGraph.Real.isReal
-    . exact hf
-
-theorem Submodule.eq_iff_orthogonalProjection_eq
-  {E : Type u_1} [NormedAddCommGroup E] [InnerProductSpace ℂ E] {U : Submodule ℂ E}
-  {V : Submodule ℂ E} [CompleteSpace E] [CompleteSpace ↥U] [CompleteSpace ↥V] :
-  U = V ↔ orthogonalProjection' U = orthogonalProjection' V :=
-by simp_rw [le_antisymm_iff, orthogonalProjection.is_le_iff_subset]
-
-open scoped FiniteDimensional
-theorem Submodule.adjoint_subtype {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-    [FiniteDimensional ℂ E] {U : Submodule ℂ E} :
-  LinearMap.adjoint U.subtype = (orthogonalProjection U).toLinearMap :=
-by
-  rw [← Submodule.adjoint_subtypeL]
-  rfl
-
-theorem Submodule.map_orthogonalProjection_self {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-    [FiniteDimensional ℂ E] {U : Submodule ℂ E} :
-  Submodule.map (orthogonalProjection U).toLinearMap U = ⊤ :=
-by
-  ext x
-  simp only [mem_map, ContinuousLinearMap.coe_coe, mem_top, iff_true]
-  use x
-  simp only [SetLike.coe_mem, orthogonalProjection_mem_subspace_eq_self, and_self]
-
-theorem OrthonormalBasis.orthogonalProjection_eq_sum_rankOne {ι 𝕜 : Type _} [RCLike 𝕜] {E : Type _}
-    [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [Fintype ι] {U : Submodule 𝕜 E}
-    [CompleteSpace U] (b : OrthonormalBasis ι 𝕜 ↥U) :
-    orthogonalProjection U = ∑ i : ι, rankOne 𝕜 (b i) (b i : E) :=
-by
-  ext
-  simp_rw [b.orthogonalProjection_eq_sum, ContinuousLinearMap.sum_apply, rankOne_apply]
-
-
-theorem orthogonalProjection_submoduleMap {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
-  {U : Submodule ℂ E}
-  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E'] (f : E ≃ₗᵢ[ℂ] E') :
-  (orthogonalProjection' (Submodule.map f U)).toLinearMap
-    = f.toLinearMap
-      ∘ₗ (orthogonalProjection' U).toLinearMap
-      ∘ₗ f.symm.toLinearMap :=
-by
-  ext
-  simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL,
-    LinearMap.coe_comp, Submodule.coeSubtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
-    LinearEquiv.coe_coe, LinearIsometryEquiv.coe_toLinearEquiv]
-  rw [← orthogonalProjection_map_apply]
-  rfl
-
-theorem orthogonalProjection_submoduleMap' {E E' : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-  [NormedAddCommGroup E'] [InnerProductSpace ℂ E']
-  {U : Submodule ℂ E}
-  [FiniteDimensional ℂ E] [FiniteDimensional ℂ E'] (f : E' ≃ₗᵢ[ℂ] E) :
-  (orthogonalProjection' (Submodule.map f.symm U)).toLinearMap
-    = f.symm.toLinearMap
-      ∘ₗ (orthogonalProjection' U).toLinearMap
-      ∘ₗ f.toLinearMap :=
-orthogonalProjection_submoduleMap f.symm
-
 theorem StarAlgEquiv.piCongrRight_symm {R ι : Type*} {A₁ A₂ : ι → Type*}
   [(i : ι) → Add (A₁ i)] [(i : ι) → Add (A₂ i)] [(i : ι) → Mul (A₁ i)] [(i : ι) → Mul (A₂ i)]
   [(i : ι) → Star (A₁ i)] [(i : ι) → Star (A₂ i)] [(i : ι) → SMul R (A₁ i)] [(i : ι) → SMul R (A₂ i)]
@@ -754,7 +665,8 @@ theorem unitary.mul_inv_eq_iff {A : Type*} [Monoid A] [StarMul A] (U : ↥(unita
     rw [← unitary.star_eq_inv]
     simp only [coe_star, SetLike.coe_mem, star_mul_self_of_mem, mul_one]
 
-noncomputable abbrev piInnerAut (U : (i : ι) → Matrix.unitaryGroup (p i) ℂ) :=
+noncomputable abbrev piInnerAut (U : (i : ι) → Matrix.unitaryGroup (p i) ℂ) :
+  PiMat ℂ ι p ≃⋆ₐ[ℂ] PiMat ℂ ι p :=
 (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i)))
 
 theorem piInnerAut_apply_dualMatrix_iff' {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} :
@@ -771,10 +683,23 @@ by
   simp only [piInnerAut_apply_dualMatrix_iff', Matrix.innerAutStarAlg_apply']
   simp_rw [unitary.mul_inv_eq_iff]
 
+example
+  {f : PiMat ℂ ι p ≃⋆ₐ[ℂ] PiMat ℂ ι p} :
+  @Isometry (PiMat ℂ ι p) (PiMat ℂ ι p)
+      (@EMetricSpace.toPseudoEMetricSpace (PiMat ℂ ι p)
+        (@MetricSpace.toEMetricSpace (PiMat ℂ ι p) InnerProductAlgebra.toMetricSpace))
+      (@EMetricSpace.toPseudoEMetricSpace (PiMat ℂ ι p)
+        (@MetricSpace.toEMetricSpace (PiMat ℂ ι p) InnerProductAlgebra.toMetricSpace))
+      f ↔
+    LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap
+  :=
+QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm
+
 theorem innerAutStarAlg_adjoint_eq_symm_of {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
   (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
   LinearMap.adjoint (piInnerAut U).toLinearMap = (piInnerAut U).symm.toLinearMap :=
 by
+  rw []
   apply LinearMap.ext
   intro
   apply ext_inner_left ℂ
@@ -799,7 +724,9 @@ def QuantumGraph.Real.piMat_conj_unitary
   {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
   (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
   QuantumGraph.Real _ ((piInnerAut U).toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint (piInnerAut U).toLinearMap) :=
-QuantumGraph.Real_conj_starAlgEquiv hA (innerAutStarAlg_adjoint_eq_symm_of hU)
+QuantumGraph.Real_conj_starAlgEquiv hA
+  (QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm.mpr
+    (innerAutStarAlg_adjoint_eq_symm_of hU))
 
 noncomputable abbrev Matrix.UnitaryGroup.toEuclideanLinearEquiv {n : Type*} [Fintype n] [DecidableEq n]
   (A : ↥(Matrix.unitaryGroup n ℂ)) :
