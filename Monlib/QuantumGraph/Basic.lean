@@ -839,6 +839,93 @@ theorem LinearMapClass.apply_rankOne_apply
     u ((rankOne 𝕜 x y) z) = rankOne 𝕜 (u x) y z :=
 by simp only [rankOne_apply, map_smul]
 
+theorem Upsilon_apply_comp {C D : Type*} [starAlgebra C] [QuantumSet C]
+  [starAlgebra D] [QuantumSet D]
+  {f : A →ₗ[ℂ] B}
+  {g : D →ₗ[ℂ] C} (x : C →ₗ[ℂ] A)
+  (hcd : k C = k D)
+  (h : (modAut (k C + 1)).toLinearMap ∘ₗ g = g ∘ₗ (modAut (k D + 1)).toLinearMap) :
+  Upsilon (f ∘ₗ x ∘ₗ g) = ((symmMap ℂ _ _).symm g ⊗ₘ f) (Upsilon x) :=
+by
+  rw [Upsilon]
+  simp only [LinearEquiv.trans_apply]
+  rw [Psi_apply_linearMap_comp_linearMap_of_commute_modAut,
+    ← TensorProduct.map_comm]
+  simp only [← LinearEquiv.coe_toLinearMap]
+  rw [← LinearMap.comp_apply, ← LinearMap.comp_apply]
+  symm
+  rw [← LinearMap.comp_apply, ← LinearMap.comp_apply]
+  congr
+  rw [TensorProduct.ext_iff]
+  intro _ _
+  simp only [LinearEquiv.coe_coe, LinearEquiv.coe_lTensor, LinearMap.map_comp_lTensor,
+    LinearMap.coe_comp, Function.comp_apply, LinearEquiv.TensorProduct.map_apply,
+    TensorProduct.map_tmul, unop_apply, op_apply, MulOpposite.coe_opLinearEquiv_symm,
+    MulOpposite.unop_op, symmMap_symm_apply, LinearMap.op_apply, LinearMap.real_apply,
+    MulOpposite.op_star, MulOpposite.unop_star, LinearMap.lTensor_tmul]
+  . simp only [starAlgebra.modAut_zero, AlgEquiv.one_toLinearMap]; rfl
+  . rw [hcd] at h; exact h
+
+theorem TensorProduct.toIsBimoduleMap_comp
+  {R H₁ H₂ H₃ H₄ : Type*} [CommSemiring R]
+  [Semiring H₁] [Semiring H₂] [Semiring H₃] [Semiring H₄] [Algebra R H₁] [Algebra R H₂]
+  [Algebra R H₃] [Algebra R H₄]
+  {f : H₁ ≃ₐ[R] H₃} {g : H₂ ≃ₐ[R] H₄} {x : H₁ ⊗[R] H₂} :
+  (TensorProduct.toIsBimoduleMap
+    ((AlgEquiv.TensorProduct.map f g) x)).1
+    =
+    (AlgEquiv.TensorProduct.map f g).toLinearMap
+      ∘ₗ (TensorProduct.toIsBimoduleMap x).1
+      ∘ₗ (AlgEquiv.TensorProduct.map f.symm g.symm).toLinearMap :=
+by
+  refine' x.induction_on _ _ _
+  . simp only [map_zero, ZeroMemClass.coe_zero, AlgEquiv.TensorProduct.map_toLinearMap,
+    LinearMap.zero_comp, LinearMap.comp_zero]
+  . intro _ _
+    rw [TensorProduct.toIsBimoduleMap_apply_coe, AlgEquiv.TensorProduct.map_tmul, rmulMapLmul_apply]
+    rw [TensorProduct.ext_iff]
+    intro _ _
+    rw [map_tmul, lmul_eq_mul, rmul_eq_mul, ← LinearMap.mulLeft_conj_of_mulEquivClass_apply,
+      ← LinearMap.mulRight_conj_of_mulEquivClass_apply]
+    simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, AlgEquiv.TensorProduct.map_tmul,
+      toIsBimoduleMap_apply_coe, rmulMapLmul_apply, map_tmul]
+    rfl
+  . intro _ _ h1 h2
+    simp only [_root_.map_add, LinearMap.IsBimoduleMaps.coe_add, h1, h2,
+      LinearMap.add_comp, LinearMap.comp_add]
+
+open scoped FiniteDimensional in
+theorem QuantumGraph.Real.upsilon_starAlgEquiv_conj_submodule
+  {f : A →ₗ[ℂ] A} (gns : hA.k = 0) (gns₂ : hB.k = 0)
+  (hf : QuantumGraph.Real A f)
+  {φ : A ≃⋆ₐ[ℂ] B} (hφ : Isometry φ) :
+  upsilonSubmodule gns₂ (QuantumGraph.Real_conj_starAlgEquiv hf hφ) =
+    Submodule.map
+      (StarAlgEquiv.TensorProduct.map φ φ) (upsilonSubmodule gns hf) :=
+by
+  rw [Submodule.eq_iff_orthogonalProjection_eq,
+    ← ContinuousLinearMap.coe_inj,
+    orthogonalProjection_submoduleMap_isometry_starAlgEquiv
+      (StarAlgEquiv.tensorProduct_map_isometry_of hφ hφ)]
+  rw [upsilonOrthogonalProjection, upsilonOrthogonalProjection]
+  simp only [LinearMap.coe_toContinuousLinearMap, ← TensorProduct.toIsBimoduleMap_symm_apply,
+    LinearEquiv.symm_apply_apply]
+  rw [Upsilon_apply_comp]
+  rw [symmMap_symm_apply, LinearMap.adjoint_adjoint, (LinearMap.isReal_iff _).mp (StarAlgEquiv.isReal _)]
+  calc (TensorProduct.toIsBimoduleMap ((φ.toLinearMap ⊗ₘ φ.toLinearMap) (Upsilon f))).1
+      = (TensorProduct.toIsBimoduleMap ((AlgEquiv.TensorProduct.map φ.toAlgEquiv
+        φ.toAlgEquiv) (Upsilon f))).1 := rfl
+    _ = (AlgEquiv.TensorProduct.map φ.toAlgEquiv φ.toAlgEquiv).toLinearMap
+      ∘ₗ (TensorProduct.toIsBimoduleMap (Upsilon f)).1
+      ∘ₗ (AlgEquiv.TensorProduct.map φ.toAlgEquiv.symm φ.toAlgEquiv.symm).toLinearMap :=
+         TensorProduct.toIsBimoduleMap_comp
+  . simp only [gns, gns₂]
+  . have := QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry' hφ
+    simp only [gns, gns₂, zero_add, mul_zero] at this ⊢
+    apply_fun LinearMap.adjoint using LinearEquiv.injective _
+    simp only [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, QuantumSet.modAut_adjoint]
+    exact this
+
 end
 
 -- class QuantumGraphHom {A B : Type*} [NormedAddCommGroupOfRing A]

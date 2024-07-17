@@ -20,19 +20,23 @@ section
 
 variable {R E F : Type _} [CommSemiring R] [NonUnitalNonAssocSemiring E]
   [NonUnitalNonAssocSemiring F] [Module R E] [Module R F] [SMulCommClass R E E]
-  [SMulCommClass R F F] [IsScalarTower R E E] [IsScalarTower R F F] (f : E ≃* F)
+  [SMulCommClass R F F] [IsScalarTower R E E] [IsScalarTower R F F]
 
-theorem LinearMap.mulLeft_conj_of_mulEquiv (x : E) :
-    f ∘ LinearMap.mulLeft R x ∘ f.symm = LinearMap.mulLeft R (f x) :=
-  by
-  ext
-  simp_rw [Function.comp_apply, LinearMap.mulLeft_apply, map_mul, MulEquiv.apply_symm_apply]
+theorem LinearMap.mulLeft_conj_of_mulEquivClass_apply
+  {Fn : Type*} [EquivLike Fn E F] [MulEquivClass Fn E F]
+  (f : Fn) (x : E) (y : F) :
+    f (LinearMap.mulLeft R x (EquivLike.inv f y))  = LinearMap.mulLeft R (f x) y :=
+by
+  simp_rw [LinearMap.mulLeft_apply, map_mul]
+  simp only [EquivLike.apply_inv_apply]
 
-theorem LinearMap.mulRight_conj_of_mulEquiv (x : E) :
-    f ∘ LinearMap.mulRight R x ∘ f.symm = LinearMap.mulRight R (f x) :=
-  by
-  ext
-  simp_rw [Function.comp_apply, LinearMap.mulRight_apply, map_mul, MulEquiv.apply_symm_apply]
+theorem LinearMap.mulRight_conj_of_mulEquivClass_apply
+  {Fn : Type*} [EquivLike Fn E F] [MulEquivClass Fn E F]
+  (f : Fn) (x : E) (y : F) :
+    f (LinearMap.mulRight R x (EquivLike.inv f y)) = LinearMap.mulRight R (f x) y :=
+by
+  simp_rw [LinearMap.mulRight_apply, map_mul]
+  simp only [EquivLike.apply_inv_apply]
 
 end
 
