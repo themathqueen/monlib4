@@ -39,7 +39,7 @@
   For all operators $T,S\in\mathcal{B}(\mathcal{H})$, if $TS=0$, then $P_{\ker{T}}S=S$, where $P_{\ker{T}}$ is the orthogonal projection onto $\ker{T}$.
  \end{corollary}
  \begin{proof}\uses{comp_idempotent_iff}\leanok
-  Suppose $TS=0$. Then we get $\image{S}\subseteq\ker{T}=\image{P_{\ker{T}}}$, and so Lemma \ref{IsIdempotentElem.comp_idempotent_iff} tells us that we get $P_{\ker{T}}S=S$.
+  Suppose $TS=0$. Then we get $\image{S}\subseteq\ker{T}=\image{P_{\ker{T}}}$, and so Lemma \ref{comp_idempotent_iff} tells us that we get $P_{\ker{T}}S=S$.
  \end{proof}
 
  \begin{definition}\label{Matrix.IsHermitian.sqSqrt}\lean{Matrix.IsHermitian.sqSqrt}\leanok
@@ -113,8 +113,11 @@
  
   Using $x=x_+-x_-$ (Lemma \ref{posSemidefDecomposition_eq}),
   we get \[2P_{\ker{x_+}}\sqrt{x^2}=2P_{\ker{x_+}}x_++2P_{\ker{x_+}}x_-=2P_{\ker{x_+}}x_-=2x_-=\sqrt{x^2}-x.\]
-  So then $x=(1-2P_{\ker{x_+}})\sqrt{x^2}$ and $x_-=P_{\ker{x_+}}\sqrt{x^2}$. And so \[x_+=\dfrac{1}{2}(\sqrt{x^2}+x)=\dfrac{1}{2}(\sqrt{x^2}+(1-2P_{\ker{x_+}})\sqrt{x^2})=(1-P_{\ker{x_+}})\sqrt{x^2}=P_{{(\ker{x_+})}^\bot}\sqrt{x^2}.\]
-  
+  So then $x=(1-2P_{\ker{x_+}})\sqrt{x^2}$ and $x_-=P_{\ker{x_+}}\sqrt{x^2}$. And so
+  \begin{align*}
+    x_+ &= \dfrac{1}{2}(\sqrt{x^2}+x)=\dfrac{1}{2}(\sqrt{x^2}+(1-2P_{\ker{x_+}})\sqrt{x^2})\\
+    &= (1-P_{\ker{x_+}})\sqrt{x^2}=P_{{(\ker{x_+})}^\bot}\sqrt{x^2}.
+  \end{align*}
   As $x_+$ and $x_-$ are Hermitian, we also get $x_-=\sqrt{x^2}P_{\ker{x_+}}$ and $x_+=\sqrt{x^2}P_{{(\ker{x_+})}^\bot}$. So then $x_+$ and $x_-$ are products of commuting positive semi-definite matrices, and by Lemma \ref{posSemidef_iff_commute} we get both $x_+$ and $x_-$ are positive semi-definite.
  \end{proof}
 
@@ -144,7 +147,7 @@
   \end{quote}
   Let $x\in M_n$ be Hermitian. Then using Corollary \ref{posSemidefDecomposition'}, we get positive semi-definite matrices $a,b\in{M_n}$ such that $x=a^*a-b^*b$. So then we compute,
   \begin{align*}
-   A^{\operatorname{r}}(x) &={A}^{\operatorname{r}}(a^*a-b^*b)
+   A^{\operatorname{r}}(x) &={A}^{\operatorname{r}}(a^*a-b^*b)\\
     &= {A(a^*a)}^*-{A(b^*b)}^*=A(a^*a)-A(b^*b).
   \end{align*}
   The last equality follows from $A$ being a positive map and both $a^*a$ and $b^*b$ being positive semi-definite.
