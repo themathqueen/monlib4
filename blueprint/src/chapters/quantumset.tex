@@ -4,21 +4,31 @@
   \uses{LinearMap.real, FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of, isAlgHom_iff_adjoint_isCoalgHom}
   \lean{QuantumSet}\leanok
   Given a $^*$-algebra $(\mathcal{A},m,\eta)$ that is also a finite-dimensional Hilbert space,
-  we say it is a \textit{quantum set} when there is a modular automorphism $\sigma_t\colon\mathcal{A}\cong\mathcal{A}$, which is an algebra automorphism for each $t\in\mathbb{R}$, and that the following properties are satisfied:
+  we say it is a \textit{quantum set} when there is a modular automorphism $\sigma_t\colon\mathcal{A}\cong\mathcal{A}$, which is an algebra automorphism for each $t\in\mathbb{R}$, and that the following properties are satisfied (for a fixed $k\in\RR$):
   \begin{enumerate}
    \item $\sigma_t\circ\sigma_s=\sigma_{t+s}$,
    \item $\sigma_0=\id$,
    \item $\sigma_t^{\operatorname{r}}=\sigma_{-t}$,
    \item $\sigma_t$ is self-adjoint,
-   \item $\forall{x,y,z}\in\mathcal{A}:\ip{xy}{z}=\ip{y}{x^*z}$,
-   \item $\forall{x,y,z}\in\mathcal{A}:\ip{xy}{z}=\ip{x}{z\sigma_{-1}(y^*)}$.
+   \item $\forall{x,y,z}\in\mathcal{A}:\ip{xy}{z}=\ip{y}{\sigma_{-k}(x)^*z}$,
+   \item $\forall{x,y,z}\in\mathcal{A}:\ip{xy}{z}=\ip{x}{z\sigma_{-k-1}(y^*)}$.
   \end{enumerate}
-  By Proposition \ref{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}, we see that $(\mathcal{A},m,\eta)$ is a Frobenius algebra.
+  By Proposition \ref{FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of}, we see that $(\mathcal{A},m,\eta,k)$ is a Frobenius algebra.
 
   And by Proposition \ref{isAlgHom_iff_adjoint_isCoalgHom}, we can see that for any $t\in\mathbb{R}$, we get $\sigma_t$ is also a co-algebra homomorphism.
 
-  We can easily see that we get $\ip{x}{y}=\eta^*(x^*y)$ for all $x,y\in\mathcal{A}$.
+  We can easily see that we get $\ip{x}{y}=\eta^*(x^*\sigma_k(y))$ for all $x,y\in\mathcal{A}$.
  \end{definition}
+ \begin{remark}
+  In the Lean code, we start with a $^*$-algebra and define a modular automorphism $\sigma_t$ that satisfies properties 1--3 above.
+  Then we add the Hilbert space structure on top of that.
+  The reason for this is so that we can define more quantum sets on the same space (with a different $k$-value; in practice, we either use $k=0$ for the GNS-inner product, or $k=-1/2$ for the KMS-inner product).
+  This way minimises the instance diamonds created.
+
+  Normally, we start with a finite-dimensional $^*$-algebra $(\mathcal{A},m,\eta)$ with a faithful and positive linear functional $\psi$. Then define the Hilbert space structure by $\ip{x}{y}=\psi(x^*y)$.
+  The modular automorphism is then defined by $\sigma_t(x)=Q^{-t}xQ^t$, where $Q$ is the ``weight'' of $\psi$ (in other words, $\psi(x)=\Tr(Q x)$).
+  Then one has a quantum set.
+ \end{remark}
 
  Clearly, the Hilbert space of $\bigoplus_iM_{n_i}$ given by a positive and faithful linear functional $\psi$ (Definition \ref{PiMat.InnerProductSpace}) is a quantum set with modular automorphism defined in Definition \ref{modAut}.
  

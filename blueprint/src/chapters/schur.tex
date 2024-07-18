@@ -7,11 +7,35 @@
  \end{definition}
 
  \begin{lemma}\label{schurMul.apply_rankOne}
-  \uses{}
+  \uses{schurMul}
   \lean{schurMul.apply_rankOne}\leanok
   Given $a,c\in(B_1,m_1,\eta_1,\simga_r)$ and $b,d\in(B_2,m_2,\eta_2,\vartheta_r)$, we get
   \[\ketbra{a}{b}\bullet\ketbra{c}{d}=\ketbra{ac}{bd}.\]
  \end{lemma}
  \begin{proof}
-  
+  \uses{linearMap_comp_rankOne, rankOne_comp_linearMap}\leanok
+  \begin{align*}
+   \irdN{\ketbra{a}{b}}{\ketbra{c}{d}} &= m(\ketbra{a}{b}\otimes\ketbra{c}{d})m^*
+   = m\ketbra{a\otimes c}{b\otimes d}m^*\\
+   &= \ketbra{m(a\otimes c)}{m(b\otimes d)}=\ketbra{ac}{bd}.
+  \end{align*}
+ \end{proof}
+
+ \begin{corollary}\label{schurMul_assoc}
+  \uses{schurMul}\lean{schurMul_assoc}\leanok
+  Given linear maps $A_1,A_2,A_3\colon X_1\to X_2$, we get
+  \[\irdLeft{\irdN{A_1}{A_2}}{A_3}=\irdRight{A_1}{\irdN{A_2}{A_3}}.\]
+ \end{corollary}
+ \begin{proof}\leanok
+  This follows from the associativity and co-associativity properties of the multiplication maps.
+ \end{proof}
+
+ \begin{lemma}\label{Psi.schurMul}
+  \uses{schurMul, QuantumSet.Psi}
+  \lean{Psi.schurMul}\leanok
+  For any $r,t\in\mathbb{R}$ and linear maps $f$ and $g$ from quantum set $A$ to quantum set $B$, we get
+  \[\Psi_{r,t}(\irdN{f}{g})=\Psi_{r,t}(f)\Psi_{r,t}(g).\]
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
  \end{proof}

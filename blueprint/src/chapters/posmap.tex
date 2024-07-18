@@ -1,0 +1,162 @@
+\chapter{Positive maps}
+
+ In this section, we show that a non-unital algebra homomorphism between two finite-dimensional $^*$-algebras is a positive map if and only if it is star-preserving.
+
+ \begin{lemma}\label{posSemidef_iff_commute}
+  \lean{Matrix.posSemidef_iff_commute}\leanok
+  Given positive semi-definite matrices $x,y\in M_n$, we have $xy=yx$ if and only if $0\leq{xy}$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Firstly, $xy$ is self-adjoint if and only if $yx=y^*x^*=(xy)^*=xy$, as both $x$ and $y$ are self-adjoint.
+  So if $0\leq xy$, then we know $xy$ is self-adjoint, and so $xy=yx$.
+  Suppose that we have $xy=yx$. We want to show $\Spectrum(xy)\subseteq[0,\infty)$.
+ 
+  Let $a,b\in M_n$ such that $x=a^*a$ and $y=b^*b$. Then we compute,
+  \begin{align*}
+   \Spectrum(xy)\setminus\{0\} &= \Spectrum(a^*ab^*b)\setminus\{0\}\\
+   &= \Spectrum(ab^*ba^*)\{0\}\\
+   &= \Spectrum({(ba^*)}^*ba^*)\setminus\{0\}\subseteq[0,\infty)\setminus\{0\}.
+  \end{align*}
+  Where the last inclusion follows from the fact that ${(ba^*)}^*ba^*$ is positive semi-definite.
+  Thus $0\leq xy$.
+ \end{proof}
+
+ \begin{lemma}\label{comp_idempotent_iff}
+  \lean{IsIdempotentElem.comp_idempotent_iff}\leanok
+  If $p,q\in \mathcal{L}(E)$ such that $q$ is idempotent, then
+  \[qp=p \,\LRa\, \image{p}\subseteq\image{q}.\]
+ \end{lemma}
+ \begin{proof}\leanok
+  Suppose $p,q\in\mathcal{L}(E)$ are idempotent. Then
+  \begin{align*}
+   &\quad\;\;\forall{x}\in{E}:q(p(x))=p(x) \LRa p(x)\in\image{q}.
+  \end{align*}
+  And so the result then follows.
+ \end{proof}
+
+ \begin{corollary}\label{orthogonalProjection_ker_comp_eq_of_comp_eq_zero}
+  \lean{orthogonalProjection_ker_comp_eq_of_comp_eq_zero}\leanok
+  For all operators $T,S\in\mathcal{B}(\mathcal{H})$, if $TS=0$, then $P_{\ker{T}}S=S$, where $P_{\ker{T}}$ is the orthogonal projection onto $\ker{T}$.
+ \end{corollary}
+ \begin{proof}\uses{comp_idempotent_iff}\leanok
+  Suppose $TS=0$. Then we get $\image{S}\subseteq\ker{T}=\image{P_{\ker{T}}}$, and so Lemma \ref{IsIdempotentElem.comp_idempotent_iff} tells us that we get $P_{\ker{T}}S=S$.
+ \end{proof}
+
+ \begin{definition}\label{Matrix.IsHermitian.sqSqrt}\lean{Matrix.IsHermitian.sqSqrt}\leanok
+  Given a Hermitian matrix $x\in M_n$, we define the positive square root of the square of $x$ to be $\sqrt{x^2}$.
+
+  This is clearly positive semi-definite.
+
+  Explicitly, given the decomposition $x=UDU^*$ where $D$ is the diagonal of the eigenvalues of $x$, then we have $\sqrt{x^2}=U\abs{D}U^*$.
+ \end{definition}
+ 
+ \begin{lemma}\label{Matrix.IsHermitian.sqSqrt_sq}
+  \uses{Matrix.IsHermitian.sqSqrt}
+  \lean{Matrix.IsHermitian.sqSqrt_sq}\leanok
+  The square of the positive square root of a Hermitian matrix is equal to the square of the matrix, i.e., $\left(\sqrt{x^2}\right)^2=x^2$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{corollary}\label{Matrix.IsHermitian.commute_sqSqrt}
+  \uses{Matrix.IsHermitian.sqSqrt}
+  \lean{Matrix.IsHermitian.commute_sqSqrt}\leanok
+  Given a Hermitian matrix $x\in M_n$, we get $\sqrt{x^2}$ and $x$ commute.
+ \end{corollary}
+ \begin{proof}\leanok
+  Straightforward computation.
+ \end{proof}
+
+ \begin{definition}\label{posSemidefDecomposition_left}
+  \uses{Matrix.IsHermitian.sqSqrt}\lean{Matrix.IsHermitian.posSemidefDecomposition_left}\leanok
+  Given a Hermitian matrix $x\in M_n$, we define $x_+$ to be the matrix \[x_+:= \frac{1}{2}(\sqrt{x^2} + x).\]
+ \end{definition}
+ \begin{definition}\label{posSemidefDecomposition_right}
+  \uses{Matrix.IsHermitian.sqSqrt}\lean{Matrix.IsHermitian.posSemidefDecomposition_right}\leanok
+  Given a Hermitian matrix $x\in M_n$, we define $x_-$ to be the matrix \[x_-:= \frac{1}{2}(\sqrt{x^2} - x).\]
+ \end{definition}
+
+ \begin{lemma}\label{posSemidefDecomposition_left_mul_right}
+  \uses{posSemidefDecomposition_left,
+   posSemidefDecomposition_right}
+  \lean{Matrix.IsHermitian.posSemidefDecomposition_left_mul_right}\leanok
+  Given a Hermitian matrix $x\in M_n$, we get $x_+x_-=0$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Direct computation.
+ \end{proof}
+
+ \begin{lemma}\label{posSemidefDecomposition_eq}
+  \uses{posSemidefDecomposition_left,
+   posSemidefDecomposition_right}
+  \lean{Matrix.IsHermitian.posSemidefDecomposition_eq}\leanok
+  Given a Hermitian matrix $x\in M_n$, we get $x=x_+-x_-$.
+ \end{lemma}
+ \begin{proof}\leanok
+  Direct computation.
+ \end{proof}
+ 
+ \begin{proposition}\label{posSemidefDecomposition_posSemidef_left_right}
+  \uses{posSemidefDecomposition_left, posSemidefDecomposition_right}
+  \lean{Matrix.IsHermitian.posSemidefDecomposition_posSemidef_left_right}\leanok
+  Given a Hermitian matrix $x\in M_n$, we get both $x_+$ and $x_-$ are positive semi-definite.
+ \end{proposition}
+ \begin{proof}
+  \uses{posSemidefDecomposition_left_mul_right,
+   orthogonalProjection_ker_comp_eq_of_comp_eq_zero,
+   posSemidefDecomposition_eq,
+   posSemidef_iff_commute}\leanok
+  It is clear that both $x_+$ and $x_-$ are Hermitian.
+  
+  As $x_+x_-=0$ (Lemma \ref{posSemidefDecomposition_left_mul_right}), then we also get $x_-x_+=0$. And by Corollary \ref{orthogonalProjection_ker_comp_eq_of_comp_eq_zero}, we get $P_{\ker{x_+}}x_-=x_-$.
+ 
+  Using $x=x_+-x_-$ (Lemma \ref{posSemidefDecomposition_eq}),
+  we get \[2P_{\ker{x_+}}\sqrt{x^2}=2P_{\ker{x_+}}x_++2P_{\ker{x_+}}x_-=2P_{\ker{x_+}}x_-=2x_-=\sqrt{x^2}-x.\]
+  So then $x=(1-2P_{\ker{x_+}})\sqrt{x^2}$ and $x_-=P_{\ker{x_+}}\sqrt{x^2}$. And so \[x_+=\dfrac{1}{2}(\sqrt{x^2}+x)=\dfrac{1}{2}(\sqrt{x^2}+(1-2P_{\ker{x_+}})\sqrt{x^2})=(1-P_{\ker{x_+}})\sqrt{x^2}=P_{{(\ker{x_+})}^\bot}\sqrt{x^2}.\]
+  
+  As $x_+$ and $x_-$ are Hermitian, we also get $x_-=\sqrt{x^2}P_{\ker{x_+}}$ and $x_+=\sqrt{x^2}P_{{(\ker{x_+})}^\bot}$. So then $x_+$ and $x_-$ are products of commuting positive semi-definite matrices, and by Lemma \ref{posSemidef_iff_commute} we get both $x_+$ and $x_-$ are positive semi-definite.
+ \end{proof}
+
+ \begin{corollary}\label{posSemidefDecomposition'}
+  \lean{Matrix.IsHermitian.posSemidefDecomposition'}\leanok
+  Given a Hermitian matrix $x\in M_n$, there exists matrices $a,b\in M_n$ such that $x = a^*a - b^*b$.
+ \end{corollary}
+ \begin{proof}
+  \uses{posSemidefDecomposition_left,
+   posSemidefDecomposition_right, posSemidefDecomposition_eq}\leanok
+  By Lemma \ref{posSemidefDecomposition_eq}, we get $x=x_+-x_-$, and the result then follows from Proposition \ref{posSemidefDecomposition_posSemidef_left_right} and the fact that any positive semi-definite matrix can be written as $a^*a$ for some matrix $a\in M_n$.
+ \end{proof}
+
+ \begin{theorem}\label{isReal_of_isPosMap}\uses{LinearMap.IsPosMap}
+  \lean{Matrix.isReal_of_isPosMap}\leanok
+  Given a positive map $\phi\colon M_n \to A$, where $A$ is a $^*$-algebra, we get $\phi$ is star-preserving.
+ \end{theorem}
+ \begin{proof}
+  \uses{LinearMap.isReal_iff, posSemidefDecomposition'}
+  \leanok
+  It suffices to show that for Hermitian matrices $x\in M_n$, we have $\phi(x^*)=\phi(x)^*$.
+  \begin{quote}
+   Suppose $\phi$ is star-preserving for Hermitian matrices.
+   Let $x\in M_n$. Then we can write $x=a+ib$, where $a=\dfrac{1}{2}(x+x^*)$ and $b=\dfrac{1}{2i}(x-x^*)$. Clearly, both $a$ and $b$ are Hermitian. So then by the hypothesis and Lemma \ref{LinearMap.isReal_iff}, we get
+   \[A^\operatorname{r}(x)=A^{\operatorname{r}}(a)+iA^{\operatorname{r}}(b)=A(a)+iA(b)=A(x).\]
+   Thus $A$ is star-preserving.
+  \end{quote}
+  Let $x\in M_n$ be Hermitian. Then using Corollary \ref{posSemidefDecomposition'}, we get positive semi-definite matrices $a,b\in{M_n}$ such that $x=a^*a-b^*b$. So then we compute,
+  \begin{align*}
+   A^{\operatorname{r}}(x) &={A}^{\operatorname{r}}(a^*a-b^*b)
+    &= {A(a^*a)}^*-{A(b^*b)}^*=A(a^*a)-A(b^*b).
+  \end{align*}
+  The last equality follows from $A$ being a positive map and both $a^*a$ and $b^*b$ being positive semi-definite.
+ \end{proof}
+
+ \begin{corollary}\label{NonUnitalAlgHom.isPosMap_iff}
+  \uses{LinearMap.IsPosMap}
+  \lean{NonUnitalAlgHom.isPosMap_iff_isReal_of_nonUnitalStarAlgEquiv_piMat}\leanok
+  Given a non-unital $^*$-algebra homomorphism $f\colon A \to B$, where there exists a star-isomorphism $A\cong\bigoplus_iM_{n_i}$, we get $f$ is a positive map if and only if $f$ is star-preserving.
+ \end{corollary}
+ \begin{proof}\uses{isReal_of_isPosMap}\leanok
+  Using an analogue of Theorem \ref{isReal_of_isPosMap}, it suffices to show that if $f$ is star-preserving, then it is a positive map.
+  
+  Let $0\leq x\in A$, then there exists $a\in A$ such that $x=a^*a$, and so $f(x)=f(a^*a)=f(a)^*f(a)$, which is non-negative.
+ \end{proof}
