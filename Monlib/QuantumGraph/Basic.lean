@@ -301,19 +301,6 @@ class schurProjection (f : A →ₗ[ℂ] B) :
   isIdempotentElem : f •ₛ f = f
   isReal : LinearMap.IsReal f
 
-structure isEquivToPiMat (A : Type*) [Add A] [Mul A] [Star A] [SMul ℂ A] :=
-  n : Type*
-  hn₁ : Fintype n
-  hn₂ : DecidableEq n
-  k : n → Type*
-  hk₁ : Π i, Fintype (k i)
-  hk₂ : Π i, DecidableEq (k i)
-  φ : A ≃⋆ₐ[ℂ] PiMat ℂ n k
-attribute [instance] isEquivToPiMat.hn₁
-attribute [instance] isEquivToPiMat.hn₂
-attribute [instance] isEquivToPiMat.hk₁
-attribute [instance] isEquivToPiMat.hk₂
-
 open scoped ComplexOrder
 theorem schurProjection.isPosMap [PartialOrder A] [PartialOrder B]
   [StarOrderedRing B]
@@ -354,7 +341,7 @@ theorem schurIdempotent.isSchurProjection_iff_isPosMap
   {f : A →ₗ[ℂ] B} (hf : f •ₛ f = f) :
   schurProjection f ↔ LinearMap.IsPosMap f :=
 ⟨λ h => h.isPosMap h₁ hδ h₂,
- λ h => ⟨hf, isReal_of_isPosMap_of_starAlgEquiv_piMat hh.φ h⟩⟩
+ λ h => ⟨hf, isReal_of_isPosMap_of_starAlgEquiv_piMat hh h⟩⟩
 
 class QuantumGraph (A : Type*) [starAlgebra A] [hA : QuantumSet A]
     (f : A →ₗ[ℂ] A) : Prop :=

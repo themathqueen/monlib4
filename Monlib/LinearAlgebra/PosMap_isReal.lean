@@ -124,7 +124,7 @@ noncomputable def Matrix.orthogonalProjection
 (Matrix.toEuclideanCLM (𝕜 := ℂ)).symm (orthogonalProjection' U)
 
 noncomputable def PiMat.orthogonalProjection
-  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
+  {k : Type*} {n : k → Type*}
   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
   (U : Π i, Submodule ℂ (EuclideanSpace ℂ (n i))) :
     PiMat ℂ k n :=
@@ -390,7 +390,7 @@ by
   rw [← hα, ← hβ]
 
 theorem PiMat.IsSelfAdjoint.posSemidefDecomposition {k : Type*} {n : k → Type*}
-  [Fintype k] [DecidableEq k] [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
+  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
   {x : PiMat ℂ k n} (hx : IsSelfAdjoint x) :
   ∃ a b, x = star a * a - star b * b :=
 by
@@ -432,22 +432,50 @@ by
   calc x = LinearMap.toContinuousLinearMap (x.toLinearMap) := rfl
     _ = LinearMap.toContinuousLinearMap (star (e.toMatrix.symm a)) * a' -
       LinearMap.toContinuousLinearMap (star (e.toMatrix.symm b)) * b' := ?_
-    _ = star a' * a' - star b' * b' := ?_
+    _ = star a' * a' - star b' * b' := rfl
   . rw [hab, ← toLinearMapAlgEquiv_symm_apply, map_sub, map_mul]
     rfl
-  . congr 1
+
+structure isEquivToPiMat (A : Type*) [Add A] [Mul A] [Star A] [SMul ℂ A] :=
+  k : Type*
+  -- hn₁ : Fintype n
+  -- hn₂ : DecidableEq n
+  rk : k → Type*
+  hrk₁ : Π i, Fintype (rk i)
+  hrk₂ : Π i, DecidableEq (rk i)
+  φ : A ≃⋆ₐ[ℂ] PiMat ℂ k rk
+-- attribute [instance] isEquivToPiMat.hn₁
+-- attribute [instance] isEquivToPiMat.hn₂
+attribute [instance] isEquivToPiMat.hrk₁
+attribute [instance] isEquivToPiMat.hrk₂
+
+noncomputable def Matrix.isEquivToPiMat :
+  isEquivToPiMat (Matrix n n ℂ) :=
+let f : Matrix n n ℂ ≃⋆ₐ[ℂ] PiMat ℂ Unit (λ _ => n) :=
+{ toFun := λ x _ => x
+  invFun := λ x => x ()
+  left_inv := λ x => rfl
+  right_inv := λ x => funext (λ i => rfl)
+  map_mul' := λ x y => rfl
+  map_add' := λ x y => rfl
+  map_smul' := λ x y => rfl
+  map_star' := λ x => rfl }
+{ k := Unit
+  rk := λ _ => n
+  φ := f
+  hrk₁ := fun i ↦ by infer_instance
+  hrk₂ := fun i ↦ by infer_instance }
 
 theorem IsSelfAdjoint.isPositiveDecomposition_of_starAlgEquiv_piMat
-  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] (PiMat ℂ k n))
+  (hφ : isEquivToPiMat A)
   {x : A} (hx : _root_.IsSelfAdjoint x) :
   ∃ a b, x = star a * a - star b * b :=
 by
-  have : IsSelfAdjoint (φ x) := by
+  have : IsSelfAdjoint (hφ.φ x) := by
     rw [IsSelfAdjoint, ← map_star, hx]
   obtain ⟨α, β, h⟩ := PiMat.IsSelfAdjoint.posSemidefDecomposition this
-  use φ.symm α, φ.symm β
-  apply_fun φ
+  use hφ.φ.symm α, hφ.φ.symm β
+  apply_fun hφ.φ
   simp_rw [h, map_sub, map_mul, map_star, StarAlgEquiv.apply_symm_apply]
 
 /-- if a map preserves positivity, then it is star-preserving -/
@@ -485,19 +513,46 @@ theorem StarNonUnitalAlgHom.toLinearMap_apply
   [Star A] [Star B]
   (f : A →⋆ₙₐ[R] B) (x : A) : (f.toLinearMap : A →ₗ[R] B) x = f x := rfl
 
-theorem LinearMap.isPosMap_comp_starAlgHom
-  {K A B : Type*}
-  [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
-  [Ring A] [StarRing A] [PartialOrder A] [Algebra ℂ A] [StarOrderedRing A] [StarModule ℂ A]
-  [Ring B] [StarRing B] [PartialOrder B] [Algebra ℂ B] [StarOrderedRing B] [StarModule ℂ B]
-  (hA : ∀ ⦃a : B⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
-  {φ : A →ₗ[ℂ] K} (hφ : LinearMap.IsPosMap φ) (ψ : B →⋆ₙₐ[ℂ] A) :
-  LinearMap.IsPosMap (φ.comp ψ.toLinearMap) :=
+theorem LinearMap.isPosMap_iff_star_mul_self_nonneg {A K : Type*}
+  [NonUnitalSemiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A]
+  [NonUnitalSemiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K]
+  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  {F : Type*} [FunLike F A K] {f : F} :
+  LinearMap.IsPosMap f ↔ ∀ a : A, 0 ≤ f (star a * a) :=
 by
-  intro x hx
-  obtain ⟨a, rfl⟩ := hA.mp hx
-  simp_rw [LinearMap.comp_apply, StarNonUnitalAlgHom.toLinearMap_apply, map_mul, map_star]
-  exact hφ (star_mul_self_nonneg _)
+  refine ⟨λ h a => h (star_mul_self_nonneg _), λ h a => ?_⟩
+  . rw [hA]
+    rintro ⟨b, rfl⟩
+    exact h _
+
+theorem LinearMap.isPosMap_iff_comp_starAlgEquiv
+  {K A B : Type*}
+  [Mul K] [Mul A] [Mul B] [Star K] [Star A] [Star B]
+  [Zero A] [Zero B] [Zero K]
+  [PartialOrder A] [PartialOrder B] [PartialOrder K]
+  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  (hB : ∀ ⦃a : B⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
+  {F S : Type*} [FunLike F A K] {φ : F}
+  [EquivLike S B A] [MulEquivClass S B A] [StarHomClass S B A]
+  (ψ : S) :
+  LinearMap.IsPosMap φ ↔ ∀ ⦃x⦄, 0 ≤ x → 0 ≤ φ (ψ x) :=
+by
+  simp_rw [IsPosMap, hA, hB]
+  simp only [forall_exists_index, forall_eq_apply_imp_iff, map_mul,
+    map_star]
+  refine ⟨λ h _ => h _, λ h x => ?_⟩
+  simpa using h (EquivLike.inv ψ x)
+
+theorem LinearMap.isReal_iff_comp_starEquiv
+  {K A B : Type*}
+  [Star K] [Star A] [Star B]
+  {F S : Type*} [FunLike F A K] [EquivLike S B A] [StarHomClass S B A]
+  {φ : F} (ψ : S) :
+  LinearMap.IsReal φ ↔ ∀ x, φ (ψ (star x)) = star (φ (ψ x)) :=
+by
+  simp_rw [map_star]
+  refine' ⟨λ h _ => h _, λ h x => _⟩
+  simpa using h (EquivLike.inv ψ x)
 
 /-- if a map preserves positivity, then it is star-preserving -/
 theorem isReal_of_isPosMap
@@ -528,8 +583,7 @@ by
     IsSelfAdjoint.of_nonneg (hφ (star_mul_self_nonneg b))]
 
 theorem isReal_of_isPosMap_of_starAlgEquiv_piMat
-  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n)
+  (hφ : isEquivToPiMat A)
   {K : Type*}
   [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
   {f : A →ₗ[ℂ] K} (hf : LinearMap.IsPosMap f) :
@@ -551,19 +605,19 @@ by
     selfAdjointDecomposition_left_isSelfAdjoint,
     selfAdjointDecomposition_right_isSelfAdjoint]
   intro x hx
-  obtain ⟨a, b, rfl⟩ := hx.isPositiveDecomposition_of_starAlgEquiv_piMat φ
+  obtain ⟨a, b, rfl⟩ := hx.isPositiveDecomposition_of_starAlgEquiv_piMat hφ
   simp only [star_sub, star_mul, star_star, map_sub]
   rw [IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg a)),
     IsSelfAdjoint.of_nonneg (hf (star_mul_self_nonneg b))]
 
 /-- a $^*$-homomorphism from $A$ to $B$ is a positive map -/
-theorem NonUnitalStarAlgHom.isPosMap
-  {R A K : Type*}
-  [CommSemiring R]
-  [Semiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A] [Algebra R A]
-  [Semiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K] [Algebra R K]
+theorem starMulHom_isPosMap
+  {A K : Type*}
+  [Semiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A]
+  [Semiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K]
   (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
-  (f : A →⋆ₙₐ[R] K) :
+  {F : Type*} [FunLike F A K] [StarHomClass F A K] [MulHomClass F A K]
+  (f : F) :
   LinearMap.IsPosMap f :=
 by
   intro a ha
@@ -571,22 +625,8 @@ by
   rw [map_mul, map_star]
   exact star_mul_self_nonneg _
 
-theorem LinearMap.isPosMap_iff_star_mul_self_nonneg {R A K : Type*}
-  [CommSemiring R]
-  [Semiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A] [Algebra R A]
-  [Semiring K] [PartialOrder K] [StarRing K] [StarOrderedRing K] [Algebra R K]
-  (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
-  {f : A →ₗ[R] K} :
-  LinearMap.IsPosMap f ↔ ∀ a : A, 0 ≤ f (star a * a) :=
-by
-  refine ⟨λ h a => h (star_mul_self_nonneg _), λ h a => ?_⟩
-  . rw [hA]
-    rintro ⟨b, rfl⟩
-    exact h _
-
 theorem NonUnitalAlgHom.isPosMap_iff_isReal_of_nonUnitalStarAlgEquiv_piMat
-  {k : Type*} {n : k → Type*} [Fintype k] [DecidableEq k]
-  [Π i, Fintype (n i)] [Π i, DecidableEq (n i)] (φ : A ≃⋆ₐ[ℂ] PiMat ℂ k n)
+  (hφ : isEquivToPiMat A)
   (hA : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ b, a = star b * b)
   {K : Type*}
   [Ring K] [StarRing K] [PartialOrder K] [Algebra ℂ K] [StarOrderedRing K] [StarModule ℂ K]
@@ -594,11 +634,9 @@ theorem NonUnitalAlgHom.isPosMap_iff_isReal_of_nonUnitalStarAlgEquiv_piMat
   LinearMap.IsPosMap f ↔ LinearMap.IsReal f :=
 by
   have : LinearMap.IsPosMap f ↔ LinearMap.IsPosMap f.toLinearMap := by rfl
-  refine ⟨λ h => isReal_of_isPosMap_of_starAlgEquiv_piMat φ (this.mp h), λ h => ?_⟩
+  refine ⟨λ h => isReal_of_isPosMap_of_starAlgEquiv_piMat hφ (this.mp h), λ h => ?_⟩
   let f' : A →⋆ₙₐ[ℂ] K := NonUnitalStarAlgHom.mk f h
-  have : f = f' := rfl
-  rw [this]
-  exact NonUnitalStarAlgHom.isPosMap hA _
+  exact starMulHom_isPosMap hA f'
 
 theorem Matrix.innerAut.map_zpow {n : Type*} [Fintype n] [DecidableEq n]
   {𝕜 : Type*} [RCLike 𝕜] (U : ↥(Matrix.unitaryGroup n 𝕜)) (x : Matrix n n 𝕜) (z : ℤ) :

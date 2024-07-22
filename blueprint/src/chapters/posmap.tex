@@ -142,15 +142,15 @@
   \begin{quote}
    Suppose $\phi$ is star-preserving for Hermitian matrices.
    Let $x\in M_n$. Then we can write $x=a+ib$, where $a=\dfrac{1}{2}(x+x^*)$ and $b=\dfrac{1}{2i}(x-x^*)$. Clearly, both $a$ and $b$ are Hermitian. So then by the hypothesis and Lemma \ref{LinearMap.isReal_iff}, we get
-   \[A^\operatorname{r}(x)=A^{\operatorname{r}}(a)+iA^{\operatorname{r}}(b)=A(a)+iA(b)=A(x).\]
-   Thus $A$ is star-preserving.
+   \[\phi^\operatorname{r}(x)=\phi^{\operatorname{r}}(a)+i\phi^{\operatorname{r}}(b)=\phi(a)+i\phi(b)=\phi(x).\]
+   Thus $\phi$ is star-preserving.
   \end{quote}
   Let $x\in M_n$ be Hermitian. Then using Corollary \ref{posSemidefDecomposition'}, we get positive semi-definite matrices $a,b\in{M_n}$ such that $x=a^*a-b^*b$. So then we compute,
   \begin{align*}
-   A^{\operatorname{r}}(x) &={A}^{\operatorname{r}}(a^*a-b^*b)\\
-    &= {A(a^*a)}^*-{A(b^*b)}^*=A(a^*a)-A(b^*b).
+   \phi^{\operatorname{r}}(x) &={\phi}^{\operatorname{r}}(a^*a-b^*b)\\
+    &= {\phi(a^*a)}^*-{\phi(b^*b)}^*=\phi(a^*a)-\phi(b^*b).
   \end{align*}
-  The last equality follows from $A$ being a positive map and both $a^*a$ and $b^*b$ being positive semi-definite.
+  The last equality follows from $\phi$ being a positive map and both $a^*a$ and $b^*b$ being positive semi-definite.
  \end{proof}
 
  \begin{corollary}\label{NonUnitalAlgHom.isPosMap_iff}
