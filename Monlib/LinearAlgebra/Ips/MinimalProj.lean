@@ -357,72 +357,6 @@ theorem LinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAd
 
 end
 
-section
-
--- /-- instance for `≤` on bounded linear maps -/
--- instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
---     [CompleteSpace E] : LE (E →L[𝕜] E) :=
---   by
---   refine' { le := _ }
---   intro u v
---   exact IsPositive (v - u)
-
--- theorem ContinuousLinearMap.isSelfAdjoint_zero {E : Type*}
---   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] :
---     IsSelfAdjoint (0 : E →L[𝕜] E) :=
--- _root_.isSelfAdjoint_zero _
-
--- /-- when `a,b` are self-adjoint operators, then
---   if `a ≤ b` and `b ≤ a`, then `a = b` -/
--- theorem IsSelfAdjoint.HasLe.le_antisymm {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
---     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a b : E →L[𝕜] E} (ha : IsSelfAdjoint a)
---     (hb : IsSelfAdjoint b) (hab : a ≤ b) (hba : b ≤ a) : a = b :=
---   by
---   simp_rw [LE.le] at *
---   rw [ContinuousLinearMap.IsSelfAdjoint.ext_iff_inner_map ha hb]
---   intro x
---   have hba2 := hba.2 x
---   rw [← neg_le_neg_iff, reApplyInnerSelf_apply, ← map_neg, ← inner_neg_left, ← neg_apply,
---     neg_sub, neg_zero] at hba2
---   symm
---   have := (hab.2 x)
---   simp_rw [reApplyInnerSelf_apply] at this
---   rw [← sub_eq_zero, ← inner_sub_left, ← sub_apply, ← IsSelfAdjoint.inner_re_eq hab.1 x, RCLike.ofReal_eq_zero,
---     _root_.le_antisymm hba2 this]
-
--- /-- we always have `a ≤ a` -/
--- @[refl, simp]
--- theorem ContinuousLinearMap.hasLe.le_refl {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
---     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a : E →L[𝕜] E} : a ≤ a := by
---   simp_rw [LE.le, sub_self, isPositive_zero]
-
--- /-- when `a,b` are self-adjoint operators, then
---   if `a ≤ b` and `b ≤ c`, then `a ≤ c` -/
--- @[simp]
--- theorem IsSelfAdjoint.HasLe.le_trans {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
---     [InnerProductSpace 𝕜 E] [CompleteSpace E] {a b c : E →L[𝕜] E}
---     (hab : a ≤ b) (hbc : b ≤ c) : a ≤ c :=
---   by
---   simp_rw [LE.le] at *
---   rw [← add_zero c, ← sub_self b, ← add_sub_assoc, add_sub_right_comm, add_sub_assoc]
---   exact IsPositive.add hbc hab
-
--- /-- `p ≤ q` means `q - p` is positive -/
--- @[refl, simp]
--- theorem ContinuousLinearMap.IsPositive.hasLe {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
---     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p q : E →L[𝕜] E} : p ≤ q ↔ (q - p).IsPositive := by
---   rfl
-
--- /-- saying `p` is positive is the same as saying `0 ≤ p` -/
--- @[simp]
--- theorem ContinuousLinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
---     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p : E →L[𝕜] E} : p.IsPositive ↔ 0 ≤ p :=
---   by
---   nth_rw 1 [← sub_zero p]
---   rfl
-
-end
-
 /-- a self-adjoint idempotent operator is positive -/
 theorem SelfAdjointAndIdempotent.is_positive {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [CompleteSpace E] {p : E →L[𝕜] E} (hp : IsIdempotentElem p)
@@ -624,15 +558,6 @@ def ContinuousLinearMap.IsMinimalProjection [InnerProductSpace 𝕜 E] [Complete
 def orthogonalProjection.IsMinimalProjection [InnerProductSpace 𝕜 E] (U : Submodule 𝕜 E)
     [CompleteSpace U] : Prop :=
   FiniteDimensional.finrank 𝕜 U = 1
-
--- /-- given self-adjoint operators `p,q` we have
-  -- `p = q` iff `p ≤ q` and `q ≤ p` -/
--- @[simp]
--- theorem IsSelfAdjoint.HasLe.le_antisymm_iff [InnerProductSpace 𝕜 E] [CompleteSpace E]
---     {p q : E →L[𝕜] E} : p = q ↔ p ≤ q ∧ q ≤ p :=
---   by
---   refine' ⟨fun h => _, fun h => le_antisymm h.1 h.2⟩
---   . rw [h, and_self_iff]
 
 open FiniteDimensional
 
@@ -1028,3 +953,20 @@ by
   refine IsProj.trace ?_
   rw [isProj_coe]
   exact orthogonalProjection'_isProj U
+
+lemma ContinuousLinearMap.eq_comp_orthogonalProjection_ker_ortho
+  {𝕜 M₁ M₂ : Type*} [RCLike 𝕜] [NormedAddCommGroup M₁] [InnerProductSpace 𝕜 M₁]
+  [NormedAddCommGroup M₂] [InnerProductSpace 𝕜 M₂]
+  {T : M₁ →L[𝕜] M₂} [HasOrthogonalProjection (LinearMap.ker T)]
+  [HasOrthogonalProjection (LinearMap.range T)]
+  [CompleteSpace M₁] [CompleteSpace M₂] :
+  T = T ∘L (orthogonalProjection' (LinearMap.ker T)ᗮ)
+  ∧
+  T = (orthogonalProjection' (LinearMap.range T)) ∘L T :=
+by
+  simp_rw [ContinuousLinearMap.ext_iff, ContinuousLinearMap.comp_apply,
+    ext_inner_left_iff (𝕜 := 𝕜) (E := M₂)]
+  simp only [orthogonalProjection'_eq, coe_comp', Submodule.coe_subtypeL', Submodule.coeSubtype,
+    Function.comp_apply, orthogonalProjection_orthogonal_val, map_sub, LinearMap.map_coe_ker,
+    sub_zero, implies_true, true_and,
+    orthogonalProjection_eq_self_iff.mpr (LinearMap.mem_range_self _ _)]
