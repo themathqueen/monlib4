@@ -25,10 +25,31 @@ noncomputable abbrev selfAdjointDecomposition_left
 (1 / 2 : ℂ) • (a + star a)
 local notation "aL" => selfAdjointDecomposition_left
 
+lemma selfAdjointDecomposition_left_one
+  {B : Type*} [AddCommMonoid B] [MulOneClass B] [StarMul B] [Module ℂ B] :
+  aL (1 : B) = 1 :=
+by
+  rw [selfAdjointDecomposition_left, star_one, ← two_smul ℂ, smul_smul]
+  norm_num
+
 noncomputable abbrev selfAdjointDecomposition_right
   {B : Type*} [Star B] [Sub B] [SMul ℂ B] (a : B) :=
 (RCLike.I : ℂ) • ((1 / 2 : ℂ) • (star a - a))
 local notation "aR" => selfAdjointDecomposition_right
+
+lemma selfAdjointDecomposition_right_one
+  {B : Type*} [AddCommGroup B] [MulOneClass B] [StarMul B] [SMulZeroClass ℂ B] :
+    aR (1 : B) = 0 :=
+by
+  simp_rw [selfAdjointDecomposition_right, star_one, sub_self, smul_zero]
+
+lemma selfAdjointDecomposition_right_eq_zero_iff
+  {B : Type*} [Star B] [AddGroup B]
+  [SMulWithZero ℂ B] [NoZeroSMulDivisors ℂ B] (a : B) :
+    aR a = 0 ↔ IsSelfAdjoint a :=
+by
+  simp [selfAdjointDecomposition_right, smul_eq_zero, sub_eq_zero]
+  rfl
 
 theorem selfAdjointDecomposition_left_isSelfAdjoint
   {B : Type*} [AddCommMonoid B] [StarAddMonoid B] [SMul ℂ B] [StarModule ℂ B] (a : B) :
@@ -925,3 +946,58 @@ by
       _ ↔ IsIdempotentElem p := by simp only [sub_eq_zero, IsIdempotentElem, eq_comm]
   rw [this.mpr hp]
   exact IsSelfAdjoint.star_mul_self _
+
+theorem LinearMap.IsPositive.add_ker_eq_inf_ker
+  {𝕜 V : Type*} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
+  [FiniteDimensional 𝕜 V] {S T : V →ₗ[𝕜] V} (hS : S.IsPositive) (hT : T.IsPositive) :
+    LinearMap.ker (S + T) = LinearMap.ker S ⊓ LinearMap.ker T :=
+by
+  ext x
+  simp only [LinearMap.mem_ker, LinearMap.add_apply, Submodule.mem_inf]
+  refine' ⟨λ h => ?_, λ h => by rw [h.1, h.2, add_zero]⟩
+  rw [eq_comm, ← sub_eq_iff_eq_add, eq_comm, zero_sub] at h
+  rw [h, neg_eq_zero, and_self]
+  have : ⟪x, S x⟫_𝕜 = 0 := eq_of_le_of_le
+    (by rw [h, inner_neg_right, neg_le, neg_zero]; exact hT.2 x)
+    (hS.2 x)
+  obtain ⟨f, rfl⟩ := (LinearMap.isPositive_iff_exists_adjoint_hMul_self _).mp hS
+  simp only [LinearMap.mul_apply, LinearMap.adjoint_inner_right, inner_self_eq_zero] at this
+  simp only [LinearMap.mul_apply, this, map_zero, zero_eq_neg] at h
+  exact h
+
+theorem mem_unitary_iff_isStarNormal_and_decomposition_left_sq_add_right_sq_eq_one
+  {B : Type*} [Ring B] [StarRing B]
+  [Module ℂ B] [StarModule ℂ B] [IsScalarTower ℂ B B]
+  [SMulCommClass ℂ B B] (a : B) :
+    a ∈ unitary B ↔ IsStarNormal a ∧ (aL a) ^ 2 + (aR a) ^ 2 = 1 :=
+by
+  have this1 :=
+    calc a * star a = (aL a + Complex.I • aR a) * star (aL a + Complex.I • aR a) :=
+        by simp_rw [← RCLike.I_to_complex, ← selfAdjointDecomposition]
+      _ = (aL a * aL a + aR a * aR a) + Complex.I • ((aR a * aL a) - (aL a * aR a)) :=
+        by
+          rw [star_add]
+          nth_rw 2 [star_smul]
+          rw [Complex.star_def, Complex.conj_I, neg_smul,
+            isSelfAdjoint_iff.mp (selfAdjointDecomposition_left_isSelfAdjoint _),
+            isSelfAdjoint_iff.mp (selfAdjointDecomposition_right_isSelfAdjoint _),
+            ← smul_neg]
+          simp_rw [complex_decomposition_mul_decomposition, mul_neg, sub_neg_eq_add,
+            sub_eq_add_neg]
+      _ = ((aL a) ^ 2 + (aR a) ^ 2) + Complex.I • (aR a * aL a - aL a * aR a) :=
+        by simp only [pow_two, smul_sub, add_sub_assoc]
+  rw [unitary.mem_iff]
+  constructor
+  . intro h
+    have : Commute (aL a) (aR a) :=
+    by rw [← isStarNormal_iff_selfAdjointDecomposition_commute, isStarNormal_iff, commute_iff_eq,
+      h.1, h.2]
+    simp_rw [isStarNormal_iff_selfAdjointDecomposition_commute, this, true_and]
+    rw [this1, this, sub_self, smul_zero, add_zero] at h
+    exact h.2
+  . rintro ⟨h1, h2⟩
+    rw [(isStarNormal_iff _).mp h1, and_self, this1, h2, add_comm]
+    apply add_eq_of_eq_sub
+    rw [sub_self, smul_eq_zero, sub_eq_zero]
+    right
+    exact ((isStarNormal_iff_selfAdjointDecomposition_commute _).mp h1).symm
