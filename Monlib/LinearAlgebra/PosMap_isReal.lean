@@ -1001,3 +1001,128 @@ by
     rw [sub_self, smul_eq_zero, sub_eq_zero]
     right
     exact ((isStarNormal_iff_selfAdjointDecomposition_commute _).mp h1).symm
+
+theorem LinearMap.exists_scalar_isometry_iff_preserves_ortho_of_ne_zero
+  {𝕜 V W : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
+  [NormedAddCommGroup W] [InnerProductSpace 𝕜 W]
+  (hV : 0 < FiniteDimensional.finrank 𝕜 V)
+  {T : V →ₗ[𝕜] W} (hT : T ≠ 0) :
+  (∃ (α : 𝕜ˣ), Isometry ((α : 𝕜) • T))
+  ↔
+  ∀ x y, ⟪x, y⟫_𝕜 = 0 → ⟪T x, T y⟫_𝕜 = 0 :=
+by
+  haveI : Nontrivial V := FiniteDimensional.nontrivial_of_finrank_pos hV
+  refine' ⟨λ ⟨α, h⟩ x y hxy => _, λ h => _⟩
+  . have : ⟪T x, T y⟫_𝕜 = 0 ↔ ⟪((α : 𝕜) • T) x, ((α : 𝕜) • T) y⟫_𝕜 = 0 :=
+      by
+        simp_rw [LinearMap.smul_apply, inner_smul_right, inner_smul_left,
+          ← mul_assoc, RCLike.mul_conj, mul_eq_zero, sq_eq_zero_iff,
+          RCLike.ofReal_eq_zero, norm_eq_zero]
+        simp only [Units.ne_zero, false_or]
+    rw [this, (isometry_iff_inner _).mp h, hxy]
+  . haveI : FiniteDimensional 𝕜 V := FiniteDimensional.of_finrank_pos hV
+    let e := stdOrthonormalBasis 𝕜 V
+    have : ∀ i j, ⟪e i + e j, e i - e j⟫_𝕜 = 0 :=
+    λ i j => by
+      simp only [inner_add_left, inner_sub_right,
+        orthonormal_iff_ite.mp (e.orthonormal)]
+      simp only [↓reduceIte, eq_comm]
+      ring
+    have h' : ∀ i j, ⟪T (e i), T (e j)⟫_𝕜 =
+        if i = j then ((‖T (e i)‖ ^ 2) : 𝕜) else 0 :=
+    λ i j => by
+      split_ifs with h'
+      . simp only [h', inner_self_eq_norm_sq_to_K]
+      . apply h
+        simp only [orthonormal_iff_ite.mp (e.orthonormal), h', reduceIte]
+    have this' := λ i j => h _ _ (this i j)
+    simp only [map_add, map_sub, inner_add_left, inner_sub_right, h',
+      reduceIte, add_ite, ite_add, eq_comm, ite_sub_ite] at this'
+    simp only [sub_self, add_zero, zero_add] at this'
+    simp_rw [@eq_comm _ (0 : 𝕜), ite_eq_iff, and_true, sub_eq_zero] at this'
+    let α : ℝ := ‖T (e ⟨0, hV⟩)‖
+    simp only [← RCLike.ofReal_pow, RCLike.ofReal_inj,
+      sq_eq_sq (norm_nonneg _) (norm_nonneg _)] at this'
+    have hα : ∀ i, α = ‖T (e i)‖ := λ i => by
+      by_cases hi : i = ⟨0, hV⟩
+      . rw [hi]
+      . specialize this' ⟨0, hV⟩ i
+        simp only [hi, eq_comm, false_or, not_false_iff, true_and] at this'
+        simp only [α, this']
+    have : ∀ x, ‖T x‖ = α * ‖x‖ :=
+    λ x => by
+      simp_rw [hα ⟨0, hV⟩]
+      rw [← sq_eq_sq (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)),
+        ← RCLike.ofReal_inj (K := 𝕜), RCLike.ofReal_pow,
+        mul_pow, RCLike.ofReal_mul, RCLike.ofReal_pow, ← hα, RCLike.ofReal_pow]
+      rw [← OrthonormalBasis.sum_repr e x]
+      simp_rw [← inner_self_eq_norm_sq_to_K]
+      simp only [map_sum, map_smul, sum_inner, inner_smul_left,
+        inner_sum, inner_smul_right, h', mul_ite, mul_zero,
+        Finset.sum_ite_eq', Finset.mem_univ, if_true, ← hα]
+      simp only [← mul_assoc, RCLike.mul_conj, orthonormal_iff_ite.mp (e.orthonormal),
+        mul_boole, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+      simp_rw [← Finset.sum_mul, mul_comm]
+    have hα' : α = 0 ↔ T = 0 :=
+    by
+      refine' ⟨λ h => _, λ h => _⟩
+      . simp_rw [h, zero_mul, norm_eq_zero] at this
+        ext x
+        simp only [LinearMap.zero_apply, this]
+      . simp only [h, LinearMap.zero_apply, norm_zero, @eq_comm _ (0 : ℝ),
+          mul_eq_zero, norm_eq_zero] at this
+        obtain ⟨x, hx⟩ : ∃ x : V, x ≠ 0 := by exact exists_ne 0
+        specialize this x
+        simp only [hx, or_false] at this
+        exact this
+    simp only [hT, iff_false, ← ne_eq] at hα'
+    have hα'' : (α : 𝕜) ≠ 0 := by simp only [ne_eq, algebraMap.lift_map_eq_zero_iff, hα',
+      not_false_iff]
+    use ((Units.mk0 α hα'')⁻¹ : 𝕜ˣ)
+    rw [isometry_iff_norm]
+    intro x
+    simp only [LinearMap.smul_apply, norm_smul, this, norm_inv]
+    simp only [Units.val_inv_eq_inv_val, Units.val_mk0, norm_inv, RCLike.norm_ofReal]
+    simp only [RCLike.norm_ofReal, abs_of_nonneg (norm_nonneg _),
+      ← hα, ← mul_assoc, inv_mul_cancel hα', one_mul]
+
+theorem LinearMap.exists_scalar_isometry_iff_preserves_ortho
+  {𝕜 V : Type*} [RCLike 𝕜]
+  [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
+  [Module.Finite 𝕜 V]
+  {T : V →ₗ[𝕜] V} :
+  (∃ (α : 𝕜) (S : V →ₗᵢ[𝕜] V), T = α • S.toLinearMap)
+  ↔
+  ∀ x y, ⟪x, y⟫_𝕜 = 0 → ⟪T x, T y⟫_𝕜 = 0 :=
+by
+  refine' ⟨λ ⟨α, S, h⟩ x y hxy => _, λ h => _⟩
+  . simp only [h, LinearMap.smul_apply, inner_smul_left, inner_smul_right,
+      LinearIsometry.coe_toLinearMap, LinearIsometry.inner_map_map, hxy, mul_zero]
+  . by_cases hT : T = 0
+    . rw [hT]
+      use 0, 1
+      simp only [zero_smul]
+    . by_cases hV : Module.rank 𝕜 V = 0
+      . rw [rank_zero_iff_forall_zero] at hV
+        simp only [ext_iff, smul_apply, LinearIsometry.coe_toLinearMap,
+          hV, implies_true, exists_true_iff_nonempty]
+        use 0, 0
+        simp only [zero_apply, norm_zero, hV, implies_true]
+      . simp only [← pos_iff_ne_zero] at hV
+        rw [rank_pos_iff_nontrivial] at hV
+        have : 0 < FiniteDimensional.finrank 𝕜 V := FiniteDimensional.finrank_pos
+        obtain ⟨α, hα⟩ := (LinearMap.exists_scalar_isometry_iff_preserves_ortho_of_ne_zero this hT).mpr h
+        use (α⁻¹ : 𝕜ˣ), ⟨((α : 𝕜) • T), (isometry_iff_norm _).mp hα⟩
+        simp only [Units.val_inv_eq_inv_val, ne_eq, Units.ne_zero, not_false_eq_true,
+          inv_smul_smul₀]
+
+theorem LinearMap.isSymmetric_adjoint_mul_self'
+  {𝕜 V W : Type*} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
+  [NormedAddCommGroup W] [InnerProductSpace 𝕜 W]
+  [FiniteDimensional 𝕜 V] [FiniteDimensional 𝕜 W]
+  (T : V →ₗ[𝕜] W) :
+    IsSymmetric (LinearMap.adjoint T ∘ₗ T) :=
+by
+  intro x y
+  simp only [coe_comp, Function.comp_apply, adjoint_inner_left, adjoint_inner_right]
