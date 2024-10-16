@@ -9,6 +9,8 @@ noncomputable instance {n : Type*} [Fintype n] :
   QuantumSet (PiQ (λ _ : n => ℂ)) :=
 Pi.quantumSet (gns := Fact.mk (λ _ => rfl))
 
+open scoped InnerProductSpace
+
 set_option synthInstance.maxHeartbeats 0 in
 theorem EuclideanSpace.comul_eq {n : Type*} [Fintype n] [DecidableEq n] (x : PiQ (λ _ : n => ℂ))
   :

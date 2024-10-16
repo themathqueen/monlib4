@@ -86,5 +86,3 @@ import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.QuantumSet.SchurMul
 import Monlib.LinearAlgebra.QuantumSet.Symm
 import Monlib.LinearAlgebra.QuantumSet.Instances
-
-#align_import all

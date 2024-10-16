@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 
-#align_import quantum_graph.iso
-
 /-!
  # Isomorphisms between quantum graphs
 
@@ -135,8 +133,9 @@ theorem innerAutIsReal (U : unitaryGroup n ℂ) : LinearMap.IsReal (innerAut U) 
 @[reducible]
 alias StarAlgEquiv.IsIsometry := Isometry
 
+open scoped InnerProductSpace
 theorem Module.Dual.IsFaithfulPosMap.inner_coord' [hφ : φ.IsFaithfulPosMap] (ij : n × n)
-    (x : ℍ) : ⟪hφ.basis ij, x⟫_ℂ = (x * hφ.matrixIsPosDef.rpow (1 / 2)) ij.1 ij.2 := by
+    (x : Mat ℂ n) : ⟪hφ.basis ij, x⟫_ℂ = (x * hφ.matrixIsPosDef.rpow (1 / 2)) ij.1 ij.2 := by
   rw [IsFaithfulPosMap.basis_apply, ← IsFaithfulPosMap.orthonormalBasis_apply,
     IsFaithfulPosMap.inner_coord _ ij x]
 
@@ -155,11 +154,12 @@ theorem InnerAut.toMatrix [hφ : φ.IsFaithfulPosMap] (U : unitaryGroup n ℂ) :
     kroneckerMap, of_apply, conj_apply, sig_apply, star_sum,
     star_mul', neg_neg, Finset.mul_sum, Finset.sum_mul, mul_assoc, innerAut_apply',
     Module.Dual.IsFaithfulPosMap.basis_apply]
-  simp_rw [← star_apply, star_eq_conjTranspose, (PosDef.rpow.isHermitian _ _).eq]
-  -- rw [Finset.sum_comm]
+  simp_rw [← star_apply, star_eq_conjTranspose]
   repeat' apply Finset.sum_congr rfl; intros
   simp_rw [← star_eq_conjTranspose, ← unitaryGroup.star_coe_eq_coe_star]
   congr 1
+  simp_rw [star_apply, ← conjTranspose_apply,
+    (PosDef.rpow.isPosDef _ _).isHermitian.eq]
   nth_rw 1 [mul_rotate', ← mul_assoc]
   rw [mul_comm _ (PosDef.rpow _ (1 / 2) _ _), mul_assoc]
 
@@ -196,6 +196,7 @@ theorem InnerAut.symmetric_eq [hφ : φ.IsFaithfulPosMap] [Nontrivial n] (A : l(
   exact
     Qam.symm_apply_starAlgEquiv_conj ((unitary_commutes_with_hφ_matrix_iff_isIsometry hφ U).mp hU) _
 
+omit [DecidableEq n] in
 theorem StarAlgEquiv.commutes_with_mul' (f : (Matrix n n ℂ) ≃⋆ₐ[ℂ] (Matrix n n ℂ)) :
     (LinearMap.mul' ℂ (Matrix n n ℂ) ∘ₗ f.toLinearMap ⊗ₘ f.toLinearMap) =
       f.toLinearMap ∘ₗ LinearMap.mul' ℂ (Matrix n n ℂ) :=
@@ -326,13 +327,30 @@ theorem innerAut_lm_basis_apply (U : Matrix.unitaryGroup n ℂ) (i j k l : n) :
     Matrix.kroneckerMap, Matrix.of_apply]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
+lemma Module.Dual.IsFaithfulPosMap.basis_eq_onb_toBasis
+  [hφ : φ.IsFaithfulPosMap] :
+  hφ.basis = (hφ.orthonormalBasis).toBasis :=
+by
+  ext
+  simp only [OrthonormalBasis.coe_toBasis, Module.Dual.IsFaithfulPosMap.orthonormalBasis_apply,
+    Module.Dual.IsFaithfulPosMap.basis_apply]
+
 theorem Qam.rankOne_toMatrix_of_star_algEquiv_coord [hφ : φ.IsFaithfulPosMap]
   (x y : Matrix n n ℂ) (i j k l : n) :
   hφ.toMatrix |x⟩⟨y| (i, j) (k, l) =
     ((x * hφ.matrixIsPosDef.rpow (1 / 2)) ⊗ₖ (y * hφ.matrixIsPosDef.rpow (1 / 2))ᴴᵀ)
       (i, k) (j, l) :=
 by
-  simp_rw [rankOne_toMatrix, conjTranspose_col, mul_apply, col_apply, row_apply, Pi.star_apply,
-    reshape_apply, kronecker_apply, conj_apply]
+  simp only [Module.Dual.IsFaithfulPosMap.toMatrix,
+    LinearMap.toMatrixAlgEquiv,
+    AlgEquiv.ofLinearEquiv_apply,
+    Module.Dual.IsFaithfulPosMap.basis_eq_onb_toBasis,
+    rankOne_toMatrix_of_onb]
+  simp_rw [conjTranspose_col, mul_apply, col_apply, row_apply, Pi.star_apply,
+    kronecker_apply, conj_apply]
   simp only [Fintype.univ_punit, Finset.sum_const, Finset.card_singleton, nsmul_eq_mul,
     Nat.cast_one, one_mul]
+  simp only [OrthonormalBasis.repr_apply_apply,
+    Module.Dual.IsFaithfulPosMap.inner_coord]
+  simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton,
+    Nat.cast_one, one_div, RCLike.star_def, one_mul]

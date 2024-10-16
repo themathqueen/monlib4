@@ -9,8 +9,6 @@ import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 import Monlib.LinearAlgebra.Ips.MatIps
 import Monlib.LinearAlgebra.QuantumSet.Instances
 
-#align_import quantum_graph.example
-
 /-!
   # Basic examples on quantum adjacency matrices
 
@@ -158,6 +156,7 @@ theorem Qam.Nontracial.delta_pos [Nonempty p] {φ : Module.Dual ℂ (Matrix p p 
   rw [← IsHermitian.trace_eq]
   exact Matrix.PosDef.pos_trace (PosDef.inv hφ.matrixIsPosDef)
 
+omit [Fintype p] [DecidableEq p] in
 theorem Pi.Qam.Nontracial.delta_ne_zero [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
     [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) : 0 < δ :=
   by
@@ -207,7 +206,7 @@ theorem Qam.trivialGraph_eq [hA2 : QuantumSetDeltaForm A] :
   by
   simp_rw [Qam.trivialGraph]
   apply invOf_eq_right_inv
-  rw [hA2.mul_comp_comul_eq, smul_mul_smul, one_mul, mul_inv_cancel,
+  rw [hA2.mul_comp_comul_eq, smul_mul_smul_comm, one_mul, mul_inv_cancel₀,
     one_smul]
   · exact ne_of_gt hA2.delta_pos
 
@@ -219,7 +218,7 @@ theorem Qam.Nontracial.TrivialGraph.qam [hA2 : QuantumSetDeltaForm A] :
   simp only [LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id, LinearMap.id_comp,
     hA2.mul_comp_comul_eq, smul_smul, mul_assoc]
-  rw [inv_mul_cancel _, mul_one, LinearMap.one_eq_id]
+  rw [inv_mul_cancel₀ _, mul_one, LinearMap.one_eq_id]
   . exact ne_of_gt hA2.delta_pos
 
 theorem Qam.Nontracial.TrivialGraph.qam.is_self_adjoint [hA2 : QuantumSetDeltaForm A] :
@@ -239,7 +238,7 @@ theorem Qam.Nontracial.trivialGraph [hA2 : QuantumSetDeltaForm A] :
   simp only [schurMul, LinearMap.coe_mk, AddHom.coe_mk]
   simp_rw [TensorProduct.map_one, LinearMap.one_eq_id,
     LinearMap.id_comp, hA2.mul_comp_comul_eq, smul_smul,
-    inv_mul_cancel (ne_of_gt hA2.delta_pos), one_smul, LinearMap.one_eq_id]
+    inv_mul_cancel₀ (ne_of_gt hA2.delta_pos), one_smul, LinearMap.one_eq_id]
 
 theorem Qam.refl_idempotent_one_one_of_delta [hA2 : QuantumSetDeltaForm A] :
     (1 : _) •ₛ (1 : l(A)) = hA2.delta • (1 : l(A)) := by
@@ -251,7 +250,7 @@ theorem Qam.Lm.Nontracial.is_unreflexive_iff_reflexive_add_one [hA2 : QuantumSet
   by
   simp_rw [_root_.map_smul, LinearMap.smul_apply, _root_.map_add, LinearMap.add_apply,
     Qam.refl_idempotent_one_one_of_delta, smul_add, smul_smul,
-    inv_mul_cancel (ne_of_gt hA2.delta_pos), one_smul, add_left_eq_self]
+    inv_mul_cancel₀ (ne_of_gt hA2.delta_pos), one_smul, add_left_eq_self]
   rw [smul_eq_zero_iff_right (inv_ne_zero (ne_of_gt hA2.delta_pos))]
 
 theorem Qam.refl_idempotent_completeGraph_left

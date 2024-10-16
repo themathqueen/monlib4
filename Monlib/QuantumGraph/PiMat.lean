@@ -77,7 +77,6 @@ StarAlgEquiv.ofAlgEquiv
   (λ x => by
     ext1
     simp only [Pi.star_apply, TensorProduct.toKronecker_star]
-    congr 1
     obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
     simp only [AlgEquiv.trans_apply, AlgEquiv.piCongrRight_apply, directSumTensorAlgEquiv_apply,
       tensorToKronecker_apply]
@@ -170,7 +169,7 @@ theorem QuantumGraph.PiMat_submoduleIsProj {f : PiMat ℂ ι p →ₗ[ℂ] PiMat
   LinearMap.IsProj (hf.PiMat_submodule t r i)
   (PiMat_toEuclideanLM (PiMatTensorProductEquiv ((StarAlgEquiv.lTensor _
     (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi t r f))) i) :=
-QuantumGraph.PiMat_submodule.proof_18 hf t r i
+QuantumGraph.PiMat_submodule.proof_17 hf t r i
 
 theorem QuantumGraph.PiMat_submoduleIsProj_codRestrict {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph (PiMat ℂ ι p) f) (t r : ℝ) (i : ι × ι) :
@@ -181,7 +180,7 @@ rfl
 
 noncomputable def QuantumGraph.NumOfEdges {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph _ f) : ℕ :=
-∑ i : ι × ι, FiniteDimensional.finrank ℂ (hf.PiMat_submodule 0 (1 / 2) i)
+∑ i : ι × ι, Module.finrank ℂ (hf.PiMat_submodule 0 (1 / 2) i)
 
 theorem QuantumGraph.numOfEdges_eq_trace {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph _ f) :
@@ -251,9 +250,9 @@ theorem QuantumGraph.numOfEdges_eq_rank_top_iff
 by
   calc
     QuantumGraph.NumOfEdges hf = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
-      ↔ ∑ i : ι × ι, FiniteDimensional.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
+      ↔ ∑ i : ι × ι, Module.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
         = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2) := by rfl
-    _ ↔ ∀ i, FiniteDimensional.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
+    _ ↔ ∀ i, Module.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
       = Fintype.card (p i.1) * Fintype.card (p i.2) := by
         rw [← Nat.cast_inj (R := ℂ)]
         simp only [Nat.cast_sum]
@@ -261,11 +260,11 @@ by
         rw [Finset.sum_eq_zero_iff_of_nonneg]
         simp_rw [sub_eq_zero, Nat.cast_inj, Finset.mem_univ, true_imp_iff,
           ← Fintype.card_prod, ← finrank_euclideanSpace (𝕜 := ℂ),
-          @eq_comm _ _ (FiniteDimensional.finrank ℂ (hf.PiMat_submodule 0 (1/2) _))]
+          @eq_comm _ _ (Module.finrank ℂ (hf.PiMat_submodule 0 (1/2) _))]
         . simp only [Finset.mem_univ, sub_nonneg, true_implies, Nat.cast_le]
           intro i
-          calc FiniteDimensional.finrank ℂ (↥(hf.PiMat_submodule 0 (1 / 2) i))
-            ≤ FiniteDimensional.finrank ℂ (EuclideanSpace ℂ (p i.1 × p i.2)) :=
+          calc Module.finrank ℂ (↥(hf.PiMat_submodule 0 (1 / 2) i))
+            ≤ Module.finrank ℂ (EuclideanSpace ℂ (p i.1 × p i.2)) :=
                 Submodule.finrank_le _
             _ = Fintype.card (p i.1) * Fintype.card (p i.2) := by
               simp only [finrank_euclideanSpace, Fintype.card_prod]
@@ -350,7 +349,7 @@ QuantumGraph.Real.PiMat_submodule.proof_28 hA i
 set_option synthInstance.maxHeartbeats 0 in
 noncomputable def QuantumGraph.Real.PiMat_orthonormalBasis {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hA : QuantumGraph.Real (PiMat ℂ ι p) A) (i : ι × ι) :
-  OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i))) ℂ (hA.PiMat_submodule i) :=
+  OrthonormalBasis (Fin (Module.finrank ℂ (hA.PiMat_submodule i))) ℂ (hA.PiMat_submodule i) :=
 stdOrthonormalBasis ℂ (hA.PiMat_submodule i)
 
 set_option synthInstance.maxHeartbeats 0 in
@@ -470,13 +469,13 @@ Finset.sum_apply _ _ _
 theorem Basis.tensorProduct_repr_tmul_apply' {R M N ι κ : Type*} [CommSemiring R]
   [AddCommMonoid M] [Module R M] [AddCommMonoid N] [Module R N] (b : Basis ι R M)
   (c : Basis κ R N) (m : M) (n : N) (i : ι × κ) :
-  ((b.tensorProduct c).repr (m ⊗ₜ[R] n)) i = (b.repr m) i.1 * (c.repr n) i.2 :=
+  ((b.tensorProduct c).repr (m ⊗ₜ[R] n)) i = (c.repr n) i.2 * (b.repr m) i.1 :=
 Basis.tensorProduct_repr_tmul_apply _ _ _ _ _ _
 
-theorem PiLp.ext_iff {p : ENNReal} {ι : Type*} {α : ι → Type*} {x : PiLp p α}
-  {y : PiLp p α} :
-  x = y ↔ (∀ (i : ι), x i = y i) :=
-by simp [← Function.funext_iff]
+-- theorem PiLp.ext_iff {p : ENNReal} {ι : Type*} {α : ι → Type*} {x : PiLp p α}
+--   {y : PiLp p α} :
+--   x = y ↔ (∀ (i : ι), x i = y i) :=
+-- by simp [← Function.funext_iff]
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
@@ -502,7 +501,7 @@ set_option maxHeartbeats 0 in
 theorem QuantumGraph.Real.PiMat_eq {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hA : QuantumGraph.Real (PiMat ℂ ι p) A) :
   let S : (i : ι × ι) →
-    (j : (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i))))
+    (j : (Fin (Module.finrank ℂ (hA.PiMat_submodule i))))
       → (((p i.1) × (p i.2)) → (((EuclideanSpace ℂ (p i.1)) × (EuclideanSpace ℂ (p i.2)))))
     := λ i j => (hA.PiMat_orthonormalBasis i j : EuclideanSpace ℂ _).prod_choose
   A = ∑ i : ι × ι, ∑ j, ∑ s : (p i.1 × p i.2), ∑ l : (p i.1 × p i.2),
@@ -536,7 +535,7 @@ by
     PiMat.transposeStarAlgEquiv_symm_apply,
     MulOpposite.unop_op]
   simp only [TensorProduct.toKronecker_apply, Matrix.toEuclideanLin_apply']
-  simp only [QuantumSet.modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero]
+  simp only [QuantumSet.modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero]
   simp only [Matrix.includeBlock_conjTranspose, Matrix.conj_conjTranspose, Matrix.transpose_apply]
   simp_rw [hS, AlgEquiv.one_apply, Matrix.includeBlock_apply]
   simp only [ContinuousLinearMap.sum_apply, map_sum, Matrix.dite_kronecker,
@@ -563,6 +562,8 @@ theorem QuantumGraph.trivialGraph :
   QuantumGraph _ (Qam.trivialGraph (PiMat ℂ ι p)) :=
 ⟨Qam.Nontracial.TrivialGraph.qam⟩
 
+omit [Fintype ι] [DecidableEq ι]
+  [Nonempty ι] [∀ (i : ι), Nontrivial (p i)] in
 theorem PiMat.piAlgEquiv_trace_apply
   (f : (i : ι) → (Matrix (p i) (p i) ℂ ≃ₐ[ℂ] Matrix (p i) (p i) ℂ))
   (x : PiMat ℂ ι p) (a : ι) :
@@ -571,10 +572,13 @@ by
   calc (((AlgEquiv.piCongrRight f) x) a).trace
       = ((f a) (x a)).trace := rfl
     _ = (x a).trace := AlgEquiv.apply_matrix_trace _ _
+omit [DecidableEq ι]
+  [Nonempty ι] [∀ (i : ι), Nontrivial (p i)] in
 theorem PiMat.modAut_trace_apply (r : ℝ) (x : PiMat ℂ ι p) (a : ι) :
   (modAut r x a).trace = (x a).trace :=
 PiMat.piAlgEquiv_trace_apply _ _ _
 
+omit [Nonempty ι] [∀ (i : ι), Nontrivial (p i)] in
 theorem PiMat.orthonormalBasis_trace (a : n (PiMat ℂ ι p)) (i : ι) :
   (QuantumSet.onb (A := (PiMat ℂ ι p)) a i).trace =
     if a.1 = i then (hφ a.1).matrixIsPosDef.rpow (-(1 / 2)) a.2.2 a.2.1 else 0 :=
@@ -595,7 +599,7 @@ by
           simp only [← Matrix.trace_iff, Matrix.stdBasisMatrix_hMul_trace]
         next h =>
           simp_all only [one_div, Matrix.includeBlock_apply, h, dif_neg]
-          simp only [↓reduceDite, Matrix.zero_apply, Finset.sum_const_zero]
+          simp only [↓reduceDIte, Matrix.zero_apply, Finset.sum_const_zero]
 
 open QuantumSet in
 set_option synthInstance.maxHeartbeats 0 in
@@ -640,7 +644,7 @@ by
   _ = (QuantumSetDeltaForm.delta (PiMat ℂ ι p))⁻¹ *
     ∑ _ : ι, (QuantumSetDeltaForm.delta (PiMat ℂ ι p)) := by simp only [hφ₂.out]; rfl
   _ = Fintype.card ι := by
-    rw [Finset.sum_const, mul_smul_comm, inv_mul_cancel (ne_of_gt QuantumSetDeltaForm.delta_pos)]
+    rw [Finset.sum_const, mul_smul_comm, inv_mul_cancel₀ (ne_of_gt QuantumSetDeltaForm.delta_pos)]
     rw [nsmul_eq_mul, mul_one]
     rfl
 
@@ -669,6 +673,7 @@ noncomputable abbrev piInnerAut (U : (i : ι) → Matrix.unitaryGroup (p i) ℂ)
   PiMat ℂ ι p ≃⋆ₐ[ℂ] PiMat ℂ ι p :=
 (StarAlgEquiv.piCongrRight (λ i => Matrix.innerAutStarAlg (U i)))
 
+omit hφ in
 theorem piInnerAut_apply_dualMatrix_iff' {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} :
   piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ ↔
   ∀ i, Matrix.innerAutStarAlg (U i) (φ i).matrix = (φ i).matrix :=
@@ -676,6 +681,7 @@ by
   simp only [Function.funext_iff, StarAlgEquiv.piCongrRight_apply,
     Module.Dual.pi.matrixBlock_apply]
 
+omit hφ in
 theorem piInnerAut_apply_dualMatrix_iff {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} :
   piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ ↔
     ∀ (a : ι), (U a) * (φ a).matrix = (φ a).matrix * (U a) :=
@@ -699,7 +705,6 @@ theorem innerAutStarAlg_adjoint_eq_symm_of {U : (i : ι) → Matrix.unitaryGroup
   (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
   LinearMap.adjoint (piInnerAut U).toLinearMap = (piInnerAut U).symm.toLinearMap :=
 by
-  rw []
   apply LinearMap.ext
   intro
   apply ext_inner_left ℂ
@@ -773,6 +778,7 @@ noncomputable abbrev unitaryTensorEuclidean (U : (i : ι) → Matrix.unitaryGrou
       (Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv (Matrix.unitaryGroup.conj (U i.2)))).trans
     euclideanSpaceTensor'))
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem unitaryTensorEuclidean_apply {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} (i : ι × ι) (x : EuclideanSpace ℂ (p i.1)) (y : EuclideanSpace ℂ (p i.2)) :
   (unitaryTensorEuclidean U i) (euclideanSpaceTensor' (R := ℂ) (x ⊗ₜ y))
     = euclideanSpaceTensor' (R := ℂ)
@@ -782,6 +788,7 @@ by
     LinearIsometryEquiv.symm_apply_apply]
   rfl
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem unitaryTensorEuclidean_apply' {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} (i : ι × ι) (x : EuclideanSpace ℂ (p i.1 × p i.2)) :
   (unitaryTensorEuclidean U i) x
     = ∑ j : p i.1 × p i.2, euclideanSpaceTensor' (R := ℂ)
@@ -790,6 +797,7 @@ by
   simp only [← unitaryTensorEuclidean_apply]
   rw [← map_sum, ← EuclideanSpace.prod_choose_spec]
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem unitaryTensorEuclidean_symm_apply {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} (i : ι × ι) (x : EuclideanSpace ℂ (p i.1)) (y : EuclideanSpace ℂ (p i.2)) :
   (unitaryTensorEuclidean U i).symm (euclideanSpaceTensor' (R := ℂ) (x ⊗ₜ y))
     = euclideanSpaceTensor' (R := ℂ)
@@ -902,6 +910,7 @@ theorem Matrix.PosSemidef.eq_iff_sq_eq_sq {n 𝕜 : Type*} [Fintype n] [RCLike �
     A ^ 2 = B ^ 2 ↔ A = B :=
 ⟨λ h => hA.eq_of_sq_eq_sq hB h, λ h => by rw [h]⟩
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem innerAutStarAlg_apply_dualMatrix_eq_iff_eq_sqrt {i : ι}
   (U : Matrix.unitaryGroup (p i) ℂ) :
   (Matrix.innerAutStarAlg U) (φ i).matrix = (φ i).matrix
@@ -915,6 +924,7 @@ by
     Matrix.innerAut.map_pow]
   simp_rw [pow_two, Matrix.PosDef.rpow_mul_rpow, add_halves, Matrix.PosDef.rpow_one_eq_self]
 
+omit [DecidableEq _] in
 theorem PiMat.modAut {r : ℝ} :
   (modAut r : PiMat ℂ ι p ≃ₐ[ℂ] PiMat ℂ ι p) =
     AlgEquiv.piCongrRight (λ _ => modAut r) :=
@@ -926,6 +936,7 @@ by
   rw [← unitary.val_toUnits_apply]
   exact (Units.mul_right_inj (toUnits U))
 
+omit [DecidableEq _] in
 theorem piInnerAut_modAut_commutes_of {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ} {r : ℝ}
   (h : ∀ i, (Matrix.innerAutStarAlg (U i)) ((hφ i).matrixIsPosDef.rpow r)
       = (hφ i).matrixIsPosDef.rpow r) :
@@ -949,7 +960,7 @@ theorem QuantumGraph.Real.PiMat_applyConjInnerAut
   {U : (i : ι) → Matrix.unitaryGroup (p i) ℂ}
   (hU : piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ) :
   let S : (i : ι × ι) →
-    (j : (Fin (FiniteDimensional.finrank ℂ (hA.PiMat_submodule i))))
+    (j : (Fin (Module.finrank ℂ (hA.PiMat_submodule i))))
       → (((p i.1) × (p i.2)) → (((EuclideanSpace ℂ (p i.1)) × (EuclideanSpace ℂ (p i.2)))))
     := λ i j => (hA.PiMat_orthonormalBasis i j : EuclideanSpace ℂ _).prod_choose
   (piInnerAut U).toLinearMap ∘ₗ A ∘ₗ LinearMap.adjoint (piInnerAut U).toLinearMap
@@ -996,7 +1007,7 @@ by
     Finset.sum_apply, StarAlgEquiv.lTensor_tmul, PiMatTensorProductEquiv_tmul,
     TensorProduct.map_tmul, PiMat_toEuclideanLM, StarAlgEquiv.piCongrRight_apply]
   simp only [LinearMap.sum_comp, LinearMap.comp_sum]
-  simp only [modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero, AlgEquiv.one_apply,
+  simp only [modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply,
     PiMat.transposeStarAlgEquiv_symm_apply, MulOpposite.unop_op]
   simp only [LinearMap.comp_rankOne, LinearMap.rankOne_comp, LinearIsometryEquiv.linearMap_adjoint,
     LinearIsometryEquiv.symm_symm]

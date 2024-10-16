@@ -183,14 +183,14 @@ by
   simp_rw [← LinearMap.ext_iff]
   apply LinearMap.ext_of_rank_one'
   intro x y
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro a b
   simp only [rmulMapLmul_apply_Upsilon_apply_aux_apply, LinearMap.comp_apply,
     LinearEquiv.coe_toLinearMap, Upsilon_rankOne, Upsilon_symm_tmul,
     schurMul.apply_rankOne, rmulMapLmul_apply,
     TensorProduct.map_tmul, star_mul, map_mul,
     starAlgebra.modAut_star, QuantumSet.modAut_apply_modAut,
-    add_neg_self, QuantumSet.modAut_zero, star_star]
+    add_neg_cancel, QuantumSet.modAut_zero, star_star]
   rfl
 
 
@@ -232,7 +232,7 @@ by
     simp_rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.comp_apply]
     nth_rw 2 [← LinearMap.id_apply (R := ℂ) x]
     revert x
-    rw [← LinearMap.ext_iff, TensorProduct.ext_iff]
+    rw [← LinearMap.ext_iff, TensorProduct.ext_iff']
     intro a b
     simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply, LinearMap.id_coe,
       id_eq, tenSwap_apply, TensorProduct.map_tmul,
@@ -327,7 +327,7 @@ by
   have : δ • (star (f a) * f a) = star (f ((Real.sqrt (RCLike.re δ) : ℂ) • a)) *
     f ((Real.sqrt (RCLike.re δ) : ℂ) • a) :=
   by
-    rw [map_smul, star_smul, smul_mul_smul, RCLike.star_def, Complex.conj_ofReal, ← this]
+    rw [map_smul, star_smul, smul_mul_smul_comm, RCLike.star_def, Complex.conj_ofReal, ← this]
   rw [this]
   exact star_mul_self_nonneg _
 
@@ -501,7 +501,7 @@ theorem orthogonalProjection_submoduleMap {E E' : Type*} [NormedAddCommGroup E] 
 by
   ext
   simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL,
-    LinearMap.coe_comp, Submodule.coeSubtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
+    LinearMap.coe_comp, Submodule.coe_subtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
     LinearEquiv.coe_coe, LinearIsometryEquiv.coe_toLinearEquiv]
   rw [← orthogonalProjection_map_apply]
   rfl
@@ -518,7 +518,7 @@ theorem orthogonalProjection_submoduleMap_isometry {E E' : Type*} [NormedAddComm
 by
   ext x
   simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp, Submodule.coe_subtypeL,
-    LinearMap.coe_comp, Submodule.coeSubtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
+    LinearMap.coe_comp, Submodule.coe_subtype, ContinuousLinearMap.coe_coe, Function.comp_apply,
     LinearEquiv.coe_coe]
   let f' : E ≃ₗᵢ[ℂ] E' := ⟨f, (isometry_iff_norm _).mp hf⟩
   calc ↑((orthogonalProjection (Submodule.map f U)) x)
@@ -531,7 +531,7 @@ by
   {R A B : Type*} [Semiring R] [AddCommMonoid A] [AddCommMonoid B]
   [Mul A] [Mul B] [Module R A] [Module R B] [Star A] [Star B]
   {F : Type*} [EquivLike F A B] [NonUnitalAlgEquivClass F R A B]
-  [StarAlgEquivClass F R A B] :
+  [StarHomClass F A B] :
   LinearMapClass F R A B :=
 SemilinearMapClass.mk
 
@@ -600,7 +600,7 @@ by
 
 noncomputable def QuantumGraph.Real.upsilonOrthonormalBasis {f : A →ₗ[ℂ] A}
   (gns : hA.k = 0) (hf : QuantumGraph.Real A f) :
-  OrthonormalBasis (Fin (FiniteDimensional.finrank ℂ (upsilonSubmodule gns hf))) ℂ (upsilonSubmodule gns hf) :=
+  OrthonormalBasis (Fin (Module.finrank ℂ (upsilonSubmodule gns hf))) ℂ (upsilonSubmodule gns hf) :=
 stdOrthonormalBasis ℂ (upsilonSubmodule gns hf)
 
 @[simp]
@@ -668,6 +668,7 @@ by
   simp_rw [smul_tmul', Finset.sum_product_univ]
   rfl
 
+open scoped InnerProductSpace
 theorem
   QuantumGraph.Real.upsilon_eq {f : A →ₗ[ℂ] A}
     (hf : QuantumGraph.Real A f) (gns : hA.k = 0) :
@@ -843,7 +844,7 @@ by
   symm
   rw [← LinearMap.comp_apply, ← LinearMap.comp_apply]
   congr
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro _ _
   simp only [LinearEquiv.coe_coe, LinearEquiv.coe_lTensor, LinearMap.map_comp_lTensor,
     LinearMap.coe_comp, Function.comp_apply, LinearEquiv.TensorProduct.map_apply,
@@ -870,7 +871,7 @@ by
     LinearMap.zero_comp, LinearMap.comp_zero]
   . intro _ _
     rw [TensorProduct.toIsBimoduleMap_apply_coe, AlgEquiv.TensorProduct.map_tmul, rmulMapLmul_apply]
-    rw [TensorProduct.ext_iff]
+    rw [TensorProduct.ext_iff']
     intro _ _
     rw [map_tmul, lmul_eq_mul, rmul_eq_mul, ← LinearMap.mulLeft_conj_of_mulEquivClass_apply,
       ← LinearMap.mulRight_conj_of_mulEquivClass_apply]
