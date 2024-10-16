@@ -1,8 +1,6 @@
 import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.InnerAut
 
-#align_import linear_algebra.my_matrix.spectra
-
 instance multisetCoe {α β : Type _} [Coe α β] : Coe (Multiset α) (Multiset β)
     where coe s := s.map (Coe.coe : α → β)
 
@@ -26,7 +24,7 @@ noncomputable instance multisetCoeRToRCLike {𝕜 : Type _} [RCLike 𝕜] :
 
 namespace Matrix
 
-variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n] [DecidableEq 𝕜]
+variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
 
 open scoped Matrix
 
@@ -67,7 +65,7 @@ theorem IsHermitian.mem_coe_spectra_diagonal {A : n → 𝕜} (hA : (diagonal A)
     x ∈ (hA.spectra : Multiset 𝕜) ↔ ∃ i : n, A i = x :=
   by
   simp_rw [IsHermitian.spectra_coe, Multiset.mem_map,
-    Finset.mem_univ_val, true_and_iff, exists_exists_eq_and]
+    Finset.mem_univ_val, true_and, exists_exists_eq_and]
   have :
     ((x : 𝕜) ∈ {b : 𝕜 | ∃ a, ↑(hA.eigenvalues a) = b} ↔ (x : 𝕜) ∈ {b : 𝕜 | ∃ a, A a = b}) ↔
       ((∃ a, (hA.eigenvalues a : 𝕜) = x) ↔ ∃ a, A a = x) :=
@@ -82,12 +80,13 @@ theorem IsHermitian.spectra_set_eq_spectrum {A : Matrix n n 𝕜} (hA : A.IsHerm
   by
   ext
   simp_rw [IsHermitian.spectra_coe, hA.spectrum, Set.mem_setOf, Multiset.mem_map,
-    Finset.mem_univ_val, true_and_iff, exists_exists_eq_and]
+    Finset.mem_univ_val, true_and, exists_exists_eq_and]
 
 theorem IsHermitian.of_innerAut {A : Matrix n n 𝕜} (hA : A.IsHermitian) (U : unitaryGroup n 𝕜) :
     (innerAut U A).IsHermitian :=
   (innerAut_isHermitian_iff U A).mp hA
 
+omit [Fintype n] [DecidableEq n] in
 theorem isAlmostHermitian_iff_smul {A : Matrix n n 𝕜} :
     A.IsAlmostHermitian ↔ ∀ α : 𝕜, (α • A).IsAlmostHermitian :=
   by
@@ -100,6 +99,7 @@ theorem isAlmostHermitian_iff_smul {A : Matrix n n 𝕜} :
     rw [one_smul] at h
     exact h
 
+omit [Fintype n] [DecidableEq n] in
 theorem IsAlmostHermitian.smul {A : Matrix n n 𝕜} (hA : A.IsAlmostHermitian) (α : 𝕜) :
     (α • A).IsAlmostHermitian :=
   isAlmostHermitian_iff_smul.mp hA _

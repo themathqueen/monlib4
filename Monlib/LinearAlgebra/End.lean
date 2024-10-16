@@ -5,8 +5,6 @@ Authors: Monica Omar
 -/
 import Mathlib.LinearAlgebra.Eigenspace.Basic
 
-#align_import linear_algebra.End
-
 /-!
  # Some obvious lemmas on module.End
 
@@ -42,11 +40,11 @@ theorem Module.End.has_eigenvector_iff_hasEigenvalue {R M : Type _} [CommRing R]
   by
   constructor
   · rintro ⟨v, hv⟩
-    apply Module.End.hasEigenvalue_of_hasEigenvector
-    rw [Module.End.HasEigenvector, Module.End.mem_eigenspace_iff]
+    apply Module.End.hasEigenvalue_of_hasEigenvector (x := v)
+    rw [Module.End.hasEigenvector_iff, Module.End.mem_eigenspace_iff]
     exact hv
   · intro h
-    rw [Module.End.HasEigenvalue] at h
+    simp only [Module.End.HasEigenvalue, Module.End.HasUnifEigenvalue] at h
     simp_rw [Submodule.ne_bot_iff] at h
     rcases h with ⟨x, Hx, hx⟩
     use x

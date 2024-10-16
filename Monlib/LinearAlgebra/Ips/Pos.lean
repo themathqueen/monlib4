@@ -10,8 +10,6 @@ import Monlib.LinearAlgebra.End
 import Mathlib.Analysis.InnerProductSpace.Positive
 import Monlib.Preq.RCLikeLe
 
-#align_import linear_algebra.my_ips.pos
-
 /-!
 
 # Positive linear maps
@@ -46,11 +44,11 @@ def IsPositive (T : E →ₗ[𝕜] E) : Prop :=
 
 theorem isPositiveZero : (0 : E →ₗ[𝕜] E).IsPositive :=
   by
-  refine' ⟨isSymmetric_zero, fun x => _⟩
+  refine' ⟨IsSymmetric.zero, fun x => _⟩
   simp_rw [zero_apply, inner_zero_right, le_rfl]
 
 theorem isPositiveOne : (1 : E →ₗ[𝕜] E).IsPositive :=
-  ⟨isSymmetric_id, fun _ => inner_self_nonneg'⟩
+  ⟨IsSymmetric.id, fun _ => inner_self_nonneg'⟩
 
 theorem IsPositive.add {S T : E →ₗ[𝕜] E} (hS : S.IsPositive) (hT : T.IsPositive) :
     (S + T).IsPositive :=
@@ -105,6 +103,7 @@ variable [FiniteDimensional 𝕜 E] (T : E →ₗ[𝕜] E)
 
 open scoped ComplexOrder
 
+omit [FiniteDimensional 𝕜 E] in
 private theorem _root_.spec_subseteq_nonneg :
   (spectrum 𝕜 T) ⊆ { x : 𝕜 | 0 ≤ x } ↔ ∀ x ∈ spectrum 𝕜 T, 0 ≤ x :=
 by
@@ -137,7 +136,7 @@ theorem sq_mul_sq_eq_self_of_isSymmetric_and_nonneg_spectrum
     by
     rw [spec_subseteq_nonneg] at hT1
     specialize hT1 (hT.eigenvalues rfl i)
-    simp only [zero_le_real, ofReal_re, true_and_iff] at hT1
+    simp only [zero_le_real, ofReal_re, true_and] at hT1
     apply
       hT1
         (Module.End.hasEigenvalue_iff_mem_spectrum.mp (hT.hasEigenvalue_eigenvalues rfl i))
@@ -333,7 +332,7 @@ theorem invertible_iff_inner_map_self_pos
       rw [← RCLike.ofReal_pow, RCLike.zero_lt_real]
       exact sq_pos_iff.mpr this
     by_contra!
-    rw [ext_iff] at hS
+    rw [LinearMap.ext_iff] at hS
     specialize hS v
     rw [mul_apply, this, map_zero] at hS
     apply hv
@@ -397,7 +396,7 @@ theorem IsSymmetric.invertible (hT : T.IsSymmetric) [Invertible T] : (⅟ T).IsS
   simp only [hT, invOf_inj]
 
 theorem isPositive_and_invertible_pos_eigenvalues (hT : T.IsPositive) [Invertible T]
-    (i : Fin (FiniteDimensional.finrank 𝕜 E)) : 0 < hT.1.eigenvalues rfl i :=
+    (i : Fin (Module.finrank 𝕜 E)) : 0 < hT.1.eigenvalues rfl i :=
   by
   -- have := linear_map.invertible_pos T hn hT,
   -- have fs : function.bijective ⇑(⅟ T),
@@ -409,11 +408,11 @@ theorem isPositive_and_invertible_pos_eigenvalues (hT : T.IsPositive) [Invertibl
       mul_invOf_self, LinearMap.one_apply, and_self_iff, forall_const]
   obtain ⟨v, hv, gh⟩ :=
     Module.End.has_eigenvector_iff_hasEigenvalue.mpr
-      (@LinearMap.IsSymmetric.hasEigenvalue_eigenvalues 𝕜 _ E _ _ T hT.1 _ _ rfl i)
+      (@LinearMap.IsSymmetric.hasEigenvalue_eigenvalues 𝕜 _ E _ _ T _ hT.1 _ rfl i)
   have ugh := (LinearMap.invertible_iff_inner_map_self_pos T hT).mp fs v gh
   rw [hv, inner_smul_real_left, inner_self_eq_norm_sq_to_K, ← ofReal_pow, real_smul_ofReal,
     ← ofReal_mul, zero_lt_real, mul_pos_iff] at ugh
-  simp_rw [not_lt_of_le (sq_nonneg _), and_false_iff, or_false_iff] at ugh
+  simp_rw [not_lt_of_le (sq_nonneg _), and_false, or_false] at ugh
   exact ugh.1
 
 noncomputable def IsPositive.rePowIsInvertible (hT : T.IsPositive) [Invertible T]
@@ -425,7 +424,7 @@ noncomputable def IsPositive.rePowIsInvertible (hT : T.IsPositive) [Invertible T
         ← RCLike.ofReal_mul, ←
         Real.rpow_add (LinearMap.isPositive_and_invertible_pos_eigenvalues _ hT _),
         LinearMap.one_apply] <;>
-    simp only [add_neg_self, neg_add_self, Real.rpow_zero, RCLike.ofReal_one, one_mul, ←
+    simp only [add_neg_cancel, neg_add_cancel, Real.rpow_zero, RCLike.ofReal_one, one_mul, ←
       OrthonormalBasis.repr_apply_apply, OrthonormalBasis.sum_repr]
 
 theorem IsPositive.sum {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
@@ -444,7 +443,7 @@ theorem IsPositive.smulNonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGrou
     [InnerProductSpace 𝕜 E] {T : E →ₗ[𝕜] E} (hT : T.IsPositive) {r : ℝ} (hr : 0 ≤ r) :
     ((r : 𝕜) • T).IsPositive := by
   simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, LinearMap.smul_apply, inner_smul_left,
-    inner_smul_right, RCLike.conj_ofReal, hT.1 _ _, forall₂_true_iff, true_and_iff]
+    inner_smul_right, RCLike.conj_ofReal, hT.1 _ _, forall₂_true_iff, true_and]
   rw [← @zero_le_real 𝕜] at hr
   simp_rw [mul_nonneg hr (hT.2 _), forall_true_iff]
 theorem IsPositive.smulNNReal {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
@@ -501,10 +500,9 @@ theorem LinearMap.isPositive_iff_eq_sum_rankOne [FiniteDimensional 𝕜 E]
   by
   constructor
   · intro hT
-    let a : Fin (FiniteDimensional.finrank 𝕜 E) → E := fun i =>
+    let a : Fin (Module.finrank 𝕜 E) → E := fun i =>
       (Real.sqrt (hT.1.eigenvalues rfl i) : 𝕜) • hT.1.eigenvectorBasis rfl i
-    refine' ⟨FiniteDimensional.finrank 𝕜 E, a, _⟩
-    intros
+    refine' ⟨Module.finrank 𝕜 E, a, _⟩
     ext1
     simp_rw [LinearMap.sum_apply, ContinuousLinearMap.coe_coe, rankOne_apply, a, inner_smul_left,
       smul_smul, mul_assoc, RCLike.conj_ofReal, mul_comm (⟪_, _⟫_𝕜),
@@ -516,7 +514,7 @@ theorem LinearMap.isPositive_iff_eq_sum_rankOne [FiniteDimensional 𝕜 E]
   · rintro ⟨m, u, hu⟩
     simp_rw [LinearMap.IsPositive, LinearMap.IsSymmetric, hu, LinearMap.sum_apply,
       ContinuousLinearMap.coe_coe, rankOne_apply, inner_sum, sum_inner, inner_smul_left,
-      inner_smul_right, inner_conj_symm, mul_comm, forall₂_true_iff, true_and_iff,
+      inner_smul_right, inner_conj_symm, mul_comm, forall₂_true_iff, true_and,
       ← inner_conj_symm _ (u _), RCLike.conj_mul, ← RCLike.ofReal_pow,
       ← ofReal_sum, zero_le_real]
     exact λ _ => Finset.sum_nonneg' (λ _ => sq_nonneg _)

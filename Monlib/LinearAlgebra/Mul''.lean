@@ -9,8 +9,6 @@ import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.Ips.TensorHilbert
 
-#align_import linear_algebra.mul''
-
 /-!
 
 # linear_map.mul''
@@ -46,7 +44,7 @@ theorem commutes_with_mul'_iff [NonUnitalNonAssocSemiring A] [Module R A]
     LinearMap.mul' R B ∘ₗ TensorProduct.map f f = f ∘ₗ LinearMap.mul' R A ↔
       ∀ x y : A, f (x * y) = f x * f y :=
   by
-  simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply, TensorProduct.map_apply,
+  simp_rw [TensorProduct.ext_iff', LinearMap.comp_apply, TensorProduct.map_apply,
     LinearMap.mul'_apply, eq_comm]
 
 end

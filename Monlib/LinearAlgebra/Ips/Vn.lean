@@ -10,8 +10,6 @@ import Mathlib.Analysis.VonNeumannAlgebra.Basic
 import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.LinearAlgebra.Ips.RankOne
 
-#align_import linear_algebra.my_ips.vn
-
 /-!
 
 # A bit on von Neumann algebras

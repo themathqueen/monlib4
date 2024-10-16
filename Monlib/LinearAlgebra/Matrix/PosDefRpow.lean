@@ -7,8 +7,6 @@ import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.InnerAut
 import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 
-#align_import linear_algebra.my_matrix.posDef_rpow
-
 /-!
  # The real-power of a positive definite matrix
 
@@ -59,7 +57,7 @@ theorem PosSemidef.rpow_mul_rpow (r₁ r₂ : NNRealˣ)
     rw [Real.zero_rpow, zero_mul, Real.zero_rpow]
     rw [ne_eq]
     rw [← NNReal.coe_add, NNReal.coe_eq_zero]
-    simp only [add_eq_zero_iff, Units.ne_zero, and_self, not_false_eq_true]
+    simp only [add_eq_zero, Units.ne_zero, and_self, not_false_eq_true]
     simp only [ne_eq, NNReal.coe_eq_zero, Units.ne_zero, not_false_eq_true]
   . rw [← Real.rpow_add]
     apply lt_of_le_of_ne (hQ.eigenvalues_nonneg _)
@@ -95,8 +93,8 @@ by
   ext i
   <;>
   simp_rw [Pi.mul_apply, Pi.inv_apply]
-  simp_rw [inv_mul_cancel (NeZero.of_pos (hQ.pos_eigenvalues i)).out]; rfl
-  simp_rw [mul_inv_cancel (NeZero.of_pos (hQ.pos_eigenvalues i)).out]; rfl
+  simp_rw [inv_mul_cancel₀ (NeZero.of_pos (hQ.pos_eigenvalues i)).out]; rfl
+  simp_rw [mul_inv_cancel₀ (NeZero.of_pos (hQ.pos_eigenvalues i)).out]; rfl
 
 @[instance]
 noncomputable def PosDef.eigenvaluesInvertible' {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
@@ -144,14 +142,14 @@ theorem PosSemidef.rpow.isPosSemidef {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) (
     (hQ.rpow r).PosSemidef :=
   by
   rw [Matrix.PosSemidef.rpow, IsHermitian.rpow,
-    innerAut_posSemidef_iff, Matrix.PosSemidef.diagonal]
+    innerAut_posSemidef_iff, Matrix.PosSemidef.diagonal_iff]
   simp only [Function.comp_apply, RCLike.zero_le_real, Pi.pow_apply]
   exact fun i => Real.rpow_nonneg (PosSemidef.eigenvalues_nonneg hQ i) r
 
 theorem PosDef.rpow.isPosDef {Q : Matrix n n 𝕜} (hQ : Q.PosDef) (r : ℝ) :
     (hQ.rpow r).PosDef :=
   by
-  rw [Matrix.PosDef.rpow_eq, innerAut_posDef_iff, Matrix.PosDef.diagonal]
+  rw [Matrix.PosDef.rpow_eq, innerAut_posDef_iff, Matrix.PosDef.diagonal_iff]
   simp only [Function.comp_apply, RCLike.zero_lt_real, Pi.pow_apply]
   exact fun i => Real.rpow_pos_of_pos (PosDef.pos_eigenvalues hQ i) r
 
@@ -167,11 +165,11 @@ theorem PosDef.sqrt_eq_rpow {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
   hQ.posSemidef.sqrt = hQ.rpow (1 / 2) :=
 by convert PosSemidef.sqrt_eq_rpow hQ.posSemidef
 
-theorem PosDef.inv {𝕜 n : Type _} [Fintype n] [RCLike 𝕜] {Q : Matrix n n 𝕜}
-    [DecidableEq n] (hQ : Q.PosDef) : Q⁻¹.PosDef :=
-  by
-  rw [← Matrix.PosDef.rpow_neg_one_eq_inv_self hQ]
-  exact Matrix.PosDef.rpow.isPosDef _ _
+-- theorem PosDef.inv {𝕜 n : Type _} [Fintype n] [RCLike 𝕜] {Q : Matrix n n 𝕜}
+--     [DecidableEq n] (hQ : Q.PosDef) : Q⁻¹.PosDef :=
+--   by
+--   rw [← Matrix.PosDef.rpow_neg_one_eq_inv_self hQ]
+--   exact Matrix.PosDef.rpow.isPosDef _ _
 
 theorem PosDef.rpow_ne_zero [Nonempty n] {Q : Matrix n n ℂ} (hQ : Q.PosDef) {r : ℝ} :
     hQ.rpow r ≠ 0 := by
@@ -179,7 +177,7 @@ theorem PosDef.rpow_ne_zero [Nonempty n] {Q : Matrix n n ℂ} (hQ : Q.PosDef) {r
     ← Matrix.ext_iff, Matrix.diagonal, Matrix.zero_apply, of_apply,
     ite_eq_right_iff, Function.comp_apply, RCLike.ofReal_eq_zero, Pi.pow_apply,
     Real.rpow_eq_zero_iff_of_nonneg (le_of_lt (hQ.pos_eigenvalues _)),
-    (NeZero.of_pos (hQ.pos_eigenvalues _)).out, false_and_iff, imp_false, Classical.not_forall,
+    (NeZero.of_pos (hQ.pos_eigenvalues _)).out, false_and, imp_false, Classical.not_forall,
     Classical.not_not, exists_eq', exists_const]
 
 lemma IsHermitian.rpow_cast {𝕜 : Type*} [RCLike 𝕜] {n : Type _} [Fintype n] [DecidableEq n]

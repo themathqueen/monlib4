@@ -4,12 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.Normed.Lp.PiLp
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Monlib.Preq.Finset
 import Monlib.LinearAlgebra.Ips.Basic
-
-#align_import linear_algebra.my_ips.tensor_hilbert
 
 /-!
 
@@ -22,7 +20,7 @@ import Monlib.LinearAlgebra.Ips.Basic
 
 section
 
-variable {𝕜 E F : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
+variable {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
   [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
 
 open scoped TensorProduct BigOperators
@@ -40,9 +38,10 @@ noncomputable instance TensorProduct.Inner : Inner 𝕜 (E ⊗[𝕜] F)
 theorem TensorProduct.inner_tmul (x z : E) (y w : F) :
     (inner (x ⊗ₜ[𝕜] y) (z ⊗ₜ[𝕜] w) : 𝕜) = inner x z * inner y w := by
   simp_rw [inner, Basis.tensorProduct_repr_tmul_apply, OrthonormalBasis.coe_toBasis_repr_apply,
+    smul_eq_mul,
     star_mul', RCLike.star_def, OrthonormalBasis.repr_apply_apply,
-    inner_conj_symm, mul_mul_mul_comm, ← Finset.mul_sum, ← Finset.sum_mul, OrthonormalBasis.sum_inner_mul_inner]
-  rfl
+    inner_conj_symm, mul_mul_mul_comm (inner y _) (inner x _),
+    ← Finset.sum_mul, ← Finset.mul_sum, OrthonormalBasis.sum_inner_mul_inner, mul_comm]
 
 protected theorem TensorProduct.inner_add_left (x y z : E ⊗[𝕜] F) :
     (inner (x + y) z : 𝕜) = inner x z + inner y z := by
@@ -100,6 +99,8 @@ theorem TensorProduct.eq_span {𝕜 E F : Type _} [RCLike 𝕜] [AddCommGroup E]
   simp_rw [Basis.tensorProduct_apply', TensorProduct.smul_tmul']
   exact ⟨fun i => ((b₁.tensorProduct b₂).repr x) i • b₁ i.fst, fun i => b₂ i.snd, rfl⟩
 
+open scoped InnerProductSpace
+
 @[instance, reducible]
 noncomputable def TensorProduct.normedAddCommGroup : NormedAddCommGroup (E ⊗[𝕜] F) :=
   @InnerProductSpace.Core.toNormedAddCommGroup 𝕜 (E ⊗[𝕜] F) _ _ _
@@ -128,7 +129,7 @@ noncomputable def TensorProduct.normedAddCommGroup : NormedAddCommGroup (E ⊗[�
 
 @[instance, reducible]
 noncomputable def TensorProduct.innerProductSpace :
-    @InnerProductSpace 𝕜 (E ⊗[𝕜] F) _ TensorProduct.normedAddCommGroup :=
+    @InnerProductSpace 𝕜 (E ⊗[𝕜] F) _ _ :=
   InnerProductSpace.ofCore _
 
 example (α β : 𝕜) (x y : E) :

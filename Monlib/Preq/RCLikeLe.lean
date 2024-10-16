@@ -5,8 +5,6 @@ Authors: Monica Omar
 -/
 import Mathlib.Analysis.RCLike.Basic
 
-#align_import preq.is_R_or_C_le
-
 /-!
  # Extra lemmas on RCLike
 
@@ -38,11 +36,11 @@ theorem real_lt_real {x y : ℝ} : (x : 𝕜) < (y : 𝕜) ↔ x < y := by simp 
 
 @[simp, norm_cast]
 theorem zero_le_real {x : ℝ} : 0 ≤ (x : 𝕜) ↔ 0 ≤ x := by
-  simp_rw [@nonneg_def 𝕜, ofReal_im, and_true_iff, ofReal_re]
+  simp_rw [@nonneg_def 𝕜, ofReal_im, and_true, ofReal_re]
 
 @[simp, norm_cast]
 theorem zero_lt_real {x : ℝ} : 0 < (x : 𝕜) ↔ 0 < x := by
-  simp_rw [@pos_def 𝕜, ofReal_im, and_true_iff, ofReal_re]
+  simp_rw [@pos_def 𝕜, ofReal_im, and_true, ofReal_re]
 
 theorem not_le_iff {z w : 𝕜} : ¬z ≤ w ↔ re w < re z ∨ im z ≠ im w := by
   rw [le_def, not_and_or, not_le]

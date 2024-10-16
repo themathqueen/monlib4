@@ -13,8 +13,6 @@ import Mathlib.Data.Matrix.Kronecker
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
 import Monlib.LinearAlgebra.Matrix.PiMat
 
-#align_import linear_algebra.my_matrix.includeBlock
-
 /-!
 
 # Include block
@@ -482,7 +480,7 @@ theorem IsBlockDiagonal.coe_nsmul {k : Type _} [Fintype k] [DecidableEq k] {s : 
     ((n • x : (BlockDiagonals R k s)) :
         Matrix (Σ i, s i) (Σ i, s i) R) =
       n • ↑x :=
-  by simp_rw [nsmul_eq_smul_cast R n, ← IsBlockDiagonal.coe_smul]
+  by simp_rw [← Nat.cast_smul_eq_nsmul R n, ← IsBlockDiagonal.coe_smul]
 
 theorem IsBlockDiagonal.npow {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _}
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] (n : ℕ) {x : Matrix (Σ i, s i) (Σ i, s i) R}
@@ -686,9 +684,6 @@ def sigmaProdSigma {α β : Type _} {ζ : α → Type _} {℘ : β → Type _} :
     <;> simp only [Equiv.sigmaProdDistrib'_apply_fst, Equiv.sigmaProdDistrib'_apply_snd,
       Equiv.coe_fn_mk, Equiv.sigmaProdDistrib, Equiv.coe_fn_mk]
     simp only [Prod.mk.eta, heq_iff_eq]
-    ext
-    <;> simp only [Equiv.sigmaProdDistrib'_apply_fst, Equiv.sigmaProdDistrib, Equiv.coe_fn_mk]
-    <;> rfl
 
 theorem IsBlockDiagonal.apply_of_ne {R : Type _} [CommSemiring R] {k : Type _} [DecidableEq k]
     {s : k → Type _} {x : Matrix (Σ i, s i) (Σ i, s i) R} (hx : x.IsBlockDiagonal) (i j : Σ i, s i)

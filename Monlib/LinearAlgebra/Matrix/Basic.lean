@@ -12,8 +12,6 @@ import Monlib.LinearAlgebra.Ips.RankOne
 import Mathlib.Data.Matrix.Kronecker
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
-#align_import linear_algebra.my_matrix.basic
-
 /-!
 
 # Some obvious lemmas on matrices
@@ -175,15 +173,14 @@ theorem Matrix.IsHermitian.trace_eq [DecidableEq n] [DecidableEq 𝕜] {A : 𝕂
     Finset.mul_sum, ← mul_assoc, mul_comm (_ᴴ _ _ * _), ← mul_assoc, ← map_sum]
   nth_rw 1 [← Finset.sum_rotate]
   simp_rw [← Finset.sum_mul, ← mul_apply, eigenvectorMatrix_mul_conjTranspose,
-    one_apply, boole_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true, map_sum,
-    RCLike.ofReal_sum]
+    one_apply, boole_mul, Finset.sum_ite_eq', Finset.mem_univ, if_true, map_sum]
   congr
   ext i
   symm
   rw [← RCLike.conj_eq_iff_re, starRingEnd_apply, ← conjTranspose_apply, hA.eq]
 
 theorem LinearMap.IsSymmetric.eigenvalue_mem_spectrum [DecidableEq 𝕜]
-    (hn : FiniteDimensional.finrank 𝕜 ℍ = Fintype.card n) {A : l(ℍ)} (hA : A.IsSymmetric)
+    (hn : Module.finrank 𝕜 ℍ = Fintype.card n) {A : l(ℍ)} (hA : A.IsSymmetric)
     (i : Fin (Fintype.card n)) : (hA.eigenvalues hn i : 𝕜) ∈ spectrum 𝕜 A :=
   by
   simp_rw [← Module.End.hasEigenvalue_iff_mem_spectrum]
@@ -217,7 +214,7 @@ theorem Matrix.IsHermitian.apply_eigenvectorBasis {𝕜 n : Type _} [RCLike 𝕜
   simp only [RingHom.toFun_eq_coe, algebraMap_smul, ← RCLike.real_smul_eq_coe_smul]
 
 
-open scoped Matrix
+open scoped Matrix InnerProductSpace
 
 noncomputable instance : Inner 𝕜 (n → 𝕜) :=
 { inner := fun x y => ⟪(EuclideanSpace.equiv n 𝕜).symm x, (EuclideanSpace.equiv n 𝕜).symm y⟫_𝕜 }

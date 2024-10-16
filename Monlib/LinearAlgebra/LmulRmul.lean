@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
-#align_import linear_algebra.lmul_rmul
-
 /-!
  # lmul and rmul (the left and right multiplication maps)
 
@@ -127,7 +125,7 @@ theorem rmulMapLmul_one {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] 
     [IsScalarTower R H₁ H₁] {H₂ : Type _} [NonAssocSemiring H₂] [Module R H₂]
     [SMulCommClass R H₂ H₂] [IsScalarTower R H₂ H₂] : rmulMapLmul (1 ⊗ₜ 1 : H₁ ⊗[R] H₂) = 1 :=
   by
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro a b
   simp_rw [rmulMapLmul_apply, TensorProduct.map_tmul, rmul_apply, lmul_apply, mul_one, one_mul,
     LinearMap.one_apply]

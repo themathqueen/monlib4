@@ -10,8 +10,6 @@ import Monlib.LinearAlgebra.Matrix.IncludeBlock
 import Monlib.LinearAlgebra.PosMap_isReal
 import Monlib.LinearAlgebra.Matrix.Cast
 
-#align_import linear_algebra.my_ips.functional
-
 /-!
 
 # Linear functionals
@@ -76,7 +74,7 @@ theorem Module.Dual.apply (φ : Module.Dual R (Matrix n n R)) (a : Matrix n n R)
       stdBasisMatrix i j (a : R) = fun k l => ite (i = k ∧ j = l) (a : R) (0 : R) :=
     fun i j a => rfl
   simp_rw [← this, smul_stdBasisMatrix, smul_eq_mul, mul_one]
-  rw [← matrix_eq_sum_std_basis a]
+  rw [← matrix_eq_sum_stdBasisMatrix a]
 
 /--
 we linear maps `φ_i : M_[n_i] →ₗ[R] R`, we define its direct sum as the linear map `(Π i, M_[n_i]) →ₗ[R] R`. -/
@@ -179,7 +177,7 @@ theorem Module.Dual.eq_trace_unique (φ : Module.Dual R (Matrix n n R)) :
     ∃! Q : Matrix n n R, ∀ a : Matrix n n R, φ a = (Q * a).trace :=
   by
   use φ.matrix
-  simp_rw [Module.Dual.apply, forall_true_iff, true_and_iff, ←
+  simp_rw [Module.Dual.apply, forall_true_iff, true_and, ←
     Matrix.ext_iff_trace, eq_comm, imp_self, forall_true_iff]
 
 def Module.Dual.pi' {k : Type _} [Fintype k] [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)]
@@ -422,7 +420,7 @@ theorem Module.Dual.isFaithfulPosMap_iff_of_matrix (φ : Module.Dual ℂ (Matrix
   refine' ⟨fun h => h.1.isFaithful_iff_of_matrix.mp h.2, _⟩
   intro hQ
   simp_rw [Module.Dual.IsFaithfulPosMap_iff, Module.Dual.IsFaithful, Module.Dual.isPosMap_iff_of_matrix,
-    hQ.posSemidef, true_and_iff, Module.Dual.apply, star_eq_conjTranspose,
+    hQ.posSemidef, true_and, Module.Dual.apply, star_eq_conjTranspose,
     ← Matrix.mul_assoc, Nontracial.trace_conjTranspose_hMul_self_eq_zero hQ,
     forall_const]
 
@@ -442,7 +440,7 @@ theorem Module.Dual.isFaithful_state_iff_of_matrix (φ : Module.Dual ℂ (Matrix
   refine' ⟨fun h => h.1.isFaithful_iff_of_matrix.mp h.2, _⟩
   intro hQ
   simp_rw [Module.Dual.IsFaithful, Module.Dual.isState_iff_of_matrix, hQ.2, hQ.1.posSemidef,
-    true_and_iff]
+    true_and]
   rw [← Module.Dual.isFaithfulPosMap_iff_of_matrix] at hQ
   exact hQ.1.2
 
@@ -606,13 +604,12 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
       simp only [Matrix.conjTranspose_one, Matrix.one_mul, Matrix.mul_one, Module.Dual.apply,
         star_eq_conjTranspose] at h1
       simp_rw [HH, NNReal.coe_zero, Complex.ofReal_zero, zero_smul] at hα
-      rw [hα, trace_zero, eq_self_iff_true, true_iff_iff] at h1
+      rw [hα, trace_zero, eq_self_iff_true, true_iff] at h1
       simp only [one_ne_zero'] at h1
     let α' : { x : NNReal // 0 < x } := ⟨α, this⟩
     have : α = α' := rfl
     refine' ⟨α', hα, fun y hy => _⟩
     simp_rw [← Subtype.coe_inj] at hy ⊢
-    norm_cast
     exact h _ hy
   · rintro ⟨α, ⟨h1, _⟩⟩
     have : 0 < (α : NNReal) := Subtype.mem α
@@ -620,10 +617,10 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
     ·
       simp_rw [Module.Dual.IsFaithful, Module.Dual.apply, h1, Matrix.smul_mul, Matrix.one_mul,
         trace_smul, smul_eq_zero, Complex.ofReal_eq_zero, NNReal.coe_eq_zero, ne_zero_of_lt this,
-        false_or_iff, star_eq_conjTranspose,
+        false_or, star_eq_conjTranspose,
         trace_conjTranspose_hMul_self_eq_zero, forall_true_iff]
     rw [h1, ← sub_eq_zero, ← sub_smul, smul_eq_zero, sub_eq_zero] at hy
-    simp only [one_ne_zero', or_false_iff, RCLike.ofReal_inj, NNReal.coe_inj,
+    simp only [one_ne_zero', or_false, RCLike.ofReal_inj, NNReal.coe_inj,
       Complex.ofReal_inj, NNReal.coe_inj] at hy
     exact hy.symm
 
@@ -744,8 +741,8 @@ theorem Module.Dual.isFaithfulPosMap_iff_isInner_of_matrix (φ : Module.Dual ℂ
     simp only [ip]
     simp_rw [conjTranspose_add, Matrix.add_mul, map_add, conjTranspose_smul, Matrix.smul_mul,
       _root_.map_smul, Complex.star_def, smul_eq_mul, forall₃_true_iff,
-      true_and_iff]
-  simp_rw [IsInner, ← hip, Hip, forall₃_true_iff, true_and_iff, and_true_iff]
+      true_and]
+  simp_rw [IsInner, ← hip, Hip, forall₃_true_iff, true_and, and_true]
   constructor
   · intro h
     simp_rw [hip, ← h.1.isReal _, star_eq_conjTranspose, conjTranspose_mul,
@@ -757,7 +754,7 @@ theorem Module.Dual.isFaithfulPosMap_iff_isInner_of_matrix (φ : Module.Dual ℂ
     refine' ⟨_, h.2.2⟩
     simp_rw [Module.Dual.IsPosMap, star_eq_conjTranspose, ← hip, @RCLike.nonneg_def' ℂ,
       ← @RCLike.conj_eq_iff_re ℂ _ (ip (_,_)),
-      starRingEnd_apply, ← h.1, true_and_iff]
+      starRingEnd_apply, ← h.1, true_and]
     exact h.2.1
 
 theorem Module.Dual.isFaithfulPosMap_of_matrix_tfae (φ : Module.Dual ℂ (Matrix n n ℂ)) :
@@ -824,7 +821,7 @@ variable {k : Type _} [Fintype k] {s : k → Type _}
 @[reducible]
 noncomputable def Module.Dual.PiNormedAddCommGroup
   {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-  [Π i, (φ i).IsFaithfulPosMap] :
+  [_hφ : Π i, (φ i).IsFaithfulPosMap] :
   _root_.NormedAddCommGroup (PiMat ℂ k s) :=
 -- -- by
 --   -- letI := fun i => (hφ i).NormedAddCommGroup
@@ -855,21 +852,20 @@ noncomputable def Module.Dual.PiNormedAddCommGroup
   --     smul_left := fun x y r => by simp_rw [inner, Pi.smul_apply, inner_smul_left, Finset.mul_sum] }
 
 set_option synthInstance.checkSynthOrder false in
-scoped[Functional] attribute [instance] Module.Dual.PiNormedAddCommGroup
+scoped[Functional] attribute [instance 1000] Module.Dual.PiNormedAddCommGroup
 
 @[reducible]
 noncomputable def Module.Dual.pi.InnerProductSpace
   {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
-  [Π i, (φ i).IsFaithfulPosMap] :
+  [hφ : Π i, (φ i).IsFaithfulPosMap] :
     -- letI := Module.Dual.PiNormedAddCommGroup hφ
-  _root_.InnerProductSpace ℂ (PiMat ℂ k s) :=
--- by
+  @_root_.InnerProductSpace ℂ (PiMat ℂ k s) _
+  ((Module.Dual.PiNormedAddCommGroup (_hφ := hφ)).toSeminormedAddCommGroup)
+   :=
   -- letI : _root_.NormedAddCommGroup (PiMat ℂ k s) := PiLp.normedAddCommGroup 2 _
   -- letI this : Π i : k,
   --   _root_.NormedAddCommGroup (Matrix (s i) (s i) ℂ) :=
   --   -- fun i => (φ i).NormedAddCommGroup
-  -- letI := fun i => (φ i).InnerProductSpace
 PiLp.innerProductSpace _
-  -- InnerProductSpace.ofCore _
 
-scoped[Functional] attribute [instance] Module.Dual.pi.InnerProductSpace
+scoped[Functional] attribute [instance high] Module.Dual.pi.InnerProductSpace

@@ -5,8 +5,6 @@ Authors: Monica Omar
 -/
 import Mathlib.Analysis.InnerProductSpace.Projection
 
-#align_import linear_algebra.is_proj'
-
 /-!
  # is_proj'
 

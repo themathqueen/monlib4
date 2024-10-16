@@ -5,8 +5,6 @@ import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 
-#align_import quantum_graph.symm
-
 @[simps]
 noncomputable def symmMap (R : Type _) [RCLike R] (M₁ M₂ : Type _) [NormedAddCommGroup M₁]
   [NormedAddCommGroup M₂]
@@ -113,6 +111,8 @@ private lemma symmMapAux_apply (f : A →ₗ[ℂ] B) :
     ∘ₗ (rTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
     ∘ₗ (τ⁻¹ _) :=
 rfl
+
+open scoped InnerProductSpace
 
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
@@ -324,7 +324,7 @@ theorem Psi.adjoint_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     star_tmul, ← MulOpposite.op_star, tenSwap_apply', star_star, map_tmul,
     AlgEquiv.toLinearMap_apply, AlgEquiv.op_apply_apply, MulOpposite.unop_op,
     starAlgebra.modAut_star, QuantumSet.modAut_apply_modAut,
-    sub_eq_add_neg, add_assoc, add_neg_cancel_comm_assoc, neg_add_self, add_zero]
+    sub_eq_add_neg, add_assoc, add_neg_cancel_comm_assoc, neg_add_cancel, add_zero]
 
 theorem Psi.symmMap_apply (r₁ r₂ : ℝ) (f : A →ₗ[ℂ] B) :
     hB.Psi r₁ r₂ (symmMap _ _ _ f) =

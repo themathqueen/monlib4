@@ -7,8 +7,6 @@ import Mathlib.Algebra.Group.Defs
 import Mathlib.Data.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset
 
-#align_import preq.finset
-
 /-!
 
 # finset
@@ -106,4 +104,4 @@ theorem forall_forall_comm {α β γ ζ : Sort _} {p : α → β → γ → ζ �
 
 theorem Finset.sum_product_univ {β α γ : Type _} [AddCommMonoid β] [Fintype α] [Fintype γ]
     {f : γ × α → β} : ∑ x : γ × α, f x = ∑ x : γ, ∑ y : α, f (x, y) :=
-  Finset.sum_product
+  Finset.sum_product _ _ _

@@ -7,8 +7,6 @@ import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Monlib.LinearAlgebra.Ips.Basic
 import Monlib.LinearAlgebra.IsProj'
 
-#align_import linear_algebra.my_ips.rank_one
-
 /-!
 
 # rank one operators
@@ -89,6 +87,8 @@ lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
   ContinuousLinearMap.adjoint (ket 𝕜 x) = bra 𝕜 x :=
 by
   rw [← bra_adjoint_eq_ket, ContinuousLinearMap.adjoint_adjoint]
+
+open scoped InnerProductSpace
 
 lemma bra_ket_apply {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (x y : E) :
@@ -245,17 +245,17 @@ theorem ContinuousLinearMap.commutes_with_all_iff [CompleteSpace E₁] {T : E₁
       intro x y
       nth_rw 1 [← rankOne_adjoint]
       rw [h', rankOne_adjoint]
-    simp_rw [ext_iff, rankOne_apply] at h' h''
+    simp_rw [ContinuousLinearMap.ext_iff, rankOne_apply] at h' h''
     by_cases H : ∀ x : E₁, x = 0
     · use 0
-      simp_rw [ext_iff]
+      simp_rw [ContinuousLinearMap.ext_iff]
       intro x
       rw [H x, zero_smul, map_zero, zero_apply]
     push_neg at H
     obtain ⟨x, hx⟩ := H
     use (⟪x,x⟫_𝕜)⁻¹ * ⟪adjoint T x, x⟫_𝕜
-    simp_rw [ext_iff, ContinuousLinearMap.smul_apply, one_apply, mul_smul, h', smul_smul]
-    rw [inv_mul_cancel]
+    simp_rw [ContinuousLinearMap.ext_iff, ContinuousLinearMap.smul_apply, one_apply, mul_smul, h', smul_smul]
+    rw [inv_mul_cancel₀]
     simp_rw [one_smul, forall_true_iff]
     · rw [inner_self_ne_zero]
       exact hx
@@ -271,7 +271,7 @@ theorem ContinuousLinearMap.centralizer [CompleteSpace E₁] :
 theorem ContinuousLinearMap.scalar_centralizer :
     {x : E₁ →L[𝕜] E₁ | ∃ α : 𝕜, x = α • 1}.centralizer = @Set.univ (E₁ →L[𝕜] E₁) :=
   by
-  simp_rw [Set.centralizer, Set.ext_iff, Set.mem_setOf, Set.mem_univ, iff_true_iff]
+  simp_rw [Set.centralizer, Set.ext_iff, Set.mem_setOf, Set.mem_univ, iff_true]
   rintro x y ⟨α, rfl⟩
   simp only [Algebra.smul_mul_assoc, one_mul, Algebra.mul_smul_comm, mul_one]
 
@@ -305,7 +305,7 @@ by
     use Units.mk0 (inner y x / inner x x)
         (div_ne_zero ugh ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx))
     simp_rw [div_eq_inv_mul, Units.val_mk0, mul_smul, ← h, smul_smul,
-      inv_mul_cancel ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx), one_smul]
+      inv_mul_cancel₀ ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx), one_smul]
 
 theorem colinear_of_ne_zero_rankOne_eq_rankOne [CompleteSpace E₂] [CompleteSpace E₁]
   {a c : E₁} {b d : E₂} (h : rankOne 𝕜 a b = rankOne 𝕜 c d)
@@ -391,17 +391,17 @@ open scoped BigOperators
 
 theorem ContinuousLinearMap.exists_sum_rankOne
   [FiniteDimensional 𝕜 E₁] [FiniteDimensional 𝕜 E₂] (T : E₁ →L[𝕜] E₂) :
-    ∃ (x : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₂)
-      (y : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₁),
+    ∃ (x : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₂)
+      (y : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₁),
       T = ∑ i, rankOne 𝕜 (x i) (y i) :=
   by
   letI := FiniteDimensional.complete 𝕜 E₁
   letI := FiniteDimensional.complete 𝕜 E₂
   let e₁ := stdOrthonormalBasis 𝕜 E₁
   let e₂ := stdOrthonormalBasis 𝕜 E₂
-  let b : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₁ := fun ij =>
+  let b : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₁ := fun ij =>
     e₁ ij.1
-  let a : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₂ := fun ij =>
+  let a : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₂ := fun ij =>
     e₂.repr (T (e₁ ij.1)) ij.2 • e₂ ij.2
   refine' ⟨a, b, _⟩
   simp only [a, b]
@@ -410,7 +410,7 @@ theorem ContinuousLinearMap.exists_sum_rankOne
   intro u v
   symm
   calc
-    ∑ x : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂),
+    ∑ x : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂),
           ⟪u,e₁ x.fst⟫_𝕜 * (⟪T (e₁ x.fst),e₂ x.snd⟫_𝕜 * ⟪e₂ x.snd,v⟫_𝕜) =
         ∑ x_1, ∑ x_2,
           ⟪u,e₁ x_1⟫_𝕜 * (⟪T (e₁ x_1),e₂ x_2⟫_𝕜 * ⟪e₂ x_2,v⟫_𝕜) :=
@@ -420,13 +420,13 @@ theorem ContinuousLinearMap.exists_sum_rankOne
     _ = ⟪T u,v⟫_𝕜 := by simp_rw [← adjoint_inner_right T, OrthonormalBasis.sum_inner_mul_inner]
 
 example [FiniteDimensional 𝕜 E₁] (T : E₁ →L[𝕜] E₁) :
-    ∃ x y : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₁) → E₁,
+    ∃ x y : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₁) → E₁,
       T = ∑ i, rankOne 𝕜 (x i) (y i) :=
 ContinuousLinearMap.exists_sum_rankOne T
 
 theorem LinearMap.exists_sum_rankOne [FiniteDimensional 𝕜 E₁] [FiniteDimensional 𝕜 E₂] (T : E₁ →ₗ[𝕜] E₂) :
-    ∃ (x : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₂)
-      (y : Fin (FiniteDimensional.finrank 𝕜 E₁) × Fin (FiniteDimensional.finrank 𝕜 E₂) → E₁),
+    ∃ (x : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₂)
+      (y : Fin (Module.finrank 𝕜 E₁) × Fin (Module.finrank 𝕜 E₂) → E₁),
       T = ∑ i, ↑(rankOne 𝕜 (x i) (y i)) :=
 by
   obtain ⟨a, b, h⟩ := ContinuousLinearMap.exists_sum_rankOne (toContinuousLinearMap T)
@@ -617,6 +617,8 @@ theorem LinearMap.toContinuousLinearMap_adjoint' {𝕜 B C : Type _} [RCLike �
   ContinuousLinearMap.toLinearMap (ContinuousLinearMap.adjoint (toContinuousLinearMap x)) =
     LinearMap.adjoint x :=
 rfl
+
+open scoped InnerProductSpace
 
 theorem OrthonormalBasis.repr_adjoint {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
   [InnerProductSpace 𝕜 E] [Fintype ι] (b : OrthonormalBasis ι 𝕜 E) :

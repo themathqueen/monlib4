@@ -7,8 +7,6 @@ import Mathlib.Algebra.Star.Basic
 import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basic
 
-#align_import preq.ites
-
 /-!
  # Some stuff on ites
 

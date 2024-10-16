@@ -157,7 +157,7 @@ by
   simp_rw [LinearMap.comp_assoc, ← LinearMap.comp_assoc _ _ (TensorProduct.map _ _),
     (QuantumSet.modAut_isCoalgHom _).2, LinearMap.comp_assoc, ← AlgEquiv.trans_toLinearMap,
     starAlgebra.modAut_trans, neg_sub_left, add_comm,
-    QuantumSet.tensorProduct.k_eq₁, neg_add_self, starAlgebra.modAut_zero]
+    QuantumSet.tensorProduct.k_eq₁, neg_add_cancel, starAlgebra.modAut_zero]
   rfl
 
 -- calc Coalgebra.comul.real = (LinearMap.adjoint (LinearMap.mul' ℂ A)).real :=

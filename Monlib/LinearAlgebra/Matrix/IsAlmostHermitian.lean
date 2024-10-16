@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Mathlib.LinearAlgebra.Matrix.Block
 import Monlib.LinearAlgebra.Matrix.Basic
 
-#align_import linear_algebra.my_matrix.is_almost_hermitian
-
 /-!
  # Almost Hermitian Matrices
 
@@ -60,7 +58,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
     by_cases h' : x = 0
     · rw [h']
       use 0; use 0
-      simp_rw [zero_smul, isHermitian_zero, true_and_iff]
+      simp_rw [zero_smul, isHermitian_zero, true_and]
     -- have hα_pre :
     --   ∀ i j k l : n, x i j ≠ 0 → x k l ≠ 0 → x i j / star (x j i) = x k l / star (x l k) :=
     --   by
@@ -87,8 +85,8 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       simp_rw [RCLike.conj_mul, ← RCLike.ofReal_pow, RCLike.ofReal_re,
         RCLike.normSq_eq_def']
     have Hα' : Real.sqrt (RCLike.normSq α) = 1 := by
-      simp_rw [Real.sqrt_eq_iff_sq_eq (RCLike.normSq_nonneg _) zero_le_one, one_pow, conj_, ← Hα,
-        inv_mul_cancel hα', RCLike.one_re]
+      simp_rw [Real.sqrt_eq_iff_eq_sq (RCLike.normSq_nonneg _) zero_le_one, one_pow, conj_, ← Hα,
+        inv_mul_cancel₀ hα', RCLike.one_re]
     have another_hα : ∀ p q : n, x p q ≠ 0 → x p q = α * conj (x q p) :=
       by
       intro p q _
@@ -104,17 +102,17 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       exact hα'
     have hβ'' : β⁻¹ = conj β :=
       by
-      rw [← mul_left_inj' hβ', inv_mul_cancel hβ', ← Complex.normSq_eq_conj_mul_self]
+      rw [← mul_left_inj' hβ', inv_mul_cancel₀ hβ', ← Complex.normSq_eq_conj_mul_self]
       norm_cast
       simp_rw [Complex.normSq_eq_abs, ← Complex.abs_pow, hβ]
       exact Hα'.symm
     have hαβ : β * α⁻¹ = β⁻¹ := by
-      rw [← hβ, pow_two, mul_inv, ← mul_assoc, mul_inv_cancel hβ', one_mul]
+      rw [← hβ, pow_two, mul_inv, ← mul_assoc, mul_inv_cancel₀ hβ', one_mul]
     use β
     use β⁻¹ • x
     simp_rw [IsHermitian, conjTranspose_smul, ← Matrix.ext_iff, Matrix.smul_apply,
-      conjTranspose_apply, smul_eq_mul, ← mul_assoc, mul_inv_cancel hβ', one_mul,
-      forall₂_true_iff, true_and_iff, hβ'', ← Complex.star_def, star_star]
+      conjTranspose_apply, smul_eq_mul, ← mul_assoc, mul_inv_cancel₀ hβ', one_mul,
+      forall₂_true_iff, true_and, hβ'', ← Complex.star_def, star_star]
     · intro p q
       by_cases H : x p q = 0
       · simp_rw [H, (this p q).mp H, star_zero, MulZeroClass.mul_zero]
@@ -132,7 +130,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
 theorem isAlmostHermitian_zero [Semiring 𝕜] [StarRing 𝕜] : (0 : Matrix n n 𝕜).IsAlmostHermitian :=
   by
   use 0; use 0
-  simp_rw [isHermitian_zero, zero_smul, and_true_iff]
+  simp_rw [isHermitian_zero, zero_smul, and_true]
 
 /-- if $x$ is almost Hermitian, then it is also normal -/
 theorem AlmostHermitian.isStarNormal [Fintype n] [CommSemiring 𝕜] [StarRing 𝕜] {M : Matrix n n 𝕜}
@@ -140,7 +138,7 @@ theorem AlmostHermitian.isStarNormal [Fintype n] [CommSemiring 𝕜] [StarRing �
   by
   obtain ⟨α, N, ⟨rfl, hN⟩⟩ := hM
   apply IsStarNormal.mk
-  simp_rw [Commute, SemiconjBy, star_smul, smul_mul_smul, star_eq_conjTranspose, hN.eq, mul_comm]
+  simp_rw [Commute, SemiconjBy, star_smul, smul_mul_smul_comm, star_eq_conjTranspose, hN.eq, mul_comm]
 
 /-- $x$ is almost Hermitian if and only if $\beta \cdot x$ is almost Hermitian for any $\beta$ -/
 theorem almost_hermitian_iff_smul [CommSemiring 𝕜] [StarRing 𝕜] {M : Matrix n n 𝕜} :
@@ -150,7 +148,7 @@ theorem almost_hermitian_iff_smul [CommSemiring 𝕜] [StarRing 𝕜] {M : Matri
   · rintro ⟨α, N, ⟨rfl, hN⟩⟩ β
     use β * α
     use N
-    simp_rw [smul_smul, true_and_iff, hN]
+    simp_rw [smul_smul, true_and, hN]
   · intro h
     specialize h (1 : 𝕜)
     simp_rw [one_smul] at h
@@ -187,11 +185,11 @@ theorem IsAlmostHermitian.upper_triangular_iff_diagonal [Field 𝕜] [StarRing �
   · intro h i j hij
     by_cases H : j < i
     · exact h H
-    · simp_rw [not_lt, le_iff_eq_or_lt, hij, false_or_iff] at H
+    · simp_rw [not_lt, le_iff_eq_or_lt, hij, false_or] at H
       specialize h H
       by_cases Hα : α = 0
       · simp_rw [Hα, zero_smul, Matrix.zero_apply]
-      · simp_rw [smul_eq_zero, Hα, false_or_iff] at h
+      · simp_rw [smul_eq_zero, Hα, false_or] at h
         rw [← hN.eq]
         simp_rw [Matrix.smul_apply, conjTranspose_apply, h, star_zero, smul_zero]
   · intro h i j hij

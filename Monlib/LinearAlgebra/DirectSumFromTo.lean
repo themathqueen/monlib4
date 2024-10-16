@@ -8,8 +8,6 @@ import Mathlib.LinearAlgebra.Pi
 -- import Mathlib.LinearAlgebra.ProjectiveSpace.Basic
 import Monlib.Preq.Ites
 
-#align_import linear_algebra.direct_sum_from_to
-
 /-!
 
 # Direct sum from _ to _
@@ -19,9 +17,9 @@ import Monlib.Preq.Ites
 -/
 
 
-def directSumFromTo {R : Type _} [Semiring R] {ι₁ : Type _} [DecidableEq ι₁] {M₁ : ι₁ → Type _}
+def directSumFromTo {R : Type*} [Semiring R] {ι₁ : Type*} [DecidableEq ι₁] {M₁ : ι₁ → Type*}
     [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₁ : ι₁, Module R (M₁ i₁)] (i j : ι₁) : M₁ i →ₗ[R] M₁ j :=
-  LinearMap.proj j ∘ₗ LinearMap.single i
+  LinearMap.proj j ∘ₗ LinearMap.single _ _ i
 
 theorem directSumFromTo_apply_same {R : Type _} [Semiring R] {ι₁ : Type _} [DecidableEq ι₁]
     {M₁ : ι₁ → Type _} [∀ i₁ : ι₁, AddCommGroup (M₁ i₁)] [∀ i₁ : ι₁, Module R (M₁ i₁)] (i : ι₁) :

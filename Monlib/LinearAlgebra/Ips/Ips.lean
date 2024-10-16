@@ -8,8 +8,6 @@ import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Monlib.LinearAlgebra.Ips.Symm
 
-#align_import linear_algebra.my_ips.ips
-
 /-!
 # Finite-dimensional inner product spaces
 
@@ -112,7 +110,7 @@ theorem LinearMap.IsProj.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup
       exact h'.1
     · intro h'
       rw [h', map_zero]
-      simp only [eq_self_iff_true, true_and_iff]
+      simp only [eq_self_iff_true, true_and]
       use x
       simp only [h', map_zero, eq_self_iff_true]
   · suffices ∀ x : V, ∃ v : ker T, ∃ w : range T, x = v + w
@@ -120,7 +118,7 @@ theorem LinearMap.IsProj.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup
       rw [codisjoint_iff, ← Submodule.add_eq_sup]
       ext x
       rcases this x with ⟨v, w, hvw⟩
-      simp only [Submodule.mem_top, iff_true_iff, hvw]
+      simp only [Submodule.mem_top, iff_true, hvw]
       apply Submodule.add_mem_sup (SetLike.coe_mem v) (SetLike.coe_mem w)
     intro x
     use ⟨x - T x, ?_⟩, ⟨T x, ?_⟩

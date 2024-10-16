@@ -7,8 +7,6 @@ import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.Hermitian
 import Monlib.Preq.Ites
 
-#align_import linear_algebra.my_matrix.conj
-
 /-!
  # Conjugate of a matrix
 

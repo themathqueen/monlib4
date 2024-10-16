@@ -12,8 +12,6 @@ import Monlib.RepTheory.AutMat
 import Monlib.Preq.StarAlgEquiv
 -- import Mathlib.Tactic.Explode
 
-#align_import linear_algebra.innerAut
-
 /-!
 
 # Inner automorphisms
@@ -101,13 +99,17 @@ instance Pi.coe {k : Type _} {s r : k → Type _} [∀ i, CoeTC (s i) (r i)] :
 ⟨fun U i => U i⟩
 
 lemma Pi.coe_eq {k : Type _} {s r : k → Type _} [∀ i, CoeTC (s i) (r i)] (U : Π i, s i) :
-  (fun i => ↑(U i : r i)) = CoeTC.coe U :=
+  (fun i => (U i : r i)) = ↑U :=
 rfl
+
+instance (R : Type*) [Monoid R] [StarMul R] :
+  CoeTC (unitary R) R :=
+⟨fun x => x⟩
 
 theorem unitary.pi_mem {k : Type _} {s : k → Type _} [∀ i, Semiring (s i)] [∀ i, StarMul (s i)]
   (U : Π i, unitary (s i)) :
   ↑U ∈ unitary (∀ i, s i) :=
-  by
+by
   rw [unitary.mem_iff]
   simp only [Pi.mul_def, Pi.star_apply, unitary.coe_star_mul_self]
   simp only [← unitary.coe_star, unitary.coe_mul_star_self, and_self]
@@ -231,6 +233,7 @@ theorem unitaryGroup.toLin'_eq [DecidableEq n] (U : unitaryGroup n 𝕜) (x : n 
     (UnitaryGroup.toLin' U) x = (toLin' U) x :=
   rfl
 
+omit [StarRing 𝕜] in
 theorem toLinAlgEquiv'_apply' [DecidableEq n] (x : Matrix n n 𝕜) :
   toLinAlgEquiv' x = (toLin' : (Matrix n n 𝕜 ≃ₗ[𝕜] (n → 𝕜) →ₗ[𝕜] (n → 𝕜))) x :=
 rfl
@@ -258,7 +261,7 @@ theorem innerAut_apply_innerAut_inv [DecidableEq n] (U₁ U₂ : unitaryGroup n 
 
 theorem innerAut_apply_innerAut_inv_self [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     innerAut U (innerAut U⁻¹ x) = x := by
-  rw [innerAut_apply_innerAut_inv, mul_inv_self, innerAut_one, LinearMap.one_apply]
+  rw [innerAut_apply_innerAut_inv, mul_inv_cancel, innerAut_one, LinearMap.one_apply]
 
 theorem innerAut_inv_apply_innerAut_self [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     innerAut U⁻¹ (innerAut U x) = x :=
@@ -475,7 +478,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     simp only [Hy.2, Hy.1, conjTranspose_one, Matrix.mul_one, Matrix.one_mul, toLin'_one,
       LinearMap.id_apply, eq_self_iff_true, forall_true_iff]
     simp_rw [← conjTranspose_mul, Hy.2, conjTranspose_one, toLin'_one, LinearMap.id_apply,
-      forall_true_iff, true_and_iff]
+      forall_true_iff, true_and]
   have this8 : (yᴴ * y).PosSemidef := posSemidef_star_mul_self _
   have this9 := (PosSemidef.invertible_iff_posDef this8).mp this7
   have this12 : (1 : n → 𝕜) ≠ 0 :=
@@ -507,7 +510,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     mul_pos_iff] at this9
   simp only [Nat.cast_pos, Fintype.card_pos] at this9
   have this14 : ¬(Fintype.card n : ℝ) < 0 := by simp only [not_lt, Nat.cast_nonneg]
-  simp_rw [this14, and_false_iff, and_true_iff, or_false_iff] at this9
+  simp_rw [this14, and_false, and_true, or_false] at this9
   have fin : (((RCLike.re α : ℝ) ^ (-(1 / 2 : ℝ)) : ℝ) : 𝕜) • y ∈ unitaryGroup n 𝕜 :=
     by
     rw [mem_unitaryGroup_iff', star_eq_conjTranspose]
@@ -528,9 +531,9 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
     by
     apply inv_eq_left_inv
     simp_rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul]
-    rw [inv_mul_cancel, one_smul, H, Hy.2]
+    rw [inv_mul_cancel₀, one_smul, H, Hy.2]
     · simp_rw [ne_eq, RCLike.ofReal_eq_zero, Real.rpow_eq_zero_iff_of_nonneg (le_of_lt this9),
-        (NeZero.of_pos this9).out, false_and_iff]
+        (NeZero.of_pos this9).out, false_and]
       exact not_false
   use U
   ext1 x
@@ -622,7 +625,7 @@ theorem innerAut_commutes_with_lid_comm (U : Matrix.unitaryGroup n 𝕜) :
         (TensorProduct.lid 𝕜 (Matrix n n 𝕜)).toLinearMap ∘ₗ
           (TensorProduct.comm 𝕜 (Matrix n n 𝕜) 𝕜).toLinearMap :=
   by
-  simp_rw [TensorProduct.ext_iff, LinearMap.comp_apply, TensorProduct.map_apply,
+  simp_rw [TensorProduct.ext_iff', LinearMap.comp_apply, TensorProduct.map_apply,
     LinearEquiv.coe_coe, TensorProduct.comm_tmul,
     TensorProduct.lid_tmul, LinearMap.one_apply, _root_.map_smul,
     forall₂_true_iff]
@@ -686,7 +689,7 @@ theorem PosSemidef.kronecker {n p : Type _} [Fintype n] [Fintype p]
   by
   rw [Matrix.IsHermitian.spectral_theorem'' hx.1, Matrix.IsHermitian.spectral_theorem'' hy.1,
     innerAut_kronecker, diagonal_kronecker_diagonal, innerAut_posSemidef_iff,
-    PosSemidef.diagonal]
+    PosSemidef.diagonal_iff]
   simp_rw [Function.comp_apply, ← RCLike.ofReal_mul, RCLike.pos_ofReal,
     mul_nonneg (IsHermitian.nonneg_eigenvalues_of_posSemidef hx _)
       (IsHermitian.nonneg_eigenvalues_of_posSemidef hy _),
@@ -697,7 +700,7 @@ theorem PosDef.kronecker {𝕜 n p : Type _} [RCLike 𝕜] [DecidableEq 𝕜] [F
     (hy : y.PosDef) : (x ⊗ₖ y).PosDef :=
   by
   rw [Matrix.IsHermitian.spectral_theorem'' hx.1, Matrix.IsHermitian.spectral_theorem'' hy.1,
-    innerAut_kronecker, innerAut_posDef_iff, diagonal_kronecker_diagonal, PosDef.diagonal]
+    innerAut_kronecker, innerAut_posDef_iff, diagonal_kronecker_diagonal, PosDef.diagonal_iff]
   simp_rw [Function.comp_apply, ← RCLike.ofReal_mul,
     @RCLike.zero_lt_real 𝕜, mul_pos (hx.pos_eigenvalues _) (hy.pos_eigenvalues _), forall_true_iff]
 

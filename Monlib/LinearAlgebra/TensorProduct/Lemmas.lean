@@ -86,7 +86,8 @@ lemma AlgEquiv.TensorProduct.map_map_toLinearMap
   (AlgEquiv.TensorProduct.map h i) ((AlgEquiv.TensorProduct.map f g) x)
     = (AlgEquiv.TensorProduct.map (f.trans h) (g.trans i)) x :=
 by
-  simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply]
+  simp only [TensorProduct.map, toAlgHom_eq_coe, coe_mk, Algebra.TensorProduct.map_apply_map_apply,
+    Equiv.coe_fn_mk]
   rfl
 
 lemma AlgEquiv.TensorProduct.map_symm

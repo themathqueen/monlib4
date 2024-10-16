@@ -40,7 +40,7 @@ lemma OrthonormalBasis.tensorProduct_repr_tmul_apply
   ((b₁.tensorProduct b₂).repr (x ⊗ₜ[𝕜] y)) (i, j) = (b₁.repr x i) * (b₂.repr y j) :=
 by
   simp only [tensorProduct, Basis.coe_toOrthonormalBasis_repr, Basis.equivFun_apply,
-    Basis.tensorProduct_repr_tmul_apply, OrthonormalBasis.coe_toBasis_repr_apply]
+    Basis.tensorProduct_repr_tmul_apply, OrthonormalBasis.coe_toBasis_repr_apply, mul_comm, smul_eq_mul]
 
 lemma OrthonormalBasis.tensorProduct_repr_tmul_apply'
   (b₁ : OrthonormalBasis ι₁ 𝕜 E) (b₂ : OrthonormalBasis ι₂ 𝕜 F)

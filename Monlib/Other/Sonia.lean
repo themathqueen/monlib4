@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Mathlib.Algebra.BigOperators.Fin
 import Init.Data.Nat.Lemmas
 
-#align_import other.sonia
-
 /-!
 
 # Useless and interesting fact(s) on naturals and integers
@@ -73,8 +71,7 @@ theorem nat_repr_mod_eq_sum_repr_mod {a n : ℕ} (x : Fin n → ℤ) (ha : 1 < a
     (∑ i, x i * (a.succ : ℕ) ^ (i : ℕ)) % a = (∑ i, x i) % a :=
   by
   induction' n with d hd
-  · intros
-    rfl
+  · rfl
   · simp_rw [Fin.sum_univ_succ, Fin.val_zero, pow_zero, mul_one, Fin.val_succ,
       Int.emod_add_cancel_left]
     let x' : Fin d → ℤ := fun i => x i.succ

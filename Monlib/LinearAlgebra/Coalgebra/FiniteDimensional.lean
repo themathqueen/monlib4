@@ -116,6 +116,8 @@ lemma Coalgebra.counit_eq_unit_adjoint
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A] :
   Coalgebra.counit = (LinearMap.adjoint (Algebra.linearMap R A : R →ₗ[R] A) : A →ₗ[R] R) :=
 rfl
+
+open scoped InnerProductSpace
 -- open scoped ofFiniteDimensionalHilbertAlgebra in
 lemma Coalgebra.inner_eq_counit' [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A] :
@@ -146,7 +148,7 @@ theorem Coalgebra.rTensor_mul_comp_lTensor_comul
   (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
   (rT A (m A)) ∘ₗ (ϰ A A A).symm.toLinearMap ∘ₗ (lT A comul) = comul ∘ₗ (m A) :=
 by
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro x y
   rw [TensorProduct.inner_ext_iff']
   intro a b

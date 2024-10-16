@@ -9,8 +9,6 @@ import Mathlib.Algebra.Module.Opposites
 import Mathlib.Algebra.Star.Basic
 import Monlib.LinearAlgebra.TensorProduct.Lemmas
 
-#align_import linear_algebra.my_ips.op_unop
-
 /-!
 
 # The multiplicative opposite linear equivalence
@@ -84,7 +82,7 @@ theorem tenSwap_symm :
   (tenSwap R).symm = (tenSwap R : B ⊗[R] Aᵐᵒᵖ ≃ₗ[R] A ⊗[R] Bᵐᵒᵖ) :=
 by
   rw [← LinearEquiv.toLinearMap_inj]
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro _ _
   rfl
 

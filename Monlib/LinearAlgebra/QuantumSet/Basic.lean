@@ -19,8 +19,6 @@ import Monlib.LinearAlgebra.Mul''
 import Monlib.RepTheory.AutMat
 import Monlib.LinearAlgebra.LinearMapOp
 
-#align_import linear_algebra.my_ips.quantum_set
-
 /-!
 
 # Quantum Set
@@ -111,6 +109,7 @@ noncomputable instance InnerProductAlgebra.toInnerProductSpace {A : Type*}
   add_left := InnerProductAlgebra.add_left
   smul_left := InnerProductAlgebra.smul_left
 
+open scoped InnerProductSpace
 -- attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 open Coalgebra in
 class QuantumSet (A : Type _) [ha : starAlgebra A]
@@ -166,7 +165,7 @@ theorem QuantumSet.modAut_symm (r : ℝ) :
 by
   ext
   apply_fun (ha.modAut r) using AlgEquiv.injective _
-  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_right_neg, ha.modAut_zero]
+  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_neg_cancel, ha.modAut_zero]
   rfl
 
 lemma QuantumSet.modAut_isSelfAdjoint
@@ -559,7 +558,7 @@ by
     Coalgebra.comul_eq_mul_adjoint,
     ← TensorProduct.map_adjoint, ← LinearMap.adjoint_comp,
     Function.Injective.eq_iff (LinearEquiv.injective _),
-    TensorProduct.ext_iff, LinearMap.ext_iff, LinearMap.comp_apply,
+    TensorProduct.ext_iff', LinearMap.ext_iff, LinearMap.comp_apply,
     TensorProduct.map_tmul, LinearMap.mul'_apply]
   simp only [Algebra.linearMap_apply, AlgEquiv.toLinearMap_apply, map_mul, implies_true, and_true,
     Algebra.algebraMap_eq_smul_one, map_smul, map_one]
@@ -581,7 +580,7 @@ theorem lmul_adjoint (a : B) :
   intro u
   simp_rw [LinearMap.adjoint_inner_left, lmul_apply,
     QuantumSet.inner_star_left,
-    starAlgebra.modAut_star, star_star, neg_neg, QuantumSet.modAut_apply_modAut, neg_add_self,
+    starAlgebra.modAut_star, star_star, neg_neg, QuantumSet.modAut_apply_modAut, neg_add_cancel,
     starAlgebra.modAut_zero, AlgEquiv.one_apply]
 
 lemma QuantumSet.inner_eq_counit' :
@@ -629,7 +628,7 @@ by
   simp_rw [← inner_eq_counit']
   nth_rw 2 [← inner_conj_symm]
   rw [inner_star_left, star_star, inner_conj_symm, mul_one,
-    modAut_isSymmetric, modAut_apply_modAut, neg_add_self, hb.modAut_zero,
+    modAut_isSymmetric, modAut_apply_modAut, neg_add_cancel, hb.modAut_zero,
     AlgEquiv.one_apply]
 
 open Coalgebra in
@@ -680,7 +679,7 @@ by
   intro x y
   simp only [LinearMap.comp_apply, LinearMap.lTensor_tmul, LinearEquiv.coe_coe,
     TensorProduct.comm_tmul, LinearMap.mul'_apply, AlgEquiv.toLinearMap_apply,
-    counit_mul_modAut_symm', neg_add_self, ha.modAut_zero, AlgEquiv.one_apply]
+    counit_mul_modAut_symm', neg_add_cancel, ha.modAut_zero, AlgEquiv.one_apply]
 
 namespace QuantumSet
 open scoped TensorProduct
@@ -713,6 +712,7 @@ theorem Psi_toFun_apply
     OrthonormalBasis.sum_repr]
 
 local notation "|" a "⟩⟨" b "|" => @rankOne ℂ _ _ _ _ _ _ _ a b
+set_option synthInstance.maxHeartbeats 80000 in
 noncomputable
 def Psi_invFun (t r : ℝ) :
   (A ⊗[ℂ] Bᵐᵒᵖ) →ₗ[ℂ] (B →ₗ[ℂ] A)
@@ -731,7 +731,9 @@ theorem Psi_invFun_apply (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
       |ha.modAut (-t) x⟩⟨hb.modAut (-r) (star (MulOpposite.unop y))| :=
   by
   simp_rw [Psi_invFun, LinearMap.coe_mk, AddHom.coe_mk,
-    Basis.tensorProduct_repr_tmul_apply, ← rankOne_lm_smul_smul, ← rankOne_lm_sum_sum, ←
+    Basis.tensorProduct_repr_tmul_apply,
+    smul_eq_mul, mul_comm,
+    ← rankOne_lm_smul_smul, ← rankOne_lm_sum_sum, ←
     _root_.map_smul, ← star_smul, Basis.mulOpposite_repr_apply, ← map_sum, ← star_sum,
     OrthonormalBasis.coe_toBasis_repr_apply, OrthonormalBasis.sum_repr]
 
@@ -739,14 +741,14 @@ theorem Psi_left_inv (t r : ℝ) (x : A) (y : B) :
     Psi_invFun t r (Psi_toFun t r |x⟩⟨y|) = (|x⟩⟨y|).toLinearMap :=
   by
   simp_rw [Psi_toFun_apply, Psi_invFun_apply, MulOpposite.unop_op, star_star, modAut_apply_modAut,
-    add_left_neg, starAlgebra.modAut_zero]
+    neg_add_cancel, starAlgebra.modAut_zero]
   simp only [AlgEquiv.one_apply]
 
 theorem Psi_right_inv (t r : ℝ) (x : A) (y : Bᵐᵒᵖ) :
     Psi_toFun t r (Psi_invFun t r (x ⊗ₜ[ℂ] y)) = x ⊗ₜ[ℂ] y :=
   by
   rw [Psi_invFun_apply, Psi_toFun_apply]
-  simp_rw [modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero]
+  simp_rw [modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero]
   simp only [AlgEquiv.one_apply, star_star, MulOpposite.op_unop]
 
 @[simps]
@@ -880,7 +882,7 @@ by
   simp only [Function.comp_apply, mul'_apply, innerSL_apply]
   nth_rw 1 [← (modAut_isCoalgHom hA.k).1]
   simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply,
-    map_mul, modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero, AlgEquiv.one_apply]
+    map_mul, modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply]
   exact Eq.symm (inner_eq_counit _ _)
 open LinearMap in
 lemma _root_.QuantumSet.mul_comp_tensor_left_unit_eq_ket (x : A) :
@@ -911,7 +913,7 @@ lemma _root_.QuantumSet.rTensor_bra_comul_unit_eq_ket_star' (x : A) :
   = ket ℂ (star x) :=
 by
   rw [rTensor_bra_comul_unit_eq_ket_star, modAut_star, modAut_apply_modAut,
-    neg_neg, neg_add_self, modAut_zero]
+    neg_neg, neg_add_cancel, modAut_zero]
   rfl
 
 open LinearMap in
@@ -1045,6 +1047,7 @@ by
   intro
   simp only [StarAlgEquiv.toLinearMap_apply, map_star]
 
+omit hA in
 theorem QuantumSet.modAut_real (r : ℝ) :
     (ha.modAut r).toLinearMap.real = (ha.modAut (-r)).toLinearMap :=
 by
@@ -1102,6 +1105,7 @@ by
   exact this
 
 set_option synthInstance.maxHeartbeats 0 in
+set_option maxHeartbeats 0 in
 private noncomputable def tenSwap_Psi_aux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] (B ⊗[ℂ] Aᵐᵒᵖ) where
   toFun f := tenSwap ℂ ((LinearMap.lTensor A ((op ℂ).toLinearMap ∘ₗ f)) (Coalgebra.comul 1))
@@ -1213,7 +1217,7 @@ by
     inner_conj_symm, ← TensorProduct.inner_tmul, ← inner_sum, h,
     Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_right,
     LinearMap.mul'_apply, rmul_apply, inner_star_left, starAlgebra.modAut_star,
-    modAut_apply_modAut, add_neg_self, starAlgebra.modAut_zero, star_star,
+    modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero, star_star,
     AlgEquiv.one_apply]
 
 @[simps!]
@@ -1256,7 +1260,7 @@ by
   rw [← LinearMap.ext_iff]
   apply LinearMap.ext_of_rank_one'
   intro x y
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro a b
   rw [TensorProduct.inner_ext_iff', rmulMapLmul_apply_Upsilon_aux_apply]
   intro c d
@@ -1279,5 +1283,5 @@ by
     TensorProduct.inner_tmul, rmul_apply, neg_add_eq_sub]
   nth_rw 2 [inner_conj_left]
   simp_rw [starAlgebra.modAut_star, modAut_apply_modAut, star_star,
-    add_neg_self, starAlgebra.modAut_zero]
+    add_neg_cancel, starAlgebra.modAut_zero]
   rfl

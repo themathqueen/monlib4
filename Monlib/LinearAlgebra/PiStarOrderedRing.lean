@@ -3,13 +3,11 @@ Copyright (c) 2024 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Mathlib.Algebra.Star.Order
+import Mathlib.Algebra.Order.Star.Basic
 import Mathlib.Algebra.Group.Subgroup.Basic
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Algebra.Star.Pi
 import Mathlib.Data.Complex.Basic
-
-#align_import linear_algebra.pi_star_ordered_ring
 
 /-!
   # pi.star_ordered_ring
@@ -63,7 +61,7 @@ theorem AddSubmonoid.pi_ofPi {ι : Type _} {B : ι → Type _} [DecidableEq ι] 
   ext i x
   simp_rw [AddSubmonoid.ofPi, AddSubmonoid.pi, AddSubmonoid.mem_mk]
   simp only [AddSubsemigroup.mem_mk]
-  rw [Set.pi_ofPi (fun i => (h i).zero_mem)]
+  rw [Set.pi_ofPi (by exact fun i => (h i).zero_mem)]
   rfl
 
 theorem Set.ofPi_mem' {ι : Type _} {B : ι → Type _} [DecidableEq ι] [∀ i, AddZeroClass (B i)]

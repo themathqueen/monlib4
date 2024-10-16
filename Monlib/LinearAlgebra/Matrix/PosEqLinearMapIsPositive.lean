@@ -12,8 +12,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Monlib.Preq.Ites
 import Monlib.Preq.RCLikeLe
 
-#align_import linear_algebra.my_matrix.pos_eq_linear_map_is_positive
-
 /-!
 
 # the correspondence between matrix.pos_semidef and linear_map.is_positive
@@ -54,6 +52,8 @@ theorem Matrix.toEuclideanLin_eq_piLp_linearEquiv [Fintype n] [DecidableEq n] (x
     Matrix.toEuclideanLin x =
       (toLin' x) :=
   rfl
+
+open scoped InnerProductSpace
 
 lemma Matrix.of_isHermitian' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜}
   (hx : x.IsHermitian) :
@@ -120,7 +120,7 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     {x : Matrix n n 𝕜} (hx : x.PosSemidef) :
   Function.Bijective (toLin' x) ↔ x.PosDef :=
   by
-  simp_rw [Matrix.PosDef, hx.1, true_and_iff]
+  simp_rw [Matrix.PosDef, hx.1, true_and]
   cases' (Matrix.posSemidef_iff x).mp hx with y hy
   constructor
   · intro h v hv
@@ -355,7 +355,7 @@ theorem vecMulVec_posSemidef [Fintype n] [DecidableEq n] (x : n → 𝕜) :
 theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).PosDef :=
   by
   simp_rw [Matrix.PosDef, Matrix.IsHermitian, Matrix.conjTranspose_one,
-    true_and_iff, Matrix.one_mulVec, Matrix.dotProduct_eq_inner, ← Matrix.vec_ne_zero]
+    true_and, Matrix.one_mulVec, Matrix.dotProduct_eq_inner, ← Matrix.vec_ne_zero]
   intro x h
   apply Finset.sum_pos'
   simp only [Finset.mem_univ, forall_true_left]
@@ -363,7 +363,7 @@ theorem Matrix.posDefOne [Fintype n] [DecidableEq n] : (1 : Matrix n n 𝕜).Pos
   exact inner_self_nonneg'
   cases' h with i hi
   use i
-  simp_rw [Finset.mem_univ, true_and_iff]
+  simp_rw [Finset.mem_univ, true_and]
   simp_rw [ne_eq] at hi
   contrapose! hi
   simp_rw [inner_self_eq_norm_sq_to_K, ← RCLike.ofReal_pow, RCLike.zero_lt_real] at hi
@@ -483,7 +483,7 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
         · simp_rw [StdBasisMatrix.sum_eq_one, one_smul]
         · simp_rw [h.2]
       rw [LinearMap.smul_apply, Matrix.traceLinearMap_apply]
-      nth_rw 1 [matrix_eq_sum_std_basis x]
+      nth_rw 1 [matrix_eq_sum_stdBasisMatrix x]
       simp_rw [Matrix.smul_stdBasisMatrix' _ _ (x _ _), map_sum, _root_.map_smul]
       calc
         ∑ x_1, ∑ x_2, x x_1 x_2 • φ (stdBasisMatrix x_1 x_2 1) =
@@ -501,7 +501,7 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
         Finset.sum_const, one_div, nsmul_eq_mul, mul_one]
       refine' ⟨fun x y => _, this⟩
       rw [trace_mul_comm]
-  simp only [trace_functional_iff, imp_self, forall_true_iff, and_true_iff]
+  simp only [trace_functional_iff, imp_self, forall_true_iff, and_true]
 
 theorem Matrix.stdBasisMatrix.trace [Fintype n] [DecidableEq n] (i j : n) (a : 𝕜) :
     (stdBasisMatrix i j a).trace = ite (i = j) a 0 := by
@@ -526,7 +526,7 @@ theorem vecMulVec_eq_zero_iff (x : n → 𝕜) : vecMulVec x (star x) = 0 ↔ x 
   · intro h i j
     simp_rw [h, MulZeroClass.mul_zero]
 
-theorem Matrix.PosDef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
+theorem Matrix.PosDef.diagonal_iff [Fintype n] [DecidableEq n] (x : n → 𝕜) :
     (diagonal x).PosDef ↔ ∀ i, 0 < x i :=
   by
   constructor
@@ -542,7 +542,7 @@ theorem Matrix.PosDef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
       simp_rw [g, if_true]
       exact one_ne_zero
     specialize h' g this
-    simp_rw [Finset.mul_sum, mul_rotate', Pi.star_apply, g, star_ite, star_zero, star_one, boole_mul, ← ite_and,
+    simp_rw [Pi.star_apply, mul_rotate', g, star_ite, star_zero, star_one, boole_mul, ← ite_and,
       mul_boole, ite_and] at h'
     simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true, Matrix.diagonal_apply_eq] at h'
     exact h'
@@ -554,8 +554,7 @@ theorem Matrix.PosDef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
     simp only [mulVec, dotProduct_diagonal, dotProduct, diagonal, ite_mul,
       MulZeroClass.zero_mul, mul_ite, MulZeroClass.mul_zero, of_apply, Finset.sum_ite_eq,
       Finset.mem_univ, if_true]
-    simp_rw [Pi.star_apply, Finset.mul_sum, mul_rotate' (star (y _)), mul_comm (y _), RCLike.star_def,
-      diagonal_apply, ite_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true,
+    simp_rw [Pi.star_apply, mul_rotate' (star (y _)), mul_comm (y _), RCLike.star_def,
       @RCLike.conj_mul 𝕜 _ (y _), ← RCLike.ofReal_pow]
     apply Finset.sum_pos'
       (fun i _ => mul_nonneg (le_of_lt (h i)) (RCLike.zero_le_real.mpr (sq_nonneg _)))
@@ -569,7 +568,7 @@ lemma norm_ite {α : Type*} [Norm α] (P : Prop) [Decidable P] (a b : α) :
   by
   split_ifs <;> rfl
 
-theorem Matrix.PosSemidef.diagonal [Fintype n] [DecidableEq n] (x : n → 𝕜) :
+theorem Matrix.PosSemidef.diagonal_iff [Fintype n] [DecidableEq n] (x : n → 𝕜) :
     (diagonal x).PosSemidef ↔ ∀ i, 0 ≤ x i :=
   by
   simp only [PosSemidef, dotProduct, mulVec, Matrix.diagonal_apply, ite_mul, zero_mul,

@@ -40,7 +40,7 @@ by
   rw [injective_iff_map_eq_zero]
   intro a ha
   obtain ⟨x, rfl⟩ := TensorProduct.exists_finset a
-  simp only [TensorProduct.mapIncl, map_tmul, map_sum, map_smul, Submodule.coeSubtype] at ha ⊢
+  simp only [TensorProduct.mapIncl, map_tmul, map_sum, map_smul, Submodule.coe_subtype] at ha ⊢
   rw [TensorProduct.inner_ext_iff'] at ha ⊢
   intro v w
   specialize ha (↑v) (↑w)
@@ -78,6 +78,17 @@ theorem norm_tmul {𝕜 B C : Type*} [RCLike 𝕜] [NormedAddCommGroup B]
       rw [TensorProduct.inner_tmul]
     _ = ‖x ⊗ₜ[𝕜] y‖ := by rw [@norm_eq_sqrt_inner 𝕜]
 
+open scoped InnerProductSpace
+lemma TensorProduct.mapIncl_norm_map (V : Submodule 𝕜 E) (W : Submodule 𝕜 F) (x : V ⊗[𝕜] W) :
+  ‖TensorProduct.mapIncl V W x‖ = ‖x‖ :=
+by
+  obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
+  simp only [TensorProduct.mapIncl, map_sum, TensorProduct.map_tmul, Submodule.coe_subtype]
+
+  simp_rw [@norm_eq_sqrt_inner 𝕜]
+  congr 2
+  simp only [sum_inner, inner_sum, TensorProduct.inner_tmul, ← Submodule.coe_inner]
+
 noncomputable def Submodule.tensorProduct_linearIsometryEquiv
   (V : Submodule 𝕜 E) (W : Submodule 𝕜 F) :
     (V ⊗[𝕜] W) ≃ₗᵢ[𝕜] (V.tensorProduct W) where
@@ -88,17 +99,10 @@ noncomputable def Submodule.tensorProduct_linearIsometryEquiv
     refine SetCoe.ext ?_
     exact Submodule.mem_tensorProduct_eq x
   map_add' _ _ := by
-    simp only [TensorProduct.mapIncl, map_add, AddSubmonoid.mk_add_mk]
+    simp only [TensorProduct.mapIncl, map_add, AddSubmonoid.mk_add_mk]; rfl
   map_smul' _ _ := by
     simp only [TensorProduct.mapIncl, LinearMapClass.map_smul, RingHom.id_apply, SetLike.mk_smul_mk]
-  norm_map' x := by
-    simp only [LinearEquiv.coe_mk, Submodule.coe_norm]
-    obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
-    simp only [TensorProduct.mapIncl, map_sum, TensorProduct.map_tmul, Submodule.coeSubtype]
-    simp_rw [@norm_eq_sqrt_inner 𝕜]
-    congr 2
-    simp only [inner_sum, sum_inner, TensorProduct.inner_tmul]
-    rfl
+  norm_map' x := TensorProduct.mapIncl_norm_map _ _ _
 
 noncomputable def Submodule.tensorProduct_orthonormalBasis {V : Submodule 𝕜 E} {W : Submodule 𝕜 F}
   {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
@@ -117,9 +121,9 @@ by
   rfl
 
 theorem Submodule.tensorProduct_finrank {V : Submodule 𝕜 E} {W : Submodule 𝕜 F} :
-  FiniteDimensional.finrank 𝕜 (V.tensorProduct W) = FiniteDimensional.finrank 𝕜 V * FiniteDimensional.finrank 𝕜 W :=
+  Module.finrank 𝕜 (V.tensorProduct W) = Module.finrank 𝕜 V * Module.finrank 𝕜 W :=
 by
-  simp only [← FiniteDimensional.finrank_tensorProduct]
+  simp only [← Module.finrank_tensorProduct]
   refine Eq.symm (LinearEquiv.finrank_eq ?f)
   exact (Submodule.tensorProduct_linearIsometryEquiv V W).toLinearEquiv
 
@@ -147,15 +151,16 @@ theorem TensorProduct.submodule_exists_le_tensorProduct {R M N : Type*}
   U ≤ M'.tensorProduct N' :=
 by
   let e := Basis.ofVectorSpace R U
-  let e'' : Set U := (Set.range e)
+  let e'' : Set U.carrier := (Set.range e)
+  let e''' : Set U := e''
   let e' : Set (M ⊗[R] N) := e''
   let he' : e'.Finite := Set.toFinite e'
   obtain ⟨M', N', hM', hN', hS⟩ := TensorProduct.exists_finite_submodule_of_finite e' he'
-  have : Submodule.span R e'' = ⊤ := Basis.span_eq e
+  have : Submodule.span R e''' = ⊤ := Basis.span_eq e
   have : Submodule.span R e' = U := by
     simp only [e']
     calc Submodule.span R (Subtype.val '' e'')
-        = Submodule.map (U.subtype) (Submodule.span R e'') := ?_
+        = Submodule.map (U.subtype) (Submodule.span R e''') := ?_
       _ = Submodule.map (U.subtype) (⊤ : Submodule R ↥U) := by rw [this]
       _ = U := by simp only [Submodule.map_top, Submodule.range_subtype]
     rw [← Submodule.span_image]
@@ -254,6 +259,7 @@ noncomputable def PiLp_tensorEquiv :
   (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂) ≃ₗ[𝕜] PiLp 2 (λ (i : ι₁ × ι₂) => (M₁ i.1) ⊗[𝕜] (M₂ i.2)) :=
 directSumTensor
 
+omit [∀ (i : ι₁), FiniteDimensional 𝕜 (M₁ i)] [∀ (i : ι₂), FiniteDimensional 𝕜 (M₂ i)] in
 theorem PiLp_tensorEquiv_tmul (x : PiLp 2 M₁) (y : PiLp 2 M₂) (i : ι₁ × ι₂) :
   PiLp_tensorEquiv (x ⊗ₜ y) i = x i.1 ⊗ₜ[𝕜] y i.2 :=
 rfl
@@ -339,16 +345,16 @@ theorem submodule_neq_tensorProduct_of {R : Type*} [RCLike R]
   [FiniteDimensional R E] [FiniteDimensional R F]
   (U : Submodule R (E ⊗[R] F))
   {p : ℕ} (hp : Nat.Prime p)
-  (hU : FiniteDimensional.finrank R U = p) :
+  (hU : Module.finrank R U = p) :
   ¬ ∃ (V : Submodule R E) (W : Submodule R F)
-      (_ : 1 < FiniteDimensional.finrank R V)
-      (_ : 1 < FiniteDimensional.finrank R W),
+      (_ : 1 < Module.finrank R V)
+      (_ : 1 < Module.finrank R W),
       U = V.tensorProduct W :=
 by
   push_neg
   intro V W hVW₁ hVW₂ hVW
-  have : FiniteDimensional.finrank R (V.tensorProduct W) =
-    FiniteDimensional.finrank R V * FiniteDimensional.finrank R W := Submodule.tensorProduct_finrank
+  have : Module.finrank R (V.tensorProduct W) =
+    Module.finrank R V * Module.finrank R W := Submodule.tensorProduct_finrank
   rw [← hVW, hU] at this
   exact
     (Nat.not_prime_mul' this.symm (Ne.symm (Nat.ne_of_lt hVW₁)) (Ne.symm (Nat.ne_of_lt hVW₂)))

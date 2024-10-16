@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Mathlib.Analysis.InnerProductSpace.Symmetric
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 
-#align_import linear_algebra.my_ips.symm
-
 /-!
 
 # some obvious lemmas on self-adjoint operators
@@ -29,7 +27,7 @@ namespace ContinuousLinearMap
 theorem IsSelfAdjoint.inner_map_self_eq_zero [CompleteSpace E] {T : E →L[𝕜] E}
     (hT : IsSelfAdjoint T) : (∀ x, ⟪T x,x⟫ = 0) ↔ T = 0 :=
   by
-  simp_rw [ext_iff, ← ContinuousLinearMap.coe_coe, ← LinearMap.ext_iff, coe_zero]
+  simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe, ← LinearMap.ext_iff, coe_zero]
   simp_rw [isSelfAdjoint_iff_isSymmetric] at hT
   exact hT.inner_map_self_eq_zero
 

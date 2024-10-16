@@ -4,12 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Algebra.Module.Opposites
-import Mathlib.LinearAlgebra.Basis
+-- import Mathlib.LinearAlgebra.Basis
 import Mathlib.LinearAlgebra.FiniteDimensional
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
-
-#align_import linear_algebra.my_ips.mul_op
 
 /-!
 
@@ -32,7 +30,7 @@ noncomputable def Basis.mulOpposite (b : Basis ι R H) : Basis ι R Hᵐᵒᵖ :
     exact this
   · simp_rw [top_le_iff]
     ext x
-    simp_rw [Submodule.mem_top, iff_true_iff, mem_span_range_iff_exists_fun, ← MulOpposite.op_smul,
+    simp_rw [Submodule.mem_top, iff_true, mem_span_range_iff_exists_fun, ← MulOpposite.op_smul,
       ← Finset.op_sum]
     use b.repr (MulOpposite.unop x)
     rw [Basis.sum_repr, MulOpposite.op_unop]

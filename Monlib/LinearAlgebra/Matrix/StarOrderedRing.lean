@@ -12,8 +12,7 @@ import Monlib.LinearAlgebra.Matrix.PosEqLinearMapIsPositive
 import Monlib.LinearAlgebra.KroneckerToTensor
 import Monlib.Preq.Complex
 import Monlib.LinearAlgebra.Matrix.PiMat
-
-#align_import linear_algebra.my_matrix.star_ordered_ring
+import Mathlib.Analysis.InnerProductSpace.Basic
 
 /-!
 # Matrix algebras are star ordered rings
@@ -48,7 +47,8 @@ theorem eq_zero_iff {n : Type _} [Fintype n] [DecidableEq n] {x : Matrix n n ℂ
     x = 0 ↔ ∀ a : n → ℂ, star a ⬝ᵥ x.mulVec a = 0 := by
   calc
     x = 0 ↔ toEuclideanLin x = 0 := by simp only [LinearEquiv.map_eq_zero_iff]
-    _ ↔ ∀ a : EuclideanSpace ℂ n, ⟪a, toEuclideanLin x a⟫_ℂ = 0 := by
+    _ ↔ ∀ a : EuclideanSpace ℂ n, (inner a (toEuclideanLin x a) :
+    ℂ) = 0 := by
       simp_rw [← inner_map_self_eq_zero, inner_eq_zero_symm]
     _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x *ᵥ a = 0 := by rfl
     _ ↔ ∀ a : n → ℂ, star a ⬝ᵥ x *ᵥ a = 0 := by rfl

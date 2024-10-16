@@ -7,8 +7,6 @@ import Mathlib.Algebra.DirectSum.Basic
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.DirectSumFromTo
 
-#align_import linear_algebra.pi_direct_sum
-
 open scoped TensorProduct
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
@@ -127,11 +125,11 @@ theorem Pi.tensorProj_apply_pi_tensorOf {R : Type _} [CommRing R] {ι₁ : Type 
   by
   have t1 :
     ∀ i j : ι₁,
-      (LinearMap.proj j).comp (LinearMap.single i) = (directSumFromTo i j : M₁ i →ₗ[R] M₁ j) :=
+      (LinearMap.proj j).comp (LinearMap.single _ _ i) = (directSumFromTo i j : M₁ i →ₗ[R] M₁ j) :=
     fun i j => rfl
   have t2 :
     ∀ i j : ι₂,
-      (LinearMap.proj j).comp (LinearMap.single i) = (directSumFromTo i j : M₂ i →ₗ[R] M₂ j) :=
+      (LinearMap.proj j).comp (LinearMap.single _ _ i) = (directSumFromTo i j : M₂ i →ₗ[R] M₂ j) :=
     fun i j => rfl
   simp only [Pi.tensorOf, Pi.tensorProj, ← LinearMap.comp_apply, ← TensorProduct.map_comp, t1, t2]
   split_ifs with h

@@ -5,11 +5,8 @@ Authors: Monica Omar
 -/
 import Mathlib.Logic.Basic
 import Mathlib.Algebra.Group.Defs
-import Mathlib.GroupTheory.GroupAction.Defs
 import Mathlib.Algebra.Star.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basic
-
-#align_import preq.dite
 
 /-!
  # Some stuff on dites

@@ -14,8 +14,6 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Algebra.Algebra.Bilinear
 import Mathlib.Algebra.Algebra.Basic
 
-#align_import linear_algebra.is_real
-
 /-!
  # real linear maps (a.k.a. star-preserving linear maps)
 

@@ -1,8 +1,6 @@
 import Monlib.LinearAlgebra.Matrix.Basic
 import Mathlib.Data.Matrix.PEquiv
 
-#align_import preq.equiv
-
 theorem Equiv.Perm.ToPequiv.toMatrix_mem_unitaryGroup {n : Type _} [DecidableEq n] [Fintype n]
     {𝕜 : Type _} [CommRing 𝕜] [StarRing 𝕜] (σ : Equiv.Perm n) :
     (Equiv.toPEquiv σ).toMatrix ∈ Matrix.unitaryGroup n 𝕜 :=

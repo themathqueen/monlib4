@@ -8,8 +8,6 @@ import Monlib.LinearAlgebra.Matrix.Reshape
 import Monlib.LinearAlgebra.InnerAut
 import Monlib.Preq.StarAlgEquiv
 
-#align_import linear_algebra.to_matrix_of_equiv
-
 /-!
 
 # to_matrix_of_equiv

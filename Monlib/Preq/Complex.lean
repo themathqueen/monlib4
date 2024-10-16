@@ -8,8 +8,6 @@ import Mathlib.Data.Complex.Abs
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.Complex.BigOperators
 
-#align_import preq.complex
-
 /-!
 
 # Some stuff about complex numbers
@@ -34,7 +32,7 @@ theorem abs_of_sum_sq_eq_sum_abs_sq_iff {n : Type _} [Fintype n] (α : n → ℂ
     intros
     simp_rw [abs_apply, Real.sq_sqrt (normSq_nonneg _)]
   simp_rw [complex.abs_sq, abs_apply]
-  rw [Real.sqrt_eq_iff_sq_eq (normSq_nonneg _), pow_two, Finset.sum_mul_sum]
+  rw [Real.sqrt_eq_iff_eq_sq (normSq_nonneg _), eq_comm, pow_two, Finset.sum_mul_sum]
   simp_rw [← normSq_mul, normSq_apply, re_sum, im_sum, Finset.sum_mul_sum, ←
     Finset.sum_add_distrib, pow_two, mul_re, mul_im, sub_mul, mul_sub, mul_add, add_mul]
   rw [← sub_eq_zero]
@@ -65,7 +63,7 @@ theorem abs_of_sum_sq_eq_sum_abs_sq_iff {n : Type _} [Fintype n] (α : n → ℂ
     simp_rw [← pow_two, sub_sub, mul_comm, ← two_mul]
     ring_nf
   simp_rw [← Finset.sum_sub_distrib, ← Finset.sum_product', Finset.univ_product_univ,
-    aux_for_ex, ← sub_sq, ← Finset.mul_sum, mul_eq_zero, two_ne_zero, false_or_iff]
+    aux_for_ex, ← sub_sq, ← Finset.mul_sum, mul_eq_zero, two_ne_zero, false_or]
   rw [Finset.sum_eq_zero_iff_of_nonneg]
   simp_rw [Finset.mem_univ, true_imp_iff, Prod.forall, sq_eq_zero_iff, sub_eq_zero, mul_comm]
   · simp_rw [Finset.mem_univ, true_imp_iff, sq_nonneg, forall_true_iff]
@@ -91,7 +89,7 @@ theorem abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff (α₁ α₂ : ℂ) :
             Finset.sum_singleton, add_sub_cancel_left]
         · exact Finset.mem_univ _
   simp_rw [← h₀, ← h₁, ← hy.1, ← hy.2, abs_of_sum_sq_eq_sum_abs_sq_iff, Fin.forall_fin_two, h₀, h₁,
-    true_and_iff, and_true_iff, eq_comm, and_self_iff]
+    true_and, and_true, eq_comm, and_self_iff]
 
 theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff' (α₁ α₂ : ℂ) :
     Complex.abs (α₁ ^ 2 + α₂ ^ 2) = abs α₁ ^ 2 + abs α₂ ^ 2 ↔ α₁ * conj α₂ = conj α₁ * α₂ :=
@@ -134,7 +132,7 @@ theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff'' (α₁ α₂ : ℂ) :
         use 1
         use 0
         simp_rw [re_add_im, ofReal_zero, MulZeroClass.mul_zero, ofReal_one, mul_one,
-          true_and_iff]
+          true_and]
       have : α₂.re = 0 ∨ α₁.im = 0 := by rw [← mul_eq_zero, ← h, h1, MulZeroClass.mul_zero]
       rcases this with (this | this)
       · contradiction
@@ -155,8 +153,8 @@ theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff'' (α₁ α₂ : ℂ) :
     use α₂.im * α₂.re
     push_neg at h1 h2
     simp_rw [add_mul, one_div, ← ofReal_inv, ← ofReal_mul, mul_comm, mul_assoc,
-      mul_inv_cancel h1, mul_one, h, ofReal_mul, mul_rotate _ _ (I * _), mul_assoc,
-      ← ofReal_mul, inv_mul_cancel h2, ofReal_one, mul_one, mul_comm I _, and_self]
+      mul_inv_cancel₀ h1, mul_one, h, ofReal_mul, mul_rotate _ _ (I * _), mul_assoc,
+      ← ofReal_mul, inv_mul_cancel₀ h2, ofReal_one, mul_one, mul_comm I _, and_self]
   · rintro ⟨γ, β₁, β₂, ⟨rfl, rfl⟩⟩
     simp_rw [mul_comm γ _, re_ofReal_mul, im_ofReal_mul, mul_mul_mul_comm, mul_comm]
 

@@ -7,8 +7,6 @@ import Monlib.LinearAlgebra.Matrix.Basic
 import Monlib.LinearAlgebra.TensorProduct.FiniteDimensional
 import Mathlib.LinearAlgebra.TensorProduct.Finiteness
 
-#align_import linear_algebra.kronecker_to_tensor
-
 /-!
 # Kronecker product to the tensor product
 
@@ -23,14 +21,15 @@ section
 
 variable {R m n : Type _} [CommSemiring R] [Fintype m] [Fintype n] [DecidableEq m] [DecidableEq n]
 
-set_option synthInstance.maxHeartbeats 0 in
+-- set_option synthInstance.maxHeartbeats 0 in
 noncomputable def TensorProduct.toKronecker : Matrix m m R ⊗[R] Matrix n n R →ₗ[R] Matrix (m × n) (m × n) R
     where
   toFun x ij kl := (matrixEquivTensor _ _ _).symm x ij.2 kl.2 ij.1 kl.1
   map_add' x y := by simp_rw [_root_.map_add, Matrix.add_apply]; rfl
   map_smul' r x :=
     by
-    simp only [_root_.map_smul, Pi.smul_apply, Algebra.id.smul_eq_mul, RingHom.id_apply]
+    simp only [_root_.map_smul (matrixEquivTensor R (Matrix m m R) n).symm,
+      Matrix.smul_apply, Algebra.id.smul_eq_mul, RingHom.id_apply]
     rfl
 
 theorem TensorProduct.toKronecker_apply (x : Matrix m m R) (y : Matrix n n R) :
@@ -50,7 +49,8 @@ noncomputable def Matrix.kroneckerToTensorProduct : Matrix (m × n) (m × n) R �
   toFun x := (matrixEquivTensor _ (Matrix m m R) n) fun i j k l => x (k, i) (l, j)
   map_add' x y := by simp_rw [Matrix.add_apply, ← _root_.map_add]; rfl
   map_smul' r x := by
-    simp_rw [Matrix.smul_apply, ← _root_.map_smul, RingHom.id_apply]
+    simp_rw [Matrix.smul_apply, ← _root_.map_smul (matrixEquivTensor R (Matrix m m R) n),
+      RingHom.id_apply]
     rfl
 
 theorem TensorProduct.toKronecker_to_tensorProduct (x : Matrix m m R ⊗[R] Matrix n n R) :

@@ -116,6 +116,8 @@ section Pi
     inner_add_left]
   smul_left := λ _ _ _ => by simp only [Pi.smul_apply, inner_smul_left, Finset.mul_sum]
 
+  open scoped InnerProductSpace
+
   theorem piInnerProductAlgebra.inner_apply (a b : PiQ A) :
     -- letI :=
     -- letI : NormedAddCommGroup (PiQ A) := piInnerProductAlgebra.toNormedAddCommGroup

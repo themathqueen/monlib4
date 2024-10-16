@@ -11,8 +11,6 @@ import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 
-#align_import linear_algebra.tensor_finite
-
 /-!
 
 # tensor_finite
@@ -48,8 +46,8 @@ noncomputable instance TensorProduct.Star : Star (E ⊗[𝕜] F)
 @[simp]
 theorem TensorProduct.star_tmul [StarModule 𝕜 E] [StarModule 𝕜 F] (x : E) (y : F) :
     star (x ⊗ₜ[𝕜] y) = star x ⊗ₜ[𝕜] star y := by
-  simp_rw [star, Basis.tensorProduct_repr_tmul_apply, star_mul',
-    mul_comm _ (star (((Basis.ofVectorSpace 𝕜 F).repr y) _)), TensorProduct.smul_tmul', ← smul_smul,
+  simp_rw [star, Basis.tensorProduct_repr_tmul_apply, smul_eq_mul,
+    star_mul', TensorProduct.smul_tmul', ← smul_smul,
     TensorProduct.smul_tmul (star (((Basis.ofVectorSpace 𝕜 F).repr y) _)), ← TensorProduct.tmul_sum,
     ← TensorProduct.sum_tmul, ← @StarModule.star_smul 𝕜, ← star_sum, Basis.sum_repr]
 
@@ -94,7 +92,7 @@ theorem TensorProduct.map_real {A B E F : Type _} [AddCommGroup A] [AddCommGroup
     [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F] (f : E →ₗ[𝕜] F) (g : A →ₗ[𝕜] B) :
     (TensorProduct.map f g).real = TensorProduct.map f.real g.real :=
   by
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro x y
   simp only [LinearMap.real_apply, TensorProduct.star_tmul, TensorProduct.map_tmul]
 
@@ -105,7 +103,7 @@ variable (A : Type _) [Ring A] [Module 𝕜 A] [StarRing A] [StarModule 𝕜 A] 
 theorem LinearMap.mul'_real :
     (LinearMap.mul' 𝕜 A).real = LinearMap.mul' 𝕜 A ∘ₗ (TensorProduct.comm 𝕜 A A).toLinearMap :=
   by
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro a b
   simp only [LinearMap.real_apply, TensorProduct.star_tmul,
     LinearEquiv.coe_coe, LinearMap.comp_apply, TensorProduct.comm_tmul, LinearMap.mul'_apply,

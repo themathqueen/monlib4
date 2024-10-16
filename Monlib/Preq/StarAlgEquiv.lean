@@ -9,8 +9,6 @@ import Mathlib.Algebra.Ring.Idempotents
 import Mathlib.LinearAlgebra.Span
 import Mathlib.Algebra.Star.Pi
 
-#align_import preq.star_alg_equiv
-
 /-!
  # Some stuff on star algebra equivalences
 

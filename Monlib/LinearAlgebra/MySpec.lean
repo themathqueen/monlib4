@@ -5,8 +5,6 @@ Authors: Monica Omar
 -/
 import Monlib.LinearAlgebra.End
 
-#align_import linear_algebra.my_spec
-
 /-!
  # One lemma of the spectrum of a linear map
 
@@ -66,7 +64,7 @@ theorem spectrum.comm {K E : Type _} [Field K] [AddCommGroup E] [Module K E] [Fi
   on_goal 1 => use y v
   on_goal 2 => use x v
   all_goals
-    rw [h, _root_.map_smul, eq_self_iff_true, true_and_iff]
+    rw [h, _root_.map_smul, eq_self_iff_true, true_and]
     intro H
     rw [H, map_zero, eq_comm, smul_eq_zero] at h
-    simp_rw [Hu, hv, false_or_iff] at h
+    simp_rw [Hu, hv, false_or] at h

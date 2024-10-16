@@ -8,8 +8,6 @@ import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Topology.Algebra.StarSubalgebra
 import Mathlib.Data.Complex.Basic
 
-#align_import linear_algebra.invariant_submodule
-
 /-!
 # Invariant submodules
 
@@ -125,7 +123,7 @@ theorem invariantUnder_inv_iff_U_subset_image [Invertible T] :
     simp only [Set.mem_image, SetLike.mem_coe]
     use(⅟ T) x
     rw [← LinearMap.comp_apply, ← LinearMap.mul_eq_comp, mul_invOf_self, LinearMap.one_apply,
-      eq_self_iff_true, and_true_iff]
+      eq_self_iff_true, and_true]
     exact h hx
   · intro h x hx
     rw [Submodule.mem_comap]
@@ -143,7 +141,7 @@ theorem inv_linear_proj_comp_map_eq_linear_proj_iff_images_eq [Invertible T] :
     by
     simp only [and_assoc, eq_iff_iff, and_congr_right_iff]
     simp only [← and_assoc, and_congr_left_iff]
-    simp only [and_comm]; simp only [iff_self_iff, imp_true_iff]
+    simp only [and_comm]; simp only [iff_self, imp_true_iff]
   rw [Hu]
   clear Hu
   simp_rw [← Submodule.invariantUnder_iff _ _, iff_self_and, ←

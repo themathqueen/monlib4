@@ -10,8 +10,6 @@ import Mathlib.RingTheory.TensorProduct.Basic
 import Monlib.Preq.Finset
 import Monlib.LinearAlgebra.LmulRmul
 
-#align_import linear_algebra.my_bimodule
-
 /-!
  # (A-A)-Bimodules
 
@@ -143,7 +141,8 @@ theorem LinearMap.IsBimoduleMap.smul {x : l(R,H₁ ⊗[R] H₂)} (hx : x.IsBimod
 theorem LinearMap.IsBimoduleMap.nsmul {x : l(R,H₁ ⊗[R] H₂)} (hx : x.IsBimoduleMap) (k : ℕ) :
     (k • x).IsBimoduleMap := by
   intro x y a
-  simp only [LinearMap.smul_apply, nsmul_eq_smul_cast R k, Bimodule.lsmul_smul, Bimodule.smul_rsmul]
+  simp only [LinearMap.smul_apply, ← Nat.cast_smul_eq_nsmul R k,
+    Bimodule.lsmul_smul, Bimodule.smul_rsmul]
   rw [hx]
 
 def LinearMap.IsBimoduleMaps (R H₁ H₂ : Type _) [CommSemiring R]
@@ -252,9 +251,9 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
   by
   rw [← left_module_map_iff, ← right_module_map_iff]
   by_cases h : (x ⊗ₘ y) = 0
-  · simp_rw [h, true_or_iff, iff_true_iff, LinearMap.isBimoduleMap.zero]
+  · simp_rw [h, true_or, iff_true, LinearMap.isBimoduleMap.zero]
   simp_rw [isBimoduleMap_iff, TensorProduct.map_tmul, Bimodule.lsmul_apply, Bimodule.rsmul_apply, h,
-    false_or_iff]
+    false_or]
   have hy : y ≠ 0 := by
     intro hy
     rw [hy, TensorProduct.map_zero] at h
@@ -274,7 +273,7 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
   specialize H b 1
   simp_rw [mul_one, one_mul, ← @sub_eq_zero _ _ _ (_ ⊗ₜ[R] (_ * _) : H₁ ⊗[R] H₂), ←
     @sub_eq_zero _ _ _ ((_ * _) ⊗ₜ[R] _), ← TensorProduct.sub_tmul, ← TensorProduct.tmul_sub,
-    TensorProduct.tmul_eq_zero, sub_eq_zero, ha, hb, false_or_iff, or_false_iff] at H hxy
+    TensorProduct.tmul_eq_zero, sub_eq_zero, ha, hb, false_or, or_false] at H hxy
   exact ⟨H, fun _ _ => hxy _ _⟩
 
 -- noncomputable def LinearMap.IsBimoduleMap.sum {p : Type _} {s : Finset p}
@@ -304,7 +303,7 @@ x.induction_on (by simp only [map_zero]; rfl)
 theorem LinearMap.isBimoduleMap_iff' {f : l(R,H₁ ⊗[R] H₂)} :
     f.IsBimoduleMap ↔ rmulMapLmul (f 1) = f :=
   by
-  simp_rw [TensorProduct.ext_iff, rmulMapLmul_apply_apply]
+  simp_rw [TensorProduct.ext_iff', rmulMapLmul_apply_apply]
   refine' ⟨fun h x y => by rw [← h, Bimodule.lsmul_one, Bimodule.rsmul_apply, one_mul], fun h => _⟩
   rw [isBimoduleMap_iff]
   intro a b c d

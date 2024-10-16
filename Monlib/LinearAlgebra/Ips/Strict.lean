@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Algebra.Algebra.Bilinear
 
-#align_import linear_algebra.my_ips.strict
-
 /-!
  # Strict tensor product (wip)
 -/

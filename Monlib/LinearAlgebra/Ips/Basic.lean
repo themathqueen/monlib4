@@ -6,8 +6,6 @@ Authors: Monica Omar
 import Monlib.LinearAlgebra.Ips.Symm
 import Monlib.Preq.RCLikeLe
 
-#align_import linear_algebra.my_ips.basic
-
 /-!
 
 # Some obvious basic properties on inner product space
@@ -37,13 +35,14 @@ theorem forall_inner_eq_zero_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommG
   exact h
 
 open RCLike ContinuousLinearMap
+open scoped InnerProductSpace
 
-variable {E : Type _} [NormedAddCommGroup E]
+variable {E : Type*} [NormedAddCommGroup E]
 
 /-- linear maps $p,q$ are equal if and only if
   $\langle p x, x \rangle = \langle q x, x \rangle$ for any $x$. -/
 theorem LinearMap.ext_iff_inner_map [InnerProductSpace ℂ E] (p q : E →ₗ[ℂ] E) :
-    p = q ↔ ∀ x : E, ⟪p x, x⟫_ℂ = ⟪q x, x⟫_ℂ :=
+    p = q ↔ ∀ x : E, inner (p x) x = (inner (q x) x : ℂ) :=
   by
   constructor
   · intro h

@@ -3,11 +3,9 @@ import Monlib.LinearAlgebra.Ips.Ips
 import Monlib.LinearAlgebra.Ips.RankOne
 import Monlib.Preq.RCLikeLe
 import Mathlib.Topology.Algebra.Module.WeakDual
-import Mathlib.Analysis.NormedSpace.Dual
+import Mathlib.Analysis.Normed.Module.Dual
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Analysis.Convex.Extreme
-
-#align_import linear_algebra.of_norm
 
 open scoped ComplexOrder
 
@@ -27,7 +25,7 @@ theorem cs_aux {x y : E} (hy : y ≠ 0) :
     ← RCLike.ofReal_pow]
   simp_rw [inner_self_eq_norm_sq_to_K, starRingEnd_apply,
     RCLike.ofReal_inv, star_inv', RCLike.star_def,
-    RCLike.conj_ofReal, mul_assoc, ← RCLike.ofReal_pow, inv_mul_cancel this, mul_one]
+    RCLike.conj_ofReal, mul_assoc, ← RCLike.ofReal_pow, inv_mul_cancel₀ this, mul_one]
   letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
   calc
     RCLike.re
@@ -57,7 +55,7 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
       intro h'
       rw [inner_eq_zero_symm] at h'
       rw [h', norm_zero, eq_comm, mul_eq_zero] at h
-      simp_rw [norm_eq_zero, hx, hy, false_or_iff] at h
+      simp_rw [norm_eq_zero, hx, hy, false_or] at h
     have hy' : ‖y‖ ^ 2 ≠ 0 := by
       rw [ne_eq, sq_eq_zero_iff, norm_eq_zero]
       exact hy
@@ -129,7 +127,7 @@ theorem innerDef_i_smul_left (x y : X) : (innerDef ((I : 𝕜) • x) y : 𝕜) 
   by
   by_cases hI : (I : 𝕜) = 0
   · simp_rw [hI, zero_smul, innerDef_zero_left, neg_zero, MulZeroClass.zero_mul]
-  have hI' : (-I : 𝕜) * I = 1 := by rw [← inv_I, inv_mul_cancel hI]
+  have hI' : (-I : 𝕜) * I = 1 := by rw [← inv_I, inv_mul_cancel₀ hI]
   simp only [innerDef, smul_eq_mul, ← mul_assoc, mul_comm (-I : 𝕜) 4⁻¹]
   simp only [mul_assoc]
   congr 1
@@ -446,19 +444,22 @@ obtain ⟨x, hx⟩ : ∃ x : H, x ≠ 0 := exists_ne 0
 use (1 / ‖x‖ : 𝕜) • x
 simp only [one_div, mem_closedBall, dist_zero_right, norm_smul, norm_inv]
 simp only [norm_ofReal, abs_norm]
-rw [inv_mul_cancel (norm_ne_zero_iff.mpr hx)]
+rw [inv_mul_cancel₀ (norm_ne_zero_iff.mpr hx)]
 exact ⟨rfl, le_rfl⟩
 
 lemma Metric.exists_mem_unitBall_of_norm_one (𝕜 H : Type _) [RCLike 𝕜] [NormedAddCommGroup H] [NormedSpace 𝕜 H]
   [Nontrivial H] :
-  ∃ (x : H) (ε : ℝ), ‖x‖ = ε ∧ 0 < ε ∧ ε < 1 ∧ x ∈ ball (0 : H) 1 := by
-obtain ⟨x, hx⟩ : ∃ x : H, x ≠ 0 := exists_ne 0
-obtain ⟨ε, hε⟩ : ∃ r : ℝ, 0 < r ∧ r < 1 := ⟨1 / 2, by norm_num⟩
-use ((ε / ‖x‖ : ℝ) : 𝕜) • x, ε
-simp only [div_eq_inv_mul, mem_ball, dist_zero_right, norm_smul, norm_inv]
-simp only [norm_ofReal, abs_norm, abs_mul, abs_inv, abs_of_pos hε.1]
-rw [mul_comm, ← mul_assoc, mul_inv_cancel (norm_ne_zero_iff.mpr hx), one_mul]
-exact ⟨rfl, hε.1, hε.2, hε.2⟩
+  ∃ (x : H) (ε : ℝ), ‖x‖ = ε ∧ 0 < ε ∧ ε < 1 ∧ x ∈ ball (0 : H) 1 :=
+by
+  obtain ⟨x, hx⟩ : ∃ x : H, x ≠ 0 := exists_ne 0
+  obtain ⟨ε, hε⟩ : ∃ r : ℝ, 0 < r ∧ r < 1 := ⟨1 / 2, by norm_num⟩
+  use ((ε / ‖x‖ : ℝ) : 𝕜) • x, ε
+  simp only [div_eq_inv_mul, mem_ball, dist_zero_right, norm_smul, norm_inv]
+  simp only [norm_ofReal, abs_norm, abs_mul, abs_inv, abs_of_pos hε.1]
+  rw [mul_comm, ← mul_assoc, mul_inv_cancel₀ (norm_ne_zero_iff.mpr hx), one_mul]
+  exact ⟨rfl, hε.1, hε.2, hε.2⟩
+
+open scoped InnerProductSpace
 
 theorem inner_lt_one_iff_of_norm_one {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H]
   {x y : H} (hx : ‖x‖ = 1) (hy : ‖y‖ = 1) :
@@ -508,12 +509,12 @@ theorem norm_one_of_mem_extremePoints_of_closed_unitBall {𝕜 H : Type _} [RCLi
   rcases hx with ⟨h1, h⟩
   by_cases hx' : ‖x‖ ≠ 1
   . specialize h ((1 / ‖x‖ : 𝕜) • x)
-      (by simp_rw [norm_smul, one_div, norm_inv, norm_ofReal, abs_norm, inv_mul_cancel (norm_ne_zero_iff.mpr this), le_rfl])
+      (by simp_rw [norm_smul, one_div, norm_inv, norm_ofReal, abs_norm, inv_mul_cancel₀ (norm_ne_zero_iff.mpr this), le_rfl])
       0 (by simp_rw [norm_zero, zero_le_one])
       (⟨‖x‖, by simp_rw [RCLike.zero_lt_real]; exact norm_pos_iff.mpr this,
         by simp_rw [← @RCLike.ofReal_one 𝕜, real_lt_real, lt_iff_le_and_ne]; exact ⟨h1, hx'⟩,
         by simp only [one_div, smul_zero, add_zero, smul_smul, ← ofReal_inv, ← ofReal_mul,
-          mul_inv_cancel (norm_ne_zero_iff.mpr this), ofReal_one, one_smul]⟩)
+          mul_inv_cancel₀ (norm_ne_zero_iff.mpr this), ofReal_one, one_smul]⟩)
     exfalso
     exact this h.2.symm
   rw [not_ne_iff] at hx'

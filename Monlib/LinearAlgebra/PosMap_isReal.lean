@@ -3,7 +3,7 @@ import Monlib.LinearAlgebra.Matrix.IncludeBlock
 import Monlib.LinearAlgebra.InvariantSubmodule
 import Monlib.LinearAlgebra.Ips.MinimalProj
 import Monlib.LinearAlgebra.Nacgor
-import Mathlib.Analysis.NormedSpace.Star.Matrix
+import Mathlib.Analysis.InnerProductSpace.StarOrder
 import Monlib.LinearAlgebra.OfNorm
 import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 import Monlib.LinearAlgebra.Matrix.PosDefRpow
@@ -75,7 +75,7 @@ by
     neg_mul, one_mul, neg_smul, neg_sub_neg]
   simp only [one_div, add_add_sub_cancel]
   simp_rw [← two_smul ℂ, smul_smul]
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_inv_cancel, one_smul]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, mul_inv_cancel₀, one_smul]
 
 noncomputable
 def ContinuousLinearMap.toLinearMapAlgEquiv
@@ -122,14 +122,14 @@ theorem ContinuousLinearMap.nonneg_iff_exists
   0 ≤ T ↔ ∃ f, T = star f * f :=
 by rw [nonneg_iff_isPositive]; exact isPositive_iff_exists_adjoint_hMul_self _
 
-def ContinuousLinearMap.StarOrderedRing :
-  _root_.StarOrderedRing (B →L[ℂ] B) :=
-StarOrderedRing.of_nonneg_iff'
-  (λ hxy z => by simp_rw [le_def, add_sub_add_left_eq_sub]; exact hxy)
-  (λ x => by
-    rw [nonneg_iff_isPositive]
-    exact ContinuousLinearMap.isPositive_iff_exists_adjoint_hMul_self _)
-attribute [local instance] ContinuousLinearMap.StarOrderedRing
+-- def ContinuousLinearMap.StarOrderedRing :
+--   _root_.StarOrderedRing (B →L[ℂ] B) :=
+-- StarOrderedRing.of_nonneg_iff'
+--   (λ hxy z => by simp_rw [le_def, add_sub_add_left_eq_sub]; exact hxy)
+--   (λ x => by
+--     rw [nonneg_iff_isPositive]
+--     exact ContinuousLinearMap.isPositive_iff_exists_adjoint_hMul_self _)
+-- attribute [local instance] ContinuousLinearMap.StarOrderedRing
 
 lemma orthogonalProjection_ker_comp_eq_of_comp_eq_zero {T S : B →L[ℂ] B} (h : T * S = 0) :
   orthogonalProjection' (LinearMap.ker T) * S = S :=
@@ -179,7 +179,7 @@ theorem Matrix.coe_toEuclideanCLM_symm_eq_toEuclideanLin_symm {𝕜 n : Type*}
 rfl
 
 theorem Matrix.orthogonalProjection_trace {U : Submodule ℂ (EuclideanSpace ℂ n)} :
-  (Matrix.orthogonalProjection U).trace = FiniteDimensional.finrank ℂ U :=
+  (Matrix.orthogonalProjection U).trace = Module.finrank ℂ U :=
 by
   rw [orthogonalProjection, Matrix.coe_toEuclideanCLM_symm_eq_toEuclideanLin_symm, ← EuclideanSpace.trace_eq_matrix_trace']
   exact _root_.orthogonalProjection_trace _
@@ -188,7 +188,7 @@ theorem PiMat.orthogonalProjection_trace {k : Type*} {n : k → Type*} [Fintype 
   [Π i, Fintype (n i)] [Π i, DecidableEq (n i)]
   (U : Π i, Submodule ℂ (EuclideanSpace ℂ (n i))) :
   (Matrix.blockDiagonal' (PiMat.orthogonalProjection U)).trace
-    = ∑ i, FiniteDimensional.finrank ℂ (U i) :=
+    = ∑ i, Module.finrank ℂ (U i) :=
 by
   simp_rw [Matrix.trace_blockDiagonal', PiMat.orthogonalProjection,
     Matrix.orthogonalProjection_trace, Nat.cast_sum]
@@ -234,7 +234,7 @@ by
   ext1
   simp only [ContinuousLinearMap.mul_apply, ContinuousLinearMap.zero_apply]
   simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL',
-    Submodule.coeSubtype, Function.comp_apply, ZeroMemClass.coe_eq_zero,
+    Submodule.coe_subtype, Function.comp_apply, ZeroMemClass.coe_eq_zero,
     orthogonalProjection_eq_zero_iff]
   rw [ContinuousLinearMap.ker_eq_ortho_adjoint_range, Submodule.orthogonal_orthogonal,
     ← ContinuousLinearMap.star_eq_adjoint]
@@ -497,6 +497,7 @@ let f : Matrix n n ℂ ≃⋆ₐ[ℂ] PiMat ℂ Unit (λ _ => n) :=
   hrk₁ := fun i ↦ by infer_instance
   hrk₂ := fun i ↦ by infer_instance }
 
+omit [StarModule ℂ A] in
 theorem IsSelfAdjoint.isPositiveDecomposition_of_starAlgEquiv_piMat
   (hφ : isEquivToPiMat A)
   {x : A} (hx : _root_.IsSelfAdjoint x) :
@@ -674,8 +675,9 @@ theorem Matrix.innerAut.map_zpow {n : Type*} [Fintype n] [DecidableEq n]
   (Matrix.innerAut U) x ^ z = (Matrix.innerAut U) (x ^ z) :=
 by
   induction z using Int.induction_on
-  . exact map_pow _ _ _
-  . exact map_pow _ _ _
+  . exact map_pow U x 0
+  . rename_i i _
+    exact map_pow U x (↑i + 1)
   . rename_i i _
     calc (innerAut U x ^ (-(i:ℤ)-1))
       = (innerAut U x ^ (i + 1))⁻¹ :=
@@ -721,7 +723,7 @@ theorem Matrix.PosDef.rpow_zpow {𝕜 : Type*} [RCLike 𝕜]
   (hQ.rpow r) ^ z = hQ.rpow (r * (z : ℝ)) :=
 by
   have := PosDef.rpow.isPosDef hQ r
-  rw [hQ.rpow_eq, innerAut_posDef_iff, Matrix.PosDef.diagonal] at this
+  rw [hQ.rpow_eq, innerAut_posDef_iff, Matrix.PosDef.diagonal_iff] at this
   have : Invertible (RCLike.ofReal ∘ (hQ.1.eigenvalues ^ r) : n → 𝕜) :=
   by
     simp only [Function.comp_apply, Pi.pow_apply, RCLike.ofReal_pos] at this
@@ -731,7 +733,7 @@ by
       simp only [Pi.mul_apply, Function.comp_apply, Pi.pow_apply, Pi.one_apply,
         ← RCLike.ofReal_mul]
       rw [← Real.rpow_add (hQ.eigenvalues_pos _)]
-      simp only [neg_add_self, add_neg_self, Real.rpow_zero, RCLike.ofReal_one] }
+      simp only [neg_add_cancel, add_neg_cancel, Real.rpow_zero, RCLike.ofReal_one] }
   simp_rw [rpow_eq, innerAut.map_zpow, diagonal_zpow]
   congr
   simp only [diagonal_eq_diagonal_iff, Pi.pow_apply, Function.comp_apply,
@@ -773,7 +775,7 @@ theorem Matrix.PosDef.eq_zpow_of_zpow_inv_eq {𝕜 : Type*} [RCLike 𝕜]
   (h : hQ.rpow (z⁻¹) = R) : Q = R ^ z :=
 by
   have : (hQ.rpow z⁻¹) ^ (z : ℤ) = R ^ (z : ℤ) := by rw [h]
-  rw [rpow_zpow, inv_mul_cancel (Int.cast_ne_zero.mpr hz), rpow_one_eq_self] at this
+  rw [rpow_zpow, inv_mul_cancel₀ (Int.cast_ne_zero.mpr hz), rpow_one_eq_self] at this
   exact this
 
 theorem Matrix.PosDef.eq_of_zpow_inv_eq_zpow_inv {𝕜 : Type*} [RCLike 𝕜]
@@ -781,7 +783,7 @@ theorem Matrix.PosDef.eq_of_zpow_inv_eq_zpow_inv {𝕜 : Type*} [RCLike 𝕜]
   {r : ℤ} (hr : r ≠ 0) (hQR : hQ.rpow r⁻¹ = hR.rpow r⁻¹) : Q = R :=
 by
   have := eq_zpow_of_zpow_inv_eq hQ hr hQR
-  rw [rpow_zpow, inv_mul_cancel (Int.cast_ne_zero.mpr hr),
+  rw [rpow_zpow, inv_mul_cancel₀ (Int.cast_ne_zero.mpr hr),
     rpow_one_eq_self] at this
   exact this
 
@@ -801,7 +803,7 @@ theorem selfAdjointDecomposition_left_of
     aL (a + Complex.I • b) = a :=
 by
   rw [selfAdjointDecomposition_left, star_add, star_smul, ha, hb,
-    Complex.star_def, Complex.conj_I, neg_smul, add_add_add_comm, add_neg_self, add_zero,
+    Complex.star_def, Complex.conj_I, neg_smul, add_add_add_comm, add_neg_cancel, add_zero,
     ← two_smul ℂ, smul_smul]
   norm_num
 
@@ -813,7 +815,7 @@ theorem selfAdjointDecomposition_right_of
 by
   rw [selfAdjointDecomposition_right, star_add, star_smul, ha, hb,
     Complex.star_def, Complex.conj_I, neg_smul, sub_eq_add_neg,
-    neg_add, add_add_add_comm, add_neg_self, zero_add, ← two_smul ℂ]
+    neg_add, add_add_add_comm, add_neg_cancel, zero_add, ← two_smul ℂ]
   simp only [smul_smul, smul_neg]
   simp only [RCLike.I_to_complex, one_div, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero,
     not_false_eq_true, IsUnit.inv_mul_cancel_left, Complex.I_mul_I, neg_smul, one_smul, neg_neg]
@@ -947,6 +949,7 @@ by
   rw [this.mpr hp]
   exact IsSelfAdjoint.star_mul_self _
 
+open scoped InnerProductSpace
 theorem LinearMap.IsPositive.add_ker_eq_inf_ker
   {𝕜 V : Type*} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
   [FiniteDimensional 𝕜 V] {S T : V →ₗ[𝕜] V} (hS : S.IsPositive) (hT : T.IsPositive) :
@@ -1006,13 +1009,13 @@ theorem LinearMap.exists_scalar_isometry_iff_preserves_ortho_of_ne_zero
   {𝕜 V W : Type*} [RCLike 𝕜]
   [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
   [NormedAddCommGroup W] [InnerProductSpace 𝕜 W]
-  (hV : 0 < FiniteDimensional.finrank 𝕜 V)
+  (hV : 0 < Module.finrank 𝕜 V)
   {T : V →ₗ[𝕜] W} (hT : T ≠ 0) :
   (∃ (α : 𝕜ˣ), Isometry ((α : 𝕜) • T))
   ↔
   ∀ x y, ⟪x, y⟫_𝕜 = 0 → ⟪T x, T y⟫_𝕜 = 0 :=
 by
-  haveI : Nontrivial V := FiniteDimensional.nontrivial_of_finrank_pos hV
+  haveI : Nontrivial V := Module.nontrivial_of_finrank_pos hV
   refine' ⟨λ ⟨α, h⟩ x y hxy => _, λ h => _⟩
   . have : ⟪T x, T y⟫_𝕜 = 0 ↔ ⟪((α : 𝕜) • T) x, ((α : 𝕜) • T) y⟫_𝕜 = 0 :=
       by
@@ -1021,7 +1024,7 @@ by
           RCLike.ofReal_eq_zero, norm_eq_zero]
         simp only [Units.ne_zero, false_or]
     rw [this, (isometry_iff_inner _).mp h, hxy]
-  . haveI : FiniteDimensional 𝕜 V := FiniteDimensional.of_finrank_pos hV
+  . haveI : FiniteDimensional 𝕜 V := Module.finite_of_finrank_pos hV
     let e := stdOrthonormalBasis 𝕜 V
     have : ∀ i j, ⟪e i + e j, e i - e j⟫_𝕜 = 0 :=
     λ i j => by
@@ -1085,7 +1088,7 @@ by
     simp only [LinearMap.smul_apply, norm_smul, this, norm_inv]
     simp only [Units.val_inv_eq_inv_val, Units.val_mk0, norm_inv, RCLike.norm_ofReal]
     simp only [RCLike.norm_ofReal, abs_of_nonneg (norm_nonneg _),
-      ← hα, ← mul_assoc, inv_mul_cancel hα', one_mul]
+      ← hα, ← mul_assoc, inv_mul_cancel₀ hα', one_mul]
 
 theorem LinearMap.exists_scalar_isometry_iff_preserves_ortho
   {𝕜 V : Type*} [RCLike 𝕜]
@@ -1105,13 +1108,13 @@ by
       simp only [zero_smul]
     . by_cases hV : Module.rank 𝕜 V = 0
       . rw [rank_zero_iff_forall_zero] at hV
-        simp only [ext_iff, smul_apply, LinearIsometry.coe_toLinearMap,
+        simp only [LinearMap.ext_iff, smul_apply, LinearIsometry.coe_toLinearMap,
           hV, implies_true, exists_true_iff_nonempty]
         use 0, 0
         simp only [zero_apply, norm_zero, hV, implies_true]
       . simp only [← pos_iff_ne_zero] at hV
         rw [rank_pos_iff_nontrivial] at hV
-        have : 0 < FiniteDimensional.finrank 𝕜 V := FiniteDimensional.finrank_pos
+        have : 0 < Module.finrank 𝕜 V := Module.finrank_pos
         obtain ⟨α, hα⟩ := (LinearMap.exists_scalar_isometry_iff_preserves_ortho_of_ne_zero this hT).mpr h
         use (α⁻¹ : 𝕜ˣ), ⟨((α : 𝕜) • T), (isometry_iff_norm _).mp hα⟩
         simp only [Units.val_inv_eq_inv_val, ne_eq, Units.ne_zero, not_false_eq_true,

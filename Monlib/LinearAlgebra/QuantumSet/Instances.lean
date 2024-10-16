@@ -16,17 +16,17 @@ noncomputable def sig (hφ : φ.IsFaithfulPosMap) (z : ℝ) :
   invFun a := hφ.matrixIsPosDef.rpow z * a * hφ.matrixIsPosDef.rpow (-z)
   left_inv a := by
     simp_rw [Matrix.mul_assoc, PosDef.rpow_mul_rpow, ← Matrix.mul_assoc, PosDef.rpow_mul_rpow,
-      add_neg_self, PosDef.rpow_zero, Matrix.one_mul, Matrix.mul_one]
+      add_neg_cancel, PosDef.rpow_zero, Matrix.one_mul, Matrix.mul_one]
   right_inv a := by
     simp_rw [Matrix.mul_assoc, PosDef.rpow_mul_rpow, ← Matrix.mul_assoc, PosDef.rpow_mul_rpow,
-      neg_add_self, PosDef.rpow_zero, Matrix.one_mul, Matrix.mul_one]
+      neg_add_cancel, PosDef.rpow_zero, Matrix.one_mul, Matrix.mul_one]
   map_add' x y := by simp_rw [Matrix.mul_add, Matrix.add_mul]
   commutes' r := by
     simp_rw [Algebra.algebraMap_eq_smul_one, Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_one,
-      PosDef.rpow_mul_rpow, neg_add_self, PosDef.rpow_zero]
+      PosDef.rpow_mul_rpow, neg_add_cancel, PosDef.rpow_zero]
   map_mul' x y := by
     simp_rw [Matrix.mul_assoc, ← Matrix.mul_assoc (hφ.matrixIsPosDef.rpow _),
-      PosDef.rpow_mul_rpow, add_neg_self, PosDef.rpow_zero, Matrix.one_mul]
+      PosDef.rpow_mul_rpow, add_neg_cancel, PosDef.rpow_zero, Matrix.one_mul]
 
 theorem Module.Dual.IsFaithfulPosMap.sig_trans_sig [hφ : φ.IsFaithfulPosMap] (x y : ℝ) :
     (sig hφ x).trans (sig hφ y) = sig hφ (x + y) :=
@@ -38,7 +38,8 @@ theorem Module.Dual.IsFaithfulPosMap.sig_trans_sig [hφ : φ.IsFaithfulPosMap] (
 
 open scoped ComplexOrder
 
-theorem PosDef.smul {𝕜 : Type*} [RCLike 𝕜] [Fintype n]
+omit [DecidableEq n] in
+theorem PosDef.smul {𝕜 : Type*} [RCLike 𝕜]
   {x : Matrix n n 𝕜} (hx : x.PosDef) (α : NNRealˣ) :
   ((((α : NNReal) : ℝ) : 𝕜) • x).PosDef := by
   constructor
@@ -124,13 +125,13 @@ by
       ext
       simp only [Pi.mul_apply, Function.comp_apply, Pi.pow_apply, Pi.one_apply]
       simp only [← RCLike.ofReal_mul]
-      rw [← Real.rpow_add (eigenvalues_pos hQ _), neg_add_self, Real.rpow_zero,
+      rw [← Real.rpow_add (eigenvalues_pos hQ _), neg_add_cancel, Real.rpow_zero,
         RCLike.ofReal_one]
     mul_invOf_self := by
       ext
       simp only [Pi.mul_apply, Function.comp_apply, Pi.pow_apply, Pi.one_apply]
       simp only [← RCLike.ofReal_mul]
-      rw [← Real.rpow_add (eigenvalues_pos hQ _), add_neg_self, Real.rpow_zero,
+      rw [← Real.rpow_add (eigenvalues_pos hQ _), add_neg_cancel, Real.rpow_zero,
         RCLike.ofReal_one] }
   rw [Matrix.inv_diagonal']
   congr
@@ -367,7 +368,7 @@ by
           (by rw [← hα]; exact hφ.matrixIsPosDef)
         simp_rw [smul_mul_assoc, one_mul, mul_smul_comm, mul_one,
           smul_smul, ← RCLike.ofReal_mul]
-        rw [← Real.rpow_add (RCLike.pos_def.mp this).1, neg_add_self,
+        rw [← Real.rpow_add (RCLike.pos_def.mp this).1, neg_add_cancel,
           Real.rpow_zero]
         simp_rw [algebraMap.coe_one, one_smul, AlgEquiv.one_apply]
       by_cases Hy : ∃ α : ℂ, hφ.matrixIsPosDef.rpow k = α • 1
@@ -467,7 +468,7 @@ variable {k : Type*} [Fintype k] [DecidableEq k] {s : k → Type*} [Π i, Fintyp
   -- AlgEquiv.toLinearMap_apply]
 
 set_option synthInstance.checkSynthOrder false in
-noncomputable instance PiMat.isStarAlgebra [∀ i, (ψ i).IsFaithfulPosMap] :
+noncomputable instance PiMat.isStarAlgebra [_hψ : ∀ i, (ψ i).IsFaithfulPosMap] :
   starAlgebra (PiMat ℂ k s) :=
 piStarAlgebra
 
@@ -503,7 +504,7 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
     QuantumSet (PiMat ℂ k s) :=
   letI : Fact (∀ (i : k), QuantumSet.k (Matrix (s i) (s i) ℂ) = 0) :=
   by apply Fact.mk; intro; rfl
-  letI : starAlgebra (PiQ fun i ↦ (fun j ↦ Matrix (s j) (s j) ℂ) i) := PiMat.isStarAlgebra
+  letI : starAlgebra (PiQ fun i ↦ (fun j ↦ Matrix (s j) (s j) ℂ) i) := PiMat.isStarAlgebra (_hψ := hψ)
   { k := 0
     inner_star_left := Pi.quantumSet.inner_star_left
     modAut_isSymmetric := Pi.quantumSet.modAut_isSymmetric

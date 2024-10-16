@@ -15,8 +15,6 @@ import Monlib.LinearAlgebra.LmulRmul
 import Monlib.LinearAlgebra.Nacgor
 import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
 
-#align_import quantum_graph.schur_idempotent
-
 /-!
  # Schur product operator
 
@@ -82,7 +80,7 @@ theorem schurMul.apply_rankOne
   obtain ⟨α, β, h⟩ := TensorProduct.eq_span (comul x : _ ⊗[ℂ] _)
   rw [← h]
   simp_rw [map_sum, TensorProduct.map_tmul, ContinuousLinearMap.coe_coe, rankOne_apply,
-    LinearMap.mul'_apply, smul_mul_smul, ← TensorProduct.inner_tmul, ← Finset.sum_smul, ← inner_sum,
+    LinearMap.mul'_apply, smul_mul_smul_comm, ← TensorProduct.inner_tmul, ← Finset.sum_smul, ← inner_sum,
     h, comul_eq_mul_adjoint, LinearMap.adjoint_inner_right, LinearMap.mul'_apply]
 
 theorem schurMul.apply_ket
@@ -280,7 +278,7 @@ theorem algHom_comp_mul {R A B : Type*} [CommSemiring R] [Semiring A]
   [Semiring B] [Algebra R A] [Algebra R B] (f : A →ₐ[R] B) :
     f.toLinearMap ∘ₗ LinearMap.mul' R A = (LinearMap.mul' R B) ∘ₗ (f.toLinearMap ⊗ₘ f.toLinearMap) :=
 by
-  rw [TensorProduct.ext_iff]
+  rw [TensorProduct.ext_iff']
   intro a b
   simp only [LinearMap.comp_apply, LinearMap.mul'_apply, AlgHom.toLinearMap_apply, map_mul,
     TensorProduct.map_tmul]
