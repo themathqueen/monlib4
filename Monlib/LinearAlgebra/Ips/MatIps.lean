@@ -507,7 +507,7 @@ protected theorem basis_repr_apply (hφ : φ.IsFaithfulPosMap) (x : Matrix n n �
     OrthonormalBasis.repr_apply_apply]
   rfl
 
-set_option synthInstance.maxHeartbeats 40000 in
+set_option synthInstance.maxHeartbeats 50000 in
 protected theorem toMatrixLinEquiv_symm_apply (hφ : φ.IsFaithfulPosMap) (hψ : ψ.IsFaithfulPosMap)
     (x : Matrix (n₂ × n₂) (n × n) ℂ) :
      (hφ.toMatrixLinEquiv hψ).symm x =
@@ -541,7 +541,7 @@ lemma _root_.AlgEquiv.toLinearEquiv_coe {R M₁ M₂ : Type*} [CommSemiring R]
   φ.toLinearEquiv = φ :=
 rfl
 
-set_option synthInstance.maxHeartbeats 40000 in
+set_option synthInstance.maxHeartbeats 50000 in
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 protected theorem toMatrix_symm_apply (hφ : φ.IsFaithfulPosMap)
     (x : Matrix (n × n) (n × n) ℂ) :
@@ -554,7 +554,7 @@ end Module.Dual.IsFaithfulPosMap
 
 local notation "|" x "⟩⟨" y "|" => @rankOne ℂ _ _ _ _ _ _ _ x y
 
-set_option synthInstance.maxHeartbeats 40000 in
+set_option synthInstance.maxHeartbeats 50000 in
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 theorem Module.Dual.eq_rankOne_of_faithful_pos_map (hφ : φ.IsFaithfulPosMap)
   (hψ : ψ.IsFaithfulPosMap)
