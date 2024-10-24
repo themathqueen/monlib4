@@ -93,23 +93,28 @@ open TensorProduct
 open Coalgebra LinearMap in
 private noncomputable def symmMapAux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] (B →ₗ[ℂ] A) :=
-{ toFun := λ x => (TensorProduct.rid ℂ _).toLinearMap
+{ toFun := λ x =>
+    (modAut (-k A)).toLinearMap
+    ∘ₗ (TensorProduct.rid ℂ _).toLinearMap
     ∘ₗ (lTensor _ (counit ∘ₗ m _))
     ∘ₗ (υ _ _ _).toLinearMap
     ∘ₗ (rTensor _ (lTensor _ x))
     ∘ₗ (rTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
     ∘ₗ (τ⁻¹ _)
+    ∘ₗ (modAut (k B)).toLinearMap
   map_add' := λ x y => by simp only [lTensor_add, rTensor_add, comp_add, add_comp]
   map_smul' := λ r x => by simp only [lTensor_smul, rTensor_smul, RingHom.id_apply,
     comp_smul, smul_comp] }
 open Coalgebra LinearMap in
 private lemma symmMapAux_apply (f : A →ₗ[ℂ] B) :
-  symmMapAux f = (TensorProduct.rid ℂ _).toLinearMap
+  symmMapAux f = (modAut (-k A)).toLinearMap
+    ∘ₗ (TensorProduct.rid ℂ _).toLinearMap
     ∘ₗ (lTensor _ (counit ∘ₗ m _))
     ∘ₗ (υ _ _ _).toLinearMap
     ∘ₗ (rTensor _ (lTensor _ f))
     ∘ₗ (rTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
-    ∘ₗ (τ⁻¹ _) :=
+    ∘ₗ (τ⁻¹ _)
+    ∘ₗ (modAut (k B)).toLinearMap :=
 rfl
 
 open scoped InnerProductSpace
@@ -117,14 +122,15 @@ open scoped InnerProductSpace
 set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
 open Coalgebra LinearMap in
-theorem symmMap_eq (f : A →ₗ[ℂ] B)
-  (gns₁ : hA.k = 0) (gns₂ : hB.k = 0) :
-  (symmMap ℂ A _) f = (TensorProduct.rid ℂ _).toLinearMap
+theorem symmMap_eq (f : A →ₗ[ℂ] B) :
+  (symmMap ℂ A _) f = (modAut (-k A)).toLinearMap
+    ∘ₗ (TensorProduct.rid ℂ _).toLinearMap
     ∘ₗ (lTensor _ (counit ∘ₗ m _))
     ∘ₗ (υ _ _ _).toLinearMap
     ∘ₗ (rTensor _ (lTensor _ f))
     ∘ₗ (rTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
-    ∘ₗ (τ⁻¹ _) :=
+    ∘ₗ (τ⁻¹ _)
+    ∘ₗ (modAut (k B)).toLinearMap :=
 by
   rw [← symmMapAux_apply]
   revert f
@@ -145,46 +151,56 @@ by
     rankOne_apply, ← smul_tmul', _root_.map_smul,
     ← inner_eq_counit', smul_eq_mul, LinearMap.mul'_apply, inner_smul_left,
     starRingEnd_apply, star_mul, ← starRingEnd_apply, inner_conj_symm, mul_assoc,
-    ← Finset.mul_sum, mul_comm ⟪_, y⟫_ℂ, ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
+    ← Finset.mul_sum, mul_comm ⟪_, y⟫_ℂ,
+    ← LinearMap.adjoint_inner_right, QuantumSet.modAut_adjoint,
+     ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
     adjoint_inner_left, mul'_apply, inner_tmul, QuantumSet.inner_star_left,
     ← inner_conj_symm (1 : A), QuantumSet.inner_conj_left, mul_one, one_mul, inner_conj_symm]
-  simp only [gns₁, gns₂, zero_mul, zero_add, neg_zero, mul_zero, zero_sub,
-    starAlgebra.modAut_zero, AlgEquiv.one_apply]
+  nth_rw 1 [← LinearMap.adjoint_inner_right]
+  nth_rw 2 [← LinearMap.adjoint_inner_left]
+  simp_rw [QuantumSet.modAut_adjoint, AlgEquiv.toLinearMap_apply, QuantumSet.modAut_apply_modAut,
+    add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply, two_mul, neg_add, add_sub_assoc]
 
 open Coalgebra LinearMap in
 private noncomputable def symmMapSymmAux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] (B →ₗ[ℂ] A) :=
-{ toFun := λ x => (TensorProduct.lid ℂ A).toLinearMap
+{ toFun := λ x => (modAut (k A)).toLinearMap
+    ∘ₗ (TensorProduct.lid ℂ A).toLinearMap
     ∘ₗ (rTensor _ (counit ∘ₗ m _))
     ∘ₗ (rTensor _ (lTensor _ x))
     ∘ₗ (υ _ _ _).symm.toLinearMap
     ∘ₗ (lTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
     ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap
+    ∘ₗ (modAut (-k B)).toLinearMap
   map_add' := λ x y => by simp only [lTensor_add, rTensor_add, comp_add, add_comp]
   map_smul' := λ r x => by simp only [lTensor_smul, rTensor_smul, RingHom.id_apply,
     comp_smul, smul_comp] }
 open Coalgebra LinearMap in
 private lemma symmMapSymmAux_apply
   (f : A →ₗ[ℂ] B) :
-  symmMapSymmAux f = (TensorProduct.lid ℂ A).toLinearMap
+  symmMapSymmAux f = (modAut (k A)).toLinearMap
+    ∘ₗ (TensorProduct.lid ℂ A).toLinearMap
     ∘ₗ (rTensor _ (counit ∘ₗ m _))
     ∘ₗ (rTensor _ (lTensor _ f))
     ∘ₗ (υ _ _ _).symm.toLinearMap
     ∘ₗ (lTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
-    ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap :=
+    ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap
+    ∘ₗ (modAut (-k B)).toLinearMap :=
 rfl
 
 open LinearMap Coalgebra in
 -- set_option maxHeartbeats 700000 in
 set_option synthInstance.maxHeartbeats 0 in
-theorem symmMap_symm_eq (f : A →ₗ[ℂ] B)
-  (gns₁ : hA.k = 0) (gns₂ : hB.k = 0) :
-  (symmMap ℂ _ _).symm f = (TensorProduct.lid ℂ A).toLinearMap
+theorem symmMap_symm_eq (f : A →ₗ[ℂ] B) :
+  (symmMap ℂ _ _).symm f =
+    (modAut (k A)).toLinearMap
+    ∘ₗ (TensorProduct.lid ℂ A).toLinearMap
     ∘ₗ (rTensor _ (counit ∘ₗ m _))
     ∘ₗ (rTensor _ (lTensor _ f))
     ∘ₗ (υ _ _ _).symm.toLinearMap
     ∘ₗ (lTensor _ (comul ∘ₗ Algebra.linearMap ℂ _))
-    ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap :=
+    ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap
+    ∘ₗ (modAut (-k B)).toLinearMap :=
   by
   rw [← symmMapSymmAux_apply]
   revert f
@@ -205,12 +221,59 @@ theorem symmMap_symm_eq (f : A →ₗ[ℂ] B)
     ContinuousLinearMap.coe_coe, rankOne_apply, mul_smul_comm, _root_.map_smul,
     ← inner_eq_counit', smul_eq_mul, inner_smul_left, starRingEnd_apply,
     star_mul, ← starRingEnd_apply, inner_conj_symm, mul_assoc,
-    ← Finset.mul_sum, ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
+    ← Finset.mul_sum,
+    ← LinearMap.adjoint_inner_right, QuantumSet.modAut_adjoint,
+    ← inner_tmul, ← sum_inner, this, comul_eq_mul_adjoint,
     adjoint_inner_left, mul'_apply, inner_tmul, QuantumSet.inner_star_left,
     mul_one, ← inner_conj_symm (1 : A), QuantumSet.inner_star_left, mul_one, inner_conj_symm]
   nth_rw 1 [QuantumSet.inner_conj]
-  simp only [gns₁, gns₂, zero_mul, zero_add, neg_zero, mul_zero, zero_sub,
-    starAlgebra.modAut_zero, star_star, AlgEquiv.one_apply]
+  rw [← LinearMap.adjoint_inner_left, QuantumSet.modAut_adjoint]
+  simp_rw [AlgEquiv.toLinearMap_apply, starAlgebra.modAut_star, neg_neg, star_star,
+    QuantumSet.modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply]
+
+open Coalgebra in
+theorem counit_map_mul_eq_counit_mul_modAut_conj_symmMap (f : A →ₗ[ℂ] B) (x : A) (y : B) :
+    counit (f x * y) = (counit (x * (modAut (k A) ((symmMap _ _ _ f) (modAut (-k B) y)))) : ℂ) :=
+  calc counit (f x * y) = ⟪star (f x), modAut (-k B) y⟫_ℂ :=
+      by rw [QuantumSet.inner_eq_counit, star_star, QuantumSet.modAut_apply_modAut, add_neg_cancel,
+        starAlgebra.modAut_zero, AlgEquiv.one_apply]
+    _ = ⟪f.real (star x), modAut (-k B) y⟫_ℂ :=
+      by rw [LinearMap.real_apply, star_star]
+    _ = ⟪star x, symmMap _ _ _ f (modAut (-k B) y)⟫_ℂ :=
+      by rw [symmMap_apply, LinearMap.adjoint_inner_right]
+    _ = counit (x * (modAut (k A) ((symmMap _ _ _ f) (modAut (-k B) y)))) :=
+      by rw [hA.inner_eq_counit, star_star]
+
+theorem LinearMap.adjoint_eq_iff
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [InnerProductSpace 𝕜 E]
+  [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F] (A : E →ₗ[𝕜] F) (B : F →ₗ[𝕜] E) :
+    LinearMap.adjoint A = B ↔ A = LinearMap.adjoint B :=
+by apply Iff.intro <;> rintro rfl <;> simp [adjoint_adjoint]
+
+open Coalgebra in
+theorem symmMap_eq_conj_modAut_tfae (f : B →ₗ[ℂ] B) :
+  List.TFAE
+    [symmMap _ _ _ f = (modAut (-k B)).toLinearMap ∘ₗ f ∘ₗ (modAut (k B)).toLinearMap,
+      f.real = (modAut (k B)).toLinearMap ∘ₗ LinearMap.adjoint f ∘ₗ (modAut (-k B)).toLinearMap,
+      ∀ x y, counit (f x * y) = (counit (x * f y) : ℂ)] :=
+by
+  tfae_have 1 ↔ 2
+  . simp_rw [symmMap_apply, LinearMap.adjoint_eq_iff, LinearMap.adjoint_comp,
+      QuantumSet.modAut_adjoint, LinearMap.comp_assoc]
+  tfae_have 1 → 3
+  . intro h x y
+    simp_rw [counit_map_mul_eq_counit_mul_modAut_conj_symmMap]
+    simp_rw [h, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, QuantumSet.modAut_apply_modAut,
+      add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply]
+  tfae_have 3 → 2
+  . intro h
+    rw [LinearMap.ext_iff_inner_map]
+    intro u
+    rw [hB.inner_eq_counit, LinearMap.real_apply, star_star, h]
+    simp_rw [LinearMap.comp_apply, ← LinearMap.adjoint_inner_right, QuantumSet.modAut_adjoint, LinearMap.adjoint_adjoint,
+      QuantumSet.inner_eq_counit, AlgEquiv.toLinearMap_apply, QuantumSet.modAut_apply_modAut,
+      add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply]
+  tfae_finish
 
 open Coalgebra in
 theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) (gns : hB.k = 0) :
@@ -222,27 +285,11 @@ theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) (gns : hB.k = 0) :
 by
   tfae_have 1 ↔ 2
   · rw [← LinearEquiv.eq_symm_apply, eq_comm]
-  tfae_have 2 ↔ 3
-  · rw [symmMap_symm_apply, LinearMap.real_inj_eq, LinearMap.real_real, eq_comm]
-  tfae_have 3 → 4
-  · intro h x y
-    calc
-      counit (f x * y) = ⟪star (f x), y⟫_ℂ := by
-        rw [QuantumSet.inner_eq_counit, star_star, gns, hb.modAut_zero,
-          AlgEquiv.one_apply]
-      _ = ⟪f.real (star x), y⟫_ℂ := by simp_rw [LinearMap.real_apply, star_star]
-      _ = ⟪LinearMap.adjoint f (star x), y⟫_ℂ := by rw [h]
-      _ = ⟪star x, f y⟫_ℂ := by rw [LinearMap.adjoint_inner_left]
-      _ = counit (x * f y) := by rw [hB.inner_eq_counit, star_star, gns,
-        hb.modAut_zero, AlgEquiv.one_apply]
-  tfae_have 4 → 3
-  · intro h
-    rw [LinearMap.ext_iff_inner_map]
-    intro u
-    rw [LinearMap.adjoint_inner_left]
-    nth_rw 2 [hB.inner_eq_counit]
-    simp only [gns, hb.modAut_zero, AlgEquiv.one_apply, hB.inner_eq_counit]
-    rw [← h, LinearMap.real_apply, star_star]
+  tfae_have 1 ↔ 3
+  · rw [symmMap_apply, LinearMap.adjoint_eq_iff]
+  have := List.TFAE.out (symmMap_eq_conj_modAut_tfae f) 1 2
+  simp only [gns, neg_zero, starAlgebra.modAut_zero, AlgEquiv.one_toLinearMap,
+    LinearMap.one_comp, LinearMap.comp_one] at this
   tfae_finish
 
 theorem commute_real_real {R A : Type _} [Semiring R] [StarRing R] [AddCommMonoid A] [Module R A]
