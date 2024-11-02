@@ -9,6 +9,7 @@ import Monlib.LinearAlgebra.Matrix.StarOrderedRing
 import Monlib.LinearAlgebra.Matrix.PosDefRpow
 import Monlib.LinearAlgebra.ToMatrixOfEquiv
 import Mathlib.Analysis.InnerProductSpace.Positive
+import Mathlib.Analysis.CStarAlgebra.Matrix
 
 variable {A : Type _} [Ring A] [StarRing A] [Algebra ℂ A] [StarModule ℂ A] [PartialOrder A]
   [_root_.StarOrderedRing A]

@@ -335,7 +335,7 @@ by
   on_goal 1 => have := ha.invOf_mul_self
   on_goal 2 => have := ha.mul_invOf_self
   all_goals
-    rw [Pi.mul_def, Function.funext_iff] at this
+    rw [Pi.mul_def, funext_iff] at this
     simp_rw [this]
     rfl
 instance Pi.invertible {ι : Type*} {R : ι → Type*} [Π i, Semiring (R i)]
@@ -436,7 +436,7 @@ theorem Matrix.commutes_with_all_iff {R : Type _} [CommSemiring R] [DecidableEq 
     have : x = diagonal x.diag := by
       ext k l
       specialize h (stdBasisMatrix l k 1)
-      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, boole_mul, mul_boole, ite_and,
+      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, of_apply, boole_mul, mul_boole, ite_and,
         Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at h
       specialize h k k
       simp_rw [diagonal, of_apply, Matrix.diag]
@@ -445,7 +445,7 @@ theorem Matrix.commutes_with_all_iff {R : Type _} [CommSemiring R] [DecidableEq 
     have this1 : ∀ k l : n, x k k = x l l := by
       intro k l
       specialize h (stdBasisMatrix k l 1)
-      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, boole_mul, mul_boole, ite_and,
+      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, of_apply, boole_mul, mul_boole, ite_and,
         Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at h
       specialize h k l
       simp_rw [if_true] at h
@@ -505,7 +505,7 @@ by
   ext x
   simp only [Set.mem_pi, Set.mem_univ, SetLike.mem_coe, forall_true_left]
   simp only [Submodule.mem_span_singleton, mem_span_range_iff_exists_fun,
-    ← Pi.single_smul, Function.funext_iff]
+    ← Pi.single_smul, funext_iff]
   rfl
 lemma PiMat.center {R ι : Type*} [CommSemiring R] [DecidableEq ι] [Fintype ι] {n : ι → Type*}
   [Π i, DecidableEq (n i)] [Π i, Fintype (n i)] :
@@ -842,7 +842,7 @@ by
     nth_rw 1 [h1]
     nth_rw 1 [h2]
     simp only [EmbeddingLike.apply_eq_iff_eq]
-    simp only [Function.funext_iff, Fin.forall_fin_two]
+    simp only [funext_iff, Fin.forall_fin_two]
     simp only [Fin.isValue, ↓reduceIte, ne_eq, zero_ne_one, not_false_eq_true, Pi.single_eq_of_ne,
       Pi.single_eq_same, true_and, one_ne_zero, and_true]
     simp only [Pi.single, Function.update]

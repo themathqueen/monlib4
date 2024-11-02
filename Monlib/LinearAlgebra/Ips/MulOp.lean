@@ -3,7 +3,7 @@ Copyright (c) 2023 Monica Omar. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
-import Mathlib.Algebra.Module.Opposites
+import Mathlib.Data.Opposite
 -- import Mathlib.LinearAlgebra.Basis
 import Mathlib.LinearAlgebra.FiniteDimensional
 import Mathlib.Analysis.InnerProductSpace.Basic

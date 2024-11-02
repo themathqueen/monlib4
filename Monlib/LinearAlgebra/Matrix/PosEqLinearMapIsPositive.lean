@@ -139,7 +139,7 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     · simp_rw [Finset.mem_univ, true_and]
       suffices y *ᵥ v ≠ 0
         by
-        simp_rw [ne_eq, Function.funext_iff, Pi.zero_apply] at this
+        simp_rw [ne_eq, funext_iff, Pi.zero_apply] at this
         push_neg at this
         cases' this with j hj
         rw [← norm_ne_zero_iff] at hj
@@ -411,7 +411,8 @@ theorem PosSemidef.complex [Fintype n] [DecidableEq n] (x : Matrix n n ℂ) :
 
 theorem StdBasisMatrix.sum_eq_one [Fintype n] [DecidableEq n] (a : 𝕜) : ∑ k : n, stdBasisMatrix k k a = a • 1 :=
   by
-  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.smul_apply, stdBasisMatrix, one_apply, smul_ite,
+  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.smul_apply, stdBasisMatrix,
+    of_apply, one_apply, smul_ite,
     ite_and, Finset.sum_ite_eq', Finset.mem_univ, if_true, smul_eq_mul, MulZeroClass.mul_zero,
     mul_one, forall₂_true_iff]
 
@@ -420,10 +421,10 @@ theorem stdBasisMatrix_hMul [Fintype n] [DecidableEq n] (i j k l : n) (a b : �
       ite (j = k) (1 : 𝕜) (0 : 𝕜) • stdBasisMatrix i l (a * b) :=
   by
   ext
-  simp_rw [Matrix.mul_apply, stdBasisMatrix, ite_mul, MulZeroClass.zero_mul, mul_ite,
+  simp_rw [Matrix.mul_apply, stdBasisMatrix, of_apply, ite_mul, MulZeroClass.zero_mul, mul_ite,
     MulZeroClass.mul_zero, Matrix.smul_apply, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, ← ite_and, ← and_assoc, ite_smul, zero_smul,
-    smul_eq_mul, one_mul, stdBasisMatrix, ← ite_and, ← and_assoc, @and_comm (j = k), eq_comm]
+    smul_eq_mul, one_mul, of_apply, ← ite_and, ← and_assoc, @and_comm (j = k), eq_comm]
 
 theorem Matrix.smul_stdBasisMatrix' {n R : Type _} [CommSemiring R] [DecidableEq n] (i j : n)
     (c : R) : stdBasisMatrix i j c = c • stdBasisMatrix i j 1 := by
@@ -505,7 +506,7 @@ theorem existsUnique_trace [Fintype n] [DecidableEq n] [Nontrivial n] :
 
 theorem Matrix.stdBasisMatrix.trace [Fintype n] [DecidableEq n] (i j : n) (a : 𝕜) :
     (stdBasisMatrix i j a).trace = ite (i = j) a 0 := by
-  simp_rw [Matrix.trace_iff', stdBasisMatrix, ite_and, Finset.sum_ite_eq, Finset.mem_univ,
+  simp_rw [Matrix.trace_iff', stdBasisMatrix, ite_and, of_apply, Finset.sum_ite_eq, Finset.mem_univ,
     if_true, eq_comm]
 
 theorem Matrix.stdBasisMatrix_eq {R n m : Type _} [Semiring R]
@@ -516,7 +517,7 @@ theorem Matrix.stdBasisMatrix_eq {R n m : Type _} [Semiring R]
 theorem vecMulVec_eq_zero_iff (x : n → 𝕜) : vecMulVec x (star x) = 0 ↔ x = 0 :=
   by
   simp_rw [← Matrix.ext_iff, vecMulVec_apply, Matrix.zero_apply, Pi.star_apply,
-    mul_comm _ (star _), Function.funext_iff, Pi.zero_apply]
+    mul_comm _ (star _), funext_iff, Pi.zero_apply]
   constructor
   · intro h i
     specialize h i i
@@ -536,7 +537,7 @@ theorem Matrix.PosDef.diagonal_iff [Fintype n] [DecidableEq n] (x : n → 𝕜) 
       Finset.sum_ite_eq, Finset.mem_univ, if_true] at h'
     let g : n → 𝕜 := fun p => ite (i = p) 1 0
     have : g ≠ 0 := by
-      rw [ne_eq, Function.funext_iff, Classical.not_forall]
+      rw [ne_eq, funext_iff, Classical.not_forall]
       simp_rw [Pi.zero_apply]
       use i
       simp_rw [g, if_true]
@@ -558,7 +559,7 @@ theorem Matrix.PosDef.diagonal_iff [Fintype n] [DecidableEq n] (x : n → 𝕜) 
       @RCLike.conj_mul 𝕜 _ (y _), ← RCLike.ofReal_pow]
     apply Finset.sum_pos'
       (fun i _ => mul_nonneg (le_of_lt (h i)) (RCLike.zero_le_real.mpr (sq_nonneg _)))
-    simp_rw [ne_eq, Function.funext_iff, Pi.zero_apply, Classical.not_forall] at hy
+    simp_rw [ne_eq, funext_iff, Pi.zero_apply, Classical.not_forall] at hy
     obtain ⟨i, hi⟩ := hy
     exact ⟨i, Finset.mem_univ _, mul_pos (h _) (by simp only [RCLike.ofReal_pow, gt_iff_lt,
       RCLike.zero_lt_real, norm_pos_iff, ne_eq, hi, not_false_eq_true, pow_pos])⟩

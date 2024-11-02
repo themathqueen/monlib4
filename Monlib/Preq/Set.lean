@@ -1,4 +1,6 @@
 import Mathlib.GroupTheory.Subsemigroup.Center
+import Mathlib.Algebra.Group.Prod
+import Mathlib.Tactic.NthRewrite
 
 theorem _root_.Set.center_prod {A B : Type*} [Semigroup A] [Semigroup B] :
   Set.center (A × B) = (Set.center A) ×ˢ (Set.center B) :=
@@ -17,7 +19,7 @@ by
   ext x
   simp only [Set.mem_pi, Set.mem_center_iff, isMulCentral_iff, mul_assoc]
   simp only [implies_true, and_self, and_true, Set.mem_univ, forall_true_left]
-  simp_rw [Function.funext_iff, Pi.mul_def]
+  simp_rw [funext_iff, Pi.mul_def]
   refine ⟨λ h i a => ?_, λ h _ _ => h _ _⟩
   let a' : Π j, A j := λ j => if h : j = i then (by rw [h]; exact a) else (x j)
   have ha' : a' i = a := by simp only [a', dif_pos]; rfl

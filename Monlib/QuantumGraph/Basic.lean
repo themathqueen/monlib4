@@ -373,6 +373,7 @@ by
   rw [← schurIdempotent_iff_Psi_isIdempotentElem, ← isReal_iff_Psi_isSelfAdjoint]
   exact ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
+set_option synthInstance.maxHeartbeats 30000 in
 theorem real_Upsilon_toBimodule {f : A →ₗ[ℂ] B} (gns₁ : hA.k = 0)
   (gns₂ : hB.k = 0) :
   (Upsilon f.real).toIsBimoduleMap.1
@@ -400,6 +401,7 @@ by
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f
   simp only [map_sum, LinearMap.real_sum, Submodule.coe_sum, this]
 
+set_option synthInstance.maxHeartbeats 30000 in
 theorem schurMul_Upsilon_toBimodule {f g : A →ₗ[ℂ] B} :
   (Upsilon (f •ₛ g)).toIsBimoduleMap.1
     = (Upsilon f).toIsBimoduleMap.1 * (Upsilon g).toIsBimoduleMap.1 :=

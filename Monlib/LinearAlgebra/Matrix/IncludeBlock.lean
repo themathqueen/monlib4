@@ -168,7 +168,7 @@ open scoped Matrix
 theorem stdBasisMatrix_hMul_trace {R n p : Type _} [Semiring R] [Fintype p] [DecidableEq p]
     [Fintype n] [DecidableEq n] (i : n) (j : p) (x : Matrix p n R) :
     Matrix.trace (stdBasisMatrix i j (1 : R) * x) = x j i := by
-  simp_rw [Matrix.trace, Matrix.diag, mul_apply, stdBasisMatrix, boole_mul, ite_and,
+  simp_rw [Matrix.trace, Matrix.diag, mul_apply, stdBasisMatrix, of_apply, boole_mul, ite_and,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 theorem ext_iff_trace {R n p : Type _} [Fintype n] [Fintype p] [DecidableEq n] [DecidableEq p]

@@ -175,7 +175,7 @@ theorem Matrix.stdBasis_repr_eq_reshape : (Matrix.stdBasis R I J).equivFun = res
         by rw [← stdBasis_eq_stdBasisMatrix]
       _ = Matrix.stdBasisMatrix i.1 i.2 (1 : R) j.1 j.2 := rfl
       _ = if i = j then 1 else 0 :=
-        by simp_rw [stdBasisMatrix, ← Prod.eq_iff_fst_eq_snd_eq]
+        by simp_rw [stdBasisMatrix, of_apply, ← Prod.eq_iff_fst_eq_snd_eq]
 
 def LinearEquiv.innerConj {R E F : Type _} [CommSemiring R] [AddCommMonoid E] [AddCommMonoid F]
     [Module R E] [Module R F] (ϱ : E ≃ₗ[R] F) : (E →ₗ[R] E) ≃ₐ[R] F →ₗ[R] F :=
@@ -263,7 +263,7 @@ theorem toLinOfAlgEquiv_eq (x : Matrix (I × J) (I × J) R) :
   simp_rw [LinearMap.ext_iff, ← ext_iff, toLinOfAlgEquiv_apply, reshape_symm_apply,
     LinearMap.sum_apply, Matrix.sum_apply, toLinAlgEquiv'_apply, mulVec, dotProduct,
     reshape_apply, LinearMap.smul_apply, Matrix.smul_apply, rankOneStdBasis_apply, stdBasisMatrix,
-    smul_ite, ← Prod.mk.inj_iff, Prod.mk.eta, one_smul, smul_zero, smul_eq_mul,
+    of_apply, smul_ite, ← Prod.mk.inj_iff, Prod.mk.eta, one_smul, smul_zero, smul_eq_mul,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true,
     forall₃_true_iff]
 
@@ -291,7 +291,7 @@ theorem innerAut_toMatrix (U : unitaryGroup n 𝕜) :
   by
   ext
   simp_rw [LinearMap.toMatrixOfAlgEquiv_apply', innerAut_apply', mul_apply, stdBasisMatrix,
-    mul_ite, mul_one, MulZeroClass.mul_zero, Finset.sum_mul, ite_mul, MulZeroClass.zero_mul,
+    of_apply, mul_ite, mul_one, MulZeroClass.mul_zero, Finset.sum_mul, ite_mul, MulZeroClass.zero_mul,
     ite_and, ← unitaryGroup.star_coe_eq_coe_star, star_apply, kroneckerMap_apply, conj_apply]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
 

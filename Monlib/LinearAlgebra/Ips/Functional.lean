@@ -467,13 +467,13 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
         Q p q =
             ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix q r 1) j k * (stdBasisMatrix r p 1) k i :=
           by
-          simp only [stdBasisMatrix, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, eq_self_iff_true, if_true,
             mul_ite, MulZeroClass.mul_zero, mul_one]
         _ = ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix r p 1) j k * (stdBasisMatrix q r 1) k i :=
           by rw [h2]
         _ = ite (p = q) (Q r r) 0 := by
-          simp only [stdBasisMatrix, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_ite,
             MulZeroClass.mul_zero, mul_one]
     by_cases h : IsEmpty n
@@ -534,13 +534,13 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
         Q p q =
             ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix q r 1) j k * (stdBasisMatrix r p 1) k i :=
           by
-          simp only [stdBasisMatrix, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, eq_self_iff_true, if_true,
             mul_ite, MulZeroClass.mul_zero, mul_one]
         _ = ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix r p 1) j k * (stdBasisMatrix q r 1) k i :=
           by rw [h2]
         _ = ite (p = q) (Q r r) 0 := by
-          simp only [stdBasisMatrix, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_ite,
             MulZeroClass.mul_zero, mul_one]
     let i : n := Nonempty.some (by infer_instance)

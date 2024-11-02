@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.LinearAlgebra.TensorProduct.Basic
 import Mathlib.Algebra.Algebra.Basic
-import Mathlib.Algebra.Module.Opposites
+import Mathlib.Data.Opposite
 import Mathlib.Algebra.Star.Basic
 import Monlib.LinearAlgebra.TensorProduct.Lemmas
 

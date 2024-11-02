@@ -1,6 +1,6 @@
 import Mathlib.Algebra.Opposites
 import Mathlib.Algebra.Module.LinearMap.Basic
-import Mathlib.Algebra.Module.Opposites
+import Mathlib.Data.Opposite
 import Mathlib.Algebra.Algebra.Equiv
 import Mathlib.Algebra.Algebra.Opposite
 
