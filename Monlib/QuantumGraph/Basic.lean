@@ -156,24 +156,6 @@ private lemma rmulMapLmul_apply_Upsilon_apply_aux_apply
   rmulMapLmul_apply_Upsilon_apply_aux x y = Upsilon (x •ₛ Upsilon.symm y) :=
 rfl
 
-lemma Upsilon_rankOne (a : A) (b : B) :
-  Upsilon (rankOne ℂ a b).toLinearMap = (modAut (- k B - 1) (star b)) ⊗ₜ[ℂ] a :=
-by
-  rw [Upsilon_apply, QuantumSet.Psi_toFun_apply, TensorProduct.comm_tmul,
-    TensorProduct.map_tmul, LinearEquiv.lTensor_tmul, starAlgebra.modAut_star,
-    starAlgebra.modAut_zero]
-  ring_nf
-  rfl
-lemma Upsilon_symm_tmul (a : A) (b : B) :
-  Upsilon.symm (a ⊗ₜ[ℂ] b) = (rankOne ℂ b (modAut (- k A - 1) (star a))).toLinearMap :=
-by
-  rw [Upsilon_symm_apply]
-  simp only [LinearEquiv.lTensor_symm_tmul, LinearEquiv.symm_symm, op_apply, TensorProduct.map_tmul,
-    LinearEquiv.coe_coe, unop_apply, MulOpposite.unop_op, TensorProduct.comm_symm_tmul, QuantumSet.Psi_invFun_apply,
-    starAlgebra.modAut_zero, neg_zero]
-  ring_nf
-  rfl
-
 theorem rmulMapLmul_apply_Upsilon_apply (x : A →ₗ[ℂ] B) (y : A ⊗[ℂ] B) :
   (rmulMapLmul (Upsilon x)) y = Upsilon (x •ₛ Upsilon.symm y) :=
 by

@@ -973,3 +973,43 @@ by
     Function.comp_apply, orthogonalProjection_orthogonal_val, map_sub, LinearMap.map_coe_ker,
     sub_zero, implies_true, true_and,
     orthogonalProjection_eq_self_iff.mpr (LinearMap.mem_range_self _ _)]
+
+theorem orthogonalProjection_of_top {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
+    [InnerProductSpace 𝕜 E] [CompleteSpace ↥(⊤ : Submodule 𝕜 E)] :
+    orthogonalProjection' (⊤ : Submodule 𝕜 E) = 1 :=
+  by
+  ext1
+  simp_rw [ContinuousLinearMap.one_apply, orthogonalProjection'_apply]
+  rw [orthogonalProjection_eq_self_iff]
+  simp only [Submodule.mem_top]
+
+theorem LinearMap.IsProj.top (S M : Type*) [Semiring S] [AddCommMonoid M]
+  [Module S M] :
+    LinearMap.IsProj (⊤ : Submodule S M) (LinearMap.id (R := S)) :=
+⟨fun _ ↦ trivial, fun _ ↦ congrFun rfl⟩
+
+theorem LinearMap.IsProj.codRestrict_of_top {S M : Type*} [Semiring S] [AddCommMonoid M]
+  [Module S M] :
+    (Submodule.subtype ⊤).comp (LinearMap.IsProj.top S M).codRestrict = LinearMap.id :=
+rfl
+theorem LinearMap.IsProj.subtype_comp_codRestrict {S M : Type*} [Semiring S] [AddCommMonoid M]
+  [Module S M] {U : Submodule S M} {f : M →ₗ[S] M} (hf : LinearMap.IsProj U f) :
+    (Submodule.subtype U).comp hf.codRestrict = f :=
+rfl
+
+theorem LinearMap.IsProj.codRestrict_eq_dim_iff {S M : Type*}
+  [Semiring S] [AddCommMonoid M] [Module S M]
+  {f : M →ₗ[S] M} {U : Submodule S M} (hf : LinearMap.IsProj U f) :
+    U = (⊤ : Submodule S M)
+    ↔ (Submodule.subtype _).comp hf.codRestrict = LinearMap.id :=
+by
+  rw[LinearMap.IsProj.subtype_comp_codRestrict]
+  constructor
+  . rintro rfl
+    ext
+    simp only [id_coe, id_eq, hf.2 _ Submodule.mem_top]
+  . rintro rfl
+    refine Submodule.eq_top_iff'.mpr ?mpr.a
+    intro x
+    rw [← id_apply (R := S) x]
+    exact hf.map_mem x

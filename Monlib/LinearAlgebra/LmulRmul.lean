@@ -5,6 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Algebra.Bilinear
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
+import Monlib.LinearAlgebra.LinearMapOp
 
 /-!
  # lmul and rmul (the left and right multiplication maps)
@@ -217,3 +218,18 @@ theorem LinearMap.mulLeft_inj {H₁ : Type _} [Semiring H₁] [Module R H₁] [S
     [IsScalarTower R H₁ H₁] (x : H₁) [Invertible x] (y z : H₁) :
     LinearMap.mulLeft R x y = LinearMap.mulLeft R x z ↔ y = z :=
   IsUnit.mul_right_inj (isUnit_of_invertible x)
+
+theorem lmul_op {R A : Type*} [CommSemiring R] [NonUnitalNonAssocSemiring A] [Module R A]
+  [SMulCommClass R A A] [IsScalarTower R A A] (x : Aᵐᵒᵖ) :
+    lmul x = (rmul (x.unop) : A →ₗ[R] A).op :=
+rfl
+
+theorem lmul_op' {R A : Type*} [CommSemiring R] [NonUnitalNonAssocSemiring A] [Module R A]
+  [SMulCommClass R A A] [IsScalarTower R A A] (x : A) :
+    lmul (MulOpposite.op x) = (rmul x : A →ₗ[R] A).op :=
+rfl
+
+theorem rmul_op' {R A : Type*} [CommSemiring R] [NonUnitalNonAssocSemiring A] [Module R A]
+  [SMulCommClass R A A] [IsScalarTower R A A] (x : A) :
+    rmul (MulOpposite.op x) = (lmul x : A →ₗ[R] A).op :=
+rfl

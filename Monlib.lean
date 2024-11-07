@@ -35,6 +35,7 @@ import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 import Monlib.QuantumGraph.PiMat
 import Monlib.QuantumGraph.OfClassicalGraph
+import Monlib.QuantumGraph.Degree
 -- import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 -- import Monlib.QuantumGraph.Nontracial
@@ -87,3 +88,4 @@ import Monlib.LinearAlgebra.QuantumSet.SchurMul
 import Monlib.LinearAlgebra.QuantumSet.Symm
 import Monlib.LinearAlgebra.QuantumSet.Instances
 import Monlib.LinearAlgebra.QuantumSet.QIso
+import Monlib.LinearAlgebra.QuantumSet.PhiMap

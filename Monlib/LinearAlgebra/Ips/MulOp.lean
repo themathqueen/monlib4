@@ -8,6 +8,8 @@ import Mathlib.Data.Opposite
 import Mathlib.LinearAlgebra.FiniteDimensional
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Monlib.LinearAlgebra.LinearMapOp
 
 /-!
 
@@ -100,3 +102,37 @@ noncomputable def OrthonormalBasis.mulOpposite {𝕜 H : Type _} [RCLike 𝕜] [
 instance MulOpposite.starModule {R H : Type _} [Star R] [SMul R H] [Star H] [StarModule R H] :
     StarModule R Hᵐᵒᵖ
     where star_smul r a := by simp_rw [star, MulOpposite.unop_smul, star_smul, MulOpposite.op_smul]
+
+theorem MulOpposite.opContinuousLinearEquiv_adjoint {𝕜 A : Type*}
+  [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A] [CompleteSpace A] :
+  ContinuousLinearMap.adjoint
+    (MulOpposite.opContinuousLinearEquiv 𝕜 (M:=A)).toContinuousLinearMap
+    = (MulOpposite.opContinuousLinearEquiv 𝕜 (M:=A)).symm.toContinuousLinearMap :=
+by
+  ext x
+  apply ext_inner_left 𝕜
+  intro y
+  simp [ContinuousLinearMap.adjoint_inner_right]
+  rfl
+
+theorem MulOpposite.opLinearEquiv_adjoint {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A]
+  [InnerProductSpace 𝕜 A] [FiniteDimensional 𝕜 A] :
+    LinearMap.adjoint (MulOpposite.opLinearEquiv 𝕜 (M:=A)).toLinearMap
+      = (MulOpposite.opLinearEquiv 𝕜 (M:=A)).symm.toLinearMap :=
+by
+  haveI : CompleteSpace A := FiniteDimensional.complete 𝕜 A
+  calc LinearMap.adjoint (MulOpposite.opLinearEquiv 𝕜 (M:=A)).toLinearMap
+        = ContinuousLinearMap.adjoint
+        (MulOpposite.opContinuousLinearEquiv 𝕜 (M:=A)).toContinuousLinearMap := rfl
+      _ = (MulOpposite.opLinearEquiv 𝕜 (M:=A)).symm.toLinearMap := by
+        rw [MulOpposite.opContinuousLinearEquiv_adjoint]; rfl
+
+theorem LinearMap.op_adjoint {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A]
+  [InnerProductSpace 𝕜 A] [FiniteDimensional 𝕜 A] (x : A →ₗ[𝕜] A) :
+    LinearMap.adjoint x.op = (LinearMap.adjoint x).op :=
+  calc LinearMap.adjoint x.op = LinearMap.adjoint ((MulOpposite.opLinearEquiv 𝕜 (M:=A)).toLinearMap
+      ∘ₗ x ∘ₗ (MulOpposite.opLinearEquiv 𝕜 (M:=A)).symm.toLinearMap) := rfl
+    _ = (LinearMap.adjoint x).op := by
+      simp [← MulOpposite.opLinearEquiv_adjoint]
+      simp [MulOpposite.opLinearEquiv_adjoint]
+      rfl

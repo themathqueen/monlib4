@@ -201,46 +201,6 @@ by
     PiMatTensorProductEquiv_apply, EuclideanSpace.trace_eq_matrix_trace',
     Matrix.coe_toEuclideanCLM_eq_toEuclideanLin, LinearEquiv.symm_apply_apply]
 
-theorem orthogonalProjection_of_top {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] [CompleteSpace ↥(⊤ : Submodule 𝕜 E)] :
-    orthogonalProjection' (⊤ : Submodule 𝕜 E) = 1 :=
-  by
-  ext1
-  simp_rw [ContinuousLinearMap.one_apply, orthogonalProjection'_apply]
-  rw [orthogonalProjection_eq_self_iff]
-  simp only [Submodule.mem_top]
-
-theorem LinearMap.IsProj.top (S M : Type*) [Semiring S] [AddCommMonoid M]
-  [Module S M] :
-    LinearMap.IsProj (⊤ : Submodule S M) (LinearMap.id (R := S)) :=
-⟨fun _ ↦ trivial, fun _ ↦ congrFun rfl⟩
-
-theorem LinearMap.IsProj.codRestrict_of_top {S M : Type*} [Semiring S] [AddCommMonoid M]
-  [Module S M] :
-    (Submodule.subtype ⊤).comp (LinearMap.IsProj.top S M).codRestrict = LinearMap.id :=
-rfl
-theorem LinearMap.IsProj.subtype_comp_codRestrict {S M : Type*} [Semiring S] [AddCommMonoid M]
-  [Module S M] {U : Submodule S M} {f : M →ₗ[S] M} (hf : LinearMap.IsProj U f) :
-    (Submodule.subtype U).comp hf.codRestrict = f :=
-rfl
-
-theorem LinearMap.IsProj.codRestrict_eq_dim_iff {S M : Type*}
-  [Semiring S] [AddCommMonoid M] [Module S M]
-  {f : M →ₗ[S] M} {U : Submodule S M} (hf : LinearMap.IsProj U f) :
-    U = (⊤ : Submodule S M)
-    ↔ (Submodule.subtype _).comp hf.codRestrict = LinearMap.id :=
-by
-  rw[LinearMap.IsProj.subtype_comp_codRestrict]
-  constructor
-  . rintro rfl
-    ext
-    simp only [id_coe, id_eq, hf.2 _ Submodule.mem_top]
-  . rintro rfl
-    refine Submodule.eq_top_iff'.mpr ?mpr.a
-    intro x
-    rw [← id_apply (R := S) x]
-    exact hf.map_mem x
-
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
 theorem QuantumGraph.numOfEdges_eq_rank_top_iff
@@ -288,7 +248,7 @@ by
       ↔ (PiMat_toEuclideanLM (PiMatTensorProductEquiv ((StarAlgEquiv.lTensor _
     (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi 0 (1/2) f))))
       = 1 := by
-        rw [Function.funext_iff]; exact Iff.rfl
+        rw [funext_iff]; exact Iff.rfl
     _ ↔ f = Qam.completeGraph _ _ :=
       by
         rw [eq_comm]
@@ -475,7 +435,7 @@ Basis.tensorProduct_repr_tmul_apply _ _ _ _ _ _
 -- theorem PiLp.ext_iff {p : ENNReal} {ι : Type*} {α : ι → Type*} {x : PiLp p α}
 --   {y : PiLp p α} :
 --   x = y ↔ (∀ (i : ι), x i = y i) :=
--- by simp [← Function.funext_iff]
+-- by simp [← funext_iff]
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
@@ -678,7 +638,7 @@ theorem piInnerAut_apply_dualMatrix_iff' {U : (i : ι) → Matrix.unitaryGroup (
   piInnerAut U (Module.Dual.pi.matrixBlock φ) = Module.Dual.pi.matrixBlock φ ↔
   ∀ i, Matrix.innerAutStarAlg (U i) (φ i).matrix = (φ i).matrix :=
 by
-  simp only [Function.funext_iff, StarAlgEquiv.piCongrRight_apply,
+  simp only [funext_iff, StarAlgEquiv.piCongrRight_apply,
     Module.Dual.pi.matrixBlock_apply]
 
 omit hφ in
@@ -829,7 +789,7 @@ by
     PiMatTensorProductEquiv_apply, StarAlgEquiv.ofAlgEquiv_coe, AlgEquiv.ofLinearEquiv_apply,
     LinearMap.coe_toContinuousLinearMap, EmbeddingLike.apply_eq_iff_eq,
     ← tensorToKronecker_apply, ← directSumTensor_apply]
-  simp only [← Function.funext_iff, EmbeddingLike.apply_eq_iff_eq]
+  simp only [← funext_iff, EmbeddingLike.apply_eq_iff_eq]
 
 theorem Matrix.kronecker_mulVec_euclideanSpaceTensor' {n m : Type*} [Fintype n] [Fintype m]
   [DecidableEq n] [DecidableEq m] (A : Matrix n n ℂ) (B : Matrix m m ℂ) (x : EuclideanSpace ℂ n)
@@ -942,7 +902,7 @@ theorem piInnerAut_modAut_commutes_of {U : (i : ι) → Matrix.unitaryGroup (p i
       = (hφ i).matrixIsPosDef.rpow r) :
   ∀ x, (piInnerAut U) ((modAut (-r)) x) = (modAut (-r)) ((piInnerAut U) x) :=
 by
-  simp only [Function.funext_iff, Function.comp_apply, piInnerAut,
+  simp only [funext_iff, Function.comp_apply, piInnerAut,
     PiMat.modAut, StarAlgEquiv.piCongrRight_apply, AlgEquiv.piCongrRight_apply,
     modAut, sig_apply, Matrix.innerAutStarAlg_apply', unitary.mul_inv_eq_iff] at h ⊢
   simp only [mul_assoc, neg_neg]
