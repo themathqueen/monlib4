@@ -1220,10 +1220,30 @@ by
     modAut_apply_modAut, add_neg_cancel, starAlgebra.modAut_zero, star_star,
     AlgEquiv.one_apply]
 
+theorem QuantumSet.Psi_apply_one_one (t r : ℝ) :
+  QuantumSet.Psi t r (rankOne ℂ (1 : B) (1 : A)) = (1 : B ⊗[ℂ] Aᵐᵒᵖ) :=
+by
+  simp only [Psi_apply, Psi_toFun_apply, _root_.map_one,
+    star_one, MulOpposite.op_one, Algebra.TensorProduct.one_def]
+theorem QuantumSet.Psi_symm_apply_one (t r : ℝ) :
+  (QuantumSet.Psi t r).symm (1 : A ⊗[ℂ] Bᵐᵒᵖ) = rankOne ℂ (1 : A) (1 : B) :=
+by
+  rw [← QuantumSet.Psi_apply_one_one t r, LinearEquiv.symm_apply_apply]
+
 @[simps!]
 noncomputable abbrev Upsilon :
   (A →ₗ[ℂ] B) ≃ₗ[ℂ] (A ⊗[ℂ] B) :=
 (Psi 0 (k A + 1)).trans ((tenSwap ℂ).trans (LinearEquiv.lTensor _ (unop ℂ)))
+
+theorem Upsilon_apply_one_one :
+  Upsilon (rankOne ℂ (1 : B) (1 : A)) = (1 : A ⊗[ℂ] B) :=
+by
+  rw [Upsilon, LinearEquiv.trans_apply, Psi_apply_one_one]
+  rfl
+theorem Upsilon_symm_apply_one :
+  Upsilon.symm (1 : A ⊗[ℂ] B) = rankOne ℂ (1 : B) (1 : A) :=
+by
+  rw [← Upsilon_apply_one_one, LinearEquiv.symm_apply_apply]
 
 private noncomputable def rmulMapLmul_apply_Upsilon_aux :
   (A →ₗ[ℂ] B) →ₗ[ℂ] ((A ⊗[ℂ] B) →ₗ[ℂ] (A ⊗[ℂ] B)) where

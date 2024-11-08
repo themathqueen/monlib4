@@ -439,10 +439,8 @@ theorem Qam.reflexive_complment_is_reflexive_qam_iff_reflexive_qam
 theorem QuantumSet.Psi_apply_completeGraph {A : Type*} {B : Type*} [starAlgebra A]
     [starAlgebra B] [QuantumSet A] [QuantumSet B] (t r : ℝ) :
   QuantumSet.Psi t r (Qam.completeGraph A B) = 1 :=
-by
-  simp only [Qam.completeGraph, Psi_apply, Psi_toFun_apply]
-  simp only [_root_.map_one, star_one, MulOpposite.op_one, Algebra.TensorProduct.one_def]
+QuantumSet.Psi_apply_one_one _ _
 theorem QuantumSet.Psi_symm_one {A B : Type*} [starAlgebra A]
   [starAlgebra B] [QuantumSet A] [QuantumSet B] (t r : ℝ) :
   (QuantumSet.Psi t r).symm 1 = Qam.completeGraph A B :=
-by rw [← QuantumSet.Psi_apply_completeGraph t r, LinearEquiv.symm_apply_apply]
+QuantumSet.Psi_symm_apply_one _ _

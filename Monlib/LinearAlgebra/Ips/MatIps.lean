@@ -386,7 +386,7 @@ protected noncomputable def basis (hφ : φ.IsFaithfulPosMap) : Basis (n × n) �
   refine' Basis.mk _ _
   · exact fun ij => stdBasisMatrix ij.1 ij.2 1 * hφ.matrixIsPosDef.rpow (-(1 / 2))
   · have := (stdBasis ℂ n n).linearIndependent
-    simp_rw [LinearIndependent, LinearMap.ker_eq_bot, injective_iff_map_eq_zero,
+    simp_rw [linearIndependent_iff_injective_linearCombination, injective_iff_map_eq_zero,
       Finsupp.linearCombination_apply, Finsupp.sum] at this ⊢
     simp_rw [← smul_mul_assoc, ← Finset.sum_mul]
     by_cases h : IsEmpty n

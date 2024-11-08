@@ -261,6 +261,44 @@ theorem QuantumGraph.CompleteGraph_numOfEdges :
       = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2) :=
 by rw [QuantumGraph.numOfEdges_eq_rank_top_iff]
 
+open scoped InnerProductSpace
+theorem Algebra.linearMap_adjoint_eq_dual :
+  LinearMap.adjoint (Algebra.linearMap ℂ (PiMat ℂ ι p))
+    = Module.Dual.pi φ :=
+by
+  rw [← Module.Dual.pi.IsFaithfulPosMap.adjoint_eq, LinearMap.adjoint_adjoint]
+
+theorem exists_numOfEdges_ne_inner_one_map_one_of_IsFaithfulState
+  (hφ₂ : (Module.Dual.pi φ).IsUnital)
+  (hB : 1 < Module.finrank ℂ (PiMat ℂ ι p)) :
+  ∃ (A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p) (hA : QuantumGraph (PiMat ℂ ι p) A),
+    ⟪1, A 1⟫_ℂ ≠ QuantumGraph.NumOfEdges hA :=
+by
+  use Qam.completeGraph _ _, ⟨Qam.Nontracial.CompleteGraph.qam⟩
+  rw [QuantumGraph.CompleteGraph_numOfEdges, Qam.completeGraph]
+  simp only [ContinuousLinearMap.coe_coe, rankOne_apply_apply_toFun]
+  have : ⟪(1 : PiMat ℂ ι p), 1⟫_ℂ = 1 :=
+  by
+    simp_rw [Coalgebra.inner_eq_counit', Coalgebra.counit_eq_unit_adjoint]
+    rw [← hφ₂]
+    congr
+    rw [← Algebra.linearMap_adjoint_eq_dual]
+    congr; ext; rfl
+  simp_rw [ne_eq, this, one_smul, this]
+  rw [← Nat.cast_one, Nat.cast_inj]
+  simp [Module.finrank_pi_fintype, Module.finrank_matrix, ← pow_two] at hB
+  have :=
+    calc ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
+      = ∑ i : ι, ∑ j : ι, Fintype.card (p i) * Fintype.card (p j) :=
+        by simp_rw [Finset.sum_product_univ]
+      _ = (∑ i : ι, Fintype.card (p i)) ^ 2 :=
+        by simp_rw [← Finset.mul_sum, ← Finset.sum_mul, pow_two]
+  rw [this, eq_comm, ← one_pow 2, sq_eq_sq (by simp) (by simp)]
+  contrapose! hB
+  calc ∑ x : ι, Fintype.card (p x) ^ 2 ≤ (∑ i : ι, Fintype.card (p i)) ^ 2 :=
+      Finset.sum_sq_le_sq_sum_of_nonneg (by simp)
+    _ = 1 := by rw [hB, one_pow]
+
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 0 in
 theorem QuantumGraph.Real.PiMat_isOrthogonalProjection
