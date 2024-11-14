@@ -188,9 +188,9 @@ theorem QuantumSet.comul_subset_eq {A : Type*} [starAlgebra A] [QuantumSet A] (r
   Coalgebra.comul (R := ℂ) (A := QuantumSet.subset r A)
     = (TensorProduct.map (QuantumSet.toSubset_algEquiv r).toLinearMap
         (QuantumSet.toSubset_algEquiv r).toLinearMap)
-      ∘ₗ (modAut (-r + k A)).toLinearMap ∘ₗ
+      ∘ₗ
     (Coalgebra.comul (R := ℂ) (A := A))
-      ∘ₗ (modAut (r + -k A)).toLinearMap ∘ₗ (toSubset_algEquiv r).symm.toLinearMap  :=
+       ∘ₗ (toSubset_algEquiv r).symm.toLinearMap  :=
 by
   letI := QuantumSet.instSubset (A := A) (by infer_instance) r
   letI : Fact (k A = k A) := Fact.mk rfl
@@ -200,7 +200,15 @@ by
   simp only [LinearMap.adjoint_comp, QuantumSet.subset_tensor_algEquiv_adjoint,
     toSubset_algEquiv_symm_adjoint, toSubset_algEquiv_adjoint]
   simp only [QuantumSet.tensorProduct.k_eq₁, ← LinearMap.comp_assoc]
-  congr
+  congr 1
+  simp only [LinearMap.comp_assoc, ← Coalgebra.comul_eq_mul_adjoint,
+    ← (QuantumSet.modAut_isCoalgHom _).2, ← AlgEquiv.TensorProduct.map_toLinearMap,
+    ← modAut_tensor]
+  nth_rw 3 [← LinearMap.comp_assoc]
+  rw [AlgEquiv.coe_comp, modAut_trans]
+  ring_nf
+  simp only [QuantumSet.modAut_zero, AlgEquiv.one_toLinearMap, LinearMap.one_comp]
+  rfl
 
 theorem AlgEquiv.refl_toLinearMap {A : Type*} [Semiring A] [Algebra ℂ A] :
   (AlgEquiv.refl (R := ℂ) (A₁ := A)).toLinearMap = LinearMap.id :=
@@ -234,13 +242,6 @@ by
   simp only [← TensorProduct.map_comp, ← LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap,
     LinearMap.id_comp]
   simp only [LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap, LinearMap.comp_id]
-  congr 1
-  rw [← (QuantumSet.modAut_isCoalgHom _).2, modAut_tensor, ← LinearMap.comp_assoc,
-    AlgEquiv.TensorProduct.map_toLinearMap, ← TensorProduct.map_comp,
-    AlgEquiv.coe_comp, QuantumSet.modAut_trans]
-  ring_nf
-  simp only [QuantumSet.modAut_zero, AlgEquiv.one_toLinearMap, TensorProduct.map_one,
-    LinearMap.one_comp]
 
 theorem LinearMap.toSubsetQuantumSet_inj
   {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
@@ -542,9 +543,7 @@ by
   calc Coalgebra.comul ∘ₗ LinearMap.mul' ℂ (QuantumSet.subset r A)
      = (TensorProduct.map (QuantumSet.toSubset_algEquiv r).toLinearMap
           (QuantumSet.toSubset_algEquiv r).toLinearMap)
-      ∘ₗ (modAut (-r + k A)).toLinearMap
       ∘ₗ (Coalgebra.comul (R := ℂ) (A := A))
-      ∘ₗ (modAut (r + -k A)).toLinearMap
       ∘ₗ (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
       ∘ₗ (LinearMap.mul' ℂ A).toSubsetQuantumSet r r
       ∘ₗ (QuantumSet.subset_tensor_algEquiv r).toLinearMap :=
@@ -556,34 +555,10 @@ by
           exact QuantumSet.comul_subset_eq _
    _ = (AlgEquiv.TensorProduct.map (QuantumSet.toSubset_algEquiv r)
           (QuantumSet.toSubset_algEquiv r)).toLinearMap
-      ∘ₗ (modAut (-r + k A)).toLinearMap
-      ∘ₗ ((modAut (r + -k A)).toLinearMap
-        ∘ₗ (Coalgebra.comul (R := ℂ) (A := A)))
-      ∘ₗ ((QuantumSet.toSubset_algEquiv r).symm.toLinearMap
-        ∘ₗ (LinearMap.mul' ℂ A).toSubsetQuantumSet r r
-        ∘ₗ (QuantumSet.subset_tensor_algEquiv r).toLinearMap) :=
-        by
-          simp_rw [modAut_tensor, AlgEquiv.TensorProduct.map_toLinearMap]
-          rw [(QuantumSet.modAut_isCoalgHom _).2]
-          simp only [LinearMap.comp_assoc]
-   _ = (AlgEquiv.TensorProduct.map (QuantumSet.toSubset_algEquiv r)
-          (QuantumSet.toSubset_algEquiv r)).toLinearMap
-      ∘ₗ ((modAut (-r + k A)).toLinearMap
-      ∘ₗ (modAut (r + -k A)).toLinearMap)
       ∘ₗ (Coalgebra.comul (R := ℂ) (A := A))
       ∘ₗ ((LinearMap.mul' ℂ A)
         ∘ₗ (TensorProduct.map (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
           (QuantumSet.toSubset_algEquiv r).symm.toLinearMap)) := by congr 1
-   _ = (AlgEquiv.TensorProduct.map (QuantumSet.toSubset_algEquiv r)
-          (QuantumSet.toSubset_algEquiv r)).toLinearMap
-      ∘ₗ (Coalgebra.comul (R := ℂ) (A := A))
-      ∘ₗ ((LinearMap.mul' ℂ A)
-        ∘ₗ (TensorProduct.map (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
-          (QuantumSet.toSubset_algEquiv r).symm.toLinearMap)) :=
-        by
-          simp only [AlgEquiv.coe_comp, QuantumSet.modAut_trans]
-          ring_nf
-          simp only [QuantumSet.modAut_zero, AlgEquiv.one_toLinearMap, LinearMap.one_comp]
   simpa only [LinearMap.comp_assoc]
 
 theorem comul_comp_mul_eq_iff_to_quantumSetSubset
