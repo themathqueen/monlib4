@@ -273,7 +273,7 @@ theorem Matrix.posSemidef_iff_eq_rankOne' [Fintype n] [DecidableEq n] {x : Matri
 Matrix.posSemidef_iff_eq_rankOne
 theorem Matrix.posSemidef_iff_eq_rankOne'' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
-      ∃ (m : Type) (hm : Fintype m) (v : m → (n → 𝕜)),
+      ∃ (m : Type) (_hm : Fintype m) (v : m → (n → 𝕜)),
         x =
           ∑ i : m,
             LinearMap.toMatrix' (rankOne 𝕜 ((EuclideanSpace.equiv _ _).symm (v i)) ((EuclideanSpace.equiv _ _).symm (v i))).toLinearMap :=
@@ -329,7 +329,7 @@ theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col [Fintype n] [DecidableEq
   simp_rw [Matrix.posSemidef_iff_eq_rankOne, rankOne.EuclideanSpace.toMatrix']
 theorem Matrix.posSemidef_iff_col_mul_conjTranspose_col' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
     x.PosSemidef ↔
-      ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
+      ∃ (m : Type) (_hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
         x =
           ∑ i : m, col (Fin 1) (v i : n → 𝕜) * (col (Fin 1) (v i : n → 𝕜))ᴴ :=
 by
@@ -341,7 +341,7 @@ theorem Matrix.posSemidef_iff_vecMulVec [Fintype n] [DecidableEq n] {x : Matrix 
     x = ∑ i : Fin m, vecMulVec (v i) (star (v i)) :=
 by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col, vecMulVec_eq (Fin 1), conjTranspose_col]
 theorem Matrix.posSemidef_iff_vecMulVec' [Fintype n] [DecidableEq n] {x : Matrix n n 𝕜} :
-  x.PosSemidef ↔ ∃ (m : Type) (hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
+  x.PosSemidef ↔ ∃ (m : Type) (_hm : Fintype m) (v : m → EuclideanSpace 𝕜 n),
     x = ∑ i : m, vecMulVec (v i) (star (v i)) :=
 by simp_rw [Matrix.posSemidef_iff_col_mul_conjTranspose_col', vecMulVec_eq (Fin 1), conjTranspose_col]
 
