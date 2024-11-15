@@ -95,7 +95,7 @@ theorem Pi.StarOrderedRing.nonneg_def {ι : Type _} {α : ι → Type _} [∀ i,
     (h : ∀ (i : ι) (x : α i), 0 ≤ x ↔ ∃ y, star y * y = x) (x : ∀ i, α i) :
     0 ≤ x ↔ ∃ y, star y * y = x :=
   by
-  simp_rw [Pi.le_def, Pi.zero_apply, Function.funext_iff, Pi.mul_apply, Pi.star_apply, h]
+  simp_rw [Pi.le_def, Pi.zero_apply, funext_iff, Pi.mul_apply, Pi.star_apply, h]
   exact
     ⟨fun hx => ⟨fun i => (hx i).choose, fun i => (hx i).choose_spec⟩,
     fun ⟨y, hy⟩ i => ⟨y i, hy i⟩⟩

@@ -331,8 +331,8 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
         φ ∘ₗ f.toLinearMap = φ, ∀ x y, ⟪f x, f y⟫_ℂ = ⟪x, y⟫_ℂ,
         ∀ x : Matrix n n ℂ, ‖f x‖ = ‖x‖, Commute φ.matrix f.of_matrix_unitary] :=
   by
-  tfae_have 5 ↔ 2
-  · simp_rw [InnerProductSpace.Core.norm_eq_sqrt_inner,
+  tfae_have 5 ↔ 2 := by
+    simp_rw [InnerProductSpace.Core.norm_eq_sqrt_inner,
       Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← Complex.ofReal_inj]
     have : ∀ x : Matrix n n ℂ, (RCLike.re ⟪x, x⟫_ℂ : ℂ) = ⟪x, x⟫_ℂ := fun x => inner_self_ofReal_re x
@@ -349,8 +349,8 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]
   rw [tfae_5_iff_2]
-  tfae_have 4 ↔ 3
-  · simp_rw [inner_eq, ← star_eq_conjTranspose, ← map_star f, ← _root_.map_mul f,
+  tfae_have 4 ↔ 3 := by
+    simp_rw [inner_eq, ← star_eq_conjTranspose, ← map_star f, ← _root_.map_mul f,
       LinearMap.ext_iff, LinearMap.comp_apply, StarAlgEquiv.toLinearMap_apply]
     refine' ⟨fun h x => _, fun h x y => h _⟩
     rw [← Matrix.one_mul x, ← star_one]
@@ -361,14 +361,13 @@ theorem starAlgEquiv_is_isometry_tFAE [hφ : φ.IsFaithfulPosMap] [Nontrivial n]
     StarAlgEquiv.toLinearMap_apply, mul_inv_eq_iff_eq_mul_of_invertible,
     φ.apply, StarAlgEquiv.symm_apply_eq, _root_.map_mul,
     StarAlgEquiv.apply_symm_apply, ← forall_left_hMul φ.matrix, @eq_comm _ φ.matrix]
-  tfae_have 1 ↔ 2
-  · rw [iff_self]; trivial
-  tfae_have 1 → 3
-  · intro i x
+  tfae_have 1 ↔ 2 := by rw [iff_self]; trivial
+  tfae_have 1 → 3 := by
+    intro i x
     nth_rw 1 [← i]
     rw [← _root_.map_mul, f.trace_preserving]
-  tfae_have 3 → 1
-  · intro i
+  tfae_have 3 → 1 := by
+    intro i
     simp_rw [← f.symm.trace_preserving (φ.matrix * f _), _root_.map_mul,
       StarAlgEquiv.symm_apply_apply, ← φ.apply, @eq_comm _ _ (φ _)] at i
     -- obtain ⟨Q, hQ, h⟩ := Module.Dual.eq_trace_unique φ
@@ -607,7 +606,7 @@ theorem inner_eq [∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :
   rfl
 
 omit [DecidableEq k] in
-theorem inner_eq' [hψ : ∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :
+theorem inner_eq' [∀ i, (ψ i).IsFaithfulPosMap] (x y : PiMat ℂ k s) :
     ⟪x, y⟫_ℂ = ∑ i, ((ψ i).matrix * (x i)ᴴ * y i).trace := by
   simp only [inner_eq, Module.Dual.pi.apply, Pi.mul_apply,
     Matrix.star_eq_conjTranspose, Pi.star_apply, Matrix.mul_assoc]
@@ -1315,7 +1314,7 @@ theorem LinearMap.pi_mul'_comp_mul'_adjoint_eq_smul_id_iff [hψ : ∀ i, (ψ i).
     LinearMap.mul' ℂ (PiMat ℂ k s) ∘ₗ (LinearMap.adjoint (LinearMap.mul' ℂ (PiMat ℂ k s))) = α • 1 ↔ ∀ i, Matrix.trace ((ψ i).matrix⁻¹) = α :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply, LinearMap.pi_mul'_comp_mul'_adjoint,
-    Function.funext_iff, Finset.sum_apply, ← LinearMap.map_smul,
+    funext_iff, Finset.sum_apply, ← LinearMap.map_smul,
     includeBlock_apply, Finset.sum_dite_eq', Finset.mem_univ, if_true,
     LinearMap.smul_apply, LinearMap.one_apply, Pi.smul_apply]
   simp only [eq_mp_eq_cast, cast_eq, ← Pi.smul_apply]

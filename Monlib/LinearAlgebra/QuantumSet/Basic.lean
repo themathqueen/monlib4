@@ -997,8 +997,8 @@ theorem _root_.QuantumSet.starAlgEquiv_is_isometry_tfae
         ∀ x, ‖f x‖ = ‖x‖,
         Isometry f] :=
 by
-  tfae_have 3 ↔ 1
-  · simp_rw [@norm_eq_sqrt_inner ℂ, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
+  tfae_have 3 ↔ 1 := by
+    simp_rw [@norm_eq_sqrt_inner ℂ, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← @RCLike.ofReal_inj ℂ, @inner_self_re ℂ, ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
     have :
       ∀ x y,

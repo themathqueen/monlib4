@@ -377,7 +377,7 @@ theorem includeBlock_inj {k : Type _} [Fintype k] [DecidableEq k] {s : k → Typ
   by
   simp only [includeBlock_apply]
   refine' ⟨fun h => _, fun h => by rw [h]⟩
-  simp_rw [Function.funext_iff, ← Matrix.ext_iff, eq_mp_eq_cast] at h
+  simp_rw [funext_iff, ← Matrix.ext_iff, eq_mp_eq_cast] at h
   ext j k
   specialize h i j k
   aesop

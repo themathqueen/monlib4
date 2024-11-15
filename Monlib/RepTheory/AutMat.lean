@@ -348,7 +348,7 @@ theorem AlgEquiv.prod_isInner_iff_prod_map {K R₁ R₂ : Type*} [CommSemiring K
   [Semiring R₁] [Semiring R₂]
   [Algebra K R₁] [Algebra K R₂] (f : (R₁ × R₂) ≃ₐ[K] (R₁ × R₂)) :
   AlgEquiv.IsInner f
-    ↔ ∃ (a : R₁) (ha : Invertible a) (b : R₂) (hb : Invertible b),
+    ↔ ∃ (a : R₁) (_ha : Invertible a) (b : R₂) (_hb : Invertible b),
       f = AlgEquiv.prod_map (Algebra.autInner a) (Algebra.autInner b) :=
 by
   constructor
@@ -363,7 +363,7 @@ theorem AlgEquiv.pi_isInner_iff_pi_map {K ι : Type*} {R : ι → Type*} [CommSe
   [Π i, Semiring (R i)] [Π i, Algebra K (R i)]
   (f : (Π i, R i) ≃ₐ[K] (Π i, R i)) :
   AlgEquiv.IsInner f
-    ↔ ∃ (a : Π i, R i) (ha : Π i, Invertible (a i)),
+    ↔ ∃ (a : Π i, R i) (_ha : Π i, Invertible (a i)),
       f = AlgEquiv.Pi (λ i => Algebra.autInner (a i)) :=
 by constructor <;> exact λ ⟨a, ha, h⟩ => ⟨(λ i => a i), by infer_instance, by rw [h]; rfl⟩
 

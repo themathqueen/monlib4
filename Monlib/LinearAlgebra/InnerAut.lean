@@ -483,7 +483,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
   have this9 := (PosSemidef.invertible_iff_posDef this8).mp this7
   have this12 : (1 : n → 𝕜) ≠ 0 :=
     by
-    simp_rw [ne_eq, Function.funext_iff, Pi.one_apply, Pi.zero_apply, one_ne_zero]
+    simp_rw [ne_eq, funext_iff, Pi.one_apply, Pi.zero_apply, one_ne_zero]
     simp only [Classical.not_forall, not_false_iff, exists_const]
   have this10 : α = RCLike.re α :=
     by
@@ -573,9 +573,9 @@ theorem diagonal.spectrum {𝕜 n : Type _} [Field 𝕜] [Fintype n] [DecidableE
     spectrum 𝕜 (toLin' (diagonal A : Matrix n n 𝕜)) = {x : 𝕜 | ∃ i : n, A i = x} :=
   by
   simp_rw [Set.ext_iff, ← Module.End.hasEigenvalue_iff_mem_spectrum, ←
-    Module.End.has_eigenvector_iff_hasEigenvalue, toLin'_apply, Function.funext_iff, mulVec,
+    Module.End.has_eigenvector_iff_hasEigenvalue, toLin'_apply, funext_iff, mulVec,
     diagonal_dotProduct, Pi.smul_apply, Algebra.id.smul_eq_mul, mul_eq_mul_right_iff, ne_eq,
-    Set.mem_setOf_eq, Function.funext_iff, Pi.zero_apply, Classical.not_forall]
+    Set.mem_setOf_eq, funext_iff, Pi.zero_apply, Classical.not_forall]
   intro x
   constructor
   · rintro ⟨v, ⟨h, ⟨j, hj⟩⟩⟩

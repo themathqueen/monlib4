@@ -253,7 +253,7 @@ by
   simp_rw [← AlgEquiv.TensorProduct.map_toLinearMap, AlgEquiv.toLinearMap_apply,
     AlgEquiv.TensorProduct.map_map_toLinearMap, AlgEquiv.op_trans,
     QuantumSet.modAut_trans]
-  simp only [add_right_neg, QuantumSet.modAut_zero, sub_add_sub_cancel, sub_self,
+  simp only [add_neg_cancel, QuantumSet.modAut_zero, sub_add_sub_cancel, sub_self,
     AlgEquiv.op_one, AlgEquiv.TensorProduct.map_one, AlgEquiv.one_apply]
   simp only [← LinearEquiv.coe_toLinearMap, ← AlgEquiv.toLinearMap_apply,
     ← LinearMap.comp_apply, AlgEquiv.TensorProduct.map_toLinearMap, modAut_map_comp_Psi,
@@ -279,7 +279,7 @@ by
 
 
 class schurProjection (f : A →ₗ[ℂ] B) :
-    Prop :=
+    Prop where
   isIdempotentElem : f •ₛ f = f
   isReal : LinearMap.IsReal f
 
@@ -326,11 +326,11 @@ theorem schurIdempotent.isSchurProjection_iff_isPosMap
  λ h => ⟨hf, isReal_of_isPosMap_of_starAlgEquiv_piMat hh h⟩⟩
 
 class QuantumGraph (A : Type*) [starAlgebra A] [hA : QuantumSet A]
-    (f : A →ₗ[ℂ] A) : Prop :=
+    (f : A →ₗ[ℂ] A) : Prop where
   isIdempotentElem : f •ₛ f = f
 
 class QuantumGraph.IsReal {A : Type*} [starAlgebra A] [hA : QuantumSet A]
-    {f : A →ₗ[ℂ] A} (h : QuantumGraph A f) : Prop :=
+    {f : A →ₗ[ℂ] A} (h : QuantumGraph A f) : Prop where
   isReal : LinearMap.IsReal f
 
 class QuantumGraph.Real (A : Type*) [starAlgebra A] [hA : QuantumSet A]

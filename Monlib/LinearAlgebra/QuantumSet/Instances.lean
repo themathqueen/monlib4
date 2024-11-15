@@ -240,7 +240,7 @@ by
       simp only [hQQ, or_false]
       refine' ⟨λ ⟨h, h2⟩ => _, _⟩
       . rw [← Matrix.IsHermitian.eigenvalues_eq_zero_iff hQ.1] at hQQ
-        simp only [Function.funext_iff, Function.comp_apply, Pi.zero_apply,
+        simp only [funext_iff, Function.comp_apply, Pi.zero_apply,
           algebraMap.lift_map_eq_zero_iff, not_forall] at hQQ
         obtain ⟨i, hi⟩ := hQQ
         specialize h2 (hQ.1.eigenvectorMatrixᵀ i)

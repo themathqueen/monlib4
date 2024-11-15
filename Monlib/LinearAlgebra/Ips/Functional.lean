@@ -236,7 +236,7 @@ lemma PiMat.nonneg_iff {k : Type _} [Fintype k]
   0 ≤ x ↔ ∃ y : PiMat ℂ k s, x = star y * y :=
 by
   simp_rw [Pi.le_def, Pi.zero_apply, Pi.mul_def, Pi.star_apply, Matrix.nonneg_iff,
-    Function.funext_iff]
+    funext_iff]
   exact ⟨λ h => ⟨(λ i => (h i).choose), λ _ => (h _).choose_spec⟩,
     λ h a => ⟨h.choose a, h.choose_spec _⟩⟩
 
@@ -277,7 +277,7 @@ def Module.Dual.IsUnital {A : Type _} [AddCommMonoid A] [Module R A] [One A] (φ
 
 /-- A linear functional is called a state if it is positive and unital -/
 class Module.Dual.IsState {A : Type _} [Semiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) :
-    Prop :=
+    Prop where
 toIsPosMap : φ.IsPosMap
 toIsUnital : φ.IsUnital
 
@@ -301,7 +301,7 @@ lemma Matrix.includeBlock_eq_zero {k : Type _} [Fintype k] [DecidableEq k] {s : 
   {x : Matrix (s i) (s i) R} :
   includeBlock x = 0 ↔ x = 0 :=
 by
-  simp_rw [Function.funext_iff, Pi.zero_apply, includeBlock_apply,
+  simp_rw [funext_iff, Pi.zero_apply, includeBlock_apply,
     dite_eq_right_iff, eq_mp_eq_cast]
   exact ⟨λ h => (h i rfl), by rintro rfl a rfl; rfl⟩
 
@@ -404,7 +404,7 @@ theorem Module.Dual.IsPosMap.isFaithful_iff_of_matrix {φ : Module.Dual ℂ (Mat
 --     (φ : Module.Dual 𝕜 A) : Prop :=
 --   φ.IsPosMap ∧ φ.IsFaithful
 @[class]
-structure Module.Dual.IsFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) : Prop :=
+structure Module.Dual.IsFaithfulPosMap {A : Type _} [NonUnitalSemiring A] [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) : Prop where
 toIsPosMap : φ.IsPosMap
 toIsFaithful : φ.IsFaithful
 
@@ -762,10 +762,8 @@ theorem Module.Dual.isFaithfulPosMap_of_matrix_tfae (φ : Module.Dual ℂ (Matri
       [φ.IsFaithfulPosMap, φ.matrix.PosDef,
         IsInner fun xy : Matrix n n ℂ × Matrix n n ℂ => φ (xy.1ᴴ * xy.2)] :=
   by
-  tfae_have 1 ↔ 2
-  · exact φ.isFaithfulPosMap_iff_of_matrix
-  tfae_have 1 ↔ 3
-  · exact φ.isFaithfulPosMap_iff_isInner_of_matrix
+  tfae_have 1 ↔ 2 := φ.isFaithfulPosMap_iff_of_matrix
+  tfae_have 1 ↔ 3 := φ.isFaithfulPosMap_iff_isInner_of_matrix
   tfae_finish
 
 end

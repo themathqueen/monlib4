@@ -306,7 +306,7 @@ by
   · simp_rw [if_true, sub_eq_zero, eq_comm]
   · simp_rw [if_false, sub_eq_self]
 
-class QamReflexive (x : l(A)) : Prop :=
+class QamReflexive (x : l(A)) : Prop where
 toQam : x •ₛ x = x
 toRefl : x •ₛ 1 = 1
 
@@ -314,7 +314,7 @@ lemma QamReflexive_iff (x : l(A)) :
     QamReflexive x ↔ x •ₛ x = x ∧ x •ₛ 1 = 1 :=
 ⟨λ h => ⟨h.toQam, h.toRefl⟩, λ h => ⟨h.1, h.2⟩⟩
 
-class QamIrreflexive (x : l(A)) : Prop :=
+class QamIrreflexive (x : l(A)) : Prop where
 toQam : x •ₛ x = x
 toIrrefl : x •ₛ 1 = 0
 

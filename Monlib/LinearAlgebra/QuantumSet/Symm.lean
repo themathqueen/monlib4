@@ -257,16 +257,16 @@ theorem symmMap_eq_conj_modAut_tfae (f : B →ₗ[ℂ] B) :
       f.real = (modAut (k B)).toLinearMap ∘ₗ LinearMap.adjoint f ∘ₗ (modAut (-k B)).toLinearMap,
       ∀ x y, counit (f x * y) = (counit (x * f y) : ℂ)] :=
 by
-  tfae_have 1 ↔ 2
-  . simp_rw [symmMap_apply, LinearMap.adjoint_eq_iff, LinearMap.adjoint_comp,
+  tfae_have 1 ↔ 2 := by
+    simp_rw [symmMap_apply, LinearMap.adjoint_eq_iff, LinearMap.adjoint_comp,
       QuantumSet.modAut_adjoint, LinearMap.comp_assoc]
-  tfae_have 1 → 3
-  . intro h x y
+  tfae_have 1 → 3 := by
+    intro h x y
     simp_rw [counit_map_mul_eq_counit_mul_modAut_conj_symmMap]
     simp_rw [h, LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, QuantumSet.modAut_apply_modAut,
       add_neg_cancel, starAlgebra.modAut_zero, AlgEquiv.one_apply]
-  tfae_have 3 → 2
-  . intro h
+  tfae_have 3 → 2 := by
+    intro h
     rw [LinearMap.ext_iff_inner_map]
     intro u
     rw [hB.inner_eq_counit, LinearMap.real_apply, star_star, h]
@@ -283,10 +283,8 @@ theorem symmMap_eq_self_tfae (f : B →ₗ[ℂ] B) (gns : hB.k = 0) :
         f.real = LinearMap.adjoint f,
         ∀ x y : B, counit (f x * y) = (counit (x * f y) : ℂ)] :=
 by
-  tfae_have 1 ↔ 2
-  · rw [← LinearEquiv.eq_symm_apply, eq_comm]
-  tfae_have 1 ↔ 3
-  · rw [symmMap_apply, LinearMap.adjoint_eq_iff]
+  tfae_have 1 ↔ 2 := by rw [← LinearEquiv.eq_symm_apply, eq_comm]
+  tfae_have 1 ↔ 3 := by rw [symmMap_apply, LinearMap.adjoint_eq_iff]
   have := List.TFAE.out (symmMap_eq_conj_modAut_tfae f) 1 2
   simp only [gns, neg_zero, starAlgebra.modAut_zero, AlgEquiv.one_toLinearMap,
     LinearMap.one_comp, LinearMap.comp_one] at this

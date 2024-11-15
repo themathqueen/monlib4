@@ -275,7 +275,7 @@ noncomputable def FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of
 open CoalgebraStruct
 structure LinearMap.IsCoalgHom {R A B : Type*}
   [CommSemiring R] [AddCommMonoid A] [Module R A] [AddCommMonoid B] [Module R B]
-  [CoalgebraStruct R A] [CoalgebraStruct R B] (x : A →ₗ[R] B) : Prop :=
+  [CoalgebraStruct R A] [CoalgebraStruct R B] (x : A →ₗ[R] B) : Prop where
     counit_comp : counit ∘ₗ x = counit
     map_comp_comul : TensorProduct.map x x ∘ₗ comul = comul ∘ₗ x
 lemma LinearMap.isCoalgHom_iff {R A B : Type*}
@@ -285,7 +285,7 @@ lemma LinearMap.isCoalgHom_iff {R A B : Type*}
 ⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
 structure LinearMap.IsAlgHom {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B]
-  [Algebra R A] [Algebra R B] (x : A →ₗ[R] B) : Prop :=
+  [Algebra R A] [Algebra R B] (x : A →ₗ[R] B) : Prop where
     comp_unit : x ∘ₗ Algebra.linearMap R A = Algebra.linearMap R B
     mul'_comp_map : (mul' R B) ∘ₗ (TensorProduct.map x x) = x ∘ₗ (mul' R A)
 lemma LinearMap.isAlgHom_iff {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B]

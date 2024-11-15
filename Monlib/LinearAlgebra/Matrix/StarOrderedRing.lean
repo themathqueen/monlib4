@@ -180,7 +180,7 @@ theorem diagonal_posDef_iff {𝕜 n : Type _}
       mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true, norm_one,
       RCLike.ofReal_one, one_pow, mul_one] at h2
     apply h2
-    simp_rw [ne_eq, Function.funext_iff, not_forall]
+    simp_rw [ne_eq, funext_iff, not_forall]
     use i
     simp only [↓reduceIte, Pi.zero_apply, one_ne_zero, not_false_eq_true]
   . intro h
@@ -191,7 +191,7 @@ theorem diagonal_posDef_iff {𝕜 n : Type _}
     simp_rw [RCLike.conj_eq_iff_re] at h
     rw [← (h i).2, ← RCLike.ofReal_pow, ← RCLike.ofReal_mul, RCLike.zero_le_real]
     apply mul_nonneg (le_of_lt (h i).1) (sq_nonneg _)
-    simp_rw [ne_eq, Function.funext_iff, not_forall, Pi.zero_apply] at hx
+    simp_rw [ne_eq, funext_iff, not_forall, Pi.zero_apply] at hx
     obtain ⟨i, hi⟩ := hx
     use i
     simp only [Finset.mem_univ, true_and, ← RCLike.ofReal_pow]
@@ -394,7 +394,7 @@ theorem Pi.le_iff_sub_nonneg {ι : Type _} [Fintype ι] [DecidableEq ι] {n : ι
     [∀ i, Fintype (n i)] [∀ i, DecidableEq (n i)] (x y : PiMat ℂ ι n) :
     x ≤ y ↔ ∃ z : PiMat ℂ ι n, y = x + star z * z :=
   by
-  simp_rw [Function.funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
+  simp_rw [funext_iff, Pi.add_apply, Pi.mul_apply, Pi.star_apply,
     Pi.le_def, Matrix.le_iff, Matrix.posSemidef_iff, sub_eq_iff_eq_add',
     Matrix.star_eq_conjTranspose]
   exact

@@ -239,7 +239,7 @@ theorem Pi.tensor_ext_iff {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Ty
     (y w : ∀ i, M₂ i) : x ⊗ₜ[R] y = z ⊗ₜ[R] w ↔ ∀ i j, x i ⊗ₜ[R] y j = z i ⊗ₜ[R] w j :=
   by
   rw [← Function.Injective.eq_iff directSumTensor.injective]
-  simp_rw [Function.funext_iff, directSumTensor_apply, directSumTensorToFun_apply, Prod.forall]
+  simp_rw [funext_iff, directSumTensor_apply, directSumTensorToFun_apply, Prod.forall]
 
 theorem Pi.tensor_ext {R : Type _} [CommRing R] {ι₁ : Type _} {ι₂ : Type _} [DecidableEq ι₁]
     [DecidableEq ι₂] [Fintype ι₁] [Fintype ι₂] {M₁ : ι₁ → Type _} {M₂ : ι₂ → Type _}

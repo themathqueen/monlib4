@@ -154,7 +154,7 @@ theorem orthogonalProjection.isIdempotentElem [InnerProductSpace 𝕜 E] (U : Su
     orthogonalProjection_mem_subspace_eq_self]
 
 class ContinuousLinearMap.IsOrthogonalProjection [InnerProductSpace 𝕜 E]
-  (T : E →L[𝕜] E) : Prop :=
+  (T : E →L[𝕜] E) : Prop where
   isIdempotent : IsIdempotentElem T
   kerEqRangeOrtho : LinearMap.ker T = (LinearMap.range T)ᗮ
 
@@ -383,14 +383,13 @@ theorem IsIdempotentElem.self_adjoint_is_positive_isOrthogonalProjection_tFAE {E
     [NormedAddCommGroup E] [InnerProductSpace ℂ E] [CompleteSpace E] {p : E →L[ℂ] E}
     (hp : IsIdempotentElem p) : List.TFAE [IsSelfAdjoint p, p.IsOrthogonalProjection, 0 ≤ p] :=
   by
-  tfae_have 3 ↔ 1
-  · exact hp.is_positive_iff_self_adjoint
-  tfae_have 2 → 1
-  · intro h
+  tfae_have 3 ↔ 1 := hp.is_positive_iff_self_adjoint
+  tfae_have 2 → 1 := by
+    intro h
     rw [IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_range _ hp]
     exact h.2
-  tfae_have 1 → 2
-  · intro h
+  tfae_have 1 → 2 := by
+    intro h
     rw [IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_range _ hp] at h
     exact ⟨hp, h⟩
   tfae_finish

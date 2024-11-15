@@ -428,7 +428,7 @@ theorem PiMat.IsSelfAdjoint.posSemidefDecomposition {k : Type*} {n : k → Type*
 by
   have : ∀ i, (x i).IsHermitian := λ i =>
   by
-    rw [IsSelfAdjoint, Function.funext_iff] at hx
+    rw [IsSelfAdjoint, funext_iff] at hx
     simp_rw [Pi.star_apply, Matrix.star_eq_conjTranspose] at hx
     exact hx i
   have := λ i => Matrix.IsHermitian.posSemidefDecomposition' (this i)
@@ -468,7 +468,7 @@ by
   . rw [hab, ← toLinearMapAlgEquiv_symm_apply, map_sub, map_mul]
     rfl
 
-structure isEquivToPiMat (A : Type*) [Add A] [Mul A] [Star A] [SMul ℂ A] :=
+structure isEquivToPiMat (A : Type*) [Add A] [Mul A] [Star A] [SMul ℂ A] where
   k : Type*
   -- hn₁ : Fintype n
   -- hn₂ : DecidableEq n
@@ -544,7 +544,7 @@ theorem StarNonUnitalAlgHom.toLinearMap_apply
   {R A B : Type*} [Semiring R] [NonUnitalNonAssocSemiring A]
   [Module R A] [NonUnitalNonAssocSemiring B] [Module R B]
   [Star A] [Star B]
-  (f : A →⋆ₙₐ[R] B) (x : A) : (f.toLinearMap : A →ₗ[R] B) x = f x := rfl
+  (f : A →⋆ₙₐ[R] B) (x : A) : (f : A →ₗ[R] B) x = f x := rfl
 
 theorem LinearMap.isPosMap_iff_star_mul_self_nonneg {A K : Type*}
   [NonUnitalSemiring A] [PartialOrder A] [StarRing A] [StarOrderedRing A]
@@ -666,7 +666,7 @@ theorem NonUnitalAlgHom.isPosMap_iff_isReal_of_nonUnitalStarAlgEquiv_piMat
   {f : A →ₙₐ[ℂ] K} :
   LinearMap.IsPosMap f ↔ LinearMap.IsReal f :=
 by
-  have : LinearMap.IsPosMap f ↔ LinearMap.IsPosMap f.toLinearMap := by rfl
+  have : LinearMap.IsPosMap f ↔ LinearMap.IsPosMap (f : A →ₗ[ℂ] K) := by rfl
   refine ⟨λ h => isReal_of_isPosMap_of_starAlgEquiv_piMat hφ (this.mp h), λ h => ?_⟩
   let f' : A →⋆ₙₐ[ℂ] K := NonUnitalStarAlgHom.mk f h
   exact starMulHom_isPosMap hA f'
