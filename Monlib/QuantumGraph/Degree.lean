@@ -3,6 +3,7 @@ import Monlib.QuantumGraph.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Opposite
 import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 import Monlib.QuantumGraph.Example
+import Monlib.LinearAlgebra.Ips.Functional
 
 open scoped InnerProductSpace ComplexOrder
 open Coalgebra in
@@ -44,13 +45,16 @@ by
   exact inner_self_nonneg'
 
 open scoped TensorProduct
-noncomputable instance starAlgebra.MulOpposite {A : Type*} [starAlgebra A] :
+noncomputable def starAlgebra.mulOpposite {A : Type*} [starAlgebra A] :
     starAlgebra Aᵐᵒᵖ where
   modAut r := (modAut (-r)).op
   modAut_trans _ _ := by simp [AlgEquiv.op_trans, add_comm]
   modAut_zero := by simp
   modAut_star _ x := by simp [← MulOpposite.op_star]
-noncomputable instance InnerProductAlgebra.MulOpposite {A : Type*} [starAlgebra A] [InnerProductAlgebra A] :
+
+attribute [local instance] starAlgebra.mulOpposite
+
+noncomputable def InnerProductAlgebra.mulOpposite {A : Type*} [starAlgebra A] [InnerProductAlgebra A] :
     InnerProductAlgebra (Aᵐᵒᵖ) where
   dist_eq _ _ := by simp [norm_eq_sqrt_inner (𝕜 := ℂ), MulOpposite.inner_eq, dist_eq_norm]
   norm_sq_eq_inner _ := by
@@ -60,7 +64,10 @@ noncomputable instance InnerProductAlgebra.MulOpposite {A : Type*} [starAlgebra 
   conj_symm _ _ := inner_conj_symm _ _
   add_left _ _ _ := inner_add_left _ _ _
   smul_left x y _ := inner_smul_left _ _ _
-noncomputable instance QuantumSet.MulOpposite {A : Type*} [starAlgebra A] [QuantumSet A]
+
+attribute [local instance] InnerProductAlgebra.mulOpposite
+
+noncomputable instance QuantumSet.mulOpposite {A : Type*} [starAlgebra A] [QuantumSet A]
   [kms : Fact (k A = - (1 / 2))] :
     QuantumSet Aᵐᵒᵖ where
   modAut_isSymmetric r x y := by
@@ -81,6 +88,8 @@ noncomputable instance QuantumSet.MulOpposite {A : Type*} [starAlgebra A] [Quant
   n_isDecidableEq := n_isDecidableEq
   onb := onb.mulOpposite
 
+attribute [local instance] QuantumSet.mulOpposite
+
 noncomputable instance CoalgebraStruct.mulOpposite {A : Type*} [Semiring A] [Algebra ℂ A] [CoalgebraStruct ℂ A] :
     CoalgebraStruct ℂ Aᵐᵒᵖ where
   comul := (Algebra.TensorProduct.opAlgEquiv ℂ ℂ A A).symm.toLinearMap ∘ₗ Coalgebra.comul.op
@@ -89,13 +98,48 @@ theorem Coalgebra.counit_mulOpposite_eq {A : Type*} [Semiring A] [Algebra ℂ A]
   (Coalgebra.counit (R := ℂ) (A := Aᵐᵒᵖ)) a = Coalgebra.counit a.unop :=
 rfl
 
-theorem QuantumSet.counit_isFaithful {A : Type*} [starAlgebra A] [QuantumSet A] (a : A) :
-  (Coalgebra.counit (R := ℂ) (A := A)) (star a * a) = 0 ↔ a = 0 :=
+theorem QuantumSet.counit_isFaithful {A : Type*} [starAlgebra A] [QuantumSet A] :
+  Module.Dual.IsFaithful (Coalgebra.counit (R := ℂ) (A := A)) :=
 by
+  intro x
   simp [← QuantumSet.inner_eq_counit']
   rw [← inner_conj_symm, QuantumSet.inner_star_left, star_star, mul_one, ← add_halves (- k A),
     ← modAut_apply_modAut, ← modAut_isSymmetric, inner_conj_symm, inner_self_eq_zero,
     map_eq_zero_iff _ (AlgEquiv.injective _)]
+
+def Module.Dual.op {R A : Type*} [CommSemiring R] [AddCommMonoid A] [Module R A]
+  (f : Module.Dual R A) :
+  Module.Dual R Aᵐᵒᵖ :=
+(unop R).toLinearMap ∘ₗ LinearMap.op f
+theorem Module.Dual.op_apply {R A : Type*} [CommSemiring R] [AddCommMonoid A] [Module R A]
+  (f : Module.Dual R A) (x : Aᵐᵒᵖ) :
+    Module.Dual.op f x = f x.unop :=
+rfl
+
+theorem Coalgebra.counit_moduleDualOp_eq {A : Type*} [Semiring A] [Algebra ℂ A]
+  [CoalgebraStruct ℂ A] :
+    Module.Dual.op (Coalgebra.counit (R := ℂ) (A := A)) = counit (R := ℂ) (A := Aᵐᵒᵖ) :=
+rfl
+
+def MulOpposite.starRing {A : Type*} [NonUnitalNonAssocSemiring A] [hA : StarRing A] :
+    StarRing Aᵐᵒᵖ where
+  star_add _ _ := star_add _ _
+
+attribute [local instance] MulOpposite.starRing
+
+theorem Module.Dual.op_isFaithful_iff {𝕜 A : Type*} [RCLike 𝕜] [NonUnitalSemiring A]
+  [StarRing A] [Module 𝕜 A] (φ : Module.Dual 𝕜 A) :
+    Module.Dual.IsFaithful φ ↔ Module.Dual.IsFaithful (Module.Dual.op φ) :=
+by
+  simp only [Module.Dual.IsFaithful, Module.Dual.op_apply, MulOpposite.unop_mul,
+    MulOpposite.unop_star]
+  refine ⟨λ h a => ?_, λ h a => ?_⟩
+  . simpa [star_star, MulOpposite.unop_eq_zero_iff] using h (star a.unop)
+  . simpa using h (star (MulOpposite.op a))
+
+theorem QuantumSet.counit_op_isFaithful {A : Type*} [starAlgebra A] [QuantumSet A] :
+  Module.Dual.IsFaithful (Coalgebra.counit (R := ℂ) (A := Aᵐᵒᵖ)) :=
+(Module.Dual.op_isFaithful_iff _).mp QuantumSet.counit_isFaithful
 
 noncomputable instance QuantumSet.tensorOp_self {A : Type*} [starAlgebra A] [QuantumSet A] [kms : Fact (k A = - (1 / 2))] :
   QuantumSet (A ⊗[ℂ] Aᵐᵒᵖ) :=
@@ -148,7 +192,11 @@ rfl
 theorem LinearMap.mul'_quantumSet_subset_eq {A : Type*} [starAlgebra A] [QuantumSet A] (r : ℝ) :
   letI := QuantumSet.instSubset (A := A) (by infer_instance) r
   letI : Fact (k A = k A) := Fact.mk rfl
-  LinearMap.mul' ℂ (QuantumSet.subset r A) = (LinearMap.mul' ℂ A).toSubsetQuantumSet r r ∘ₗ (QuantumSet.subset_tensor_algEquiv r).toLinearMap :=
+  LinearMap.mul' ℂ (QuantumSet.subset r A) = (QuantumSet.toSubset_algEquiv r).toLinearMap
+      ∘ₗ (LinearMap.mul' ℂ A)
+      ∘ₗ (TensorProduct.map
+        (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
+        (QuantumSet.toSubset_algEquiv r).symm.toLinearMap) :=
 by
   ext x y
   simp [AlgEquiv.toLinearMap_apply, QuantumSet.subset_tensor_algEquiv_tmul]
@@ -198,17 +246,17 @@ by
   letI := QuantumSet.instSubset (A := A ⊗[ℂ] A) (by infer_instance) r
   simp only [Coalgebra.comul_eq_mul_adjoint, LinearMap.mul'_quantumSet_subset_eq]
   simp only [LinearMap.adjoint_comp, QuantumSet.subset_tensor_algEquiv_adjoint,
-    toSubset_algEquiv_symm_adjoint, toSubset_algEquiv_adjoint]
+    TensorProduct.map_adjoint, toSubset_algEquiv_symm_adjoint, toSubset_algEquiv_adjoint]
   simp only [QuantumSet.tensorProduct.k_eq₁, ← LinearMap.comp_assoc]
   congr 1
   simp only [LinearMap.comp_assoc, ← Coalgebra.comul_eq_mul_adjoint,
-    ← (QuantumSet.modAut_isCoalgHom _).2, ← AlgEquiv.TensorProduct.map_toLinearMap,
-    ← modAut_tensor]
-  nth_rw 3 [← LinearMap.comp_assoc]
+    ← (QuantumSet.modAut_isCoalgHom _).2, TensorProduct.map_comp,
+    ← AlgEquiv.TensorProduct.map_toLinearMap, ← modAut_tensor]
+  congr 1
+  rw [← LinearMap.comp_assoc]
   rw [AlgEquiv.coe_comp, modAut_trans]
   ring_nf
   simp only [QuantumSet.modAut_zero, AlgEquiv.one_toLinearMap, LinearMap.one_comp]
-  rfl
 
 theorem AlgEquiv.refl_toLinearMap {A : Type*} [Semiring A] [Algebra ℂ A] :
   (AlgEquiv.refl (R := ℂ) (A₁ := A)).toLinearMap = LinearMap.id :=
@@ -233,15 +281,8 @@ by
   nth_rw 2 [← LinearMap.comp_assoc]
   rw [← TensorProduct.map_comp, LinearMap.mul'_quantumSet_subset_eq]
   simp only [LinearMap.toSubsetQuantumSet, LinearMap.comp_assoc]
-  congr 2
-  simp only [← LinearMap.comp_assoc]
-  congr 1
-  simp only [QuantumSet.subset_tensor_algEquiv,
-    AlgEquiv.trans_toLinearMap, AlgEquiv.TensorProduct.map_toLinearMap,
-    ← LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap, LinearMap.id_comp]
-  simp only [← TensorProduct.map_comp, ← LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap,
-    LinearMap.id_comp]
-  simp only [LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap, LinearMap.comp_id]
+  simp only [← LinearMap.comp_assoc, ← TensorProduct.map_comp, AlgEquiv.symm_comp_toLinearMap,
+    LinearMap.id_comp, LinearMap.comp_id]
 
 theorem LinearMap.toSubsetQuantumSet_inj
   {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
@@ -267,6 +308,17 @@ by
     ← QuantumSet.toSubset_equiv_isReal (A := B) r₂ _,
     QuantumSet.toSubset_equiv_symm_isReal (A := _) r₁ _]
   rfl
+
+theorem quantumGraph_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph A f ↔ f •ₛ f = f :=
+⟨λ ⟨h⟩ => h, λ h => ⟨h⟩⟩
+
+theorem QuantumGraph.toSubset_iff {A : Type*} [starAlgebra A] [h : QuantumSet A] {f : A →ₗ[ℂ] A} (r : ℝ) :
+  letI := QuantumSet.instSubset (A := A) h r
+  QuantumGraph (QuantumSet.subset r A)
+  (LinearMap.toSubsetQuantumSet f r r) ↔ QuantumGraph A f :=
+by
+  simp only [quantumGraph_iff, schurMul_toSubsetQuantumSet, LinearMap.toSubsetQuantumSet_inj]
 
 theorem QuantumGraph.real_toSubset_iff {A : Type*} [starAlgebra A] [h : QuantumSet A] {f : A →ₗ[ℂ] A} (r : ℝ) :
   letI := QuantumSet.instSubset (A := A) h r
@@ -539,27 +591,21 @@ by
   letI : Fact (k A = k A) := Fact.mk rfl
   letI hh := QuantumSet.tensorProduct (A := A) (B := A) (h := Fact.mk rfl)
   letI := QuantumSet.instSubset (A := A ⊗[ℂ] A) (by infer_instance) r
-  have :=
-  calc Coalgebra.comul ∘ₗ LinearMap.mul' ℂ (QuantumSet.subset r A)
-     = (TensorProduct.map (QuantumSet.toSubset_algEquiv r).toLinearMap
+  have : Coalgebra.comul ∘ₗ LinearMap.mul' ℂ (QuantumSet.subset r A)
+    = (TensorProduct.map (QuantumSet.toSubset_algEquiv r).toLinearMap
           (QuantumSet.toSubset_algEquiv r).toLinearMap)
       ∘ₗ (Coalgebra.comul (R := ℂ) (A := A))
-      ∘ₗ (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
-      ∘ₗ (LinearMap.mul' ℂ A).toSubsetQuantumSet r r
-      ∘ₗ (QuantumSet.subset_tensor_algEquiv r).toLinearMap :=
-        by
-          rw [LinearMap.mul'_quantumSet_subset_eq]
-          simp only [← LinearMap.comp_assoc]
-          congr 4
-          simp only [LinearMap.comp_assoc]
-          exact QuantumSet.comul_subset_eq _
-   _ = (AlgEquiv.TensorProduct.map (QuantumSet.toSubset_algEquiv r)
-          (QuantumSet.toSubset_algEquiv r)).toLinearMap
-      ∘ₗ (Coalgebra.comul (R := ℂ) (A := A))
-      ∘ₗ ((LinearMap.mul' ℂ A)
-        ∘ₗ (TensorProduct.map (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
-          (QuantumSet.toSubset_algEquiv r).symm.toLinearMap)) := by congr 1
-  simpa only [LinearMap.comp_assoc]
+      ∘ₗ ((QuantumSet.toSubset_algEquiv r).symm.toLinearMap
+      ∘ₗ (QuantumSet.toSubset_algEquiv r).toLinearMap)
+      ∘ₗ (LinearMap.mul' ℂ A)
+      ∘ₗ (TensorProduct.map (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
+          (QuantumSet.toSubset_algEquiv r).symm.toLinearMap) :=
+  by
+    rw [LinearMap.mul'_quantumSet_subset_eq]
+    simp only [← LinearMap.comp_assoc]
+    congr 4
+    exact QuantumSet.comul_subset_eq _
+  simpa only [LinearMap.comp_assoc, AlgEquiv.symm_comp_toLinearMap, LinearMap.comp_id]
 
 theorem comul_comp_mul_eq_iff_to_quantumSetSubset
   {A : Type*} [starAlgebra A] [QuantumSet A] {δ : ℂ} (r : ℝ) :
@@ -575,6 +621,24 @@ by
     AlgEquiv.symm_comp_toLinearMap]
   rfl
 
+theorem QuantumGraph.toSubset_isRegular_iff
+  {A : Type*} [starAlgebra A] [QuantumSet A]
+  {f : A →ₗ[ℂ] A} (r : ℝ) (h : QuantumGraph A f) (d : ℂ) :
+  let h' := (QuantumGraph.toSubset_iff r).mpr h;
+  letI := QuantumSet.instSubset (A := A) (by infer_instance) r;
+    h.IsRegular d ↔ h'.IsRegular d :=
+by
+  intro h'
+  simp only [QuantumGraph.IsRegular, LinearMap.toSubsetQuantumSet_apply]
+  rw [LinearMap.toSubsetQuantumSet_adjoint_apply]
+  simp only [LinearMap.comp_apply, ← QuantumSet.toSubset_algEquiv_symm_eq_toSubset_equiv,
+    ← QuantumSet.toSubset_algEquiv_eq_toSubset_equiv, map_one, AlgEquiv.toLinearMap_apply]
+  nth_rw 3 [eq_comm]
+  nth_rw 4 [eq_comm]
+  simp_rw [← AlgEquiv.symm_apply_eq, map_smul, map_one]
+  nth_rw 1 [eq_comm]
+  nth_rw 2 [eq_comm]
+
 set_option maxHeartbeats 550000 in
 lemma QuantumGraph.zero_le_degree_le_norm_one_sq
   {A : Type*} [starAlgebra A] [QuantumSet A] [Nontrivial A]
@@ -584,21 +648,10 @@ lemma QuantumGraph.zero_le_degree_le_norm_one_sq
   {f : A →ₗ[ℂ] A} (h : QuantumGraph.Real A f) (d : ℂ) (h2 : (h.toQuantumGraph).IsRegular d) :
     0 ≤ d ∧ d ≤ ‖(1 : A)‖ ^ 2 :=
 by
-  have h' := (QuantumGraph.real_toSubset_iff 0).mpr h
   letI := QuantumSet.instSubset (A := A) (by infer_instance) 0
-  have h2' : QuantumGraph.IsRegular (h'.toQuantumGraph) d :=
-  by
-    simp only [QuantumGraph.IsRegular, LinearMap.toSubsetQuantumSet_apply]
-    rw [LinearMap.toSubsetQuantumSet_adjoint_apply]
-    simp only [LinearMap.comp_apply, ← QuantumSet.toSubset_algEquiv_symm_eq_toSubset_equiv,
-      ← QuantumSet.toSubset_algEquiv_eq_toSubset_equiv, map_one, AlgEquiv.toLinearMap_apply]
-    nth_rw 1 [eq_comm]
-    nth_rw 2 [eq_comm]
-    simp_rw [← AlgEquiv.symm_apply_eq, map_smul, map_one]
-    nth_rw 1 [eq_comm]
-    nth_rw 2 [eq_comm]
-    exact ⟨h2.1, h2.2⟩
   rw [QuantumSet.normOne_toSubset 0]
   exact QuantumGraph.zero_le_degree_le_norm_one_sq_of_gns
     ((StarOrderedRing.nonneg_iff_toQuantumSetSubset 0).mp h₁) hδ
-    ((comul_comp_mul_eq_iff_to_quantumSetSubset 0).mp h₂) rfl h' _ h2'
+    ((comul_comp_mul_eq_iff_to_quantumSetSubset 0).mp h₂) rfl
+    ((QuantumGraph.real_toSubset_iff 0).mpr h) _
+    ((QuantumGraph.toSubset_isRegular_iff 0 h.toQuantumGraph d).mp h2)

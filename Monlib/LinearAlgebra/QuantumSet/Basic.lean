@@ -613,14 +613,13 @@ lemma QuantumSet.inner_modAut_right_conj (a b : A) :
 by
   nth_rw 1 [← one_mul a]
   rw [inner_conj_left, ← inner_star_left, mul_one]
--- lemma QuantumSet.inner_conj'' (a b : A) :
---   ⟪a, b⟫_ℂ = ⟪hA.modAut (- (1/2)) (star b), hA.modAut (- (1 / 2)) (star a)⟫_ℂ :=
--- calc ⟪a, b⟫_ℂ = starRingEnd ℂ ⟪b, a⟫_ℂ := by rw [inner_conj_symm]
---   _ = starRingEnd ℂ ⟪star a, hA.modAut (-1) (star b)⟫_ℂ := by rw [inner_conj]
---   _ = ⟪hA.modAut (-1) (star b), star a⟫_ℂ := by rw [inner_conj_symm]
---   _ = ⟪hA.modAut (-(1/2)) (hA.modAut (-(1/2)) (star b)), star a⟫_ℂ := by
---     rw [modAut_apply_modAut]; norm_num
---   _ = ⟪hA.modAut (- (1/2)) (star b), hA.modAut (- (1 / 2)) (star a)⟫_ℂ := by rw [modAut_isSymmetric]
+lemma QuantumSet.inner_conj'' (a b : A) :
+  ⟪a, b⟫_ℂ = ⟪modAut ((-(2 * hA.k) - 1) / 2) (star b), modAut ((-(2*hA.k) - 1) / 2) (star a)⟫_ℂ :=
+calc ⟪a, b⟫_ℂ = ⟪modAut (-(2 * hA.k) - 1) (star b), star a⟫_ℂ := by rw [inner_conj']
+  _ = ⟪modAut ((-(2 * hA.k)-1) / 2) (modAut (((-(2 * hA.k)-1) / 2)) (star b)), star a⟫_ℂ := by
+    rw [modAut_apply_modAut]; norm_num
+  _ = ⟪modAut ((-(2 * hA.k)-1) / 2) (star b), modAut ((-(2 * hA.k)-1) / 2) (star a)⟫_ℂ := by
+    rw [modAut_isSymmetric]
 
 lemma QuantumSet.inner_eq_counit (x y : B) :
   ⟪x, y⟫_ℂ = Coalgebra.counit (star x * modAut hB.k y) :=
@@ -680,6 +679,14 @@ by
   simp only [LinearMap.comp_apply, LinearMap.lTensor_tmul, LinearEquiv.coe_coe,
     TensorProduct.comm_tmul, LinearMap.mul'_apply, AlgEquiv.toLinearMap_apply,
     counit_mul_modAut_symm', neg_add_cancel, ha.modAut_zero, AlgEquiv.one_apply]
+
+example (kms : k A = - (1 / 2)) (x : A) :
+  ‖star x‖ = ‖x‖ :=
+by
+  simp only [norm_eq_sqrt_inner (𝕜 := ℂ)]
+  congr 2
+  rw [QuantumSet.inner_conj'', star_star]
+  simp [kms]
 
 namespace QuantumSet
 open scoped TensorProduct

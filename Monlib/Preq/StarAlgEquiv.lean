@@ -174,7 +174,7 @@ lemma _root_.isIdempotentElem_pi_iff
   {ι : Type*} {A : ι → Type*} [Π i, Mul (A i)] {a : Π i, A i} :
   IsIdempotentElem a ↔ ∀ i, IsIdempotentElem (a i) :=
 by
-  simp only [IsIdempotentElem, Pi.mul_def, Function.funext_iff]
+  simp only [IsIdempotentElem, Pi.mul_def, funext_iff]
 
 theorem AlgEquiv.eq_apply_iff_symm_eq {R A B : Type _} [CommSemiring R] [Semiring A] [Semiring B]
     [Algebra R A] [Algebra R B] (f : A ≃ₐ[R] B) {a : B} {b : A} : a = f b ↔ f.symm a = b :=

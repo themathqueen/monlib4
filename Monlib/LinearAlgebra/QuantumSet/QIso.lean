@@ -419,3 +419,16 @@ theorem QFun.qBijective_iff_inv_eq_adjoint
   hp.adjoint_comp_self_eq_id_of_map_counit h.1⟩,
   λ ⟨h1, h2⟩ => ⟨hp.map_counit_of_adjoint_comp_self_eq_id h2,
   hp.map_comul_of_inv_eq_adjoint h1 h2⟩⟩
+
+noncomputable def QFun.qBijective.linearEquiv
+  {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P]
+  (h : hp.qBijective) :
+    (B₁ ⊗[ℂ] H) ≃ₗ[ℂ] (H ⊗[ℂ] B₂) where
+  toLinearMap := P
+  invFun := LinearMap.adjoint P
+  left_inv _ := by
+    simp only [LinearMap.toFun_eq_coe, ← LinearMap.comp_apply]
+    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).2, LinearMap.one_apply]
+  right_inv _ := by
+    simp only [LinearMap.toFun_eq_coe, ← LinearMap.comp_apply]
+    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).1, LinearMap.one_apply]
