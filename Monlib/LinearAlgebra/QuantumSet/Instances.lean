@@ -386,6 +386,20 @@ by
         rw [← commutes_with_all_iff, this1] at Hy
         contradiction
 
+theorem Module.Dual.pi_isTracial_iff {k : Type*} [Fintype k] [DecidableEq k]
+  {s : k → Type*}
+  [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)]
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)} :
+    (Module.Dual.pi φ).IsTracial ↔ ∀ i, (φ i).IsTracial :=
+by
+  constructor
+  . intro h i x y
+    specialize h (includeBlock x) (includeBlock y)
+    simp [Module.Dual.pi_apply, includeBlock_hMul_includeBlock] at h
+    simpa only [← Module.Dual.pi_apply, Module.Dual.pi.apply_single_block'] using h
+  . intro h x y
+    simp [h _ _]
+
 set_option synthInstance.checkSynthOrder false in
 @[default_instance] noncomputable instance Matrix.isStarAlgebra [hφ : φ.IsFaithfulPosMap] :
     starAlgebra (Matrix n n ℂ) where

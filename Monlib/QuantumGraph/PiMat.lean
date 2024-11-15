@@ -928,6 +928,36 @@ theorem PiMat.modAut {r : ℝ} :
     AlgEquiv.piCongrRight (λ _ => modAut r) :=
 rfl
 
+theorem Matrix.counit_eq_dual {n : Type*} [Fintype n] [DecidableEq n]
+  {φ : Module.Dual ℂ (Matrix n n ℂ)} [φ.IsFaithfulPosMap] :
+  Coalgebra.counit (R := ℂ) (A := Matrix n n ℂ) = φ :=
+by
+  ext
+  simp only [← Coalgebra.inner_eq_counit']
+  rw [@Module.Dual.IsFaithfulPosMap.inner_eq, conjTranspose_one, one_mul]
+
+theorem PiMat.counit_eq_dual :
+  (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = Module.Dual.pi φ :=
+by
+  apply LinearMap.ext
+  intro
+  simp only [← Coalgebra.inner_eq_counit']
+  rw [Module.Dual.pi.IsFaithfulPosMap.inner_eq, star_one, one_mul]
+
+theorem modAut_eq_id_iff (r : ℝ) :
+    (modAut r : PiMat ℂ ι p ≃ₐ[ℂ] PiMat ℂ ι p) = 1
+      ↔ r = 0 ∨ Module.Dual.IsTracial (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) :=
+by
+  rw [PiMat.counit_eq_dual]
+  calc (modAut r : PiMat ℂ ι p ≃ₐ[ℂ] PiMat ℂ ι p) = 1
+      ↔ ∀ i, (modAut r : Mat ℂ (p i) ≃ₐ[ℂ] Mat ℂ (p i)) = 1 :=
+      by
+        simp [PiMat.modAut, AlgEquiv.ext_iff, funext_iff]
+        refine ⟨λ h i a => ?_, λ h a i => h i (a i)⟩
+        simpa only [Matrix.includeBlock_apply_same] using h (Matrix.includeBlock a) i
+    _ ↔ ∀ i, sig (hφ i) r = 1 := by simp only [modAut]
+  simp_rw [sig_eq_id_iff, forall_or_left, Module.Dual.pi_isTracial_iff]
+
 theorem unitary.mul_inj {A : Type*} [Monoid A] [StarMul A] (U : ↥(unitary A)) (x y : A) :
   ↑U * x = ↑U * y ↔ x = y :=
 by
