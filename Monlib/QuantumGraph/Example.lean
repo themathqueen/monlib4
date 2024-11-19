@@ -8,6 +8,7 @@ import Monlib.LinearAlgebra.QuantumSet.Pi
 import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 import Monlib.LinearAlgebra.Ips.MatIps
 import Monlib.LinearAlgebra.QuantumSet.Instances
+import Monlib.LinearAlgebra.QuantumSet.DeltaForm
 
 /-!
   # Basic examples on quantum adjacency matrices
@@ -80,15 +81,10 @@ theorem Qam.completeGraph_eq' :
   Qam.completeGraph A B =
     Algebra.linearMap ℂ A ∘ₗ Coalgebra.counit :=
 by
-  -- rw [Coalgebra.counit_eq_unit_adjoint]
-  rw [LinearMap.ext_iff]
-  intro x
-  simp_rw [Qam.completeGraph_eq, ContinuousLinearMap.coe_coe, LinearMap.comp_apply, rankOne_apply,
-    QuantumSet.inner_eq_counit, star_one, one_mul]
-  simp only [
-    ← AlgEquiv.toLinearMap_apply, ← LinearMap.comp_apply,
-    (QuantumSet.modAut_isCoalgHom _).1]
-  simp only [LinearMap.comp_apply, Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,]
+  rw [Coalgebra.counit_eq_bra_one]
+  ext
+  simp [Algebra.algebraMap_eq_smul_one]
+  rfl
 
 open scoped schurMul
 theorem Qam.Nontracial.CompleteGraph.qam :
@@ -129,71 +125,6 @@ by
   nth_rw 1 [hαβ]
   simp_rw [map_sum, Qam.completeGraph, schurMul.apply_rankOne, one_mul, ← hαβ]
 
-open scoped ComplexOrder
-class QuantumSetDeltaForm (A : Type*) [starAlgebra A] [QuantumSet A] where
-  delta : ℂ
-  delta_pos : 0 < delta
-  mul_comp_comul_eq : LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul = delta • 1
-
-theorem LinearMap.mul'_comp_mul'_adjoint_of_delta_form {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] :
-  LinearMap.mul' ℂ (Matrix p p ℂ) ∘ₗ Coalgebra.comul = φ.matrix⁻¹.trace • 1 :=
-by rw [Coalgebra.comul_eq_mul_adjoint, Qam.Nontracial.mul_comp_mul_adjoint]
-
-theorem LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form [∀ i, Nontrivial (n i)] {δ : ℂ}
-    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
-  m ∘ₗ Coalgebra.comul = δ • id :=
-by
-  rw [Coalgebra.comul_eq_mul_adjoint,
-    LinearMap.pi_mul'_comp_mul'_adjoint_eq_smul_id_iff δ]
-  exact hφ₂
-
-theorem Qam.Nontracial.delta_pos [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] : 0 < φ.matrix⁻¹.trace :=
-  by
-  rw [IsHermitian.trace_eq (PosDef.inv hφ.matrixIsPosDef).1, RCLike.pos_def]
-  simp only [RCLike.ofReal_im, and_true]
-  rw [← IsHermitian.trace_eq]
-  exact Matrix.PosDef.pos_trace (PosDef.inv hφ.matrixIsPosDef)
-
-omit [Fintype p] [DecidableEq p] in
-theorem Pi.Qam.Nontracial.delta_ne_zero [Nonempty p] [∀ i, Nontrivial (n i)] {δ : ℂ}
-    [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) : 0 < δ :=
-  by
-  let j : p := Classical.arbitrary p
-  rw [← hφ₂ j]
-  exact Qam.Nontracial.delta_pos
-
--- set_option maxHeartbeats 0 in
-noncomputable
-instance Matrix.quantumSetDeltaForm [Nonempty p] {φ : Module.Dual ℂ (Matrix p p ℂ)}
-    [hφ : φ.IsFaithfulPosMap] :
-    QuantumSetDeltaForm (Matrix p p ℂ) where
-  delta := φ.matrix⁻¹.trace
-  delta_pos := Qam.Nontracial.delta_pos
-  mul_comp_comul_eq := by rw [LinearMap.mul'_comp_mul'_adjoint_of_delta_form]
-
-set_option synthInstance.checkSynthOrder false in
-noncomputable instance PiMat.quantumSetDeltaForm [Nonempty p] [∀ i, Nontrivial (n i)] {d : ℂ}
-  [hφ : ∀ i, (φ i).IsFaithfulPosMap] [hφ₂ : Fact (∀ i, (φ i).matrix⁻¹.trace = d)] :
-    QuantumSetDeltaForm (PiMat ℂ p n) where
-  delta := d
-  delta_pos := Pi.Qam.Nontracial.delta_ne_zero hφ₂.out
-  mul_comp_comul_eq := by
-    rw [LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form]
-    exact hφ₂.out
-
-@[instance]
-noncomputable def QuantumSet.DeltaForm.mul_comp_comul_isInvertible {A : Type*} [starAlgebra A]
-  [QuantumSet A] [hA2 : QuantumSetDeltaForm A] :
-  Invertible (LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul) :=
-by
-  apply IsUnit.invertible
-  rw [LinearMap.isUnit_iff_ker_eq_bot, hA2.mul_comp_comul_eq, LinearMap.ker_smul, LinearMap.one_eq_id,
-    LinearMap.ker_id]
-  exact ne_of_gt hA2.delta_pos
-
-
 noncomputable def Qam.trivialGraph (A : Type*) [starAlgebra A] [QuantumSet A]
   [QuantumSetDeltaForm A] :
   l(A) :=
@@ -201,6 +132,7 @@ noncomputable def Qam.trivialGraph (A : Type*) [starAlgebra A] [QuantumSet A]
 
 variable {A : Type*} [ha:starAlgebra A] [hA : QuantumSet A]
 
+open scoped ComplexOrder
 theorem Qam.trivialGraph_eq [hA2 : QuantumSetDeltaForm A] :
     Qam.trivialGraph A = hA2.delta⁻¹ • (1 : l(A)) :=
   by

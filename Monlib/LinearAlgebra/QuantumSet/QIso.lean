@@ -420,7 +420,7 @@ theorem QFun.qBijective_iff_inv_eq_adjoint
   λ ⟨h1, h2⟩ => ⟨hp.map_counit_of_adjoint_comp_self_eq_id h2,
   hp.map_comul_of_inv_eq_adjoint h1 h2⟩⟩
 
-noncomputable def QFun.qBijective.linearEquiv
+noncomputable def QFun.qBijective.toLinearEquiv
   {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P]
   (h : hp.qBijective) :
     (B₁ ⊗[ℂ] H) ≃ₗ[ℂ] (H ⊗[ℂ] B₂) where
@@ -432,3 +432,71 @@ noncomputable def QFun.qBijective.linearEquiv
   right_inv _ := by
     simp only [LinearMap.toFun_eq_coe, ← LinearMap.comp_apply]
     rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).1, LinearMap.one_apply]
+
+lemma QFun.qBijective.toLinearEquiv_toLinearMap
+  {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P]
+  (h : hp.qBijective) :
+    h.toLinearEquiv.toLinearMap = P :=
+rfl
+
+lemma QFun.qBijective.toLinearEquiv_symm_toLinearMap
+  {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P]
+  (h : hp.qBijective) :
+    h.toLinearEquiv.symm.toLinearMap = LinearMap.adjoint P :=
+rfl
+
+theorem QFun.qBijective_iso_id
+  {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P] (h : hp.qBijective) :
+    h.toLinearEquiv.toLinearMap ∘ₗ
+      (rT _ 1) ∘ₗ h.toLinearEquiv.symm.toLinearMap = lT _ 1 :=
+by
+  ext
+  simp [LinearMap.rTensor_one, LinearMap.lTensor_one]
+
+theorem rankOne_one_one_eq :
+  ContinuousLinearMap.toLinearMap (rankOne ℂ (1 : B₁) (1 : B₂)) = η B₁ ∘ₗ Coalgebra.counit :=
+by
+  rw [Coalgebra.counit_eq_bra_one]
+  ext
+  simp [Algebra.algebraMap_eq_smul_one]
+
+lemma QFun.map_unit'' {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} (hp : QFun H P) :
+  P ∘ₗ rT H (η B₁) = lT H (η B₂) ∘ₗ (TensorProduct.comm ℂ _ _).toLinearMap :=
+calc P ∘ₗ rT H (η B₁) = lT H (η B₂) ∘ₗ ((τ' _).symm.toLinearMap ∘ₗ (τ _).toLinearMap) :=
+    by
+      rw [← LinearMap.comp_assoc, ← hp.map_unit, map_unit']
+      simp only [LinearMap.comp_assoc, LinearEquiv.comp_coe, LinearEquiv.self_trans_symm]
+      rfl
+  _ = lT H (η B₂) ∘ₗ (TensorProduct.comm ℂ _ _).toLinearMap := by ext; simp
+
+lemma QFun.counit_map_adjoint {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} (hp : QFun H P) :
+  (rT _ Coalgebra.counit) ∘ₗ LinearMap.adjoint P
+    = (TensorProduct.comm ℂ _ _).symm.toLinearMap ∘ₗ lT _ Coalgebra.counit :=
+calc (rT _ Coalgebra.counit) ∘ₗ LinearMap.adjoint P
+    = LinearMap.adjoint (P ∘ₗ (rT _ (η B₁))) :=
+      by
+        rw [Coalgebra.counit_eq_unit_adjoint, ← LinearMap.rTensor_adjoint,
+          LinearMap.adjoint_comp]
+        congr; ext; rfl
+  _ = LinearMap.adjoint (lT H (η B₂) ∘ₗ (TensorProduct.comm ℂ _ _).toLinearMap) :=
+      by rw [hp.map_unit'']
+  _ = (TensorProduct.comm ℂ _ _).symm.toLinearMap ∘ₗ lT _ Coalgebra.counit :=
+      by
+        rw [LinearMap.adjoint_comp, LinearMap.lTensor_adjoint,
+          Coalgebra.counit_eq_unit_adjoint, TensorProduct.comm_adjoint]
+        congr; ext; rfl
+
+/-- for any `qBijective` function `P`,
+  we get `P ∘ (|1⟩⟨1| ⊗ id) ∘ adjoint P = (id ⊗ |1⟩⟨1|)`. -/
+theorem QFun.qBijective_iso_rankOne_one_one
+  {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P] (h : hp.qBijective) :
+    h.toLinearEquiv.toLinearMap ∘ₗ (rT _ (rankOne ℂ (1 : B₁) (1 : B₁))) ∘ₗ h.toLinearEquiv.symm.toLinearMap
+      = lT _ (rankOne ℂ (1 : B₂) (1 : B₂)) :=
+by
+  rw [rankOne_one_one_eq, LinearMap.rTensor_comp,
+    h.toLinearEquiv_toLinearMap, h.toLinearEquiv_symm_toLinearMap,
+    LinearMap.comp_assoc, hp.counit_map_adjoint, ← LinearMap.comp_assoc, hp.map_unit'']
+  nth_rw 1 [LinearMap.comp_assoc]
+  nth_rw 2 [← LinearMap.comp_assoc]
+  rw [LinearEquiv.comp_coe, LinearEquiv.symm_trans_self, LinearEquiv.refl_toLinearMap,
+    LinearMap.id_comp, ← LinearMap.lTensor_comp, rankOne_one_one_eq]

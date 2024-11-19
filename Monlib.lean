@@ -89,3 +89,4 @@ import Monlib.LinearAlgebra.QuantumSet.Symm
 import Monlib.LinearAlgebra.QuantumSet.Instances
 import Monlib.LinearAlgebra.QuantumSet.QIso
 import Monlib.LinearAlgebra.QuantumSet.PhiMap
+import Monlib.LinearAlgebra.QuantumSet.DeltaForm

@@ -1,6 +1,7 @@
 import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.Ips.MatIps
 import Monlib.LinearAlgebra.QuantumSet.Pi
+import Monlib.LinearAlgebra.QuantumSet.DeltaForm
 -- import Monlib.LinearAlgebra.Ips.Frob
 
 variable {n : Type*} [Fintype n] [DecidableEq n] {φ : Module.Dual ℂ (Matrix n n ℂ)}
@@ -543,3 +544,54 @@ noncomputable instance Module.Dual.pi.IsFaithfulPosMap.quantumSet
   -- commutes' a f := by ext1; simp only [RingHom.coe_mk, MonoidHom.coe_mk, Pi.mul_apply]
   -- smul_def' a f := by ext1; simp only [Pi.smul_apply, RingHom.coe_mk, MonoidHom.coe_mk,
   --   Pi.mul_apply]
+
+open scoped TensorProduct BigOperators Kronecker Matrix Functional
+
+theorem LinearMap.mul'_comp_mul'_adjoint_of_delta_form {φ : Module.Dual ℂ (Matrix n n ℂ)}
+    [hφ : φ.IsFaithfulPosMap] :
+  LinearMap.mul' ℂ (Matrix n n ℂ) ∘ₗ Coalgebra.comul = φ.matrix⁻¹.trace • 1 :=
+by rw [Coalgebra.comul_eq_mul_adjoint, Qam.Nontracial.mul_comp_mul_adjoint]
+
+theorem LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form [∀ i, Nontrivial (s i)] {δ : ℂ}
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) :
+  LinearMap.mul' ℂ (PiMat ℂ k s) ∘ₗ Coalgebra.comul = δ • 1 :=
+by
+  rw [Coalgebra.comul_eq_mul_adjoint, LinearMap.pi_mul'_comp_mul'_adjoint_eq_smul_id_iff δ]
+  exact hφ₂
+
+theorem Qam.Nontracial.delta_pos [Nonempty n] {φ : Module.Dual ℂ (Matrix n n ℂ)}
+    [hφ : φ.IsFaithfulPosMap] : 0 < φ.matrix⁻¹.trace :=
+by
+  rw [Matrix.IsHermitian.trace_eq (Matrix.PosDef.inv hφ.matrixIsPosDef).1, RCLike.pos_def]
+  simp only [RCLike.ofReal_im, and_true]
+  rw [← Matrix.IsHermitian.trace_eq]
+  exact Matrix.PosDef.pos_trace (Matrix.PosDef.inv hφ.matrixIsPosDef)
+
+omit [Fintype k] [DecidableEq k] in
+theorem Pi.Qam.Nontracial.delta_ne_zero [Nonempty k] [∀ i, Nontrivial (s i)] {δ : ℂ}
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap] (hφ₂ : ∀ i, (φ i).matrix⁻¹.trace = δ) : 0 < δ :=
+by
+  let j : k := Classical.arbitrary k
+  rw [← hφ₂ j]
+  exact Qam.Nontracial.delta_pos
+
+noncomputable
+instance Matrix.quantumSetDeltaForm [Nonempty n] {φ : Module.Dual ℂ (Matrix n n ℂ)}
+    [hφ : φ.IsFaithfulPosMap] :
+    QuantumSetDeltaForm (Matrix n n ℂ) where
+  delta := φ.matrix⁻¹.trace
+  delta_pos := Qam.Nontracial.delta_pos
+  mul_comp_comul_eq := by rw [LinearMap.mul'_comp_mul'_adjoint_of_delta_form]
+
+set_option synthInstance.checkSynthOrder false in
+noncomputable instance PiMat.quantumSetDeltaForm [Nonempty k] [∀ i, Nontrivial (s i)] {d : ℂ}
+  {φ : Π i, Module.Dual ℂ (Matrix (s i) (s i) ℂ)}
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap] [hφ₂ : Fact (∀ i, (φ i).matrix⁻¹.trace = d)] :
+    QuantumSetDeltaForm (PiMat ℂ k s) where
+  delta := d
+  delta_pos := Pi.Qam.Nontracial.delta_ne_zero hφ₂.out
+  mul_comp_comul_eq := by
+    rw [LinearMap.pi_mul'_comp_mul'_adjoint_of_delta_form]
+    exact hφ₂.out
