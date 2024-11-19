@@ -649,10 +649,41 @@ by
   rw [← OrthonormalBasis.repr_symm_single]
   rfl
 
+set_option maxHeartbeats 300000 in
+lemma QuantumSet.comul_of_subset (r : ℝ) :
+  letI := hA.instSubset r;
+  Coalgebra.comul (R := ℂ) (A := A) =
+    (TensorProduct.map (toSubset_algEquiv r).symm.toLinearMap
+      (toSubset_algEquiv r).symm.toLinearMap)
+    ∘ₗ Coalgebra.comul (R := ℂ)
+    ∘ₗ (toSubset_algEquiv r).toLinearMap :=
+by
+  rw [← AlgEquiv.TensorProduct.map_toLinearMap,
+    ← AlgEquiv.TensorProduct.map_symm, ← AlgEquiv.comp_linearMap_eq_iff,
+    eq_comm, AlgEquiv.linearMap_comp_eq_iff, AlgEquiv.TensorProduct.map_toLinearMap,
+    LinearMap.comp_assoc]
+  exact comul_subset_eq r
+
+theorem Coalgebra.comul_mul_toSubset_algEquiv (a b : A) :
+  letI := hA.instSubset 0;
+  Coalgebra.comul (R := ℂ) (a * b)
+    = ∑ i, QuantumSet.toSubset_algEquiv 0 (a * (modAut ((k A / 2)) (hA.onb i)))
+        ⊗ₜ[ℂ] (star (modAut ((k A / 2)) (hA.onb i)) * b) :=
+by
+  rw [QuantumSet.comul_of_subset 0]
+  letI := hA.instSubset 0
+  simp only [LinearMap.comp_apply, AlgEquiv.toLinearMap_apply, map_mul]
+  rw [Coalgebra.comul_mul_of_gns rfl]
+  simp only [map_sum]
+  congr
+  ext i
+  rw [QuantumSet.toSubset_onb 0]
+  simp only [zero_div, neg_zero, add_zero, map_mul]
+  rfl
+
 open scoped ComplexOrder
 theorem schurProjection.isPosMap [PartialOrder A] [PartialOrder B]
   [StarOrderedRing B]
-  (gns : k A = 0)
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
   {f : A →ₗ[ℂ] B}
   (hf : schurProjection f) :
@@ -662,19 +693,20 @@ by
   rintro ⟨h1, h2⟩ x hx
   obtain ⟨a, b, rfl⟩ := h₁.mp hx
   rw [← h1, schurMul_apply_apply]
-  simp_rw [LinearMap.comp_apply, Coalgebra.comul_mul_of_gns gns,
-    map_sum, TensorProduct.map_tmul, LinearMap.mul'_apply]
+  simp_rw [LinearMap.comp_apply]
+  rw [Coalgebra.comul_mul_toSubset_algEquiv]
+  simp_rw [map_sum, TensorProduct.map_tmul, LinearMap.mul'_apply]
   nth_rw 2 [← star_star a]
   simp_rw [← star_mul, h2 _]
   exact Finset.sum_nonneg (λ _ _ => mul_star_self_nonneg _)
 
 theorem schurIdempotent.isSchurProjection_iff_isPosMap
   [PartialOrder A] [PartialOrder B]
-  [StarOrderedRing A] [StarOrderedRing B] (gns : k A = 0)
+  [StarOrderedRing A] [StarOrderedRing B]
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
   (hh : isEquivToPiMat A) {f : A →ₗ[ℂ] B} (hf : f •ₛ f = f) :
   schurProjection f ↔ LinearMap.IsPosMap f :=
-⟨λ h => h.isPosMap gns h₁,
+⟨λ h => h.isPosMap h₁,
  λ h => ⟨hf, isReal_of_isPosMap_of_starAlgEquiv_piMat hh h⟩⟩
 
 class QuantumGraph (A : Type*) [starAlgebra A] [hA : QuantumSet A]

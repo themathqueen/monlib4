@@ -18,17 +18,17 @@ by
   rw [toSubset_algEquiv_adjoint, LinearMap.comp_apply]
   simp only [AlgEquiv.toLinearMap_apply, map_one]
 
-theorem schurProjection.innerOne_map_one_nonneg_of_gns
+theorem schurProjection.innerOne_map_one_nonneg
   {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A]
   [QuantumSet B]
-  [PartialOrder A] [PartialOrder B] [StarOrderedRing A] [StarOrderedRing B] (gns : k A = 0)
+  [PartialOrder A] [PartialOrder B] [StarOrderedRing A] [StarOrderedRing B]
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b)
   (h₂ : ∀ ⦃a : B⦄, 0 ≤ a ↔ ∃ (b : B), a = star b * b)
   {f : A →ₗ[ℂ] B}
   (h : schurProjection f) :
     0 ≤ ⟪1, f 1⟫_ℂ :=
 by
-  have iPM := schurProjection.isPosMap gns h₁ h
+  have iPM := schurProjection.isPosMap h₁ h
   obtain ⟨x, hx⟩ := h₂.mp (@iPM 1 zero_le_one)
   rw [hx, ← inner_conj_symm, QuantumSet.inner_star_left, star_star, mul_one,
     inner_conj_symm, ← add_halves (-k B), ← QuantumSet.modAut_apply_modAut,
@@ -85,13 +85,7 @@ theorem QuantumGraph.Real.innerOne_map_one_nonneg
   (h₁ : ∀ ⦃a : A⦄, 0 ≤ a ↔ ∃ (b : A), a = star b * b) {f : A →ₗ[ℂ] A}
   (h : QuantumGraph.Real A f) :
     0 ≤ ⟪1, f 1⟫_ℂ :=
-by
-  rw [QuantumSet.innerOne_map_one_toSubset_eq 0 0]
-  letI := hA.instSubset 0
-  apply schurProjection.innerOne_map_one_nonneg_of_gns rfl
-  exact h₁; exact h₁
-  simp_rw [← quantumGraphReal_iff_schurProjection]
-  exact (real_toSubset_iff 0).mpr h
+schurProjection.innerOne_map_one_nonneg h₁ h₁ (quantumGraphReal_iff_schurProjection.mp h)
 
 open scoped TensorProduct
 
@@ -264,7 +258,7 @@ theorem QuantumGraph.Real.innerOne_map_one_le_norm_one_pow_four_of_gns
     ⟪1, f 1⟫_ℂ ≤ ‖(1 : A)‖ ^ 4 :=
 by
   have sP : schurProjection f := ⟨h.isIdempotentElem, h.isReal⟩
-  have iPM := schurProjection.isPosMap gns h₁ sP
+  have iPM := schurProjection.isPosMap h₁ sP
   calc ⟪1, f 1⟫_ℂ = Complex.re ⟪1, f 1⟫_ℂ :=
       QuantumSet.innerOne_map_one_isReal_ofReal h.isReal
     _ = Complex.re ⟪1, (PhiMap f).1 1⟫_ℂ := by rw [← oneInner_map_one_eq_oneInner_PhiMap_map_one]
@@ -292,7 +286,7 @@ lemma QuantumGraph.zero_le_degree_le_norm_one_sq_of_gns
     0 ≤ d ∧ d ≤ ‖(1 : A)‖ ^ 2 :=
 by
   have sP : schurProjection f := ⟨h.isIdempotentElem, h.isReal⟩
-  have iPM := schurProjection.isPosMap gns h₁ sP
+  have iPM := schurProjection.isPosMap h₁ sP
   have hd : d = ⟪1, f 1⟫_ℂ / ⟪1, (1 : A)⟫_ℂ :=
     by
       rw [h2.1, inner_smul_right, mul_div_assoc, div_self, mul_one]
