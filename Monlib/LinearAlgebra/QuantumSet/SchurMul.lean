@@ -329,3 +329,9 @@ schurMul_one_iff_one_schurMul_of_isReal hx LinearMap.isRealOne LinearMap.isRealO
 theorem schurMul_irreflexive_of_isReal {x : A →ₗ[ℂ] A} (hx : LinearMap.IsReal x) :
   x •ₛ 1 = 0 ↔ 1 •ₛ x = 0 :=
 schurMul_one_iff_one_schurMul_of_isReal hx LinearMap.isRealOne LinearMap.isRealZero
+
+lemma schurIdempotent_iff_Psi_isIdempotentElem {A B : Type*} [starAlgebra A] [starAlgebra B]
+    [hA : QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
+  f •ₛ f = f ↔ IsIdempotentElem (hA.Psi t r f) :=
+by
+  simp_rw [IsIdempotentElem, ← Psi.schurMul, Function.Injective.eq_iff (LinearEquiv.injective _)]

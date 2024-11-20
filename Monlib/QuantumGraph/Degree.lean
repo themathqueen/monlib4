@@ -5,19 +5,6 @@ import Monlib.QuantumGraph.Example
 
 open scoped InnerProductSpace ComplexOrder
 
-theorem QuantumSet.innerOne_map_one_toSubset_eq
-  {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
-  (r₁ r₂ : ℝ) {f : A →ₗ[ℂ] B} :
-  letI := QuantumSet.instSubset (A := B) (by infer_instance) r₂
-  ⟪1, f 1⟫_ℂ = ⟪1, (f.toSubsetQuantumSet r₁ r₂) 1⟫_ℂ :=
-by
-  simp
-  rw [← AlgEquiv.toLinearMap_apply]
-  letI := QuantumSet.instSubset (A := B) (by infer_instance) r₂
-  nth_rw 2 [← LinearMap.adjoint_inner_left]
-  rw [toSubset_algEquiv_adjoint, LinearMap.comp_apply]
-  simp only [AlgEquiv.toLinearMap_apply, map_one]
-
 theorem schurProjection.innerOne_map_one_nonneg
   {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A]
   [QuantumSet B]
@@ -35,26 +22,6 @@ by
     ← AlgEquiv.toLinearMap_apply, ← LinearMap.adjoint_inner_right,
     QuantumSet.modAut_adjoint, AlgEquiv.toLinearMap_apply]
   exact inner_self_nonneg'
-
-
-instance {A : Type*} [hA : PartialOrder A] (r : ℝ) :
-    PartialOrder (QuantumSet.subset r A) :=
-hA
-instance {A : Type*} [hA : NonUnitalNonAssocSemiring A] (r : ℝ) :
-  NonUnitalNonAssocSemiring (QuantumSet.subset r A) :=
-hA
-instance {A : Type*} [hA : NonUnitalSemiring A] (r : ℝ) :
-  NonUnitalSemiring (QuantumSet.subset r A) :=
-hA
-instance {A : Type*} [NonUnitalNonAssocSemiring A] [hA : StarRing A] (r : ℝ) :
-  StarRing (QuantumSet.subset r A) :=
-hA
-instance {A : Type*} [NonUnitalSemiring A] [PartialOrder A] [StarRing A] [hA : StarOrderedRing A] (r : ℝ) :
-  StarOrderedRing (QuantumSet.subset r A) :=
-hA
-instance {A : Type*} [hA : Nontrivial A] (r : ℝ) :
-  Nontrivial (QuantumSet.subset r A) :=
-hA
 
 theorem QuantumGraph.real_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
   QuantumGraph.Real A f ↔ f •ₛ f = f ∧ LinearMap.IsReal f :=
@@ -145,20 +112,6 @@ by
   simp_rw [Coalgebra.inner_eq_counit']
   rw [QuantumSet.counit_isFaithful, map_eq_zero_iff _ (LinearEquiv.injective _),
     Qam.complement'_eq, sub_eq_zero, eq_comm]
-
-theorem QuantumSet.normOne_toSubset {A : Type*} [starAlgebra A] [QuantumSet A] (r : ℝ) :
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  ‖(1 : A)‖ = ‖(1 : QuantumSet.subset r A)‖ :=
-by
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  simp_rw [norm_eq_sqrt_inner (𝕜 := ℂ), QuantumSet.subset_inner_eq,
-    ← QuantumSet.toSubset_algEquiv_symm_eq_toSubset_equiv, map_one]
-
-theorem LinearMap.toSubsetQuantumSet_eq_iff {A B : Type*}  [ha : starAlgebra A]
-  [starAlgebra B] [hA : QuantumSet A] [hB : QuantumSet B] (sk₁ : ℝ) (sk₂ : ℝ)
-  (f : A →ₗ[ℂ] B) (g : QuantumSet.subset sk₁ A →ₗ[ℂ] QuantumSet.subset sk₂ B) :
-  f.toSubsetQuantumSet sk₁ sk₂ = g ↔ f = g.ofSubsetQuantumSet sk₁ sk₂ :=
-by rfl
 
 theorem QuantumGraph.Real.innerOne_map_one_eq_norm_pow_four_iff
   {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} (h : QuantumGraph.Real A f) :

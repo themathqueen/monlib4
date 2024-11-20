@@ -9,6 +9,7 @@ import Monlib.LinearAlgebra.QuantumSet.PhiMap
 import Monlib.LinearAlgebra.Ips.Functional
 import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 import Mathlib.LinearAlgebra.TensorProduct.Opposite
+import Monlib.LinearAlgebra.QuantumSet.Subset
 -- import Monlib.LinearAlgebra.QuantumSet.TensorProduct
 
 local notation x " ⊗ₘ " y => TensorProduct.map x y
@@ -82,12 +83,6 @@ by
       QuantumSet.modAut_real, AlgEquiv.linearMap_comp_eq_iff, QuantumSet.modAut_symm,
       neg_neg, LinearMap.comp_assoc, ← hg, ← QuantumSet.modAut_symm,
       ← AlgEquiv.comp_linearMap_eq_iff]
-
-lemma schurIdempotent_iff_Psi_isIdempotentElem {A B : Type*} [starAlgebra A] [starAlgebra B]
-    [hA : QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (t r : ℝ) :
-  f •ₛ f = f ↔ IsIdempotentElem (hA.Psi t r f) :=
-by
-  simp_rw [IsIdempotentElem, ← Psi.schurMul, Function.Injective.eq_iff (LinearEquiv.injective _)]
 
 @[simp]
 theorem LinearMap.op_real {K E F : Type*}
@@ -462,214 +457,11 @@ noncomputable instance QuantumSet.tensorOp_self {A : Type*} [starAlgebra A] [Qua
   QuantumSet (A ⊗[ℂ] Aᵐᵒᵖ) :=
 QuantumSet.tensorProduct (h := Fact.mk rfl)
 
-@[simp]
-theorem QuantumSet.subset_k {A : Type*} [starAlgebra A] [h : QuantumSet A] (r : ℝ) :
-  letI := QuantumSet.instSubset h r
-  k (QuantumSet.subset r A) = r :=
-rfl
-
-@[simp]
-theorem QuantumSet.subset_n {A : Type*} [starAlgebra A] [h : QuantumSet A] (r : ℝ) :
-  letI := QuantumSet.instSubset h r
-  n (QuantumSet.subset r A) = n A :=
-rfl
-
 theorem MulOpposite.norm_eq {𝕜 H : Type*} [RCLike 𝕜] [NormedAddCommGroup H]
   (x : Hᵐᵒᵖ) : ‖x‖ = ‖x.unop‖ :=
 rfl
 
-noncomputable def QuantumSet.subset_tensor_algEquiv {A B : Type*} [starAlgebra A] [starAlgebra B] (r : ℝ) :
-  (QuantumSet.subset r A ⊗[ℂ] QuantumSet.subset r B) ≃ₐ[ℂ] QuantumSet.subset r (A ⊗[ℂ] B) :=
-(AlgEquiv.TensorProduct.map
-  (QuantumSet.toSubset_algEquiv r).symm
-  (QuantumSet.toSubset_algEquiv r).symm).trans
-(QuantumSet.toSubset_algEquiv r)
-theorem QuantumSet.subset_tensor_algEquiv_tmul {A B : Type*} [starAlgebra A] [starAlgebra B]
-  (r : ℝ) (x : QuantumSet.subset r A) (y : QuantumSet.subset r B) :
-  QuantumSet.subset_tensor_algEquiv r (x ⊗ₜ[ℂ] y)
-    = QuantumSet.toSubset_algEquiv r
-      ((QuantumSet.toSubset_algEquiv r).symm x ⊗ₜ[ℂ] (QuantumSet.toSubset_algEquiv r).symm y) :=
-rfl
-theorem QuantumSet.subset_tensor_algEquiv_symm_tmul {A B : Type*} [starAlgebra A] [starAlgebra B]
-  (r : ℝ) (a : A) (b : B) :
-  (QuantumSet.subset_tensor_algEquiv r).symm (QuantumSet.toSubset_algEquiv r (a ⊗ₜ[ℂ] b))
-    = (QuantumSet.toSubset_algEquiv r)
-      ((QuantumSet.toSubset_algEquiv r a) ⊗ₜ[ℂ] (QuantumSet.toSubset_algEquiv r b)) :=
-rfl
-
-theorem LinearMap.mul'_quantumSet_subset_eq {A : Type*} [starAlgebra A] [QuantumSet A] (r : ℝ) :
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  letI : Fact (k A = k A) := Fact.mk rfl
-  LinearMap.mul' ℂ (QuantumSet.subset r A) = (QuantumSet.toSubset_algEquiv r).toLinearMap
-      ∘ₗ (LinearMap.mul' ℂ A)
-      ∘ₗ (TensorProduct.map
-        (QuantumSet.toSubset_algEquiv r).symm.toLinearMap
-        (QuantumSet.toSubset_algEquiv r).symm.toLinearMap) :=
-by
-  ext x y
-  simp [AlgEquiv.toLinearMap_apply, QuantumSet.subset_tensor_algEquiv_tmul]
-
-@[simp]
-theorem AlgEquiv.coe_comp
-  {R A₁ A₂ A₃ : Type*} [CommSemiring R] [Semiring A₁] [Semiring A₂]
-  [Semiring A₃] [Algebra R A₁] [Algebra R A₂] [Algebra R A₃]
-  (e : A₁ ≃ₐ[R] A₂) (e₂ : A₂ ≃ₐ[R] A₃) :
-  e₂.toLinearMap.comp e.toLinearMap = (e.trans e₂).toLinearMap :=
-rfl
-
-@[simp]
-theorem AlgEquiv.self_trans_symm
-  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
-  (f : A ≃ₐ[R] B) :
-  f.trans f.symm = AlgEquiv.refl :=
-by aesop
-@[simp]
-theorem AlgEquiv.symm_trans_self
-  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
-  (f : A ≃ₐ[R] B) :
-  f.symm.trans f = AlgEquiv.refl :=
-by aesop
-
-set_option maxHeartbeats 300000 in
-set_option synthInstance.maxHeartbeats 30000 in
-theorem QuantumSet.subset_tensor_algEquiv_adjoint
-  {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
-  [h : Fact (k A = k B)] (r : ℝ) :
-  letI h1 := QuantumSet.instSubset (A := A) (by infer_instance) r;
-  letI h2 := QuantumSet.instSubset (A := B) (by infer_instance) r;
-  letI h3 := QuantumSet.tensorProduct (h := h);
-  letI := QuantumSet.tensorProduct (hA := h1) (hB := h2) (h := Fact.mk rfl);
-  letI := QuantumSet.instSubset (A := A ⊗[ℂ] B) h3 r;
-    LinearMap.adjoint (QuantumSet.subset_tensor_algEquiv (A := A) (B := B) r).toLinearMap
-    = (QuantumSet.subset_tensor_algEquiv r).symm.toLinearMap :=
-by
-  simp [QuantumSet.subset_tensor_algEquiv, LinearMap.adjoint_comp]
-  letI h1 := QuantumSet.instSubset (A := A) (by infer_instance) r
-  letI h2 := QuantumSet.instSubset (A := B) (by infer_instance) r
-  letI h3 := QuantumSet.tensorProduct (h := h)
-  letI := QuantumSet.tensorProduct (hA := h1) (hB := h2) (h := Fact.mk rfl)
-  letI := QuantumSet.instSubset (A := A ⊗[ℂ] B) h3 r
-  simp [TensorProduct.map_adjoint]
-  simp only [QuantumSet.toSubset_algEquiv_symm_adjoint, QuantumSet.toSubset_algEquiv_adjoint r,
-    modAut_tensor, QuantumSet.tensorProduct.k_eq₁, ← h.out,
-    ← LinearMap.comp_assoc, AlgEquiv.TensorProduct.map_toLinearMap]
-  simp only [← TensorProduct.map_comp, LinearMap.comp_assoc]
-  simp only [AlgEquiv.coe_comp (e := modAut _), QuantumSet.modAut_trans]
-  ring_nf
-  simp only [QuantumSet.modAut_zero]
-  rfl
-
-theorem QuantumSet.comul_subset_eq {A : Type*} [starAlgebra A] [QuantumSet A] (r : ℝ) :
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  letI : Fact (k A = k A) := Fact.mk rfl
-  Coalgebra.comul (R := ℂ) (A := QuantumSet.subset r A)
-    = (TensorProduct.map (QuantumSet.toSubset_algEquiv r).toLinearMap
-        (QuantumSet.toSubset_algEquiv r).toLinearMap)
-      ∘ₗ
-    (Coalgebra.comul (R := ℂ) (A := A))
-       ∘ₗ (toSubset_algEquiv r).symm.toLinearMap  :=
-by
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  letI : Fact (k A = k A) := Fact.mk rfl
-  letI hh := QuantumSet.tensorProduct (A := A) (B := A) (h := Fact.mk rfl)
-  letI := QuantumSet.instSubset (A := A ⊗[ℂ] A) (by infer_instance) r
-  simp only [Coalgebra.comul_eq_mul_adjoint, LinearMap.mul'_quantumSet_subset_eq]
-  simp only [LinearMap.adjoint_comp, QuantumSet.subset_tensor_algEquiv_adjoint,
-    TensorProduct.map_adjoint, toSubset_algEquiv_symm_adjoint, toSubset_algEquiv_adjoint]
-  simp only [QuantumSet.tensorProduct.k_eq₁, ← LinearMap.comp_assoc]
-  congr 1
-  simp only [LinearMap.comp_assoc, ← Coalgebra.comul_eq_mul_adjoint,
-    ← (QuantumSet.modAut_isCoalgHom _).2, TensorProduct.map_comp,
-    ← AlgEquiv.TensorProduct.map_toLinearMap, ← modAut_tensor]
-  congr 1
-  rw [← LinearMap.comp_assoc]
-  rw [AlgEquiv.coe_comp, modAut_trans]
-  ring_nf
-  simp only [QuantumSet.modAut_zero, AlgEquiv.one_toLinearMap, LinearMap.one_comp]
-
-theorem AlgEquiv.refl_toLinearMap {A : Type*} [Semiring A] [Algebra ℂ A] :
-  (AlgEquiv.refl (R := ℂ) (A₁ := A)).toLinearMap = LinearMap.id :=
-rfl
-theorem AlgEquiv.symm_comp_toLinearMap {A B : Type*} [Semiring A] [Semiring B] [Algebra ℂ A] [Algebra ℂ B]
-  (e : A ≃ₐ[ℂ] B) :
-  e.symm.toLinearMap ∘ₗ e.toLinearMap = LinearMap.id :=
-by simp only [coe_comp, self_trans_symm]; rfl
-theorem AlgEquiv.comp_symm_toLinearMap {A B : Type*} [Semiring A] [Semiring B] [Algebra ℂ A] [Algebra ℂ B]
-  (e : A ≃ₐ[ℂ] B) :
-  e.toLinearMap ∘ₗ e.symm.toLinearMap = LinearMap.id :=
-by simp only [coe_comp, symm_trans_self]; rfl
-
-theorem schurMul_toSubsetQuantumSet {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
-    {f : A →ₗ[ℂ] B} (r₁ r₂ : ℝ) :
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r₁;
-  letI := QuantumSet.instSubset (A := B) (by infer_instance) r₂;
-  (f.toSubsetQuantumSet r₁ r₂ •ₛ f.toSubsetQuantumSet r₁ r₂) = (f •ₛ f).toSubsetQuantumSet r₁ r₂ :=
-by
-  simp
-  simp only [QuantumSet.comul_subset_eq]
-  nth_rw 2 [← LinearMap.comp_assoc]
-  rw [← TensorProduct.map_comp, LinearMap.mul'_quantumSet_subset_eq]
-  simp only [LinearMap.toSubsetQuantumSet, LinearMap.comp_assoc]
-  simp only [← LinearMap.comp_assoc, ← TensorProduct.map_comp, AlgEquiv.symm_comp_toLinearMap,
-    LinearMap.id_comp, LinearMap.comp_id]
-
-theorem LinearMap.toSubsetQuantumSet_inj
-  {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
-  {f g : A →ₗ[ℂ] B} (r₁ r₂ : ℝ) :
-  f.toSubsetQuantumSet r₁ r₂ = g.toSubsetQuantumSet r₁ r₂ ↔ f = g :=
-by rfl
-
-theorem QuantumSet.toSubset_equiv_isReal {A : Type*} [Star A] (r : ℝ) :
-  LinearMap.IsReal (QuantumSet.toSubset_equiv r (A := A)) :=
-λ _ => rfl
-theorem QuantumSet.toSubset_equiv_symm_isReal {A : Type*} [Star A] (r : ℝ) :
-  LinearMap.IsReal (QuantumSet.toSubset_equiv r (A := A)).symm :=
-λ _ => rfl
-
-theorem LinearMap.toSubsetQuantumSet_isReal_iff
-  {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
-  {f : A →ₗ[ℂ] B} (r₁ r₂ : ℝ) :
-  letI := QuantumSet.instSubset (A := A) (by infer_instance) r₁;
-  letI := QuantumSet.instSubset (A := B) (by infer_instance) r₂;
-    LinearMap.IsReal (f.toSubsetQuantumSet r₁ r₂) ↔ LinearMap.IsReal f :=
-by
-  simp only [LinearMap.IsReal, LinearMap.toSubsetQuantumSet_apply,
-    ← QuantumSet.toSubset_equiv_isReal (A := B) r₂ _,
-    QuantumSet.toSubset_equiv_symm_isReal (A := _) r₁ _]
-  rfl
-
-theorem QuantumSet.toSubset_onb (r : ℝ) (i : n A) :
-  letI := hA.instSubset r;
-  -- let f : n A ≃ n (QuantumSet.subset r A) := Equiv.refl _;
-  this.onb i =
-    toSubset_algEquiv r (modAut ((k A / 2) + -(r / 2)) (hA.onb i)) :=
-by
-  -- intro
-  simp [onb]
-  rw [← OrthonormalBasis.repr_symm_single]
-  rfl
-
-set_option maxHeartbeats 300000 in
-lemma QuantumSet.comul_of_subset (r : ℝ) :
-  letI := hA.instSubset r;
-  Coalgebra.comul (R := ℂ) (A := A) =
-    (TensorProduct.map (toSubset_algEquiv r).symm.toLinearMap
-      (toSubset_algEquiv r).symm.toLinearMap)
-    ∘ₗ Coalgebra.comul (R := ℂ)
-    ∘ₗ (toSubset_algEquiv r).toLinearMap :=
-by
-  rw [← AlgEquiv.TensorProduct.map_toLinearMap,
-    ← AlgEquiv.TensorProduct.map_symm, ← AlgEquiv.comp_linearMap_eq_iff,
-    eq_comm, AlgEquiv.linearMap_comp_eq_iff, AlgEquiv.TensorProduct.map_toLinearMap,
-    LinearMap.comp_assoc]
-  exact comul_subset_eq r
-
-theorem QuantumSet.toSubset_algEquiv_isReal
-  {A : Type*} [Ring A] [Algebra ℂ A] [Star A]  (r : ℝ) :
-  LinearMap.IsReal (QuantumSet.toSubset_algEquiv r (A := A)) :=
-λ _ => rfl
-
-theorem Coalgebra.comul_mul_toSubset_algEquiv (a b : A) :
+theorem Coalgebra.comul_mul (a b : A) :
   Coalgebra.comul (R := ℂ) (a * b)
     = ∑ i, (a * (modAut ((k A / 2)) (hA.onb i)))
         ⊗ₜ[ℂ] (star (modAut ((k A / 2)) (hA.onb i)) * b) :=
@@ -700,7 +492,7 @@ by
   obtain ⟨a, b, rfl⟩ := h₁.mp hx
   rw [← h1, schurMul_apply_apply]
   simp_rw [LinearMap.comp_apply]
-  rw [Coalgebra.comul_mul_toSubset_algEquiv]
+  rw [Coalgebra.comul_mul]
   simp_rw [map_sum, TensorProduct.map_tmul, LinearMap.mul'_apply]
   nth_rw 2 [← star_star a]
   simp_rw [← star_mul, h2 _]

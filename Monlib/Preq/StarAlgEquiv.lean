@@ -256,3 +256,36 @@ def StarAlgEquiv.piCongrRight {R ι : Type*} {A₁ A₂ : ι → Type*}
     map_smul' _ _ := by simp only [Pi.smul_apply, map_smul]; rfl
     left_inv _ := by simp only [symm_apply_apply]
     right_inv _ := by simp only [apply_symm_apply]
+
+@[simp]
+theorem AlgEquiv.coe_comp
+  {R A₁ A₂ A₃ : Type*} [CommSemiring R] [Semiring A₁] [Semiring A₂]
+  [Semiring A₃] [Algebra R A₁] [Algebra R A₂] [Algebra R A₃]
+  (e : A₁ ≃ₐ[R] A₂) (e₂ : A₂ ≃ₐ[R] A₃) :
+  e₂.toLinearMap.comp e.toLinearMap = (e.trans e₂).toLinearMap :=
+rfl
+
+@[simp]
+theorem AlgEquiv.self_trans_symm
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A ≃ₐ[R] B) :
+  f.trans f.symm = AlgEquiv.refl :=
+by aesop
+@[simp]
+theorem AlgEquiv.symm_trans_self
+  {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+  (f : A ≃ₐ[R] B) :
+  f.symm.trans f = AlgEquiv.refl :=
+by aesop
+
+variable {R A B : Type*} [CommSemiring R] [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
+
+theorem AlgEquiv.refl_toLinearMap :
+  (AlgEquiv.refl (R := R) (A₁ := A)).toLinearMap = LinearMap.id :=
+rfl
+theorem AlgEquiv.symm_comp_toLinearMap (e : A ≃ₐ[R] B) :
+  e.symm.toLinearMap ∘ₗ e.toLinearMap = LinearMap.id :=
+by simp only [coe_comp, self_trans_symm]; rfl
+theorem AlgEquiv.comp_symm_toLinearMap (e : A ≃ₐ[R] B) :
+  e.toLinearMap ∘ₗ e.symm.toLinearMap = LinearMap.id :=
+by simp only [coe_comp, symm_trans_self]; rfl
