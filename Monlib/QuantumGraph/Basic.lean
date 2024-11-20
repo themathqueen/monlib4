@@ -664,10 +664,14 @@ by
     LinearMap.comp_assoc]
   exact comul_subset_eq r
 
+theorem QuantumSet.toSubset_algEquiv_isReal
+  {A : Type*} [Ring A] [Algebra ℂ A] [Star A]  (r : ℝ) :
+  LinearMap.IsReal (QuantumSet.toSubset_algEquiv r (A := A)) :=
+λ _ => rfl
+
 theorem Coalgebra.comul_mul_toSubset_algEquiv (a b : A) :
-  letI := hA.instSubset 0;
   Coalgebra.comul (R := ℂ) (a * b)
-    = ∑ i, QuantumSet.toSubset_algEquiv 0 (a * (modAut ((k A / 2)) (hA.onb i)))
+    = ∑ i, (a * (modAut ((k A / 2)) (hA.onb i)))
         ⊗ₜ[ℂ] (star (modAut ((k A / 2)) (hA.onb i)) * b) :=
 by
   rw [QuantumSet.comul_of_subset 0]
@@ -678,8 +682,10 @@ by
   congr
   ext i
   rw [QuantumSet.toSubset_onb 0]
-  simp only [zero_div, neg_zero, add_zero, map_mul]
-  rfl
+  simp only [zero_div, neg_zero, add_zero]
+  rw [← QuantumSet.toSubset_algEquiv_isReal]
+  simp only [← map_mul, TensorProduct.map_tmul, AlgEquiv.toLinearMap_apply,
+    AlgEquiv.symm_apply_apply]
 
 open scoped ComplexOrder
 theorem schurProjection.isPosMap [PartialOrder A] [PartialOrder B]
