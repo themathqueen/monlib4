@@ -7,7 +7,6 @@
   we say it is a \textit{quantum set} when there is a modular automorphism $\sigma_t\colon\mathcal{A}\cong\mathcal{A}$, which is an algebra automorphism for each $t\in\mathbb{R}$, and that the following properties are satisfied (for a fixed $k\in\mathbb{R}$):
   \begin{enumerate}
    \item $\sigma_t\circ\sigma_s=\sigma_{t+s}$,
-   \item $\sigma_0=\id$,
    \item $\sigma_t^{\operatorname{r}}=\sigma_{-t}$,
    \item $\sigma_t$ is self-adjoint,
    \item $\forall{x,y,z}\in\mathcal{A}:\ip{xy}{z}=\ip{y}{\sigma_{-k}(x)^*z}$,
@@ -18,6 +17,8 @@
   And by Proposition \ref{isAlgHom_iff_adjoint_isCoalgHom}, we can see that for any $t\in\mathbb{R}$, we get $\sigma_t$ is also a co-algebra homomorphism.
 
   We can easily see that we get $\ip{x}{y}=\eta^*(x^*\sigma_k(y))$ for all $x,y\in\mathcal{A}$.
+
+  It is clear that we get $\sigma_0=1$ and $\sigma_{t}^{-1}=\sigma_{-t}$ for $t\in\mathbb{R}$.
  \end{definition}
  \begin{remark}
   In the Lean code, we start with a $^*$-algebra and define a modular automorphism $\sigma_t$ that satisfies properties 1--3 above.

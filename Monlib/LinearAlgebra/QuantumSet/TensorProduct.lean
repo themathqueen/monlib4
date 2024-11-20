@@ -26,8 +26,6 @@ noncomputable instance tensorStarAlgebra :
     simp only [AlgEquiv.trans_toLinearMap, LinearMap.coe_comp, Function.comp_apply,
       AlgEquiv.toLinearMap_apply, AlgEquiv.TensorProduct.map_tmul,
       QuantumSet.modAut_apply_modAut, add_comm]
-  modAut_zero := by
-    simp only [starAlgebra.modAut_zero, AlgEquiv.TensorProduct.map_one]
   modAut_star _ x := x.induction_on (by simp only [map_zero, star_zero])
     (λ _ _ => by simp only [AlgEquiv.TensorProduct.map_tmul, TensorProduct.star_tmul, starAlgebra.modAut_star])
     (λ _ _ h1 h2 => by simp only [map_add, star_add, h1, h2])

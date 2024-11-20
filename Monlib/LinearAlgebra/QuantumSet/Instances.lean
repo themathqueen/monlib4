@@ -406,10 +406,6 @@ set_option synthInstance.checkSynthOrder false in
     starAlgebra (Matrix n n ℂ) where
   modAut := sig hφ
   modAut_trans := Module.Dual.IsFaithfulPosMap.sig_trans_sig
-  modAut_zero := by
-    ext1
-    simp only [sig_apply, neg_zero, PosDef.rpow_zero, one_mul, mul_one,
-      AlgEquiv.one_apply]
   modAut_star r x := by
     simp_rw [sig_apply, star_mul, star_eq_conjTranspose,
       neg_neg, (Matrix.PosDef.rpow.isPosDef _ _).1.eq,

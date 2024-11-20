@@ -37,7 +37,6 @@ instance QuantumSet.subsetStarAlgebra (k : ℝ) :
     _root_.starAlgebra (QuantumSet.subset k A) where
   modAut r := (toSubset_algEquiv k).symm.trans ((ha.modAut r).trans (toSubset_algEquiv k))
   modAut_trans := ha.modAut_trans
-  modAut_zero := ha.modAut_zero
   modAut_star := ha.modAut_star
 
 lemma QuantumSet.subsetStarAlgebra_modAut_apply (r : ℝ) (x : QuantumSet.subset new_k A) :

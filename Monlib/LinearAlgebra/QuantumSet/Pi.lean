@@ -35,7 +35,6 @@ section Pi
   @[default_instance]
   def piStarAlgebra :
     starAlgebra (PiQ A) where
-
   modAut r := Pi.modAut r
   modAut_trans r s := by
     simp_rw [AlgEquiv.ext_iff]
@@ -44,11 +43,6 @@ section Pi
     intro i
     simp_rw [AlgEquiv.trans_apply, Pi.modAut_apply,
       QuantumSet.modAut_apply_modAut, add_comm]
-  modAut_zero := by
-    ext
-    simp only [AlgEquiv.Pi_apply, starAlgebra.modAut_zero,
-      Pi.modAut_apply]
-    rfl
   modAut_star r x := by
     ext i
     simp only [Pi.modAut_apply, Pi.star_apply, star, starAlgebra.modAut_star]

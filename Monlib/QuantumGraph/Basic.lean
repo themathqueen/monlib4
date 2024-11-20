@@ -80,8 +80,8 @@ by
     simp_rw [symmMap_symm_comp, LinearEquiv.symm_apply_apply,
       symmMap_symm_apply, ← LinearMap.star_eq_adjoint,
       isSelfAdjoint_iff.mp (QuantumSet.modAut_isSelfAdjoint _),
-      QuantumSet.modAut_real, AlgEquiv.linearMap_comp_eq_iff, QuantumSet.modAut_symm,
-      neg_neg, LinearMap.comp_assoc, ← hg, ← QuantumSet.modAut_symm,
+      QuantumSet.modAut_real, AlgEquiv.linearMap_comp_eq_iff, starAlgebra.modAut_symm,
+      neg_neg, LinearMap.comp_assoc, ← hg, ← starAlgebra.modAut_symm,
       ← AlgEquiv.comp_linearMap_eq_iff]
 
 @[simp]
@@ -264,7 +264,7 @@ by
     AlgEquiv.symm_one, ← AlgEquiv.toLinearMap_apply,
     AlgEquiv.TensorProduct.map_toLinearMap, AlgEquiv.one_toLinearMap,
     LinearMap.one_eq_id, ← LinearMap.lTensor_eq,
-    AlgEquiv.symm_op, QuantumSet.modAut_symm]
+    AlgEquiv.symm_op, starAlgebra.modAut_symm]
   simp_rw [← LinearMap.comp_apply, LinearEquiv.coe_toLinearMap]
   rw [lTensor_modAut_comp_Psi, neg_neg, eq_comm, LinearEquiv.coe_toLinearMap]
   ring_nf
@@ -367,7 +367,6 @@ noncomputable def starAlgebra.mulOpposite {A : Type*} [starAlgebra A] :
     starAlgebra Aᵐᵒᵖ where
   modAut r := (modAut (-r)).op
   modAut_trans _ _ := by simp [AlgEquiv.op_trans, add_comm]
-  modAut_zero := by simp
   modAut_star _ x := by simp [← MulOpposite.op_star]
 attribute [local instance] starAlgebra.mulOpposite
 noncomputable def InnerProductAlgebra.mulOpposite {A : Type*} [starAlgebra A] [InnerProductAlgebra A] :
@@ -899,9 +898,9 @@ theorem QuantumSet.starAlgEquiv_commutes_with_modAut_of_isometry''
   f.toLinearMap ∘ₗ (modAut (-(2 * k A + 1))).toLinearMap
     = (modAut (-(2 * k B + 1))).toLinearMap ∘ₗ f.toLinearMap :=
 by
-  rw [← modAut_symm, AlgEquiv.linearMap_comp_eq_iff, AlgEquiv.symm_symm,
+  rw [← starAlgebra.modAut_symm, AlgEquiv.linearMap_comp_eq_iff, AlgEquiv.symm_symm,
     LinearMap.comp_assoc, starAlgEquiv_commutes_with_modAut_of_isometry' hf,
-    ← LinearMap.comp_assoc, ← modAut_symm]
+    ← LinearMap.comp_assoc, ← starAlgebra.modAut_symm]
   simp only [AlgEquiv.coe_comp, AlgEquiv.self_trans_symm]
   rfl
 

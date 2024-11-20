@@ -301,7 +301,7 @@ theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
       Commute x (hb.modAut (-r)).toLinearMap :=
   by
   simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp]
-  rw [AlgEquiv.linearMap_comp_eq_iff, ← QuantumSet.modAut_symm]
+  rw [AlgEquiv.linearMap_comp_eq_iff, ← starAlgebra.modAut_symm]
   nth_rw 1 [← AlgEquiv.comp_linearMap_eq_iff]
   rw [eq_comm]
   simp_rw [LinearMap.comp_assoc]
@@ -313,7 +313,7 @@ theorem symmMap_apply_eq_symmMap_symm_apply_iff
   by
   rw [symmMap_apply, symmMap_symm_apply, LinearMap.adjoint_real_eq]
   simp_rw [@eq_comm _ (LinearMap.adjoint _), AlgEquiv.comp_linearMap_eq_iff,
-    neg_sub_left, QuantumSet.modAut_symm]
+    neg_sub_left, starAlgebra.modAut_symm]
   nth_rw 1 [← QuantumSet.modAut_isSelfAdjoint]
   nth_rw 2 [← QuantumSet.modAut_isSelfAdjoint]
   simp_rw [LinearMap.star_eq_adjoint, ← LinearMap.adjoint_comp,

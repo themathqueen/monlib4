@@ -48,7 +48,7 @@ class starAlgebra (A : Type _) extends
     /-- the modular automorphism is an additive homomorphism from `ℝ` to
       `(A ≃ₐ[ℂ] A, add := · * ·, zero := 1)` -/
     modAut_trans : ∀ r s, (modAut r).trans (modAut s) = modAut (r + s)
-    modAut_zero : modAut 0 = 1
+    -- modAut_zero : modAut 0 = 1
     /-- applying star to `modAut r x` will give `modAut (-r) (star x)` -/
     modAut_star : ∀ r x, star (modAut r x) = modAut (-r) (star x)
 attribute [instance] starAlgebra.toRing
@@ -56,10 +56,37 @@ attribute [instance] starAlgebra.toAlgebra
 attribute [instance] starAlgebra.toStarRing
 attribute [instance] starAlgebra.toStarModule
 attribute [simp] starAlgebra.modAut_trans
-attribute [simp] starAlgebra.modAut_zero
 attribute [simp] starAlgebra.modAut_star
-
 export starAlgebra (modAut)
+
+theorem starAlgebra.modAut_zero {A : Type*} [hA : starAlgebra A] :
+  hA.modAut 0 = 1 :=
+by
+  ext x
+  have := hA.modAut_trans 0 1
+  rw [zero_add, AlgEquiv.ext_iff] at this
+  specialize this x
+  apply_fun (modAut 1).symm at this
+  simp only [AlgEquiv.trans_apply, AlgEquiv.symm_apply_apply] at this
+  exact this
+
+@[simp]
+theorem starAlgebra.modAut_apply_modAut {A : Type*} [ha : starAlgebra A]
+  (t r : ℝ) (a : A) :
+  ha.modAut t (ha.modAut r a) = ha.modAut (t + r) a :=
+by
+  rw [← AlgEquiv.trans_apply, starAlgebra.modAut_trans, add_comm]
+
+@[simp]
+theorem starAlgebra.modAut_symm {A : Type*} [ha : starAlgebra A] (r : ℝ) :
+  (ha.modAut r).symm = ha.modAut (-r) :=
+by
+  ext
+  apply_fun (ha.modAut r) using AlgEquiv.injective _
+  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_neg_cancel, ha.modAut_zero]
+  rfl
+
+attribute [simp] starAlgebra.modAut_zero
 
 -- @[instance] def starAlgebra.toStarAddMonoid {A : Type*} [starAlgebra A] :
 --   StarAddMonoid A :=
@@ -152,28 +179,14 @@ by
   let b := hA.onb.toBasis
   exact @Module.Finite.of_basis ℂ A (n A) _ _ _ _ b
 
-@[simp]
-theorem QuantumSet.modAut_apply_modAut
-  (t r : ℝ) (a : A) :
-  ha.modAut t (ha.modAut r a) = ha.modAut (t + r) a :=
-by
-  rw [← AlgEquiv.trans_apply, starAlgebra.modAut_trans, add_comm]
-
-@[simp]
-theorem QuantumSet.modAut_symm (r : ℝ) :
-  (ha.modAut r).symm = ha.modAut (-r) :=
-by
-  ext
-  apply_fun (ha.modAut r) using AlgEquiv.injective _
-  simp only [AlgEquiv.apply_symm_apply, modAut_apply_modAut, add_neg_cancel, ha.modAut_zero]
-  rfl
-
 lemma QuantumSet.modAut_isSelfAdjoint
   [hA : QuantumSet A] (r : ℝ) :
   IsSelfAdjoint (ha.modAut r).toLinearMap :=
 by
   rw [← LinearMap.isSymmetric_iff_isSelfAdjoint]
   exact modAut_isSymmetric _
+
+alias QuantumSet.modAut_apply_modAut := starAlgebra.modAut_apply_modAut
 
 attribute [simp] TensorProduct.inner_tmul
 
@@ -182,18 +195,7 @@ section Complex
     starAlgebra ℂ where
   modAut _ := 1
   modAut_trans _ _ := rfl
-  modAut_zero := rfl
   modAut_star _ _ := rfl
-  --   NormedAddCommGroupOfRing ℂ where
-  -- noncomputable instance :
-  --    ℂ where
-  -- toFun := algebraMap ℂ ℂ
-  -- map_add' _ _ := rfl
-  -- map_one' := rfl
-  -- map_mul' _ _ := rfl
-  -- map_zero' := rfl
-  -- commutes' _ _ := mul_comm _ _
-  -- smul_def' _ _ := rfl
 
   noncomputable instance :
     InnerProductAlgebra ℂ where
@@ -634,7 +636,7 @@ lemma _root_.QuantumSet.rTensor_bra_comul_unit_eq_ket_star' (x : A) :
     ∘ₗ (rTensor A (bra ℂ (modAut (-hA.k) x))) ∘ₗ Coalgebra.comul ∘ₗ Algebra.linearMap ℂ A
   = ket ℂ (star x) :=
 by
-  rw [rTensor_bra_comul_unit_eq_ket_star, modAut_star, modAut_apply_modAut,
+  rw [rTensor_bra_comul_unit_eq_ket_star, modAut_star, starAlgebra.modAut_apply_modAut,
     neg_neg, neg_add_cancel, modAut_zero]
   rfl
 
@@ -804,7 +806,7 @@ by
   rw [← neg_sub] at this
   simp only [sub_neg_eq_add,
     LinearMap.real_of_isReal (_root_.StarAlgEquiv.isReal _), hf] at this
-  simp only [← LinearMap.comp_assoc, ← modAut_symm,
+  simp only [← LinearMap.comp_assoc, ← starAlgebra.modAut_symm,
     ← AlgEquiv.linearMap_comp_eq_iff] at this
   apply_fun LinearMap.adjoint at this
   simp only [LinearMap.adjoint_comp, ← hf, LinearMap.adjoint_adjoint,
