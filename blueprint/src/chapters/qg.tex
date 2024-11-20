@@ -1,0 +1,41 @@
+\chapter{Quantum graphs}
+
+\begin{definition}\label{QuantumGraph}
+ \uses{QuantumSet, schurMul}
+ \lean{QuantumGraph}\leanok
+ A \textit{quantum graph} is a pair $(B,A)$, where $B$ is a quantum set and $A$ is a linear map $B\to B$ such that $A\bullet A=A$.
+\end{definition}
+
+\begin{definition}\label{QuantumGraph.Real}
+ \uses{QuantumGraph, LinearMap.IsReal}
+ \lean{QuantumGraph.Real}\leanok
+ A quantum graph $(B,A)$ is \textit{real} if $A$ is a real linear map.
+\end{definition}
+
+\begin{lemma}\label{Coalgebra.comul_mul}
+ \uses{QuantumSet}
+ \lean{Coalgebra.comul_mul_of_gns}\leanok
+ Given a quantum set $B$, we have
+ \[m^*m=\sum_i\rmul(u_i)\otimes\lmul(u_i^*),\]
+ where $(u_i)_i$ is an orthonormal basis of $B$.
+\end{lemma}
+\begin{proof}\uses{rmulMapLmul_apply_Upsilon_eq}\leanok
+ Using Lemma \ref{rmulMapLmul_apply_Upsilon_eq}, we get
+ \[m^*m=\Phi(\operatorname{id})=\rmul(u_i)^*\otimes\lmul(u_i).\]
+ Taking adjoints of the above then gives us our desired result.
+\end{proof}
+
+\begin{lemma}\label{QuantumGraph.Real.isPosMap}
+ \uses{QuantumGraph.Real, LinearMap.IsPosMap}
+ \lean{schurIdempotent.isSchurProjection_iff_isPosMap}\leanok
+ Given a quantum graph $(B,A)$, we have $(B,A)$ is real if and only if $A$ is a positive map.
+\end{lemma}
+\begin{proof}\uses{isReal_of_isPosMap, Coalgebra.comul_mul}\leanok
+ If $A$ is a positive map, then it is real by Theorem \ref{isReal_of_isPosMap}.
+ So suppose $A$ is real. Now let $x\in{B}$. Then using Lemma \ref{Coalgebra.comul_mul}, we compute,
+ \begin{align*}
+  A(x^*x) &= (A \bullet A)m(x^*\otimes x)\\
+  &= \sum_im(A\otimes A)(x^*u_i\otimes u_i^*x)\\
+  &= \sum_iA(x^*u_i)A(u_i^*x)=\sum_i{A(u_i^*x)}^*A(u_i^*x) \geq0.
+ \end{align*}
+\end{proof}

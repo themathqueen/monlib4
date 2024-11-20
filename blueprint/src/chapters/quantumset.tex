@@ -158,3 +158,37 @@
   with inverse given by
   \[\Psi_{t,r}^{-1}(a\otimes b^{\operatorname{op}})=\ketbra{\sigma_{-t}(a)}{\vartheta_{-r}(b^*)}.\]
  \end{definition}
+
+ \begin{definition}\label{tenSwap}
+  \lean{tenSwap}\leanok
+  We define the tensor swap map to be $\varrho\colon A\otimes B^{\operatorname{op}}\cong B\otimes A^{\operatorname{op}}$, given by $x\otimes y^{\operatorname{op}}\mapsto y\otimes x^{\operatorname{op}}$.
+ \end{definition}
+
+ \begin{definition}\label{Upsilon}
+  \uses{QuantumSet.Psi, tenSwap}
+  \lean{Upsilon}\leanok
+  We define $\Upsilon$ to be the linear isomorphism from $\Bcal(\mathcal{A}_1,\mathcal{A}_2)$ to $\mathcal{A}_1\otimes\mathcal{A}_2$ given by $(\operatorname{id}\otimes\operatorname{unop})\varrho\Psi_{0,1}$.
+ \end{definition}
+
+ % \begin{lemma}\lean{}
+ %  $\Upsilon(\ketbra{a}{b})=\sigma_{-1}(b^*)\otimes a$.
+ % \end{lemma}
+ % \begin{lemma}
+ %  $\Upsilon^{-1}(a\otimes b)=\ketbra{b}{\sigma_{-1}(a^*)}$.
+ % \end{lemma}
+ 
+ \begin{definition}\label{PhiMap}
+  \uses{Upsilon}
+  \lean{PhiMap}\leanok
+  We define $\Phi$ to be the linear isomorphism from $\Bcal(\mathcal{A}_1,\mathcal{A}_2)$ to the bimodule maps in $\Bcal(\mathcal{A}_1\otimes\mathcal{A}_2)$ given by $(\rmul\otimes\lmul)\Upsilon$.
+ \end{definition}
+
+ \begin{lemma}\label{rmulMapLmul_apply_Upsilon_eq}
+  \uses{PhiMap}
+  \lean{rmulMapLmul_apply_Upsilon_eq}\leanok
+  \[\Phi(A)=(\operatorname{id}\otimes m)(\operatorname{id}\otimes A\otimes\operatorname{id})(m^*\otimes\operatorname{id}).\]
+ \end{lemma}
+ \begin{proof}
+  
+ \end{proof}
+
