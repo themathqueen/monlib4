@@ -1090,6 +1090,42 @@ by
     simp only [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, QuantumSet.modAut_adjoint]
     exact this
 
+theorem PhiMap.apply_real (gns : k B = 0) (A : B →ₗ[ℂ] B) :
+  (PhiMap (LinearMap.real A)).1
+    = LinearMap.adjoint (PhiMap A).1 :=
+real_Upsilon_toBimodule gns gns
+
+theorem PhiMap_rankOne (x y : B) :
+  (PhiMap (rankOne ℂ x y)).1 =
+    TensorProduct.map (LinearMap.adjoint (rmul y)) (lmul x) :=
+by
+  rw [PhiMap_apply, Upsilon_rankOne, TensorProduct.toIsBimoduleMap_apply_coe,
+    rmulMapLmul_apply, ← rmul_adjoint]
+
+theorem LinearMap.real_zero :
+  LinearMap.real (0 : B →ₗ[ℂ] B) = 0 :=
+by ext; simp only [real_apply, zero_apply, star_zero]
+
+theorem lTensor_counit_PhiMap_rTensor_algebraLinearMap (x : B →ₗ[ℂ] B) :
+  (modAut (-k B)).toLinearMap
+    ∘ₗ (TensorProduct.rid ℂ _).toLinearMap
+    ∘ₗ (LinearMap.lTensor _ Coalgebra.counit)
+    ∘ₗ (PhiMap x).1
+    ∘ₗ (LinearMap.rTensor _ (Algebra.linearMap ℂ _))
+    ∘ₗ (TensorProduct.lid ℂ _).symm.toLinearMap
+    ∘ₗ (modAut (k B)).toLinearMap
+  = symmMap ℂ B B x :=
+by
+  rw [PhiMap_apply, TensorProduct.toIsBimoduleMap_apply_coe,
+    rmulMapLmul_apply_Upsilon_eq, symmMap_eq]
+  simp only [LinearMap.comp_assoc, LinearMap.rTensor_comp, LinearMap.lTensor_comp]
+
+def QuantumGraph.NumOfEdges {A : Type*} [starAlgebra A] [QuantumSet A] :
+    (A →ₗ[ℂ] A) →ₗ[ℂ] ℂ where
+  toFun f := ⟪1, f 1⟫_ℂ
+  map_add' _ _ := by simp only [LinearMap.add_apply, inner_add_right]
+  map_smul' _ _ := by simp only [LinearMap.smul_apply, inner_smul_right]; rfl
+
 end
 
 -- class QuantumGraphHom {A B : Type*} [NormedAddCommGroupOfRing A]

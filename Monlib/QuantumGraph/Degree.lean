@@ -126,6 +126,149 @@ by
   rw [LinearMap.toSubsetQuantumSet_eq_iff, rankOne_ofSubsetQuantumSet]
   simp_rw [← QuantumSet.toSubset_algEquiv_symm_eq_toSubset_equiv, map_one]
 
+@[simps]
+noncomputable def QuantumGraph.outDegree {A : Type*} [starAlgebra A] [QuantumSet A] :
+    (A →ₗ[ℂ] A) →ₗ[ℂ] (A →ₗ[ℂ] A) where
+  toFun f := LinearMap.mul' ℂ _ ∘ₗ (LinearMap.rTensor _ f)
+    ∘ₗ (LinearMap.rTensor _ (Algebra.linearMap ℂ _))
+    ∘ₗ (TensorProduct.lid ℂ _).symm.toLinearMap
+  map_add' _ _ := by simp only [LinearMap.rTensor_add, LinearMap.add_comp, LinearMap.comp_add]
+  map_smul' _ _ := by simp only [LinearMap.rTensor_smul, LinearMap.smul_comp,
+    LinearMap.comp_smul]; rfl
+
+theorem QuantumGraph.outDegree_eq {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph.outDegree f = lmul (f 1) :=
+by
+  ext a
+  simp only [outDegree_apply, LinearMap.comp_apply, LinearEquiv.coe_coe,
+    TensorProduct.lid_symm_apply, LinearMap.rTensor_tmul, Algebra.linearMap_apply,
+    Algebra.algebraMap_eq_smul_one, one_smul,
+    lmul_apply, LinearMap.mul'_apply]
+
+set_option synthInstance.maxHeartbeats 30000 in
+@[simps]
+noncomputable def QuantumGraph.inDegree {A : Type*} [starAlgebra A] [QuantumSet A] :
+    (A →ₗ[ℂ] A) →ₗ⋆[ℂ] (A →ₗ[ℂ] A) where
+  toFun f := LinearMap.mul' ℂ _ ∘ₗ (LinearMap.lTensor _ (LinearMap.adjoint f))
+    ∘ₗ (LinearMap.lTensor _ (Algebra.linearMap ℂ _))
+    ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap
+  map_add' _ _ := by simp only [map_add, LinearMap.lTensor_add, LinearMap.add_comp, LinearMap.comp_add]
+  map_smul' _ _ := by simp only [LinearMap.lTensor_smul, LinearMap.smul_comp,
+    LinearMap.comp_smul, LinearMap.adjoint_smul]
+
+theorem QuantumGraph.inDegree_eq {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph.inDegree f = rmul (LinearMap.adjoint f 1) :=
+by
+  ext a
+  simp only [inDegree_apply, LinearMap.comp_apply, LinearEquiv.coe_coe,
+    TensorProduct.rid_symm_apply, LinearMap.lTensor_tmul, Algebra.linearMap_apply,
+    Algebra.algebraMap_eq_smul_one, one_smul,
+    rmul_apply, LinearMap.mul'_apply]
+
+lemma QuantumGraph.outDegree_real_eq {A : Type*} [starAlgebra A] [QuantumSet A] {x : A →ₗ[ℂ] A} :
+  LinearMap.real (QuantumGraph.outDegree x) = QuantumGraph.inDegree (symmMap ℂ _ _ x) :=
+by
+  rw [outDegree_eq, lmul_eq_mul, LinearMap.mulLeft_real,
+    ← star_one, ← LinearMap.real_apply, inDegree_eq, symmMap_apply,
+    LinearMap.adjoint_adjoint]
+  rfl
+
+lemma QuantumGraph.inDegree_real_eq {A : Type*} [starAlgebra A] [QuantumSet A] {x : A →ₗ[ℂ] A} :
+  LinearMap.real (QuantumGraph.inDegree x) = QuantumGraph.outDegree ((symmMap ℂ _ _).symm x) :=
+by
+  rw [LinearMap.real_inj_eq, LinearMap.real_real,
+    outDegree_real_eq, LinearEquiv.apply_symm_apply]
+
+theorem QuantumGraph.outDegree_eq' {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph.outDegree f =
+    (TensorProduct.lid ℂ _).toLinearMap
+      ∘ₗ (LinearMap.rTensor _ Coalgebra.counit)
+      ∘ₗ (PhiMap f).1
+      ∘ₗ (LinearMap.rTensor _ (Algebra.linearMap ℂ _))
+      ∘ₗ (TensorProduct.lid ℂ _).symm.toLinearMap :=
+by
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f
+  simp only [map_sum, LinearMap.IsBimoduleMap.sum_coe, LinearMap.sum_comp, LinearMap.comp_sum]
+  congr
+  ext
+  simp only [PhiMap_rankOne, LinearMap.comp_apply,
+    LinearEquiv.coe_coe, TensorProduct.lid_symm_apply,
+    LinearMap.rTensor_tmul, TensorProduct.map_tmul,
+    TensorProduct.lid_tmul, outDegree_eq, lmul_apply,
+    ContinuousLinearMap.coe_coe, rankOne_apply, Algebra.linearMap_apply,
+    Algebra.algebraMap_eq_smul_one, one_smul, ← Coalgebra.inner_eq_counit',
+    LinearMap.adjoint_inner_right, rmul_apply, one_mul, smul_mul_assoc]
+
+theorem QuantumGraph.inDegree_eq' {A : Type*} [starAlgebra A] [QuantumSet A]
+  (gns : k A = 0) {f : A →ₗ[ℂ] A} :
+  QuantumGraph.inDegree f =
+    (TensorProduct.rid ℂ _).toLinearMap
+      ∘ₗ (LinearMap.lTensor _ Coalgebra.counit)
+      ∘ₗ (PhiMap (LinearMap.real f)).1
+      ∘ₗ (LinearMap.lTensor _ (Algebra.linearMap ℂ _))
+      ∘ₗ (TensorProduct.rid ℂ _).symm.toLinearMap :=
+by
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f
+  simp only [map_sum, LinearMap.IsBimoduleMap.sum_coe, LinearMap.sum_comp, LinearMap.comp_sum,
+    LinearMap.real_sum]
+  congr
+  ext
+  simp only [rankOne_real, PhiMap_rankOne, LinearMap.comp_apply,
+    LinearEquiv.coe_coe, TensorProduct.rid_symm_apply,
+    LinearMap.lTensor_tmul, TensorProduct.map_tmul,
+    TensorProduct.rid_tmul, inDegree_eq, lmul_apply,
+    ContinuousLinearMap.coe_coe, rankOne_apply, Algebra.linearMap_apply,
+    Algebra.algebraMap_eq_smul_one, one_smul, ← Coalgebra.inner_eq_counit',
+    LinearMap.adjoint_inner_right, rmul_apply, one_mul, smul_mul_assoc,
+    rmul_adjoint, starAlgebra.modAut_star, starAlgebra.modAut_apply_modAut, star_star,
+    ContinuousLinearMap.linearMap_adjoint, rankOne_adjoint, mul_one]
+  ring_nf
+  simp only [gns, starAlgebra.modAut_zero, mul_smul_comm,
+    QuantumSet.inner_eq_counit, star_one, one_mul, AlgEquiv.one_apply, mul_one]
+
+theorem QuantumGraph.outDegree_apply_schurMul
+  {A : Type*} [starAlgebra A] [QuantumSet A] (gns : k A = 0) (f₁ f₂ : A →ₗ[ℂ] A) :
+  QuantumGraph.outDegree (f₁ •ₛ f₂)
+    = (f₁ ∘ₗ symmMap ℂ _ _ f₂) •ₛ 1 :=
+by
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f₁
+  obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne f₂
+  simp only [map_sum, LinearMap.sum_apply, LinearMap.sum_comp, LinearMap.comp_sum,
+    schurMul.apply_rankOne, QuantumGraph.outDegree_eq,
+    ContinuousLinearMap.coe_coe, rankOne_apply, map_smul,
+    symmMap_rankOne_apply, LinearMap.rankOne_comp,
+    schurMul_one_right_rankOne, lmul_adjoint]
+  simp only [lmul_eq_alg_lmul, map_mul, ContinuousLinearMap.linearMap_adjoint,
+    rankOne_adjoint, ContinuousLinearMap.coe_coe, rankOne_apply,
+    star_smul, star_star, Complex.star_def, inner_conj_symm, map_smul, mul_smul_comm]
+  simp only [QuantumSet.inner_conj_left, one_mul, gns]
+  ring_nf
+  simp only [starAlgebra.modAut_zero, AlgEquiv.one_apply]
+
+theorem QuantumGraph.inDegree_apply_schurMul
+  {A : Type*} [starAlgebra A] [QuantumSet A] (gns : k A = 0) (f₁ f₂ : A →ₗ[ℂ] A) :
+  QuantumGraph.inDegree (f₁ •ₛ f₂)
+    = 1 •ₛ (LinearMap.adjoint f₂ ∘ₗ LinearMap.real f₁) :=
+by
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne f₁
+  obtain ⟨γ, δ, rfl⟩ := LinearMap.exists_sum_rankOne f₂
+  simp only [map_sum, LinearMap.sum_apply, LinearMap.sum_comp, LinearMap.comp_sum,
+    LinearMap.real_sum,
+    schurMul.apply_rankOne, QuantumGraph.inDegree_eq,
+    ContinuousLinearMap.coe_coe, rankOne_apply, map_smul,
+    LinearMap.rankOne_comp, schurMul_one_left_rankOne, rmul_adjoint,
+    rankOne_real, ContinuousLinearMap.linearMap_adjoint,
+    rankOne_adjoint, ContinuousLinearMap.coe_coe,
+    LinearMap.adjoint_smul, mul_smul_comm,
+    starAlgebra.modAut_star, starAlgebra.modAut_apply_modAut,
+    star_star, inner_conj_symm]
+  simp_rw [QuantumSet.inner_star_left, mul_one]
+  simp only [gns]
+  ring_nf
+  simp only [starAlgebra.modAut_zero, AlgEquiv.one_apply]
+  simp only [rmul_eq_mul, LinearMap.mulRight_mul, LinearMap.mul_eq_comp]
+  rw [Finset.sum_comm]
+
 def QuantumGraph.IsRegular
   {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A}
   (_h : QuantumGraph A f) (d : ℂ) : Prop :=

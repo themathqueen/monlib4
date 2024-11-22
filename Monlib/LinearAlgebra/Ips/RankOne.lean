@@ -505,6 +505,17 @@ by
   obtain ⟨α, β, rfl⟩ := ContinuousLinearMap.exists_sum_rankOne a
   simp_rw [map_sum, h]
 
+theorem AddMonoidHom.ext_of_rank_one' {𝕜 H₁ H₂ H' : Type _} [RCLike 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
+    [NormedAddCommGroup H₁] [InnerProductSpace 𝕜 H₁]
+    [NormedAddCommGroup H₂] [InnerProductSpace 𝕜 H₂]
+    [FiniteDimensional 𝕜 H₁] [FiniteDimensional 𝕜 H₂]
+    {x y : (H₁ →ₗ[𝕜] H₂) →+ H'}
+    (h : ∀ a b, x (rankOne 𝕜 a b).toLinearMap = y (rankOne 𝕜 a b).toLinearMap) : x = y :=
+by
+  ext a
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne a
+  simp_rw [map_sum, h]
+
 theorem LinearMap.ext_of_rank_one' {𝕜 H₁ H₂ H' : Type _} [RCLike 𝕜] [AddCommMonoid H'] [Module 𝕜 H']
     [NormedAddCommGroup H₁] [InnerProductSpace 𝕜 H₁]
     [NormedAddCommGroup H₂] [InnerProductSpace 𝕜 H₂]

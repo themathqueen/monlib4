@@ -74,17 +74,24 @@ theorem IsIdempotentElem.mem_range_iff {p : E →ₗ[R] E} (hp : IsIdempotentEle
   · intro h
     use x
 
-variable {U V : Submodule R E} {p q : E →ₗ[R] E}
-  (hp : IsIdempotentElem p) (hq : IsIdempotentElem q)
+variable {U V : Submodule R E} {q : E →ₗ[R] E} (hq : IsIdempotentElem q)
 
 include hq in
 /-- given idempotent linear operators $p,q$,
   we have $qp = p$ iff $p(E) \subseteq q(E)$ -/
-theorem IsIdempotentElem.comp_idempotent_iff :
-    q.comp p = p ↔ Submodule.map p ⊤ ≤ Submodule.map q ⊤ :=
+theorem IsIdempotentElem.comp_idempotent_iff
+  {E₂ : Type*} [AddCommGroup E₂] [Module R E₂] (p : E₂ →ₗ[R] E) :
+    q.comp p = p ↔ LinearMap.range p ≤ LinearMap.range q :=
 by
-  simp_rw [LinearMap.ext_iff, comp_apply, ← IsIdempotentElem.mem_range_iff hq, Submodule.map_top,
+  simp_rw [LinearMap.ext_iff, comp_apply, ← IsIdempotentElem.mem_range_iff hq,
     SetLike.le_def, mem_range, forall_exists_index, forall_apply_eq_imp_iff]
+include hq in
+theorem IsIdempotentElem.comp_idempotent_iff'
+  {E₂ : Type*} [AddCommGroup E₂] [Module R E₂] (p : E₂ →ₗ[R] E) :
+    q.comp p = p ↔ Submodule.map p ⊤ ≤ Submodule.map q ⊤ :=
+by simp_rw [IsIdempotentElem.comp_idempotent_iff hq, Submodule.map_top]
+
+variable {p : E →ₗ[R] E} (hp : IsIdempotentElem p)
 
 include hp hq in
 /-- if $p,q$ are idempotent operators and $pq = p = qp$,
@@ -123,7 +130,7 @@ theorem LinearMap.commutes_of_isIdempotentElem {E 𝕜 : Type _} [RCLike 𝕜] [
 theorem LinearMap.commutes_iff_isIdempotentElem {E 𝕜 : Type _} [RCLike 𝕜] [AddCommGroup E]
     [Module 𝕜 E] {p q : E →ₗ[𝕜] E} (hp : IsIdempotentElem p) (hq : IsIdempotentElem q) :
     p.comp q = p ∧ q.comp p = p ↔ IsIdempotentElem (q - p) :=
-  ⟨fun h => LinearMap.isIdempotentElem_sub_of hp hq h, fun h =>
+  ⟨fun h => LinearMap.isIdempotentElem_sub_of hq hp h, fun h =>
     LinearMap.commutes_of_isIdempotentElem hp hq h⟩
 
 end
@@ -530,7 +537,7 @@ theorem orthogonalProjection.is_le_iff_subset [InnerProductSpace ℂ E] {U V : S
   simp_rw [orthogonal_projection_is_le_iff_commutes, ← coe_inj, coe_comp,
     IsIdempotentElem.comp_idempotent_iff
       (IsIdempotentElem.clm_to_lm.mp (orthogonalProjection.isIdempotentElem V)),
-    Submodule.map_top, range_toLinearMap, orthogonalProjection.range]
+    range_toLinearMap, orthogonalProjection.range]
 
 theorem Submodule.map_to_linearMap [Module 𝕜 E] {p : E →L[𝕜] E} {U : Submodule 𝕜 E} :
     Submodule.map (p : E →ₗ[𝕜] E) U = Submodule.map p U :=
@@ -541,13 +548,13 @@ theorem Submodule.map_to_linearMap [Module 𝕜 E] {p : E →L[𝕜] E} {U : Sub
 theorem ContinuousLinearMap.image_subset_iff_sub_of_is_idempotent [InnerProductSpace 𝕜 E]
     [CompleteSpace E] {p q : E →L[𝕜] E} (hp : IsIdempotentElem p) (hq : IsIdempotentElem q)
     (hpa : IsSelfAdjoint p) (hqa : IsSelfAdjoint q) :
-    Submodule.map p ⊤ ≤ Submodule.map q ⊤ ↔ IsIdempotentElem (q - p) := by
+    LinearMap.range p ≤ LinearMap.range q ↔ IsIdempotentElem (q - p) := by
   simp_rw [IsIdempotentElem.clm_to_lm, coe_sub, ←
     LinearMap.commutes_iff_isIdempotentElem (IsIdempotentElem.clm_to_lm.mp hp)
       (IsIdempotentElem.clm_to_lm.mp hq),
     ← coe_comp, coe_inj, self_adjoint_proj_commutes hpa hqa, and_self_iff, ← coe_inj, coe_comp,
-    IsIdempotentElem.comp_idempotent_iff (IsIdempotentElem.clm_to_lm.mp hq),
-    Submodule.map_to_linearMap]
+    IsIdempotentElem.comp_idempotent_iff (IsIdempotentElem.clm_to_lm.mp hq)]
+  rfl
 
 section MinProj
 

@@ -178,19 +178,19 @@ theorem QuantumGraph.PiMat_submoduleIsProj_codRestrict {f : PiMat ℂ ι p →�
       (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi t r f))) i) :=
 rfl
 
-noncomputable def QuantumGraph.NumOfEdges {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+noncomputable def QuantumGraph.dim_of_piMat_submodule {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph _ f) : ℕ :=
 ∑ i : ι × ι, Module.finrank ℂ (hf.PiMat_submodule 0 (1 / 2) i)
 
-theorem QuantumGraph.numOfEdges_eq_trace {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+theorem QuantumGraph.dim_of_piMat_submodule_eq_trace {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph _ f) :
-  QuantumGraph.NumOfEdges hf =
+  QuantumGraph.dim_of_piMat_submodule hf =
     PiMat.traceLinearMap
     (PiMatTensorProductEquiv
     ((StarAlgEquiv.lTensor _ (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi 0 (1 / 2) f))) :=
 by
   rw [PiMat.traceLinearMap_apply, Matrix.blockDiagonal'AlgHom_apply,
-    Matrix.trace_blockDiagonal', NumOfEdges]
+    Matrix.trace_blockDiagonal', dim_of_piMat_submodule]
   simp only [Nat.cast_sum, PiMatTensorProductEquiv_apply]
   congr
   ext i
@@ -203,13 +203,13 @@ by
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
-theorem QuantumGraph.numOfEdges_eq_rank_top_iff
+theorem QuantumGraph.dim_of_piMat_submodule_eq_rank_top_iff
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hf : QuantumGraph _ f) :
-  QuantumGraph.NumOfEdges hf = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
+  QuantumGraph.dim_of_piMat_submodule hf = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
     ↔ f = Qam.completeGraph _ _ :=
 by
   calc
-    QuantumGraph.NumOfEdges hf = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
+    QuantumGraph.dim_of_piMat_submodule hf = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2)
       ↔ ∑ i : ι × ι, Module.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
         = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2) := by rfl
     _ ↔ ∀ i, Module.finrank ℂ ↥(hf.PiMat_submodule 0 (1 / 2) i)
@@ -255,11 +255,11 @@ by
         simp_rw [StarAlgEquiv.eq_apply_iff_symm_eq, map_one]
         rw [← LinearEquiv.symm_apply_eq, QuantumSet.Psi_symm_one, eq_comm]
 
-theorem QuantumGraph.CompleteGraph_numOfEdges :
-  QuantumGraph.NumOfEdges
+theorem QuantumGraph.CompleteGraph_dim_of_piMat_submodule :
+  QuantumGraph.dim_of_piMat_submodule
     (⟨Qam.Nontracial.CompleteGraph.qam⟩ : QuantumGraph _ (Qam.completeGraph (PiMat ℂ ι p) (PiMat ℂ ι p)))
       = ∑ i : ι × ι, Fintype.card (p i.1) * Fintype.card (p i.2) :=
-by rw [QuantumGraph.numOfEdges_eq_rank_top_iff]
+by rw [QuantumGraph.dim_of_piMat_submodule_eq_rank_top_iff]
 
 open scoped InnerProductSpace
 theorem Algebra.linearMap_adjoint_eq_dual :
@@ -268,15 +268,17 @@ theorem Algebra.linearMap_adjoint_eq_dual :
 by
   rw [← Module.Dual.pi.IsFaithfulPosMap.adjoint_eq, LinearMap.adjoint_adjoint]
 
-theorem exists_numOfEdges_ne_inner_one_map_one_of_IsFaithfulState
+theorem exists_dim_of_piMat_submodule_ne_inner_one_map_one_of_IsFaithfulState
   (hφ₂ : (Module.Dual.pi φ).IsUnital)
   (hB : 1 < Module.finrank ℂ (PiMat ℂ ι p)) :
   ∃ (A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p) (hA : QuantumGraph (PiMat ℂ ι p) A),
-    ⟪1, A 1⟫_ℂ ≠ QuantumGraph.NumOfEdges hA :=
+    QuantumGraph.NumOfEdges A ≠ QuantumGraph.dim_of_piMat_submodule hA :=
 by
   use Qam.completeGraph _ _, ⟨Qam.Nontracial.CompleteGraph.qam⟩
-  rw [QuantumGraph.CompleteGraph_numOfEdges, Qam.completeGraph]
-  simp only [ContinuousLinearMap.coe_coe, rankOne_apply_apply_toFun]
+  rw [QuantumGraph.CompleteGraph_dim_of_piMat_submodule, Qam.completeGraph,
+    QuantumGraph.NumOfEdges]
+  simp only [LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.coe_coe,
+    rankOne_apply_apply_toFun, ne_eq]
   have : ⟪(1 : PiMat ℂ ι p), 1⟫_ℂ = 1 :=
   by
     simp_rw [Coalgebra.inner_eq_counit', Coalgebra.counit_eq_unit_adjoint]
@@ -601,12 +603,12 @@ by
 
 open QuantumSet in
 set_option synthInstance.maxHeartbeats 0 in
-theorem QuantumGraph.trivialGraph_numOfEdges :
-  (QuantumGraph.trivialGraph : QuantumGraph _ (Qam.trivialGraph (PiMat ℂ ι p))).NumOfEdges
+theorem QuantumGraph.trivialGraph_dim_of_piMat_submodule :
+  (QuantumGraph.trivialGraph : QuantumGraph _ (Qam.trivialGraph (PiMat ℂ ι p))).dim_of_piMat_submodule
     = Fintype.card ι :=
 by
   rw [← Nat.cast_inj (R := ℂ)]
-  rw [QuantumGraph.numOfEdges_eq_trace, Qam.trivialGraph_eq]
+  rw [QuantumGraph.dim_of_piMat_submodule_eq_trace, Qam.trivialGraph_eq]
   simp_rw [map_smul]
   rw [← rankOne.sum_orthonormalBasis_eq_id_lm (QuantumSet.onb)]
   simp only [map_sum, Psi_apply, Psi_toFun_apply, StarAlgEquiv.lTensor_tmul,
