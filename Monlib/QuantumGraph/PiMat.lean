@@ -1143,3 +1143,104 @@ by
   simp only [Finset.univ_product_univ, rankOne_lm_sum_sum]
   simp only [Finset.sum_product_univ, Matrix.reshape_aux_star (R := ℂ),
     Matrix.vecMulVec_conj, star_star]
+
+theorem orthogonalProjection'_bot {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [InnerProductSpace 𝕜 E] :
+  orthogonalProjection' (⊥ : Submodule 𝕜 E) = 0 :=
+by simp
+
+omit [Fintype ι] [(i : ι) → Fintype (p i)] [(i : ι) → DecidableEq (p i)] in
+lemma LinearMap.proj_apply_includeBlock
+  (i j : ι) (x : Matrix (p j) (p j) ℂ) :
+  LinearMap.proj (R := ℂ) i (Matrix.includeBlock (i := j) x) =
+    if h : j = i then by rw [← h]; exact x else 0 :=
+by simp [Matrix.includeBlock_apply]
+
+lemma _root_.PiMat.modAut_includeBlock
+  (r : ℝ) (j : ι) (x : Matrix (p j) (p j) ℂ) :
+  (modAut r) (Matrix.includeBlock x)
+    = Matrix.includeBlock (modAut r x) :=
+by
+  simp only [PiMat.modAut]
+  ext
+  simp only [AlgEquiv.piCongrRight_apply,
+    modAut, sig_apply, Matrix.includeBlock_apply, mul_dite, mul_zero,
+    dite_mul, zero_mul]
+  aesop
+
+omit [DecidableEq ι] in
+lemma _root_.PiMat.modAut_proj
+  (r : ℝ) (j : ι) (x : PiMat ℂ ι p) :
+  (modAut r) (LinearMap.proj (R := ℂ) j x)
+    = (modAut r x) j :=
+by
+  simp only [PiMat.modAut]
+  ext
+  simp only [AlgEquiv.piCongrRight_apply,
+    modAut, sig_apply, Matrix.includeBlock_apply, mul_dite, mul_zero,
+    dite_mul, zero_mul]
+  aesop
+
+lemma EuclideanSpace.prod_choose_zero_fst
+  {n m : Type*} [Fintype n] [DecidableEq n] [Fintype m] [DecidableEq m]
+  (i : n × m) :
+  ((0 : EuclideanSpace ℂ (n × m)).prod_choose i).1 = 0 :=
+by
+  simp only [Pi.zero_apply, Prod.fst_zero, PiLp.zero_apply,
+    prod_choose, LinearIsometryEquiv.map_zero, zero_smul]
+
+lemma
+  Matrix.vecMulVec_zero {m n α : Type*} [MulZeroClass α] (w : m → α) :
+  vecMulVec w (0 : n → α) = 0 :=
+by
+  ext
+  simp only [zero_apply, vecMulVec_apply, Pi.zero_apply, mul_zero]
+lemma
+  Matrix.zero_vecMulVec {m n α : Type*} [MulZeroClass α] (w : n → α) :
+  vecMulVec (0 : m → α) w = 0 :=
+by
+  ext
+  simp only [zero_apply, vecMulVec_apply, Pi.zero_apply, zero_mul]
+
+open scoped Kronecker
+
+set_option synthInstance.maxHeartbeats 200000 in
+set_option maxHeartbeats 400000 in
+theorem QuantumGraph.Real.PiMat_submodule_eq_zero_iff_proj_comp_adjoint_proj_eq_zero
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hA : QuantumGraph.Real _ A)
+  {i : ι × ι} :
+  hA.PiMat_submodule i = 0 ↔
+    LinearMap.proj i.1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj i.2) = 0 :=
+by
+  rw [Submodule.zero_eq_bot,
+    Submodule.eq_iff_orthogonalProjection_eq, orthogonalProjection'_bot,
+    QuantumGraph.Real.PiMat_submoduleOrthogonalProjection]
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
+  simp only [map_sum, Finset.sum_apply, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
+    StarAlgEquiv.lTensor_tmul, PiMatTensorProductEquiv_tmul, PiMat_toEuclideanLM, StarAlgEquiv.piCongrRight_apply]
+  rw [← map_sum, LinearEquiv.map_eq_zero_iff,
+    ← map_sum, StarAlgEquiv.map_eq_zero_iff]
+  simp only [PiMat.transposeStarAlgEquiv_symm_apply, MulOpposite.unop_op]
+  rw [← Function.Injective.eq_iff (QuantumSet.Psi 0 (1/2)).injective,
+    ← Function.Injective.eq_iff (AlgEquiv.lTensor _ (Matrix.transposeAlgEquiv _ _ _).symm).injective,
+    ← Function.Injective.eq_iff tensorToKronecker.injective]
+  simp only [LinearMap.sum_comp, LinearMap.comp_sum,
+    LinearMap.rankOne_comp', LinearMap.comp_rankOne, map_sum,
+    QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply, AlgEquiv.lTensor_tmul,
+    Matrix.transposeAlgEquiv_symm_op_apply, PiMat.modAut_proj,
+    tensorToKronecker_apply, TensorProduct.toKronecker_apply, map_zero]
+  rfl
+
+theorem QuantumGraph.Real.PiMat_submodule_eq_zero_iff_swap_eq_zero_of_adjoint
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hA : QuantumGraph.Real _ A)
+  (hA₂ : LinearMap.adjoint A = A)
+  (i : ι × ι) :
+  hA.PiMat_submodule i = 0
+    ↔ hA.PiMat_submodule i.swap = 0 :=
+by
+  simp_rw [PiMat_submodule_eq_zero_iff_proj_comp_adjoint_proj_eq_zero,
+    Prod.fst_swap, Prod.snd_swap]
+  nth_rw 1 [← hA₂, ← Function.Injective.eq_iff LinearMap.adjoint.injective]
+  simp only [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, LinearMap.comp_assoc, map_zero]
