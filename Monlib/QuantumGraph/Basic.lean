@@ -510,6 +510,10 @@ class QuantumGraph (A : Type*) [starAlgebra A] [hA : QuantumSet A]
     (f : A →ₗ[ℂ] A) : Prop where
   isIdempotentElem : f •ₛ f = f
 
+theorem quantumGraph_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph A f ↔ f •ₛ f = f :=
+⟨λ ⟨h⟩ => h, λ h => ⟨h⟩⟩
+
 class QuantumGraph.IsReal {A : Type*} [starAlgebra A] [hA : QuantumSet A]
     {f : A →ₗ[ℂ] A} (h : QuantumGraph A f) : Prop where
   isReal : LinearMap.IsReal f
@@ -518,6 +522,10 @@ class QuantumGraph.Real (A : Type*) [starAlgebra A] [hA : QuantumSet A]
     (f : A →ₗ[ℂ] A) : Prop where
   isIdempotentElem : f •ₛ f = f
   isReal : LinearMap.IsReal f
+
+theorem QuantumGraph.real_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
+  QuantumGraph.Real A f ↔ f •ₛ f = f ∧ LinearMap.IsReal f :=
+⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
 
 theorem quantumGraphReal_iff_schurProjection {f : A →ₗ[ℂ] A} :
   QuantumGraph.Real A f ↔ schurProjection f :=

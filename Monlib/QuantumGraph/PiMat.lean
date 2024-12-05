@@ -1206,15 +1206,14 @@ open scoped Kronecker
 
 set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 400000 in
-theorem QuantumGraph.Real.PiMat_submodule_eq_zero_iff_proj_comp_adjoint_proj_eq_zero
+theorem QuantumGraph.Real.PiMat_submodule_eq_bot_iff_proj_comp_adjoint_proj_eq_zero
   {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hA : QuantumGraph.Real _ A)
   {i : ι × ι} :
-  hA.PiMat_submodule i = 0 ↔
+  hA.PiMat_submodule i = ⊥ ↔
     LinearMap.proj i.1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj i.2) = 0 :=
 by
-  rw [Submodule.zero_eq_bot,
-    Submodule.eq_iff_orthogonalProjection_eq, orthogonalProjection'_bot,
+  rw [Submodule.eq_iff_orthogonalProjection_eq, orthogonalProjection'_bot,
     QuantumGraph.Real.PiMat_submoduleOrthogonalProjection]
   obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
   simp only [map_sum, Finset.sum_apply, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
@@ -1232,15 +1231,104 @@ by
     tensorToKronecker_apply, TensorProduct.toKronecker_apply, map_zero]
   rfl
 
-theorem QuantumGraph.Real.PiMat_submodule_eq_zero_iff_swap_eq_zero_of_adjoint
+theorem Matrix.trace_eq_linearMap_trace
+  {n : Type*} [Fintype n] [DecidableEq n]
+  (y : Matrix n n ℂ) :
+  Matrix.trace y = LinearMap.trace ℂ (EuclideanSpace ℂ n)
+    (Matrix.toEuclideanLin y) :=
+by
+  rw [LinearMap.trace_eq_matrix_trace ℂ (PiLp.basisFun 2 ℂ n)]
+  simp only [Matrix.toEuclideanLin_eq_toLin, LinearMap.toMatrix_toLin]
+
+lemma Matrix.trace_piMatTensorProductEquiv_apply_lTensor_transpose
+  {ι : Type*} [Fintype ι] [DecidableEq ι]
+  {p : ι → Type*} [∀ i, Fintype (p i)] [∀ i, DecidableEq (p i)]
+  (x : (PiMat ℂ ι p) ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) (i : ι × ι) :
+  Matrix.trace
+    (PiMatTensorProductEquiv
+      ((StarAlgEquiv.lTensor (PiMat ℂ ι p) (PiMat.transposeStarAlgEquiv ι p).symm) x) i)
+    = Matrix.trace (PiMatTensorProductEquiv (LinearMap.lTensor _ (unop ℂ).toLinearMap x) i) :=
+by
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset x
+  simp_rw [hS, map_sum, Finset.sum_apply, Matrix.trace_sum,
+    StarAlgEquiv.lTensor_tmul, LinearMap.lTensor_tmul,
+    PiMatTensorProductEquiv_tmul, Matrix.trace_kronecker,
+    PiMat.transposeStarAlgEquiv_symm_apply]
+  rfl
+
+lemma Matrix.trace_piMatTensorProductEquiv_lTensor_unop_map_modAut
+  (x : (PiMat ℂ ι p) ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) (i : ι × ι) :
+  Matrix.trace
+    (PiMatTensorProductEquiv
+      (LinearMap.lTensor _ (unop ℂ).toLinearMap
+        ((TensorProduct.map (modAut (0 - 1 / 2)).toLinearMap (AlgEquiv.op (modAut (0 - 1 / 2))).toLinearMap) x)) i)
+  = Matrix.trace
+    (PiMatTensorProductEquiv
+      (LinearMap.lTensor _ (unop ℂ).toLinearMap x) i) :=
+by
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset x
+  simp_rw [hS, map_sum, Finset.sum_apply, Matrix.trace_sum,
+    TensorProduct.map_tmul, LinearMap.lTensor_tmul,
+    PiMatTensorProductEquiv_tmul, Matrix.trace_kronecker,
+    AlgEquiv.toLinearMap_apply]
+  congr 1
+  ext
+  rw [AlgEquiv.op_apply_apply, LinearEquiv.coe_coe, unop_apply, MulOpposite.unop_op]
+  simp_rw [PiMat.modAut_trace_apply]
+  rfl
+
+lemma Matrix.trace_piMatTensorProductEquiv_lTensor_unop_tenSwap
+  (x : (PiMat ℂ ι p) ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) (i : ι × ι) :
+  (Matrix.trace
+      (PiMatTensorProductEquiv
+        ((LinearMap.lTensor (PiMat ℂ ι p) (unop ℂ).toLinearMap) ((tenSwap ℂ) x)) i))
+  = Matrix.trace (PiMatTensorProductEquiv
+        ((LinearMap.lTensor (PiMat ℂ ι p) (unop ℂ).toLinearMap) x) i.swap) :=
+by
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset x
+  rw [← LinearEquiv.coe_toLinearMap]
+  simp_rw [hS, map_sum, Finset.sum_apply, Matrix.trace_sum,
+    LinearEquiv.coe_coe, tenSwap_apply,
+    LinearMap.lTensor_tmul, PiMatTensorProductEquiv_tmul, Matrix.trace_kronecker,
+    LinearEquiv.coe_coe, unop_apply]
+  congr 1
+  ext
+  rw [mul_comm]
+  rfl
+
+theorem QuantumGraph.Real.piMat_submodule_finrank_eq_swap_of_adjoint
+  {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hf : QuantumGraph.Real _ f)
+  (hf₂ : LinearMap.adjoint f = f)
+  (i : ι × ι) :
+  Module.finrank ℂ (hf.PiMat_submodule i)
+    = Module.finrank ℂ (hf.PiMat_submodule i.swap) :=
+by
+  rw [← Nat.cast_inj (R := ℂ)]
+  nth_rw 2 [← Complex.conj_natCast]
+  simp_rw [← orthogonalProjection_trace,
+    QuantumGraph.Real.PiMat_submoduleOrthogonalProjection,
+    LinearMap.coe_toContinuousLinearMap,
+    PiMat_toEuclideanLM, StarAlgEquiv.piCongrRight_apply,
+    Matrix.toEuclideanStarAlgEquiv_coe,
+    ← Matrix.trace_eq_linearMap_trace]
+  nth_rw 2 [← hf₂]
+  rw [Psi.adjoint_apply]
+  simp_rw [Matrix.trace_piMatTensorProductEquiv_apply_lTensor_transpose,
+    Matrix.trace_piMatTensorProductEquiv_lTensor_unop_map_modAut,
+    Matrix.trace_piMatTensorProductEquiv_lTensor_unop_tenSwap,
+    ← Matrix.trace_piMatTensorProductEquiv_apply_lTensor_transpose,
+    map_star, starRingEnd_apply, Matrix.trace_star, Pi.star_apply,
+    Matrix.star_eq_conjTranspose, Matrix.conjTranspose_conjTranspose]
+  rfl
+
+theorem QuantumGraph.Real.PiMat_submodule_eq_bot_iff_swap_eq_bot_of_adjoint
   {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hA : QuantumGraph.Real _ A)
   (hA₂ : LinearMap.adjoint A = A)
   (i : ι × ι) :
-  hA.PiMat_submodule i = 0
-    ↔ hA.PiMat_submodule i.swap = 0 :=
+  hA.PiMat_submodule i = ⊥
+    ↔ hA.PiMat_submodule i.swap = ⊥ :=
 by
-  simp_rw [PiMat_submodule_eq_zero_iff_proj_comp_adjoint_proj_eq_zero,
-    Prod.fst_swap, Prod.snd_swap]
-  nth_rw 1 [← hA₂, ← Function.Injective.eq_iff LinearMap.adjoint.injective]
-  simp only [LinearMap.adjoint_comp, LinearMap.adjoint_adjoint, LinearMap.comp_assoc, map_zero]
+  simp only [← Submodule.finrank_eq_zero]
+  rw [hA.piMat_submodule_finrank_eq_swap_of_adjoint hA₂]

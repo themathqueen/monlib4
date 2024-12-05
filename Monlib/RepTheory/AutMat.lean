@@ -1023,8 +1023,8 @@ theorem AlgEquiv.matrix_prod_aut' {𝕜 n m : Type*} [Field 𝕜] [Fintype n] [F
   (∃ (f₁ : Matrix n n 𝕜 ≃ₐ[𝕜] Matrix n n 𝕜) (f₂ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix m m 𝕜),
     f = AlgEquiv.prod_map f₁ f₂)
   ∨
-  (∃ (g : (Matrix m m 𝕜 × Matrix n n 𝕜) ≃ₐ[𝕜] (Matrix n n 𝕜 × Matrix m m 𝕜)),
-    f = g ∘ Prod.swap) :=
+  (∃ (g₁ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix n n 𝕜) (g₂ : Matrix n n 𝕜 ≃ₐ[𝕜] Matrix m m 𝕜),
+    f = g₁.prod_map g₂ ∘ Prod.swap) :=
 by
   rcases AlgEquiv.matrix_prod_aut f with (h | h)
   . left
@@ -1045,7 +1045,7 @@ by
   . right
     let g₁ : Matrix n n 𝕜 ≃ₐ[𝕜] Matrix m m 𝕜 := AlgEquiv.of_prod_map₁₂ f h.1
     let g₂ : Matrix m m 𝕜 ≃ₐ[𝕜] Matrix n n 𝕜 := AlgEquiv.of_prod_map₂₁ f h.2
-    use (AlgEquiv.prod_map g₂ g₁)
+    use g₂, g₁
     ext1 x
     simp_rw [Function.comp_apply, Prod.swap, AlgEquiv.prod_map_apply, Prod.map_apply]
     calc f x = f (0, x.2) + f (x.1, 0) := by rw [← map_add, add_comm, Prod.fst_add_snd]

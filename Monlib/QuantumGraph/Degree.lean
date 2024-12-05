@@ -23,14 +23,6 @@ by
     QuantumSet.modAut_adjoint, AlgEquiv.toLinearMap_apply]
   exact inner_self_nonneg'
 
-theorem QuantumGraph.real_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
-  QuantumGraph.Real A f ↔ f •ₛ f = f ∧ LinearMap.IsReal f :=
-⟨λ h => ⟨h.1, h.2⟩, λ h => ⟨h.1, h.2⟩⟩
-
-theorem quantumGraph_iff {A : Type*} [starAlgebra A] [QuantumSet A] {f : A →ₗ[ℂ] A} :
-  QuantumGraph A f ↔ f •ₛ f = f :=
-⟨λ ⟨h⟩ => h, λ h => ⟨h⟩⟩
-
 theorem QuantumGraph.toSubset_iff {A : Type*} [starAlgebra A] [h : QuantumSet A] {f : A →ₗ[ℂ] A} (r : ℝ) :
   letI := QuantumSet.instSubset (A := A) h r
   QuantumGraph (QuantumSet.subset r A)
