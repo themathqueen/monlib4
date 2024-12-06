@@ -154,7 +154,7 @@ by
 variable {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
   [(i : ι) → Fintype (p i)] [(i : ι) → DecidableEq (p i)]
 
-theorem PiMat.trace_eq_linearMap_trace_toEuclideanLin
+theorem PiMat.trace_eq_linearMap_trace_toEuclideanLM
   (y : (PiMat ℂ (ι × ι) fun i ↦ p i.1 × p i.2)) :
   PiMat.traceLinearMap y
     = ∑ x : ι × ι, LinearMap.trace ℂ (EuclideanSpace ℂ (p x.1 × p x.2))
@@ -184,7 +184,7 @@ by
     orthogonalProjection_trace (R := ℂ),
     QuantumGraph.Real.PiMat_submoduleOrthogonalProjection,
     LinearMap.coe_toContinuousLinearMap]
-  rw [← PiMat.trace_eq_linearMap_trace_toEuclideanLin]
+  rw [← PiMat.trace_eq_linearMap_trace_toEuclideanLM]
 
 theorem
   Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner {i : ι}
@@ -231,6 +231,7 @@ by
     LinearMap.comp_assoc]
   rw [LinearMap.lrsum_eq_single_proj_lrcomp]
 
+private
 lemma
   QuantumGraph.Real.PiFinTwo_same_exists_proj_conj_add_of_piMat_submodule_eq_bot
   (h₂ : hA.PiMat_submodule (1, 0) = ⊥)
@@ -249,6 +250,7 @@ by
     Fin.isValue, Prod.mk_zero_zero, Prod.mk_one_one,
     h₂, h₃, LinearMap.zero_comp, LinearMap.comp_zero, zero_add, add_zero]
 
+private
 lemma QuantumGraph.Real.piFinTwo_same_piMat_submodule_eq_bot_of_adjoint_and_dim_eq_one
   (hA₂ : LinearMap.adjoint A = A)
   (hd : hA.toQuantumGraph.dim_of_piMat_submodule = 1) :
@@ -624,3 +626,18 @@ by
   simp only [LinearMap.ext_iff, LinearMap.comp_apply,
     LinearMap.single_apply]
   exact PiMat_finTwo_same_swapAlgEquiv_apply_piSingle_one
+
+theorem QuantumGraph.Real.schurProjection_proj_conj
+  {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hf : QuantumGraph.Real _ f)
+  (i : ι × ι) :
+  schurProjection (A := Mat ℂ (p i.2)) (B := Mat ℂ (p i.1))
+  ((LinearMap.proj (R := ℂ) i.1) ∘ₗ f
+    ∘ₗ (LinearMap.adjoint (LinearMap.proj i.2))) :=
+by
+  constructor
+  . rw [schurMul_proj_comp, schurMul_comp_proj_adjoint, hf.1]
+  . rw [LinearMap.isReal_iff]
+    simp_rw [LinearMap.real_comp, LinearMap.real_of_isReal hf.2, LinearMap.proj_adjoint,
+    LinearMap.real_of_isReal (LinearMap.proj_isReal (φ := λ r => Mat ℂ (p r)) _),
+    LinearMap.real_of_isReal (LinearMap.single_isReal (φ := λ r => Mat ℂ (p r)) _)]

@@ -1172,7 +1172,7 @@ omit [DecidableEq ι] in
 lemma _root_.PiMat.modAut_proj
   (r : ℝ) (j : ι) (x : PiMat ℂ ι p) :
   (modAut r) (LinearMap.proj (R := ℂ) j x)
-    = (modAut r x) j :=
+    = LinearMap.proj (R := ℂ) j (modAut r x) :=
 by
   simp only [PiMat.modAut]
   ext
@@ -1229,6 +1229,34 @@ by
     QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply, AlgEquiv.lTensor_tmul,
     Matrix.transposeAlgEquiv_symm_op_apply, PiMat.modAut_proj,
     tensorToKronecker_apply, TensorProduct.toKronecker_apply, map_zero]
+  rfl
+
+set_option synthInstance.maxHeartbeats 200000 in
+set_option maxHeartbeats 400000 in
+theorem QuantumGraph.Real.PiMat_submodule_eq_top_iff_proj_comp_adjoint_proj_eq_rankOne_one_one
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real _ A) {i : ι × ι} :
+  hA.PiMat_submodule i = ⊤ ↔
+    LinearMap.proj i.1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj i.2)
+      = (rankOne ℂ (1 : Mat ℂ (p i.1)) (1 : Mat ℂ (p i.2))) :=
+by
+  rw [Submodule.eq_iff_orthogonalProjection_eq, orthogonalProjection_of_top,
+    QuantumGraph.Real.PiMat_submoduleOrthogonalProjection]
+  obtain ⟨α, β, rfl⟩ := LinearMap.exists_sum_rankOne A
+  simp only [map_sum, Finset.sum_apply, QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
+    StarAlgEquiv.lTensor_tmul, PiMatTensorProductEquiv_tmul, PiMat_toEuclideanLM, StarAlgEquiv.piCongrRight_apply]
+  rw [← map_sum, ← ContinuousLinearMap.toLinearMapAlgEquiv_symm_apply,
+    map_eq_one_iff _ (AlgEquiv.injective _),
+    ← map_sum, map_eq_one_iff _ (StarAlgEquiv.injective _)]
+  simp only [PiMat.transposeStarAlgEquiv_symm_apply, MulOpposite.unop_op]
+  rw [← Function.Injective.eq_iff (QuantumSet.Psi 0 (1/2)).injective,
+    ← Function.Injective.eq_iff (AlgEquiv.lTensor _ (Matrix.transposeAlgEquiv _ _ _).symm).injective,
+    ← Function.Injective.eq_iff tensorToKronecker.injective]
+  simp only [LinearMap.sum_comp, LinearMap.comp_sum,
+    LinearMap.rankOne_comp', LinearMap.comp_rankOne, map_sum,
+    QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply, AlgEquiv.lTensor_tmul,
+    Matrix.transposeAlgEquiv_symm_op_apply, PiMat.modAut_proj,
+    tensorToKronecker_apply, TensorProduct.toKronecker_apply, map_one,
+    star_one, Matrix.transpose_one, Matrix.one_kronecker_one]
   rfl
 
 theorem Matrix.trace_eq_linearMap_trace
@@ -1296,6 +1324,58 @@ by
   rw [mul_comm]
   rfl
 
+def LinearIsometryEquiv.of_linearEquiv
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 E]
+  [InnerProductSpace 𝕜 F]
+  [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+  (f : E ≃ₗ[𝕜] F) (hf : LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap) :
+    E ≃ₗᵢ[𝕜] F where
+  toLinearEquiv := f
+  norm_map' := by
+    rw [← isometry_iff_norm, isometry_iff_inner]
+    intro _ _
+    rw [← LinearEquiv.coe_toLinearMap, ← LinearMap.adjoint_inner_left]
+    simp only [hf, LinearEquiv.coe_toLinearMap, LinearEquiv.symm_apply_apply]
+
+lemma LinearIsometryEquiv.of_linearEquiv_apply {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 E]
+  [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+  (f : E ≃ₗ[𝕜] F) (hf : LinearMap.adjoint f.toLinearMap = f.symm.toLinearMap) (x : E) :
+  (LinearIsometryEquiv.of_linearEquiv f hf) x = f x :=
+rfl
+
+noncomputable def TensorProduct.comm_linearIsometryEquiv
+  (𝕜 E F : Type*) [RCLike 𝕜] [NormedAddCommGroup E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 E]
+  [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F] :
+    (E ⊗[𝕜] F) ≃ₗᵢ[𝕜] (F ⊗[𝕜] E) :=
+LinearIsometryEquiv.of_linearEquiv (TensorProduct.comm 𝕜 E F) TensorProduct.comm_adjoint
+
+lemma TensorProduct.comm_linearIsometryEquiv_apply
+  {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+  [NormedAddCommGroup F] [InnerProductSpace 𝕜 E]
+  [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+  (x : E) (y : F) :
+  (TensorProduct.comm_linearIsometryEquiv 𝕜 E F) (x ⊗ₜ y) = y ⊗ₜ x :=
+rfl
+
+noncomputable def
+  EuclideanSpace.tensor_comm {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m] :
+  EuclideanSpace ℂ (n × m) ≃ₗᵢ[ℂ] EuclideanSpace ℂ (m × n) :=
+(euclideanSpaceTensor'.symm.trans (TensorProduct.comm_linearIsometryEquiv ℂ _ _)).trans
+  (euclideanSpaceTensor')
+lemma EuclideanSpace.tensor_comm_apply {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
+  (x : EuclideanSpace ℂ n) (y : EuclideanSpace ℂ m) :
+  tensor_comm (euclideanSpaceTensor' (R := ℂ) (x ⊗ₜ[ℂ] y))
+    = euclideanSpaceTensor' (R := ℂ) (y ⊗ₜ[ℂ] x) :=
+by
+  simp only [tensor_comm]
+  rw [LinearIsometryEquiv.trans_apply]
+  nth_rw 2 [LinearIsometryEquiv.trans_apply]
+  rw [LinearIsometryEquiv.symm_apply_apply]
+  rfl
+
 theorem QuantumGraph.Real.piMat_submodule_finrank_eq_swap_of_adjoint
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph.Real _ f)
@@ -1332,3 +1412,24 @@ theorem QuantumGraph.Real.PiMat_submodule_eq_bot_iff_swap_eq_bot_of_adjoint
 by
   simp only [← Submodule.finrank_eq_zero]
   rw [hA.piMat_submodule_finrank_eq_swap_of_adjoint hA₂]
+
+lemma Submodule.finrank_eq_iff_eq_top {K V : Type*} [DivisionRing K]
+  [AddCommGroup V] [Module K V] [FiniteDimensional K V] {S : Submodule K V} :
+  Module.finrank K ↥S = Module.finrank K V ↔ S = ⊤ :=
+by
+  refine ⟨Submodule.eq_top_of_finrank_eq, ?_⟩
+  rintro rfl
+  simp only [finrank_top]
+
+theorem QuantumGraph.Real.PiMat_submodule_eq_top_iff_swap_eq_top_of_adjoint
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hA : QuantumGraph.Real _ A)
+  (hA₂ : LinearMap.adjoint A = A)
+  (i : ι × ι) :
+  hA.PiMat_submodule i = ⊤
+    ↔ hA.PiMat_submodule i.swap = ⊤ :=
+by
+  simp only [← Submodule.finrank_eq_iff_eq_top]
+  rw [hA.piMat_submodule_finrank_eq_swap_of_adjoint hA₂]
+  simp only [Prod.fst_swap, Prod.snd_swap, finrank_euclideanSpace, Fintype.card_prod,
+    mul_comm]
