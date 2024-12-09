@@ -38,6 +38,7 @@ import Monlib.QuantumGraph.OfClassicalGraph
 import Monlib.QuantumGraph.Degree
 import Monlib.QuantumGraph.Grad
 import Monlib.QuantumGraph.PiMatFinTwo
+import Monlib.QuantumGraph.Matrix
 -- import Monlib.QuantumGraph.Iso
 -- import Monlib.QuantumGraph.Mess
 -- import Monlib.QuantumGraph.Nontracial

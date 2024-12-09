@@ -283,12 +283,13 @@ by
 theorem QuantumGraph.Real.piFinTwo_same_exists_matrix_map_eq_map_of_adjoint_and_dim_eq_one
   (hA₂ : LinearMap.adjoint A = A)
   (hd : hA.toQuantumGraph.dim_of_piMat_submodule = 1) :
-  (∃ f : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ,
-    LinearMap.adjoint (LinearMap.proj 0)
-      ∘ₗ f ∘ₗ LinearMap.proj 0 = A)
+  -- (∃ f : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ,
+  LinearMap.adjoint (LinearMap.proj 0)
+    ∘ₗ LinearMap.proj 0 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj 0) ∘ₗ LinearMap.proj 0 = A
   ∨
-    ∃ f : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ,
-      LinearMap.adjoint (LinearMap.proj 1) ∘ₗ f ∘ₗ LinearMap.proj 1 = A :=
+    -- ∃ f : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ,
+      LinearMap.adjoint (LinearMap.proj 1)
+    ∘ₗ LinearMap.proj 1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj 1) ∘ₗ LinearMap.proj 1 = A :=
 by
   obtain ⟨h₁, h⟩ := hA.piFinTwo_same_piMat_submodule_eq_bot_of_adjoint_and_dim_eq_one hA₂ hd
   have h₂ := h₁
@@ -300,9 +301,11 @@ by
   rcases h with (h | h)
   <;>
   simp only [h.1, h.2, LinearMap.comp_zero, LinearMap.zero_comp,
-    add_zero, zero_add] at hf
-  exact Or.inl ⟨_, hf⟩
-  exact Or.inr ⟨_, hf⟩
+    add_zero, zero_add, LinearMap.comp_assoc] at hf
+  exact Or.inl hf
+  exact Or.inr hf
+  -- exact Or.inl ⟨_, hf⟩
+  -- exact Or.inr ⟨_, hf⟩
 
 def AlgHom.proj
   (R : Type*) {ι : Type*} [CommSemiring R] {φ : ι → Type*}
