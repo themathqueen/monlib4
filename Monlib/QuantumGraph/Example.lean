@@ -157,7 +157,7 @@ theorem Qam.Nontracial.TrivialGraph.qam.is_self_adjoint [hA2 : QuantumSetDeltaFo
     LinearMap.adjoint (Qam.trivialGraph A) = Qam.trivialGraph A :=
   by
   simp_rw [Qam.trivialGraph_eq, LinearMap.adjoint_smul, LinearMap.adjoint_one, starRingEnd_apply,
-    star_inv', ← starRingEnd_apply]
+    star_inv₀, ← starRingEnd_apply]
   congr 2
   have := hA2.delta_pos
   rw [RCLike.pos_def, ← RCLike.conj_eq_iff_im] at this
@@ -302,7 +302,7 @@ theorem Qam.Nontracial.trivialGraph.isReal [hA2 : QuantumSetDeltaForm A] :
     LinearMap.IsReal (Qam.trivialGraph A) :=
   by
   rw [LinearMap.isReal_iff, Qam.trivialGraph_eq, LinearMap.real_smul, LinearMap.real_one,
-    starRingEnd_apply, star_inv']
+    starRingEnd_apply, star_inv₀]
   congr
   have := hA2.delta_pos
   rw [RCLike.pos_def, ← RCLike.conj_eq_iff_im] at this

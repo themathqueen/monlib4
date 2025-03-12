@@ -134,6 +134,7 @@ open scoped TensorProduct
 variable {A B : Type*} [ha:starAlgebra A] [hb:starAlgebra B]
     [hA : QuantumSet A] [hB : QuantumSet B]
 
+set_option synthInstance.maxHeartbeats 30000 in
 private noncomputable def rmulMapLmul_apply_Upsilon_apply_aux :
     (A →ₗ[ℂ] B) →ₗ[ℂ] ((A ⊗[ℂ] B) →ₗ[ℂ] (A ⊗[ℂ] B)) where
   toFun x :=
@@ -830,7 +831,7 @@ by
   simp only [gns, neg_zero, zero_sub] at this
   simp_rw [ContinuousLinearMap.coe_sum, ContinuousLinearMap.coe_smul,
     ← this, ← map_smul]
-  simp_rw [← map_sum, ← Finset.smul_sum, TensorProduct.of_othonormalBasis_prod_eq',
+  simp_rw [← map_sum, ← Finset.smul_sum, a, TensorProduct.of_othonormalBasis_prod_eq',
     ← rankOne_apply (𝕜 := ℂ) (1 : A ⊗[ℂ] A),
     ← ContinuousLinearMap.sum_apply,
     ← OrthonormalBasis.orthogonalProjection'_eq_sum_rankOne]
@@ -857,6 +858,7 @@ by
     zero_sub, QuantumSet.modAut_star, QuantumSet.modAut_apply_modAut,
     add_neg_cancel, QuantumSet.modAut_zero, star_star, AlgEquiv.one_apply,
     TensorProduct.inner_conj_symm]
+  rfl
 
 noncomputable def TensorProduct.of_orthonormalBasis_prod₁_lm
   {𝕜 E F : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
@@ -999,7 +1001,8 @@ by
     StarAlgEquiv.toLinearMap_apply] at this
   simp_rw [this, map_star, oneHom_isometry_inner_one_right hφ,
     ← TensorProduct.inner_tmul, ← Finset.sum_smul,
-    ← sum_inner, ← Algebra.TensorProduct.one_def, TensorProduct.of_othonormalBasis_prod_eq']
+    ← sum_inner, ← Algebra.TensorProduct.one_def, a, TensorProduct.of_othonormalBasis_prod_eq']
+  rfl
 
 theorem LinearMapClass.apply_rankOne_apply
   {E₁ E₂ E₃ 𝕜 : Type*} [RCLike 𝕜]

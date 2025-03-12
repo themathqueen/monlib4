@@ -322,6 +322,10 @@ by
   rw [← orthogonalProjection_of_top, orthogonalProjection.is_le_iff_subset]
   exact fun _ _ ↦ trivial
 
+instance FiniteDimensional.innerProductSpace.complete {E : Type*} [NormedAddCommGroup E]
+  [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] : CompleteSpace E :=
+FiniteDimensional.complete ℂ E
+
 theorem isOrthogonalProjection_le_one {E : Type*} [NormedAddCommGroup E]
   [InnerProductSpace ℂ E] [FiniteDimensional ℂ E] {p : E →L[ℂ] E} (hp : p.IsOrthogonalProjection) :
     p ≤ 1 :=

@@ -23,7 +23,7 @@ StarAlgEquiv.ofAlgEquiv (directSumTensorAlgEquiv ℂ
       ext
       simp only [Pi.star_apply, TensorProduct.star_tmul,
         directSumTensorAlgEquiv_apply, directSumTensorToFun_apply])
-    (λ _ _ h1 h2 => by simp only [star_add, AlgEquiv.map_add, h1, h2]))
+    (λ _ _ h1 h2 => by simp only [star_add, map_add, h1, h2]))
 
 @[simps]
 noncomputable def PiMat.transposeStarAlgEquiv
@@ -152,7 +152,7 @@ by
         (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi t r f)))))))]
     simp_rw [IsIdempotentElem.mulEquiv, ← schurIdempotent_iff_Psi_isIdempotentElem,
       hf.isIdempotentElem]
-  simp_rw [isIdempotentElem_iff,  LinearMap.mul_eq_comp, ← LinearMap.isProj_iff_idempotent] at this
+  simp_rw [← LinearMap.isProj_iff_isIdempotentElem] at this
   exact ⟨λ i => (this i).choose, λ i => (this i).choose_spec⟩
 
 
@@ -361,7 +361,7 @@ by
   rw [QuantumGraph.CompleteGraph_dim_of_piMat_submodule, Qam.completeGraph,
     QuantumGraph.NumOfEdges]
   simp only [LinearMap.coe_mk, AddHom.coe_mk, ContinuousLinearMap.coe_coe,
-    rankOne_apply_apply_toFun, ne_eq]
+    rankOne_apply_apply_apply, ne_eq]
   have : ⟪(1 : PiMat ℂ ι p), 1⟫_ℂ = 1 :=
   by
     simp_rw [Coalgebra.inner_eq_counit', Coalgebra.counit_eq_unit_adjoint]
@@ -378,7 +378,7 @@ by
         by simp_rw [Finset.sum_product_univ]
       _ = (∑ i : ι, Fintype.card (p i)) ^ 2 :=
         by simp_rw [← Finset.mul_sum, ← Finset.sum_mul, pow_two]
-  rw [this, eq_comm, ← one_pow 2, sq_eq_sq (by simp) (by simp)]
+  rw [this, eq_comm, ← one_pow 2, sq_eq_sq₀ (by simp) (by simp)]
   contrapose! hB
   calc ∑ x : ι, Fintype.card (p x) ^ 2 ≤ (∑ i : ι, Fintype.card (p i)) ^ 2 :=
       Finset.sum_sq_le_sq_sum_of_nonneg (by simp)
@@ -439,7 +439,7 @@ set_option synthInstance.maxHeartbeats 0 in
 theorem EuclideanSpace.prod_exists_finset {n m : Type*} [Fintype n] [DecidableEq n]
   [Fintype m] [DecidableEq m] (x : EuclideanSpace ℂ (n × m)) :
   ∃ S : Finset ((EuclideanSpace ℂ n) × EuclideanSpace ℂ m),
-    x = ∑ s in S, euclideanSpaceTensor' (R := ℂ) (s.1 ⊗ₜ[ℂ] s.2) :=
+    x = ∑ s ∈ S, euclideanSpaceTensor' (R := ℂ) (s.1 ⊗ₜ[ℂ] s.2) :=
 by
   obtain ⟨S, hS⟩ := TensorProduct.exists_finset ((euclideanSpaceTensor' (R:=ℂ)).symm x)
   use S
@@ -531,7 +531,7 @@ by
 theorem TensorProduct.chooseFinset_spec {R M N : Type*} [CommSemiring R]
   [AddCommMonoid M] [AddCommMonoid N] [Module R M] [Module R N]
   (x : TensorProduct R M N) :
-  x = ∑ s in (TensorProduct.chooseFinset x), s.1 ⊗ₜ s.2 :=
+  x = ∑ s ∈ (TensorProduct.chooseFinset x), s.1 ⊗ₜ s.2 :=
 TensorProduct.chooseFinset.proof_1 x
 
 -- changed from choosing some `Finset (_ × _)` like above to the following
@@ -546,7 +546,7 @@ noncomputable def EuclideanSpace.prod_choose {n m : Type*} [Fintype n] [Decidabl
 theorem EuclideanSpace.sum_apply {n : Type*} [Fintype n] [DecidableEq n] {𝕜 : Type*} [RCLike 𝕜]
   {ι : Type*} (s : Finset ι)
   (x : ι → EuclideanSpace 𝕜 n) (j : n) :
-  (∑ i : ι in s, x i) j = ∑ i : ι in s, (x i j) :=
+  (∑ i ∈ s, x i) j = ∑ i ∈ s, (x i j) :=
 Finset.sum_apply _ _ _
 
 theorem Basis.tensorProduct_repr_tmul_apply' {R M N ι κ : Type*} [CommSemiring R]

@@ -252,17 +252,17 @@ variable {ι₁ ι₂ : Type*} [DecidableEq ι₁] [DecidableEq ι₂] [Fintype 
     {M₁ : ι₁ → Type*} {M₂ : ι₂ → Type*}
     [(i₁ : ι₁) → NormedAddCommGroup (M₁ i₁)] [(i₂ : ι₂) → NormedAddCommGroup (M₂ i₂)]
     [(i₁ : ι₁) → InnerProductSpace 𝕜 (M₁ i₁)] [(i₂ : ι₂) → InnerProductSpace 𝕜 (M₂ i₂)]
-    [(i : ι₁) → FiniteDimensional 𝕜 (M₁ i)] [(i : ι₂) → FiniteDimensional 𝕜 (M₂ i)]
 
 @[simps!]
 noncomputable def PiLp_tensorEquiv :
   (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂) ≃ₗ[𝕜] PiLp 2 (λ (i : ι₁ × ι₂) => (M₁ i.1) ⊗[𝕜] (M₂ i.2)) :=
 directSumTensor
 
-omit [∀ (i : ι₁), FiniteDimensional 𝕜 (M₁ i)] [∀ (i : ι₂), FiniteDimensional 𝕜 (M₂ i)] in
 theorem PiLp_tensorEquiv_tmul (x : PiLp 2 M₁) (y : PiLp 2 M₂) (i : ι₁ × ι₂) :
   PiLp_tensorEquiv (x ⊗ₜ y) i = x i.1 ⊗ₜ[𝕜] y i.2 :=
 rfl
+
+variable [(i : ι₁) → FiniteDimensional 𝕜 (M₁ i)] [(i : ι₂) → FiniteDimensional 𝕜 (M₂ i)]
 
 @[simp]
 theorem PiLp_tensorEquiv_norm_map

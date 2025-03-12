@@ -44,7 +44,7 @@ by
       (aᵀ i) := λ _ _ => by
     simp only [Matrix.toEuclideanLin_apply']
     ext
-    simp only [Matrix.mulVec, Matrix.dotProduct, e, mul_boole, Finset.sum_ite_eq,
+    simp only [Matrix.mulVec, dotProduct, e, mul_boole, Finset.sum_ite_eq,
       Finset.mem_univ, if_true]
     rfl
   constructor
@@ -55,7 +55,7 @@ by
     this]
   ext1
   rw [Finset.sum_apply, Matrix.toEuclideanLin_apply']
-  simp_rw [PiLp.smul_apply, PiLp.mul_apply, Matrix.mulVec, Matrix.dotProduct,
+  simp_rw [PiLp.smul_apply, PiLp.mul_apply, Matrix.mulVec, dotProduct,
     Matrix.transpose_apply,
     SimpleGraph.adjMatrix, Matrix.of_apply, boole_mul, smul_eq_mul,
     mul_ite,
@@ -70,7 +70,8 @@ by
   simp only [QuantumGraph.NumOfEdges, LinearMap.coe_mk,
     AddHom.coe_mk, LinearMap,
     Matrix.toEuclideanLin_apply', Matrix.mulVec_one]
-  rw [EuclideanSpace.inner_eq, star_one, Matrix.one_dotProduct]
+  rw [EuclideanSpace.inner_eq, star_one, one_dotProduct]
+  simp only [Finset.sum_apply, Matrix.transpose_apply]
 
 theorem SimpleGraph.conjTranspose_adjMatrix {V α : Type*} (G : SimpleGraph V)
   [DecidableRel G.Adj] [NonAssocSemiring α] [StarRing α] :

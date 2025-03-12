@@ -323,7 +323,7 @@ theorem innerAut_lm_basis_apply (U : Matrix.unitaryGroup n ℂ) (i j k l : n) :
     (f_{U} e_{i,j}) k l = (U ⊗ₖ star U) (k, j) (i, l) :=
   by
   simp_rw [Matrix.innerAut_apply, Matrix.mul_apply, Matrix.UnitaryGroup.inv_apply,
-    Matrix.stdBasisMatrix, mul_boole, Finset.sum_mul, ite_mul, MulZeroClass.zero_mul, ite_and,
+    Matrix.stdBasisMatrix, of_apply, mul_boole, Finset.sum_mul, ite_mul, MulZeroClass.zero_mul, ite_and,
     Matrix.kroneckerMap, Matrix.of_apply]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]
 

@@ -174,7 +174,7 @@ by
         by
           simp only [a, ← PiLp.norm_eq_of_L2]
           rfl
-      _ = √(∑ i : n in Finset.univ, if i = j then ‖(1 : 𝕜)‖ ^ 2 else ‖(0 : 𝕜)‖ ^ 2) := by
+      _ = √(∑ i : n, if i = j then ‖(1 : 𝕜)‖ ^ 2 else ‖(0 : 𝕜)‖ ^ 2) := by
         simp only [norm_ite, ite_pow]
       _ = 1 := by
         simp only [norm_one, norm_zero, Finset.sum_ite_eq', Finset.mem_univ,
