@@ -21,6 +21,7 @@ variable {R E F : Type _} [CommSemiring R] [NonUnitalNonAssocSemiring E]
   [NonUnitalNonAssocSemiring F] [Module R E] [Module R F] [SMulCommClass R E E]
   [SMulCommClass R F F] [IsScalarTower R E E] [IsScalarTower R F F]
 
+omit [IsScalarTower R E E] [IsScalarTower R F F] in
 theorem LinearMap.mulLeft_conj_of_mulEquivClass_apply
   {Fn : Type*} [EquivLike Fn E F] [MulEquivClass Fn E F]
   (f : Fn) (x : E) (y : F) :
@@ -29,6 +30,7 @@ by
   simp_rw [LinearMap.mulLeft_apply, map_mul]
   simp only [EquivLike.apply_inv_apply]
 
+omit [SMulCommClass R E E] [SMulCommClass R F F] in
 theorem LinearMap.mulRight_conj_of_mulEquivClass_apply
   {Fn : Type*} [EquivLike Fn E F] [MulEquivClass Fn E F]
   (f : Fn) (x : E) (y : F) :
@@ -136,22 +138,22 @@ open scoped BigOperators
 theorem LinearMap.mulLeft_sum {R : Type _} {A : Type _} [CommSemiring R]
     [NonUnitalNonAssocSemiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A]
     {n : Type _} {s : Finset n} {x : n → A} :
-    ∑ i : n in s, LinearMap.mulLeft R (x i) = LinearMap.mulLeft R (∑ i : n in s, x i) :=
+    ∑ i ∈ s, LinearMap.mulLeft R (x i) = LinearMap.mulLeft R (∑ i ∈ s, x i) :=
 by simp_rw [← lmul_eq_mul, map_sum]
 
 theorem LinearMap.mulRight_sum {R : Type _} {A : Type _} [CommSemiring R]
     [NonUnitalNonAssocSemiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A]
     {n : Type _} {s : Finset n} {x : n → A} :
-    ∑ i : n in s, LinearMap.mulRight R (x i) = LinearMap.mulRight R (∑ i : n in s, x i) :=
+    ∑ i ∈ s, LinearMap.mulRight R (x i) = LinearMap.mulRight R (∑ i ∈ s, x i) :=
 by simp_rw [← rmul_eq_mul, map_sum]
 
 theorem lmul_eq_zero_iff {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H₁) :
     (lmul x : l(R,H₁)) = 0 ↔ x = 0 :=
-  LinearMap.mulLeft_eq_zero_iff _
+  LinearMap.mulLeft_eq_zero_iff _ _ _
 
 theorem rmul_eq_zero_iff {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H₁) :
     (rmul x : l(R,H₁)) = 0 ↔ x = 0 :=
-  LinearMap.mulRight_eq_zero_iff _
+  LinearMap.mulRight_eq_zero_iff _ _ _
 
 theorem lmul_eq_one_iff {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁]
     [IsScalarTower R H₁ H₁] (x : H₁) : (lmul x : l(R,H₁)) = 1 ↔ x = 1 :=

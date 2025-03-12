@@ -94,10 +94,7 @@ in other words, there exists unique $v \in \textnormal{ker}(T)$ and $w \in \text
 theorem LinearMap.IsProj.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup V] [Module R V]
     (U : Submodule R V) (T : V →ₗ[R] V) (h : LinearMap.IsProj U T) : IsCompl (ker T) (range T) :=
   by
-  have : IsIdempotentElem T := by
-    rw [IsIdempotentElem, LinearMap.mul_eq_comp,
-      ← LinearMap.isProj_iff_idempotent]
-    exact ⟨U, h⟩
+  have : IsIdempotentElem T := T.isProj_iff_isIdempotentElem.mp ⟨U, h⟩
   constructor
   · rw [disjoint_iff]
     ext x
@@ -140,9 +137,7 @@ theorem LinearMap.is_idempotent_isSelfAdjoint_iff_ker_ortho_range [InnerProductS
   · intro h1; apply eq_of_sub_eq_zero
     simp only [← inner_map_self_eq_zero]
     intro x
-    have := IsIdempotentElem.eq h
-    rw [LinearMap.mul_eq_comp] at this
-    obtain ⟨U, hT⟩ := (LinearMap.isProj_iff_idempotent T).mpr this
+    obtain ⟨U, hT⟩ := T.isProj_iff_isIdempotentElem.mpr h
     obtain ⟨v, w, hvw, _⟩ :=
       Submodule.existsUnique_add_of_isCompl (LinearMap.IsProj.isCompl_range_ker U T hT) x
     simp only [LinearMap.sub_apply, inner_sub_left, LinearMap.adjoint_inner_left]
@@ -191,7 +186,7 @@ theorem LinearMap.IsStarNormal.norm_eq_adjoint [FiniteDimensional 𝕜 V] (T : V
       (IsSymmetric.sub (isSymmetric_hMul_adjoint_self T) (isSymmetric_adjoint_mul_self T)),
     sub_apply, inner_sub_left, mul_apply, adjoint_inner_left, inner_self_eq_norm_sq_to_K, ←
     adjoint_inner_right T, inner_self_eq_norm_sq_to_K, sub_eq_zero, ←
-    sq_eq_sq (norm_nonneg _) (norm_nonneg _)]
+    sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)]
   norm_cast
   simp_rw [eq_comm]
 
@@ -213,7 +208,7 @@ theorem ContinuousLinearMap.IsStarNormal.norm_eq_adjoint [CompleteSpace V] (T : 
   simp_rw [LinearMap.sub_apply, inner_sub_left, ContinuousLinearMap.coe_coe, ContinuousLinearMap.mul_apply,
     ContinuousLinearMap.adjoint_inner_left, inner_self_eq_norm_sq_to_K, ←
     ContinuousLinearMap.adjoint_inner_right T, inner_self_eq_norm_sq_to_K, sub_eq_zero, ←
-    sq_eq_sq (norm_nonneg _) (norm_nonneg _), eq_comm]
+    sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _), eq_comm]
   norm_cast
 
 /-- if $T$ is normal, then $\textnormal{ker}(T) = \textnormal{ker}(T^*)$ -/
@@ -294,7 +289,7 @@ theorem ContinuousLinearMap.IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_ra
     rw [ContinuousLinearMap.IsIdempotentElem.toLinearMap] at h
     have := IsIdempotentElem.eq h
     rw [LinearMap.mul_eq_comp] at this
-    obtain ⟨U, hT⟩ := (LinearMap.isProj_iff_idempotent T.toLinearMap).mpr this
+    obtain ⟨U, hT⟩ := T.toLinearMap.isProj_iff_isIdempotentElem.mpr this
     obtain ⟨v, w, hvw, _⟩ :=
       Submodule.existsUnique_add_of_isCompl (LinearMap.IsProj.isCompl_range_ker U (↑T) hT) x
     simp only [LinearMap.sub_apply, inner_sub_left, LinearMap.adjoint_inner_left]

@@ -8,6 +8,7 @@ import Mathlib.Analysis.Normed.Lp.PiLp
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Monlib.Preq.Finset
 import Monlib.LinearAlgebra.Ips.Basic
+import Mathlib.RingTheory.TensorProduct.Finite
 
 /-!
 

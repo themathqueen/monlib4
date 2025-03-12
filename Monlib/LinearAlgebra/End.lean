@@ -24,13 +24,13 @@ theorem LinearMap.one_comp {R E F : Type _} [Semiring R] [AddCommMonoid E] [AddC
 
 theorem LinearMap.comp_sum {R M M₂ M₃ : Type _} [Semiring R] [AddCommMonoid M] [AddCommMonoid M₂]
     [AddCommMonoid M₃] [Module R M] [Module R M₂] [Module R M₃] (g : M₃ →ₗ[R] M₂) {α : Type _}
-    (s : Finset α) (f : α → M →ₗ[R] M₃) : g ∘ₗ ∑ a : α in s, f a = ∑ a : α in s, g ∘ₗ f a := by
+    (s : Finset α) (f : α → M →ₗ[R] M₃) : g ∘ₗ ∑ a ∈ s, f a = ∑ a ∈ s, g ∘ₗ f a := by
   simp_rw [LinearMap.ext_iff, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.sum_apply,
     map_sum, forall_true_iff]
 
 theorem LinearMap.sum_comp {R M M₂ M₃ : Type _} [Semiring R] [AddCommMonoid M] [AddCommMonoid M₂]
     [AddCommMonoid M₃] [Module R M] [Module R M₂] [Module R M₃] (f : M →ₗ[R] M₃) {α : Type _}
-    (s : Finset α) (g : α → M₃ →ₗ[R] M₂) : (∑ a : α in s, g a) ∘ₗ f = ∑ a : α in s, g a ∘ₗ f := by
+    (s : Finset α) (g : α → M₃ →ₗ[R] M₂) : (∑ a ∈ s, g a) ∘ₗ f = ∑ a ∈ s, g a ∘ₗ f := by
   simp_rw [LinearMap.ext_iff, LinearMap.sum_apply, LinearMap.comp_apply, LinearMap.sum_apply,
     forall_true_iff]
 

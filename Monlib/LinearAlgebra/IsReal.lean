@@ -74,7 +74,7 @@ open scoped BigOperators
 
 @[simp]
 theorem LinearMap.real_sum {n : Type _} {s : Finset n} (f : n → E →ₗ[K] F) :
-    (∑ i : n in s, f i).real = ∑ i : n in s, (f i).real :=
+    (∑ i ∈ s, f i).real = ∑ i ∈ s, (f i).real :=
   by
   ext
   simp only [LinearMap.real_apply, LinearMap.sum_apply, star_sum]
