@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Monica Omar
 -/
 import Mathlib.Data.Complex.Basic
-import Mathlib.Data.Complex.Abs
+import Mathlib.Data.Complex.Norm
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Data.Complex.BigOperators
 
@@ -23,15 +23,15 @@ open Complex
 
 /--
 $\left|\sum_i\alpha_i^2\right|=\sum_i|\alpha_i|^2$ if and only if $\forall{i,j}\in[n]:\Re(\alpha_i)\Im(\alpha_j)=\Re(\alpha_j)\Im(\alpha_i)$ -/
-theorem abs_of_sum_sq_eq_sum_abs_sq_iff {n : Type _} [Fintype n] (α : n → ℂ) :
-    Complex.abs (∑ i : n, α i ^ 2) = ∑ i : n, abs (α i) ^ 2 ↔
+theorem norm_of_sum_sq_eq_sum_norm_sq_iff {n : Type _} [Fintype n] (α : n → ℂ) :
+    ‖(∑ i : n, α i ^ 2)‖ = ∑ i : n, ‖(α i)‖ ^ 2 ↔
       ∀ i j : n, (α i).re * (α j).im = (α j).re * (α i).im :=
   by
-  have complex.abs_sq : ∀ x : ℂ, abs x ^ 2 = Complex.normSq x :=
+  have complex.abs_sq : ∀ x : ℂ, ‖x‖ ^ 2 = Complex.normSq x :=
     by
     intros
-    simp_rw [abs_apply, Real.sq_sqrt (normSq_nonneg _)]
-  simp_rw [complex.abs_sq, abs_apply]
+    simp_rw [norm_def, Real.sq_sqrt (normSq_nonneg _)]
+  simp_rw [complex.abs_sq, norm_def]
   rw [Real.sqrt_eq_iff_eq_sq (normSq_nonneg _), eq_comm, pow_two, Finset.sum_mul_sum]
   simp_rw [← normSq_mul, normSq_apply, re_sum, im_sum, Finset.sum_mul_sum, ←
     Finset.sum_add_distrib, pow_two, mul_re, mul_im, sub_mul, mul_sub, mul_add, add_mul]
@@ -71,15 +71,15 @@ theorem abs_of_sum_sq_eq_sum_abs_sq_iff {n : Type _} [Fintype n] (α : n → ℂ
     intros
     exact normSq_nonneg _
 
-theorem abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff (α₁ α₂ : ℂ) :
-    Complex.abs (α₁ ^ 2 + α₂ ^ 2) = abs α₁ ^ 2 + abs α₂ ^ 2 ↔ α₁.re * α₂.im = α₂.re * α₁.im :=
+theorem norm_of_sq_add_sq_eq_norm_sq_add_norm_sq_iff (α₁ α₂ : ℂ) :
+    norm (α₁ ^ 2 + α₂ ^ 2) = norm α₁ ^ 2 + norm α₂ ^ 2 ↔ α₁.re * α₂.im = α₂.re * α₁.im :=
   by
   let α := ![α₁, α₂]
   have h₀ : α 0 = α₁ := rfl
   have h₁ : α 1 = α₂ := rfl
   have hy :
-    Complex.abs (∑ i : Fin 2, α i ^ 2) = Complex.abs (α 0 ^ 2 + α 1 ^ 2) ∧
-      ∑ i : Fin 2, abs (α i) ^ 2 = abs (α 0) ^ 2 + abs (α 1) ^ 2 :=
+    norm (∑ i : Fin 2, α i ^ 2) = norm (α 0 ^ 2 + α 1 ^ 2) ∧
+      ∑ i : Fin 2, norm (α i) ^ 2 = norm (α 0) ^ 2 + norm (α 1) ^ 2 :=
     by
     constructor <;>
       · rw [Finset.sum_eq_add_sum_diff_singleton]
@@ -88,13 +88,13 @@ theorem abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff (α₁ α₂ : ℂ) :
           simp only [Finset.sum_sdiff_eq_sub, Finset.subset_univ, Fin.sum_univ_two,
             Finset.sum_singleton, add_sub_cancel_left]
         · exact Finset.mem_univ _
-  simp_rw [← h₀, ← h₁, ← hy.1, ← hy.2, abs_of_sum_sq_eq_sum_abs_sq_iff, Fin.forall_fin_two, h₀, h₁,
+  simp_rw [← h₀, ← h₁, ← hy.1, ← hy.2, norm_of_sum_sq_eq_sum_norm_sq_iff, Fin.forall_fin_two, h₀, h₁,
     true_and, and_true, eq_comm, and_self_iff]
 
-theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff' (α₁ α₂ : ℂ) :
-    Complex.abs (α₁ ^ 2 + α₂ ^ 2) = abs α₁ ^ 2 + abs α₂ ^ 2 ↔ α₁ * conj α₂ = conj α₁ * α₂ :=
+theorem norm_of_sq_add_sq_norm_sq_add_norm_sq_iff' (α₁ α₂ : ℂ) :
+    norm (α₁ ^ 2 + α₂ ^ 2) = norm α₁ ^ 2 + norm α₂ ^ 2 ↔ α₁ * conj α₂ = conj α₁ * α₂ :=
   by
-  rw [abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff, ← re_add_im α₁, ← re_add_im α₂]
+  rw [norm_of_sq_add_sq_eq_norm_sq_add_norm_sq_iff, ← re_add_im α₁, ← re_add_im α₂]
   simp_rw [add_re, add_im, map_add, conj_ofReal, mul_I_im, mul_I_re, starRingEnd_apply, star_mul',
     ← starRingEnd_apply, conj_I, conj_ofReal, mul_add, add_mul]
   simp only [ofReal_re, ofReal_im, MulZeroClass.mul_zero, neg_zero, add_zero,
@@ -109,19 +109,19 @@ theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff' (α₁ α₂ : ℂ) :
 
 /--
 $\left|\sum_i\alpha_i^2\right|=\sum_i|\alpha_i|^2$ is also equivalent to saying that for any $i,j$ we get $\alpha_i\overline{\alpha_j}=\overline{\alpha_i}\alpha_j$ -/
-theorem abs_of_sum_sq_eq_sum_abs_sq_iff' {n : Type _} [Fintype n] (α : n → ℂ) :
-    Complex.abs (∑ i : n, α i ^ 2) = ∑ i : n, abs (α i) ^ 2 ↔
+theorem norm_of_sum_sq_eq_sum_norm_sq_iff' {n : Type _} [Fintype n] (α : n → ℂ) :
+    norm (∑ i : n, α i ^ 2) = ∑ i : n, norm (α i) ^ 2 ↔
       ∀ i j : n, α i * conj (α j) = conj (α i) * α j :=
   by
-  have := abs_of_sq_add_sq_abs_sq_add_abs_sq_iff'
-  simp_rw [abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff] at this
-  simp_rw [abs_of_sum_sq_eq_sum_abs_sq_iff, this]
+  have := norm_of_sq_add_sq_norm_sq_add_norm_sq_iff'
+  simp_rw [norm_of_sq_add_sq_eq_norm_sq_add_norm_sq_iff] at this
+  simp_rw [norm_of_sum_sq_eq_sum_norm_sq_iff, this]
 
-theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff'' (α₁ α₂ : ℂ) :
-    Complex.abs (α₁ ^ 2 + α₂ ^ 2) = abs α₁ ^ 2 + abs α₂ ^ 2 ↔
+theorem norm_of_sq_add_sq_norm_sq_add_norm_sq_iff'' (α₁ α₂ : ℂ) :
+    norm (α₁ ^ 2 + α₂ ^ 2) = norm α₁ ^ 2 + norm α₂ ^ 2 ↔
       ∃ (γ : ℂ) (β₁ β₂ : ℝ), α₁ = γ * β₁ ∧ α₂ = γ * β₂ :=
   by
-  rw [abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff]
+  rw [norm_of_sq_add_sq_eq_norm_sq_add_norm_sq_iff]
   constructor
   · intro h
     rw [← re_add_im α₂, ← re_add_im α₁]
@@ -160,12 +160,12 @@ theorem abs_of_sq_add_sq_abs_sq_add_abs_sq_iff'' (α₁ α₂ : ℂ) :
 
 /--
 $\left|\sum_i\alpha_i^2\right|=\sum_i|\alpha_i|^2$ is equivalent to saying that there exists some $\gamma\in\mathbb{C}$ such that for any $i\in[n]$ we get there exists some $\beta\in\mathbb{R}$ such that $\alpha_i=\gamma\beta$ -/
-theorem abs_of_sum_sq_eq_sum_abs_sq_iff'' {n : Type _} [Fintype n] (α : n → ℂ) :
-    Complex.abs (∑ i : n, α i ^ 2) = ∑ i : n, abs (α i) ^ 2 ↔ ∃ γ : ℂ, ∀ i : n, ∃ β : ℝ, α i = γ * β :=
+theorem norm_of_sum_sq_eq_sum_norm_sq_iff'' {n : Type _} [Fintype n] (α : n → ℂ) :
+    norm (∑ i : n, α i ^ 2) = ∑ i : n, norm (α i) ^ 2 ↔ ∃ γ : ℂ, ∀ i : n, ∃ β : ℝ, α i = γ * β :=
   by
-  have := abs_of_sq_add_sq_abs_sq_add_abs_sq_iff''
-  simp_rw [abs_of_sq_add_sq_eq_abs_sq_add_abs_sq_iff] at this
-  simp_rw [abs_of_sum_sq_eq_sum_abs_sq_iff, this]
+  have := norm_of_sq_add_sq_norm_sq_add_norm_sq_iff''
+  simp_rw [norm_of_sq_add_sq_eq_norm_sq_add_norm_sq_iff] at this
+  simp_rw [norm_of_sum_sq_eq_sum_norm_sq_iff, this]
   constructor
   · intro h
     by_cases H : α = 0
