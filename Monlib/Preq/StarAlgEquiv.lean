@@ -5,8 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Algebra.Equiv
-import Mathlib.Algebra.Ring.Idempotents
-import Mathlib.LinearAlgebra.Span
+import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.Algebra.Star.Pi
 
 /-!

@@ -5,7 +5,8 @@ Authors: Monica Omar
 -/
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Data.Finset.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
+import Mathlib.Data.Fintype.Prod
 
 /-!
 
@@ -22,8 +23,8 @@ open scoped BigOperators
 
 theorem sum_rotate {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ} {u : Finset ζ}
     {f : α → γ → ζ → β} :
-    ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z =
-      ∑ z : ζ in u, ∑ x : α in s, ∑ y : γ in t, f x y z :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, f x y z =
+      ∑ z ∈ u, ∑ x ∈ s, ∑ y ∈ t, f x y z :=
   by
   nth_rw 2 [Finset.sum_comm]
   congr
@@ -32,8 +33,8 @@ theorem sum_rotate {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t 
 
 theorem sum_3_comm {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ} {u : Finset ζ}
     {f : α → γ → ζ → β} :
-    ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z =
-      ∑ z : ζ in u, ∑ y : γ in t, ∑ x : α in s, f x y z :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, f x y z =
+      ∑ z ∈ u, ∑ y ∈ t, ∑ x ∈ s, f x y z :=
   by
   rw [Finset.sum_rotate]
   congr
@@ -42,8 +43,8 @@ theorem sum_3_comm {α β γ ζ : Type _} [AddCommMonoid β] {s : Finset α} {t 
 
 theorem sum_4_rotate {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ}
     {u : Finset ζ} {v : Finset ε} {f : α → γ → ζ → ε → β} :
-    ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
-      ∑ w : ε in v, ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, f x y z w :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, ∑ w ∈ v, f x y z w =
+      ∑ w ∈ v, ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, f x y z w :=
   by
   nth_rw 2 [Finset.sum_comm]
   congr
@@ -52,8 +53,8 @@ theorem sum_4_rotate {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α
 
 theorem sum_sum_comm_sum {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ}
     {u : Finset ζ} {v : Finset ε} {f : α → γ → ζ → ε → β} :
-    ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
-      ∑ x : α in s, ∑ y : γ in t, ∑ w : ε in v, ∑ z : ζ in u, f x y z w :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, ∑ w ∈ v, f x y z w =
+      ∑ x ∈ s, ∑ y ∈ t, ∑ w ∈ v, ∑ z ∈ u, f x y z w :=
   by
   congr
   ext x
@@ -63,8 +64,8 @@ theorem sum_sum_comm_sum {α β γ ζ ε : Type _} [AddCommMonoid β] {s : Finse
 
 theorem sum_sum_sum {β α γ ζ : Type _} [AddCommMonoid β] {s : Finset γ} {t : Finset α}
     {g : Finset ζ} {f : γ → α → ζ → β} :
-    ∑ x : γ in s, ∑ y : α in t, ∑ z : ζ in g, f x y z =
-      ∑ z : ζ in g, ∑ x : γ in s, ∑ y : α in t, f x y z :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ g, f x y z =
+      ∑ z ∈ g, ∑ x ∈ s, ∑ y ∈ t, f x y z :=
   by
   symm
   rw [Finset.sum_comm]
@@ -74,8 +75,8 @@ theorem sum_sum_sum {β α γ ζ : Type _} [AddCommMonoid β] {s : Finset γ} {t
 
 theorem sum_4_swap_2 {β α γ ζ ε : Type _} [AddCommMonoid β] {s : Finset γ} {t : Finset α}
     {u : Finset ζ} {v : Finset ε} {f : γ → α → ζ → ε → β} :
-    ∑ x : γ in s, ∑ y : α in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w =
-      ∑ z : ζ in u, ∑ w : ε in v, ∑ x : γ in s, ∑ y : α in t, f x y z w :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, ∑ w ∈ v, f x y z w =
+      ∑ z ∈ u, ∑ w ∈ v, ∑ x ∈ s, ∑ y ∈ t, f x y z w :=
   by
   rw [Finset.sum_rotate]
   congr
@@ -84,8 +85,8 @@ theorem sum_4_swap_2 {β α γ ζ ε : Type _} [AddCommMonoid β] {s : Finset γ
 
 theorem sum_5_rotate {α β γ ζ ε κ : Type _} [AddCommMonoid β] {s : Finset α} {t : Finset γ}
     {u : Finset ζ} {v : Finset ε} {k : Finset κ} {f : α → γ → ζ → ε → κ → β} :
-    ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, ∑ vz : κ in k, f x y z w vz =
-      ∑ vz : κ in k, ∑ x : α in s, ∑ y : γ in t, ∑ z : ζ in u, ∑ w : ε in v, f x y z w vz :=
+    ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, ∑ w ∈ v, ∑ vz ∈ k, f x y z w vz =
+      ∑ vz ∈ k, ∑ x ∈ s, ∑ y ∈ t, ∑ z ∈ u, ∑ w ∈ v, f x y z w vz :=
   by
   nth_rw 2 [Finset.sum_comm]
   congr
