@@ -658,58 +658,139 @@ theorem PiMat_finTwo_same_proj_one_comp_swapStarAlgEquiv
     = LinearMap.proj 0 :=
 rfl
 
-theorem QuantumGraph.Real.piMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one_equiv
+set_option maxHeartbeats 500000 in
+theorem
+  QuantumGraph.Real.piMatFinTwo_same_eq_zero_of_isSelfAdjoint_and_reflexive_and_numOfEdges_eq_one
   [Nontrivial n]
   (hc : Coalgebra.counit (R := ℂ) (A := PiMat ℂ (Fin 2) (PiFinTwo_same n)) = PiMat.traceLinearMap)
-  {A B : PiMat ℂ (Fin 2) (PiFinTwo_same n) →ₗ[ℂ] PiMat ℂ (Fin 2) (PiFinTwo_same n)}
+  {A : PiMat ℂ (Fin 2) (PiFinTwo_same n) →ₗ[ℂ] PiMat ℂ (Fin 2) (PiFinTwo_same n)}
   (hA : QuantumGraph.Real _ A) (hA₂ : LinearMap.adjoint A = A) (hA₃ : A •ₛ 1 = 1)
-  (hA₄ : QuantumGraph.NumOfEdges A = 1)
-  (hB : QuantumGraph.Real _ B) (hB₂ : LinearMap.adjoint B = B) (hB₃ : B •ₛ 1 = 1)
-  (hB₄ : QuantumGraph.NumOfEdges B = 1) :
-  ∃ f : PiMat ℂ (Fin 2) (PiFinTwo_same n) ≃⋆ₐ[ℂ] PiMat ℂ (Fin 2) (PiFinTwo_same n),
-    QuantumGraph.equiv A B f :=
+  (hA₄ : QuantumGraph.NumOfEdges A = 1) :
+  A = 0 :=
 by
-  have hA₅ := hA.PiMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one hc hA₂ hA₃ hA₄
-  have hB₅ := hB.PiMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one hc hB₂ hB₃ hB₄
-  have H1 : ∀ i : Fin 2, (A = LinearMap.adjoint (LinearMap.proj i)
-    ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n i)) ∘ₗ LinearMap.proj i
-    ∧ B = LinearMap.adjoint (LinearMap.proj i)
-    ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n i)) ∘ₗ LinearMap.proj i)
-    →
-    QuantumGraph.equiv A B (StarAlgEquiv.refl) :=
-  by
-    intro i h
-    refine ⟨fun x1 ↦ congrFun rfl, ?_⟩
-    apply LinearMap.ext
-    simp only [h, Fin.isValue, LinearMap.coe_comp, LinearMap.coe_proj, Function.comp_apply,
-      Function.eval, StarAlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_refl, id_eq, implies_true]
-  have H2 :
-    ((A = LinearMap.adjoint (LinearMap.proj 0)
-      ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 0)) ∘ₗ LinearMap.proj 0
-    ∧ B = LinearMap.adjoint (LinearMap.proj 1)
-      ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 1)) ∘ₗ LinearMap.proj 1)
-    ∨
-    (A = LinearMap.adjoint (LinearMap.proj 1)
-      ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 1)) ∘ₗ LinearMap.proj 1
-    ∧ B = LinearMap.adjoint (LinearMap.proj 0)
-      ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 0)) ∘ₗ LinearMap.proj 0))
-    → QuantumGraph.equiv A B (PiMat_finTwo_same_swapStarAlgEquiv) :=
-  by
-    rintro (h | h)
-    all_goals
-      constructor
-      . rw [QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm]
-        exact PiMat_finTwo_same_swapStarAlgEquiv_isometry
-      . simp_rw [h.1, h.2, LinearMap.comp_assoc]
-        simp only [PiMat_finTwo_same_proj_one_comp_swapStarAlgEquiv,
-          PiMat_finTwo_same_proj_zero_comp_swapStarAlgEquiv,
-          ← LinearMap.comp_assoc, LinearMap.proj_adjoint,
-          PiMat_finTwo_same_swapStarAlgEquiv_comp_linearMapSingle_zero,
-          PiMat_finTwo_same_swapStarAlgEquiv_comp_linearMapSingle_one]
-  obtain (hf | hf) := hA₅
-  . obtain (hg | hg) := hB₅
-    . exact ⟨_, H1 _ ⟨hf, hg⟩⟩
-    . exact ⟨_, H2 (Or.inl ⟨hf, hg⟩)⟩
-  . obtain (hg | hg) := hB₅
-    . exact ⟨_, H2 (Or.inr ⟨hf, hg⟩)⟩
-    . exact ⟨_, H1 _ ⟨hf, hg⟩⟩
+  rw [← QuantumGraph.dim_of_piMat_submodule_eq_numOfEdges_of_trace_counit hc hA.toQuantumGraph,
+    Nat.cast_eq_one] at hA₄
+  obtain ⟨i, hi, hf⟩ := hA.exists_unique_includeMap_of_adjoint_and_dim_ofPiMat_submodule_eq_one hA₂ hA₄
+  let p : _ → PiMat ℂ _ (PiFinTwo_same n) →ₗ[ℂ] Mat ℂ _ := λ j => LinearMap.proj j
+  have hp : ∀ j, p j = LinearMap.proj j := λ j => rfl
+  have : ∀ j, p j ∘ₗ LinearMap.adjoint (p j) = 1 :=
+  λ j => by
+    simp only [LinearMap.proj_adjoint, p, LinearMap.one_eq_id, LinearMap.proj_comp_single_same]
+  have this' : ∀ j, (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j)) •ₛ 1 = 1 :=
+  λ j => by
+    calc (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j)) •ₛ 1
+        = (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j) ∘ₗ 1) •ₛ (p j ∘ₗ 1 ∘ₗ LinearMap.adjoint (p j)) :=
+          by simp only [LinearMap.one_comp, LinearMap.comp_one, this]
+      _ = p j ∘ₗ ((A ∘ₗ LinearMap.adjoint (p j)) •ₛ (1 ∘ₗ LinearMap.adjoint (p j))) :=
+          schurMul_proj_comp (hφ := λ _ => hφ) _ _ _
+      _ = p j ∘ₗ (A •ₛ 1) ∘ₗ LinearMap.adjoint (p j) :=
+          by rw [schurMul_comp_proj_adjoint (hφ := λ _ => hφ)]
+      _ = 1 := by simp only [hA₃, LinearMap.one_comp, this]
+  have :=
+  calc
+    LinearMap.adjoint (p i) ∘ₗ p i + ∑ j ∈ Finset.univ \ {i}, LinearMap.adjoint (p j) ∘ₗ p j
+      = ∑ j, LinearMap.adjoint (p j) ∘ₗ p j :=
+        by
+          simp only [Finset.subset_univ, Finset.sum_sdiff_eq_sub, Fin.sum_univ_two, Fin.isValue,
+            Finset.sum_singleton, add_sub_cancel, p]
+    _ = 1 :=
+        by
+          rw [LinearMap.one_eq_id, ← LinearMap.sum_single_comp_proj]
+          simp only [p, LinearMap.proj_adjoint]
+    _ = A •ₛ 1 := hA₃.symm
+    _ = ∑ j, (LinearMap.adjoint (p i) ∘ₗ (p i) ∘ₗ A ∘ₗ LinearMap.adjoint (p i) ∘ₗ (p i))
+        •ₛ (LinearMap.adjoint (p j) ∘ₗ 1 ∘ₗ p j) :=
+        by
+          simp only [p, hi]
+          simp_rw [← map_sum,
+            LinearMap.one_comp]
+          congr
+          rw [LinearMap.one_eq_id, ← LinearMap.sum_single_comp_proj]
+          simp only [p, LinearMap.proj_adjoint, map_sum]
+    _ = (LinearMap.adjoint (p i) ∘ₗ (p i) ∘ₗ A ∘ₗ LinearMap.adjoint (p i) ∘ₗ (p i))
+        •ₛ (LinearMap.adjoint (p i) ∘ₗ 1 ∘ₗ p i)
+        + ∑ j ∈ Finset.univ \ {i},
+          (LinearMap.adjoint (p i) ∘ₗ (p i) ∘ₗ A ∘ₗ LinearMap.adjoint (p i) ∘ₗ (p i))
+          •ₛ (LinearMap.adjoint (p j) ∘ₗ 1 ∘ₗ p j) :=
+        by
+          simp only [schurMul_apply_apply, Fin.sum_univ_two, Fin.isValue, Finset.subset_univ,
+            Finset.sum_sdiff_eq_sub, Finset.sum_singleton, add_sub_cancel,]
+    _ = LinearMap.adjoint (p i) ∘ₗ p i :=
+        by
+          simp only [map_add, LinearMap.add_apply, p, schurMul_proj_adjoint_comp]
+          simp only [← LinearMap.comp_assoc, schurMul_comp_proj]
+          simp only [LinearMap.comp_assoc, ← hp, this']
+          simp only [LinearMap.one_comp, add_right_eq_self]
+          apply Finset.sum_eq_zero
+          simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and]
+          push_neg
+          intro j hj
+          rw [schurMul_proj_adjoint_comp_of_ne_eq_zero (hφ := λ _ => hφ) hj.symm]
+  simp only [Finset.subset_univ, Finset.sum_sdiff_eq_sub, Fin.sum_univ_two, Fin.isValue,
+    Finset.sum_singleton, add_sub_cancel, LinearMap.ext_iff, LinearMap.add_apply,
+    LinearMap.comp_apply, LinearMap.proj_apply, LinearMap.proj_adjoint_apply, funext_iff,
+    Pi.add_apply, p] at this
+  have hii : i = 0 ∨ i = 1 := Fin.exists_fin_two.mp ⟨i, rfl⟩
+  specialize this 1 (if i = 0 then 1 else 0)
+  rcases hii with (hii | hii)
+  <;> rw [hii] at this
+  <;> simp only [add_right_eq_self, add_left_eq_self, includeBlock_apply,
+      LinearMap.single_apply, dite_eq_right_iff] at this
+  <;> simp only [Fin.isValue, ↓reduceIte, ↓dreduceIte, Pi.one_apply, eq_mp_eq_cast, cast_eq,
+    one_ne_zero, imp_false, not_true_eq_false, p] at this
+
+-- theorem QuantumGraph.Real.piMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one_equiv
+--   [Nontrivial n]
+--   (hc : Coalgebra.counit (R := ℂ) (A := PiMat ℂ (Fin 2) (PiFinTwo_same n)) = PiMat.traceLinearMap)
+--   {A B : PiMat ℂ (Fin 2) (PiFinTwo_same n) →ₗ[ℂ] PiMat ℂ (Fin 2) (PiFinTwo_same n)}
+--   (hA : QuantumGraph.Real _ A) (hA₂ : LinearMap.adjoint A = A) (hA₃ : A •ₛ 1 = 1)
+--   (hA₄ : QuantumGraph.NumOfEdges A = 1)
+--   (hB : QuantumGraph.Real _ B) (hB₂ : LinearMap.adjoint B = B) (hB₃ : B •ₛ 1 = 1)
+--   (hB₄ : QuantumGraph.NumOfEdges B = 1) :
+--   ∃ f : PiMat ℂ (Fin 2) (PiFinTwo_same n) ≃⋆ₐ[ℂ] PiMat ℂ (Fin 2) (PiFinTwo_same n),
+--     QuantumGraph.equiv A B f :=
+-- by
+--   have hA₅ := hA.PiMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one hc hA₂ hA₃ hA₄
+--   have hB₅ := hB.PiMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one hc hB₂ hB₃ hB₄
+--   have H1 : ∀ i : Fin 2, (A = LinearMap.adjoint (LinearMap.proj i)
+--     ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n i)) ∘ₗ LinearMap.proj i
+--     ∧ B = LinearMap.adjoint (LinearMap.proj i)
+--     ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n i)) ∘ₗ LinearMap.proj i)
+--     →
+--     QuantumGraph.equiv A B (StarAlgEquiv.refl) :=
+--   by
+--     intro i h
+--     refine ⟨fun x1 ↦ congrFun rfl, ?_⟩
+--     apply LinearMap.ext
+--     simp only [h, Fin.isValue, LinearMap.coe_comp, LinearMap.coe_proj, Function.comp_apply,
+--       Function.eval, StarAlgEquiv.toLinearMap_apply, StarAlgEquiv.coe_refl, id_eq, implies_true]
+--   have H2 :
+--     ((A = LinearMap.adjoint (LinearMap.proj 0)
+--       ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 0)) ∘ₗ LinearMap.proj 0
+--     ∧ B = LinearMap.adjoint (LinearMap.proj 1)
+--       ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 1)) ∘ₗ LinearMap.proj 1)
+--     ∨
+--     (A = LinearMap.adjoint (LinearMap.proj 1)
+--       ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 1)) ∘ₗ LinearMap.proj 1
+--     ∧ B = LinearMap.adjoint (LinearMap.proj 0)
+--       ∘ₗ Qam.trivialGraph (Mat ℂ (PiFinTwo_same n 0)) ∘ₗ LinearMap.proj 0))
+--     → QuantumGraph.equiv A B (PiMat_finTwo_same_swapStarAlgEquiv) :=
+--   by
+--     rintro (h | h)
+--     all_goals
+--       constructor
+--       . rw [QuantumSet.starAlgEquiv_isometry_iff_adjoint_eq_symm]
+--         exact PiMat_finTwo_same_swapStarAlgEquiv_isometry
+--       . simp_rw [h.1, h.2, LinearMap.comp_assoc]
+--         simp only [PiMat_finTwo_same_proj_one_comp_swapStarAlgEquiv,
+--           PiMat_finTwo_same_proj_zero_comp_swapStarAlgEquiv,
+--           ← LinearMap.comp_assoc, LinearMap.proj_adjoint,
+--           PiMat_finTwo_same_swapStarAlgEquiv_comp_linearMapSingle_zero,
+--           PiMat_finTwo_same_swapStarAlgEquiv_comp_linearMapSingle_one]
+--   obtain (hf | hf) := hA₅
+--   . obtain (hg | hg) := hB₅
+--     . exact ⟨_, H1 _ ⟨hf, hg⟩⟩
+--     . exact ⟨_, H2 (Or.inl ⟨hf, hg⟩)⟩
+--   . obtain (hg | hg) := hB₅
+--     . exact ⟨_, H2 (Or.inr ⟨hf, hg⟩)⟩
+--     . exact ⟨_, H1 _ ⟨hf, hg⟩⟩
