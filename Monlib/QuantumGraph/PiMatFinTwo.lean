@@ -280,6 +280,147 @@ by
       simp only [zero_ne_one, and_false] at h₁
     . exact ⟨h₁.2, Or.inl ⟨h₁.1, h₂.2⟩⟩
 
+lemma Pi.nat_eq_zero_of_sum_eq_one_and_unique_one
+  {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → ℕ}
+  (h : ∑ i, f i = 1) {i : ι} (hd : f i = 1)
+  {j : ι} (hj : j ≠ i) : f j = 0 :=
+by
+  rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ i), hd] at h
+  simp only [add_right_eq_self, Finset.sum_eq_zero_iff, Finset.mem_sdiff, Finset.mem_univ,
+    Finset.mem_singleton, true_and] at h
+  exact h _ hj
+
+theorem Finset.sum_nat_eq_one_iff_exists_unique_eq_one
+  {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ι → ℕ}
+  (h : ∑ i, f i = 1) :
+  (∃! i : ι, f i = 1) :=
+by
+  have this1 : ∀ i : ι, f i ≤ 1 :=
+  by
+    intro i
+    by_contra!
+    have :=
+    calc 1 = ∑ j, f j := h.symm
+      _ = f i
+        + ∑ j ∈ Finset.univ \ {i}, f j :=
+          by rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ _)]
+      _ > 1 + ∑ j ∈ Finset.univ \ {i}, f j :=
+        by
+          nlinarith
+      _ ≥ 1 := by norm_num
+    linarith
+  have : ∃! i, 1 ≤ f i :=
+  by
+    apply existsUnique_of_exists_of_unique
+    . by_contra!
+      simp only [Nat.lt_one_iff] at this
+      simp only [this, Finset.sum_const_zero] at h
+      norm_num at h
+    . intro y₁ y₂ hy hd
+      by_contra!
+      have :=
+      calc
+        1 =  ∑ i : ι, f i := h.symm
+        _ = f y₁ + f y₂
+          + ∑ i ∈ (Finset.univ \ {y₁}) \ {y₂}, f i :=
+            by
+              have : y₂ ∈ Finset.univ \ {y₁} := by simp [this.symm]
+              rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ y₁),
+                Finset.sum_eq_add_sum_diff_singleton this, add_assoc]
+        _ ≥ 1 + 1
+          + ∑ i ∈ (Finset.univ \ {y₁}) \ {y₂}, f i :=
+            by
+              apply LE.le.ge
+              linarith
+        _ ≥ 2 := by norm_num
+      linarith
+  obtain ⟨i, ⟨hi, hii⟩⟩ := this
+  simp_rw [le_antisymm_iff]
+  use i
+  simp only [this1, true_and, hi]
+  exact hii
+
+theorem QuantumGraph.Real.dim_of_piMat_submodule_eq_zero_iff_eq_zero
+  {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
+  [(i : ι) → Fintype (p i)] [(i : ι) → DecidableEq (p i)]
+  {φ : (i : ι) → Module.Dual ℂ (Matrix (p i) (p i) ℂ)}
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real _ A) :
+  hA.toQuantumGraph.dim_of_piMat_submodule = 0 ↔ A = 0 :=
+by
+  simp only [QuantumGraph.Real.dim_of_piMat_submodule_eq]
+  simp_rw [Finset.sum_eq_zero_iff,
+    Submodule.finrank_eq_zero,
+    QuantumGraph.Real.PiMat_submodule_eq_bot_iff_proj_comp_adjoint_proj_eq_zero]
+  constructor
+  . intro h
+    rw [LinearMap.eq_sum_conj_adjoint_proj_comp_proj (hφ := hφ) A]
+    simp only [h _ (Finset.mem_univ _), LinearMap.comp_zero, LinearMap.zero_comp,
+      Finset.sum_const_zero]
+  . rintro rfl
+    simp only [LinearMap.zero_comp, LinearMap.comp_zero,
+      Finset.mem_univ, imp_self, implies_true]
+
+theorem QuantumGraph.Real.exists_unique_includeMap_of_adjoint_and_dim_ofPiMat_submodule_eq_one
+  {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
+  [(i : ι) → Fintype (p i)] [(i : ι) → DecidableEq (p i)]
+  {φ : (i : ι) → Module.Dual ℂ (Matrix (p i) (p i) ℂ)}
+  [hφ : ∀ i, (φ i).IsFaithfulPosMap]
+  {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} (hA : QuantumGraph.Real _ A)
+  (hA₂ : LinearMap.adjoint A = A)
+  (hd : hA.toQuantumGraph.dim_of_piMat_submodule = 1) :
+  ∃! i : ι,
+    LinearMap.adjoint (LinearMap.proj i)
+      ∘ₗ LinearMap.proj i
+      ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj i) ∘ₗ LinearMap.proj i = A :=
+by
+  have hA_neZero :=
+    (not_iff_not.mpr (hA.dim_of_piMat_submodule_eq_zero_iff_eq_zero)).mp
+    (ne_zero_of_eq_one hd)
+  simp only [QuantumGraph.Real.dim_of_piMat_submodule_eq] at hd
+  obtain ⟨i, hi, hii⟩ := Finset.sum_nat_eq_one_iff_exists_unique_eq_one hd
+  have this₁ : ∀ j ∈ Finset.univ \ {i},
+    Module.finrank ℂ (hA.PiMat_submodule j) = 0 :=
+  by
+    intro j hj
+    simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and] at hj
+    exact Pi.nat_eq_zero_of_sum_eq_one_and_unique_one hd hi hj
+  have this₂ := (hA.piMat_submodule_finrank_eq_swap_of_adjoint hA₂)
+  rw [this₂] at hi
+  have this₃ := Prod.ext_iff.mp (hii _ hi)
+  simp only [Prod.fst_swap, Prod.snd_swap] at this₃
+  simp_rw [Submodule.finrank_eq_zero,
+    QuantumGraph.Real.PiMat_submodule_eq_bot_iff_proj_comp_adjoint_proj_eq_zero] at this₁
+  have : ∑ x ∈ Finset.univ \ {i},
+      LinearMap.adjoint (LinearMap.proj x.1) ∘ₗ
+        ((LinearMap.proj x.1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj x.2))) ∘ₗ LinearMap.proj x.2
+      = (0 : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p) :=
+  by
+    apply Finset.sum_eq_zero
+    intro j hj
+    simp only [this₁ _ hj, LinearMap.comp_zero, LinearMap.zero_comp]
+  have hAA : A = LinearMap.adjoint (LinearMap.proj i.1)
+    ∘ₗ (LinearMap.proj i.1 ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj i.1))
+    ∘ₗ LinearMap.proj i.1 :=
+  by
+    nth_rw 1 [LinearMap.eq_sum_conj_adjoint_proj_comp_proj (hφ := hφ) A]
+    rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ i)]
+    simp only [this, add_zero]
+    rw [this₃.1]
+  refine ⟨i.1, hAA.symm, λ j hj => ?_⟩
+  . by_contra!
+    specialize this₁ (j, j)
+    simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and,
+      Prod.ext_iff, this₃.1, and_self] at this₁
+    have :=
+    calc (0 : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p)
+        = LinearMap.adjoint (LinearMap.proj j) ∘ₗ
+          (LinearMap.proj j ∘ₗ A ∘ₗ LinearMap.adjoint (LinearMap.proj j)) ∘ₗ LinearMap.proj j := by
+            simp only [this₁ this, LinearMap.comp_zero, LinearMap.zero_comp]
+      _ = A := by simp only [LinearMap.comp_assoc, hj]
+      _ ≠ 0 := hA_neZero
+    simp only [ne_eq, not_true_eq_false] at this
+
 theorem QuantumGraph.Real.piFinTwo_same_exists_matrix_map_eq_map_of_adjoint_and_dim_eq_one
   (hA₂ : LinearMap.adjoint A = A)
   (hd : hA.toQuantumGraph.dim_of_piMat_submodule = 1) :

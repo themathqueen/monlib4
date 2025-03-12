@@ -322,7 +322,7 @@ by
     inv_mul_of_invertible, rmul_adjoint, StarMul.star_mul, star_smul,
     _root_.map_smul]
   simp only [← StarMul.star_mul, mul_inv_of_invertible, star_one, _root_.map_one,
-    rmul_one, lmul_one, one_mul, smul_smul, star_div']
+    rmul_one, lmul_one, one_mul, smul_smul, star_div₀]
   simp only [one_div, RCLike.star_def, Complex.conj_ofReal, ← pow_two]
   simp only [inv_pow]
   simp only [QuantumSetDeltaForm.delta, ← hφ.norm_sq_dualMatrix_inv]
@@ -361,7 +361,7 @@ by
     simp_rw [hα, conjTranspose_smul, trace_smul, hφ.matrixIsPosDef.inv.1.eq,
       smul_smul, smul_eq_mul]
     rw [mul_rotate _ _ (α : ℂ), mul_assoc _ _ (star (α : ℂ)), Complex.star_def,
-      Complex.mul_conj, Complex.normSq_eq_abs, ← Complex.norm_eq_abs,
+      Complex.mul_conj, Complex.normSq_eq_norm_sq,
       ← hφ.norm_sq_dualMatrix_inv, ← Complex.ofReal_pow,
       ← Complex.ofReal_mul, ← mul_pow, mul_comm,
       ← norm_smul, ← hα, x.property, one_pow, Complex.ofReal_one, one_smul]
@@ -461,6 +461,7 @@ by
       by
         rw [hA.matrix_eq_of_orthonormalBasis u]
         simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.sum_singleton]
+        rfl
     rw [this, ← of_norm_one_matrix_eq_trivialGraph, of_norm_one_matrix_eq_of_norm_one_matrix_iff,
       normalize_of_ne_zero]
     simp only [this] at *

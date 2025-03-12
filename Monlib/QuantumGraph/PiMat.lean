@@ -576,7 +576,7 @@ by
   let p₂ := (EuclideanSpace.basisFun m ℂ).toBasis
   let a := λ i : n × m => (((p₁.tensorProduct p₂).repr ((euclideanSpaceTensor' (R := ℂ)).symm x)) i • p₁ i.1)
   have ha : ∀ i, a i = (((p₁.tensorProduct p₂).repr ((euclideanSpaceTensor' (R := ℂ)).symm x)) i • p₁ i.1) := λ i => rfl
-  simp_rw [← ha]
+  simp only [p₁, p₂, ← ha]
   rfl
 
 set_option synthInstance.maxHeartbeats 0 in
@@ -921,7 +921,7 @@ theorem Matrix.kronecker_mulVec_euclideanSpaceTensor' {n m : Type*} [Fintype n] 
     = WithLp.equiv 2 _ (euclideanSpaceTensor' (R := ℂ) ((A *ᵥ x) ⊗ₜ (B *ᵥ y))) :=
 by
   ext a
-  simp only [Matrix.mulVec, Matrix.dotProduct, kroneckerMap_apply, WithLp.equiv,
+  simp only [Matrix.mulVec, dotProduct, kroneckerMap_apply, WithLp.equiv,
     euclideanSpaceTensor'_apply]
 
   calc
@@ -1056,7 +1056,8 @@ theorem piInnerAut_modAut_commutes_of {U : (i : ι) → Matrix.unitaryGroup (p i
   ∀ x, (piInnerAut U) ((modAut (-r)) x) = (modAut (-r)) ((piInnerAut U) x) :=
 by
   simp only [funext_iff, Function.comp_apply, piInnerAut,
-    PiMat.modAut, StarAlgEquiv.piCongrRight_apply, AlgEquiv.piCongrRight_apply,
+    Pi.modAut, AlgEquiv.Pi_apply,
+    StarAlgEquiv.piCongrRight_apply, AlgEquiv.piCongrRight_apply,
     modAut, sig_apply, Matrix.innerAutStarAlg_apply', unitary.mul_inv_eq_iff] at h ⊢
   simp only [mul_assoc, neg_neg]
   simp only [Matrix.PosDef.rpow_neg_eq_inv_rpow, inv_inv]
