@@ -97,7 +97,7 @@ open scoped ComplexOrder ComplexConjugate
 class InnerProductAlgebra (A : Type*) [starAlgebra A]
   extends
     Norm A, MetricSpace A,
-    Inner ℂ A, BoundedSMul ℂ A where
+    Inner ℂ A, IsBoundedSMul ℂ A where
   dist x y := ‖x - y‖
   -- norm x := (inner x x).re
   norm_sq_eq_inner x : ‖x‖ ^ 2 = RCLike.re (inner x x)
@@ -437,6 +437,7 @@ theorem Psi_toFun_apply
 
 local notation "|" a "⟩⟨" b "|" => @rankOne ℂ _ _ _ _ _ _ _ a b
 set_option synthInstance.maxHeartbeats 80000 in
+set_option maxHeartbeats 300000 in
 noncomputable
 def Psi_invFun (t r : ℝ) :
   (A ⊗[ℂ] Bᵐᵒᵖ) →ₗ[ℂ] (B →ₗ[ℂ] A)
@@ -613,7 +614,7 @@ lemma _root_.QuantumSet.mul_comp_tensor_left_unit_eq_ket (x : A) :
   mul' ℂ A ∘ (x ⊗ₜ[ℂ] ·) ∘ Algebra.linearMap ℂ A = ket ℂ x :=
 by
   ext
-  simp only [Function.comp_apply, Algebra.linearMap_apply, mul'_apply, ket_toFun_toFun,
+  simp only [Function.comp_apply, Algebra.linearMap_apply, mul'_apply, ket_apply_apply,
     Algebra.algebraMap_eq_smul_one, mul_smul_one]
 open LinearMap starAlgebra in
 lemma _root_.QuantumSet.rTensor_bra_comul_unit_eq_ket_star (x : A) :
@@ -625,7 +626,7 @@ by
   apply ext_inner_left ℂ
   intro
   simp only [coe_comp, LinearEquiv.coe_coe, Function.comp_apply, Algebra.linearMap_apply, map_one,
-    ContinuousLinearMap.coe_coe, ket_toFun_toFun, one_smul]
+    ContinuousLinearMap.coe_coe, ket_apply_apply, one_smul]
   obtain ⟨α, β, h⟩ := TensorProduct.eq_span (Coalgebra.comul 1 : A ⊗[ℂ] A)
   simp_rw [← h, map_sum, inner_sum, rTensor_tmul, ContinuousLinearMap.coe_coe, bra_apply_apply,
     TensorProduct.lid_tmul, inner_smul_right, ← TensorProduct.inner_tmul, ← inner_sum,
@@ -676,7 +677,7 @@ theorem ket_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [Inne
 by
   ext
   simp only [Matrix.col_apply, LinearMap.toMatrix_apply,
-    Basis.singleton_apply, ContinuousLinearMap.coe_coe, ket_toFun_toFun, one_smul]
+    Basis.singleton_apply, ContinuousLinearMap.coe_coe, ket_apply_apply, one_smul]
 open scoped Matrix
 theorem bra_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
   {ι : Type*} [Fintype ι] [DecidableEq ι] (b : OrthonormalBasis ι 𝕜 A) (x : A) :
@@ -1032,7 +1033,7 @@ by
     Psi_toFun_apply, TensorProduct.comm_tmul,
     TensorProduct.map_tmul, ← h, map_sum, TensorProduct.sum_tmul,
     map_sum, sum_inner]
-  simp only [LinearMap.lTensor_tmul, ContinuousLinearMap.coe_coe, rankOne_apply_apply_toFun,
+  simp only [LinearMap.lTensor_tmul, ContinuousLinearMap.coe_coe, rankOne_apply_apply_apply,
     TensorProduct.tmul_smul, starAlgebra.modAut_star, neg_add_rev,
     LinearEquiv.coe_coe, unop_apply, MulOpposite.unop_op, starAlgebra.modAut_zero,
     AlgEquiv.one_apply, op_apply, LinearEquiv.lTensor_tmul,

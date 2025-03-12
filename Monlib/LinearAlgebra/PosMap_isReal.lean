@@ -887,6 +887,7 @@ by
       selfAdjointDecomposition_left_isSelfAdjoint, selfAdjointDecomposition_right_isSelfAdjoint,
       mul_neg, sub_neg_eq_add, mul_neg, sub_eq_add_neg]
     simp only [pow_two]
+    rfl
   have h₂ : star p * p = (a ^ 2 + b ^ 2) + Complex.I • (a * b - b * a) :=
   by
     rw [h, star_add]
@@ -1047,7 +1048,7 @@ by
     simp_rw [@eq_comm _ (0 : 𝕜), ite_eq_iff, and_true, sub_eq_zero] at this'
     let α : ℝ := ‖T (e ⟨0, hV⟩)‖
     simp only [← RCLike.ofReal_pow, RCLike.ofReal_inj,
-      sq_eq_sq (norm_nonneg _) (norm_nonneg _)] at this'
+      sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)] at this'
     have hα : ∀ i, α = ‖T (e i)‖ := λ i => by
       by_cases hi : i = ⟨0, hV⟩
       . rw [hi]
@@ -1057,7 +1058,7 @@ by
     have : ∀ x, ‖T x‖ = α * ‖x‖ :=
     λ x => by
       simp_rw [hα ⟨0, hV⟩]
-      rw [← sq_eq_sq (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)),
+      rw [← sq_eq_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)),
         ← RCLike.ofReal_inj (K := 𝕜), RCLike.ofReal_pow,
         mul_pow, RCLike.ofReal_mul, RCLike.ofReal_pow, ← hα, RCLike.ofReal_pow]
       rw [← OrthonormalBasis.sum_repr e x]
@@ -1089,7 +1090,7 @@ by
     simp only [LinearMap.smul_apply, norm_smul, this, norm_inv]
     simp only [Units.val_inv_eq_inv_val, Units.val_mk0, norm_inv, RCLike.norm_ofReal]
     simp only [RCLike.norm_ofReal, abs_of_nonneg (norm_nonneg _),
-      ← hα, ← mul_assoc, inv_mul_cancel₀ hα', one_mul]
+      ← hα, α, ← mul_assoc, inv_mul_cancel₀ hα', one_mul]
 
 theorem LinearMap.exists_scalar_isometry_iff_preserves_ortho
   {𝕜 V : Type*} [RCLike 𝕜]

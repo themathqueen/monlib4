@@ -32,7 +32,7 @@ section Pi
   --   {}
   -- -- calc
 
-  @[default_instance]
+  @[instance]
   def piStarAlgebra :
     starAlgebra (PiQ A) where
   modAut r := Pi.modAut r

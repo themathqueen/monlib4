@@ -55,7 +55,7 @@ by rw [← LinearMap.adjoint_adjoint (TensorProduct.rid 𝕜 E).toLinearMap, Ten
 variable {H : Type*}
   [NormedAddCommGroup H] [InnerProductSpace ℂ H] [FiniteDimensional ℂ H]
 
-set_option maxHeartbeats 600000 in
+set_option maxHeartbeats 750000 in
 lemma QFun.adjoint_eq
   {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} (hp : QFun H P) :
   LinearMap.adjoint P =
@@ -384,7 +384,7 @@ lemma LinearMap.rTensor_one {R M₁ M₂ : Type*} [CommSemiring R] [AddCommMonoi
   rT M₁ (1 : M₂ →ₗ[R] M₂) = 1 :=
 by ext; simp
 
-set_option maxHeartbeats 300000 in
+set_option maxHeartbeats 350000 in
 theorem QFun.map_comul_of_inv_eq_adjoint
   {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} (hp : QFun H P) (h₁ : P ∘ₗ LinearMap.adjoint P = 1)
   (h₂ : LinearMap.adjoint P ∘ₗ P = 1) :

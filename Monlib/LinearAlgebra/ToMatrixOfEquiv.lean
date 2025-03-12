@@ -263,7 +263,7 @@ theorem toLinOfAlgEquiv_eq (x : Matrix (I × J) (I × J) R) :
   simp_rw [LinearMap.ext_iff, ← ext_iff, toLinOfAlgEquiv_apply, reshape_symm_apply,
     LinearMap.sum_apply, Matrix.sum_apply, toLinAlgEquiv'_apply, mulVec, dotProduct,
     reshape_apply, LinearMap.smul_apply, Matrix.smul_apply, rankOneStdBasis_apply, stdBasisMatrix,
-    of_apply, smul_ite, ← Prod.mk.inj_iff, Prod.mk.eta, one_smul, smul_zero, smul_eq_mul,
+    of_apply, smul_ite, ← Prod.mk_inj, Prod.mk.eta, one_smul, smul_zero, smul_eq_mul,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true,
     forall₃_true_iff]
 

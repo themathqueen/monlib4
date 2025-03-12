@@ -7,6 +7,7 @@ variable {A : Type*} [ha : starAlgebra A] [hA : QuantumSet A]
 open scoped TensorProduct
 -- noncomputable instance :
 --   NormedAddCommGroupOfRing (A ⊗[ℂ] B) where
+set_option synthInstance.maxHeartbeats 80000 in
 noncomputable instance tensorStarAlgebra :
     starAlgebra (A ⊗[ℂ] B) where
   star_mul x y := x.induction_on (by simp only [zero_mul, star_zero, mul_zero])

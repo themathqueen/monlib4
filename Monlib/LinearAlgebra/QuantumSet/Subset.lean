@@ -331,7 +331,7 @@ by
   ext x y
   simp [AlgEquiv.toLinearMap_apply, QuantumSet.subset_tensor_algEquiv_tmul]
 
-set_option maxHeartbeats 300000 in
+set_option maxHeartbeats 0 in
 set_option synthInstance.maxHeartbeats 30000 in
 theorem QuantumSet.subset_tensor_algEquiv_adjoint
   {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
@@ -388,6 +388,7 @@ by
   ring_nf
   simp only [starAlgebra.modAut_zero, AlgEquiv.one_toLinearMap, LinearMap.one_comp]
 
+set_option maxHeartbeats 300000 in
 theorem schurMul_toSubsetQuantumSet {A B : Type*} [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
     {f : A →ₗ[ℂ] B} (r₁ r₂ : ℝ) :
   letI := QuantumSet.instSubset (A := A) (by infer_instance) r₁;

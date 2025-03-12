@@ -91,7 +91,7 @@ by
   ext
   simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
     TensorProduct.lid_symm_apply, TensorProduct.map_tmul, ContinuousLinearMap.coe_coe,
-    ket_toFun_toFun, one_smul, LinearMap.mul'_apply]
+    ket_apply_apply, one_smul, LinearMap.mul'_apply]
 
 section
 
@@ -167,7 +167,7 @@ theorem linearMap_comp_ket {𝕜 E₁ E₂ : Type*} [RCLike 𝕜]
   f ∘ₗ (ket 𝕜 x).toLinearMap = (ket 𝕜 (f x)).toLinearMap :=
 by
   ext
-  simp only [LinearMap.coe_comp, ContinuousLinearMap.coe_coe, Function.comp_apply, ket_toFun_toFun,
+  simp only [LinearMap.coe_comp, ContinuousLinearMap.coe_coe, Function.comp_apply, ket_apply_apply,
     one_smul]
 
 theorem mul_comp_lid_symm {R : Type*} [CommSemiring R] :
@@ -303,6 +303,7 @@ theorem comul_comp_algHom_adjoint (f : A →ₐ[ℂ] B) :
     = ((LinearMap.adjoint f.toLinearMap) ⊗ₘ (LinearMap.adjoint f.toLinearMap)) ∘ₗ Coalgebra.comul :=
 comul_comp_nonUnitalAlgHom_adjoint f.toNonUnitalAlgHom
 
+set_option linter.deprecated false in
 theorem schurMul_nonUnitalAlgHom_comp_coalgHom {D : Type*} [starAlgebra D]
   [hD : QuantumSet D] (g : C →ₙₐ[ℂ] D) (f : A →ₗc[ℂ] B) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ f.toLinearMap) •ₛ (g.toLinearMap ∘ₗ y ∘ₗ f.toLinearMap)

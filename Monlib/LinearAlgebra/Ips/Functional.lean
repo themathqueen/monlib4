@@ -491,7 +491,8 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
       intro p
       rw [eq_comm]
       simp_rw [RCLike.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← RCLike.star_def, ← Matrix.star_apply,
-        star_eq_conjTranspose, hQ.1.eq]
+        star_eq_conjTranspose]
+      rw [hQ.1.eq]
     have : 0 ≤ Q i i := by
       rw [PosSemidef.complex] at hQ
       specialize hQ fun j => ite (i = j) 1 0
@@ -553,7 +554,8 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
       intro p
       rw [eq_comm]
       simp_rw [RCLike.re_eq_complex_re, ← Complex.conj_eq_iff_re, ← RCLike.star_def, ← Matrix.star_apply,
-        star_eq_conjTranspose, hQ.1.eq]
+        star_eq_conjTranspose]
+      rw [hQ.1.eq]
     have : 0 ≤ Q i i := by
       rw [PosSemidef.complex] at hQ
       specialize hQ fun j => ite (i = j) 1 0

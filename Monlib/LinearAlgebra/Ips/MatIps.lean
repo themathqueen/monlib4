@@ -394,10 +394,10 @@ protected noncomputable def basis (hφ : φ.IsFaithfulPosMap) : Basis (n × n) �
     rw [not_isEmpty_iff] at h
     have t1 :
       ∀ a : n × n →₀ ℂ,
-        (∑ x : n × n in a.support, a x • (stdBasisMatrix x.fst x.snd 1 : Matrix n n ℂ)) *
+        (∑ x ∈ a.support, a x • (stdBasisMatrix x.fst x.snd 1 : Matrix n n ℂ)) *
               hQ.rpow (-(1 / 2)) =
             0 ↔
-          (∑ x : n × n in a.support, a x • (stdBasisMatrix x.fst x.snd 1 : Matrix n n ℂ)) *
+          (∑ x ∈ a.support, a x • (stdBasisMatrix x.fst x.snd 1 : Matrix n n ℂ)) *
                 hQ.rpow (-(1 / 2)) *
               hQ.rpow (1 / 2) =
             0 * hQ.rpow (1 / 2) :=
@@ -416,7 +416,7 @@ protected noncomputable def basis (hφ : φ.IsFaithfulPosMap) : Basis (n × n) �
     ext x
     simp_rw [Submodule.mem_top, iff_true, mem_span_range_iff_exists_fun, ← smul_mul,
       ← Finset.sum_mul, ← Matrix.ext_iff, mul_apply, Matrix.sum_apply,
-      Matrix.smul_apply, stdBasisMatrix, of_apply, smul_ite, smul_zero, ← Prod.mk.inj_iff, Prod.mk.eta,
+      Matrix.smul_apply, stdBasisMatrix, of_apply, smul_ite, smul_zero, ← Prod.mk_inj, Prod.mk.eta,
       Finset.sum_ite_eq', Finset.mem_univ, if_true, smul_mul_assoc, one_mul]
     exists fun ij : n × n => (x * hQ.rpow (1 / 2) : Matrix n n ℂ) ij.1 ij.2
     simp_rw [smul_eq_mul, ← mul_apply, Matrix.mul_assoc, Matrix.PosDef.rpow_mul_rpow, add_neg_cancel,
@@ -461,11 +461,12 @@ theorem basis_is_orthonormal (hφ : φ.IsFaithfulPosMap) : Orthonormal ℂ  hφ.
         simp_rw [Matrix.mul_assoc]
         rw [trace_mul_comm]
         simp_rw [Matrix.mul_assoc]
+        rfl
       _ = (hQ.rpow (-(1 / 2) + 1 + -(1 / 2) : ℝ) * stdBasisMatrix i j 1).trace := by
         simp_rw [PosDef.rpow_mul_rpow]
       _ = (hQ.rpow 0 * stdBasisMatrix i j 1).trace := by ring_nf
       _ = ite (i = j) 1 0 := by simp_rw [PosDef.rpow_zero, Matrix.one_mul, stdBasisMatrix.trace]
-  simp_rw [this, ← ite_and, ← Prod.eq_iff_fst_eq_snd_eq, forall₂_true_iff]
+  simp only [Q, this, ← ite_and, ← Prod.eq_iff_fst_eq_snd_eq, forall₂_true_iff]
 
 protected noncomputable def orthonormalBasis (hφ : φ.IsFaithfulPosMap) :
     OrthonormalBasis (n × n) ℂ (Matrix n n ℂ) :=
