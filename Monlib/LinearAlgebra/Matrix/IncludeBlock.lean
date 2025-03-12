@@ -561,18 +561,19 @@ def IsBlockDiagonal.algebra {k : Type _} [Fintype k] [DecidableEq k] {s : k → 
     [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] :
     Algebra R (BlockDiagonals R k s)
     where
-  toFun r := r • 1
-  map_one' := by ext; simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_one, one_smul]
-  map_zero' := by
-    ext
-    simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_zero, zero_smul]
-  map_add' x y := by
-    ext
-    simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_add, add_smul, add_comm]
-  map_mul' x y := by
-    ext; simp only [IsBlockDiagonal.coe_smul, IsBlockDiagonal.coe_mul, smul_mul_assoc]
-    simp only [Pi.smul_apply, Algebra.id.smul_eq_mul, mul_smul,
-      IsBlockDiagonal.coe_one, Matrix.one_mul, mul_assoc, smul_smul]
+  algebraMap :=
+  { toFun r := r • 1
+    map_one' := by ext; simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_one, one_smul]
+    map_zero' := by
+      ext
+      simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_zero, zero_smul]
+    map_add' x y := by
+      ext
+      simp only [IsBlockDiagonal.coe_nsmul, IsBlockDiagonal.coe_add, add_smul, add_comm]
+    map_mul' x y := by
+      ext; simp only [IsBlockDiagonal.coe_smul, IsBlockDiagonal.coe_mul, smul_mul_assoc]
+      simp only [Pi.smul_apply, Algebra.id.smul_eq_mul, mul_smul,
+        IsBlockDiagonal.coe_one, Matrix.one_mul, mul_assoc, smul_smul] }
   commutes' r x := by
     ext
     simp only [smul_apply, smul_eq_mul, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]

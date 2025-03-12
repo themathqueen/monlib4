@@ -28,7 +28,7 @@ noncomputable def TensorProduct.toKronecker : Matrix m m R ⊗[R] Matrix n n R �
   map_add' x y := by simp_rw [_root_.map_add, Matrix.add_apply]; rfl
   map_smul' r x :=
     by
-    simp only [_root_.map_smul (matrixEquivTensor R (Matrix m m R) n).symm,
+    simp only [_root_.map_smul (matrixEquivTensor n R (Matrix m m R)).symm,
       Matrix.smul_apply, Algebra.id.smul_eq_mul, RingHom.id_apply]
     rfl
 
@@ -46,10 +46,10 @@ theorem TensorProduct.toKronecker_apply (x : Matrix m m R) (y : Matrix n n R) :
 set_option synthInstance.maxHeartbeats 0 in
 noncomputable def Matrix.kroneckerToTensorProduct : Matrix (m × n) (m × n) R →ₗ[R] Matrix m m R ⊗[R] Matrix n n R
     where
-  toFun x := (matrixEquivTensor _ (Matrix m m R) n) fun i j k l => x (k, i) (l, j)
+  toFun x := (matrixEquivTensor n R (Matrix m m R)) fun i j k l => x (k, i) (l, j)
   map_add' x y := by simp_rw [Matrix.add_apply, ← _root_.map_add]; rfl
   map_smul' r x := by
-    simp_rw [Matrix.smul_apply, ← _root_.map_smul (matrixEquivTensor R (Matrix m m R) n),
+    simp_rw [Matrix.smul_apply, ← _root_.map_smul (matrixEquivTensor n R (Matrix m m R)),
       RingHom.id_apply]
     rfl
 

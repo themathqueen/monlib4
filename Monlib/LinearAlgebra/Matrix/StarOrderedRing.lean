@@ -59,7 +59,7 @@ protected def LE {n : Type _} [Fintype n] [DecidableEq n] :
 ⟨fun x y => (y - x).PosSemidef⟩
 
 def NegSemidef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] (x : Matrix n n 𝕜) : Prop :=
-  x.IsHermitian ∧ ∀ a : n → 𝕜, Matrix.dotProduct (Star.star a) (x *ᵥ a) ≤ 0
+  x.IsHermitian ∧ ∀ a : n → 𝕜, dotProduct (Star.star a) (x *ᵥ a) ≤ 0
 
 def NegDef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] (x : Matrix n n 𝕜) : Prop :=
 x.IsHermitian ∧ ∀ a : n → 𝕜, a ≠ 0 → (star a) ⬝ᵥ (x *ᵥ a) < 0
@@ -75,11 +75,11 @@ theorem IsHermitian.neg_iff {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] (x : Mat
 theorem negSemidef_iff_neg_posSemidef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n]
     (x : Matrix n n 𝕜) : x.NegSemidef ↔ (-x).PosSemidef := by
   simp_rw [Matrix.NegSemidef, Matrix.PosSemidef, Matrix.IsHermitian.neg_iff, Matrix.neg_mulVec,
-    Matrix.dotProduct_neg, le_neg, neg_zero]
+    dotProduct_neg, le_neg, neg_zero]
 theorem negDef_iff_neg_posDef {𝕜 n : Type _} [RCLike 𝕜] [Fintype n] (x : Matrix n n 𝕜) :
     x.NegDef ↔ (-x).PosDef := by
   simp_rw [Matrix.NegDef, Matrix.PosDef, Matrix.IsHermitian.neg_iff, Matrix.neg_mulVec,
-    Matrix.dotProduct_neg, lt_neg, neg_zero]
+    dotProduct_neg, lt_neg, neg_zero]
 
 open scoped ComplexOrder
 
@@ -345,7 +345,7 @@ def partialOrder {n : Type _} [Fintype n] [DecidableEq n] : PartialOrder (Matrix
     rw [← sub_eq_zero, Matrix.eq_zero_iff]
     intro a
     have := hx.2 a
-    rw [← neg_sub, Matrix.neg_mulVec, Matrix.dotProduct_neg,
+    rw [← neg_sub, Matrix.neg_mulVec, dotProduct_neg,
       le_neg, neg_zero] at this
     exact le_antisymm this (hy.2 a)
 

@@ -123,7 +123,7 @@ theorem PosDef.rpow_neg_one_eq_inv_self {Q : Matrix n n 𝕜} (hQ : Q.PosDef) :
 theorem IsHermitian.rpow_zero {Q : Matrix n n 𝕜} (hQ : Q.IsHermitian) : hQ.rpow 0 = 1 :=
   by
   simp_rw [IsHermitian.rpow, Pi.pow_def, Real.rpow_zero, coe_diagonal_eq_diagonal_coe,
-    diagonal_one, innerAut_coe, MulEquivClass.map_eq_one_iff]
+    diagonal_one, innerAut_coe, EmbeddingLike.map_eq_one_iff]
   ext; simp only [Function.comp_apply, CoeTC.coe, one_apply, coe_ite]; aesop
 
 theorem PosSemidef.rpow_zero {Q : Matrix n n 𝕜} (hQ : Q.PosSemidef) : hQ.rpow 0 = 1 :=

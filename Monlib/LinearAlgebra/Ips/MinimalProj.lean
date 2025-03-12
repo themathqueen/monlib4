@@ -715,7 +715,7 @@ theorem orthogonal_projection_iff [InnerProductSpace 𝕜 E] [FiniteDimensional 
   · rintro ⟨h1, h2⟩
     simp_rw [IsIdempotentElem, mul_def, ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe,
       coe_comp, ← LinearMap.ext_iff] at h2
-    rcases(LinearMap.isProj_iff_idempotent _).mpr h2 with ⟨W, hp⟩
+    rcases(LinearMap.isProj_iff_isIdempotentElem _).mpr h2 with ⟨W, hp⟩
     let p' := isProj' hp
     have hp' : p' = isProj' hp := rfl
     simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe, ← isProj'_apply hp,
@@ -757,10 +757,9 @@ theorem orthogonal_projection_iff' [InnerProductSpace 𝕜 E] [FiniteDimensional
     simp_rw [orthogonalProjection'_apply, Submodule.coe_mem, forall_const]
     simp_rw [orthogonalProjection'_apply, orthogonalProjection_eq_self_iff, imp_self, forall_const]
   · rintro ⟨h, h2⟩
-    have : p.comp p = p :=
+    have : IsIdempotentElem p :=
       by
-      simp_rw [ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe,
-        ContinuousLinearMap.coe_comp, ← LinearMap.ext_iff, ← LinearMap.isProj_iff_idempotent]
+      simp_rw [IsIdempotentElem.toLinearMap, ← LinearMap.isProj_iff_isIdempotentElem]
       use U
       apply LinearMap.IsProj.mk <;> simp_rw [ContinuousLinearMap.coe_coe]
       exact h2.1
@@ -790,7 +789,7 @@ theorem orthogonal_projection_iff' [InnerProductSpace 𝕜 E] [FiniteDimensional
     · intro h'
       rw [← Submodule.coe_eq_zero, ← @inner_self_eq_zero 𝕜, isProj'_apply hp,
         ContinuousLinearMap.coe_coe, ← adjoint_inner_left, IsSelfAdjoint.adjoint_eq h, ←
-        ContinuousLinearMap.comp_apply, this, h' _ (LinearMap.IsProj.map_mem h2 _)]
+        ContinuousLinearMap.mul_apply, this, h' _ (LinearMap.IsProj.map_mem h2 _)]
 
 set_option synthInstance.maxHeartbeats 200000 in
 theorem orthogonalProjection.isMinimalProjection_to_clm [InnerProductSpace 𝕜 E]

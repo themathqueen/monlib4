@@ -66,11 +66,11 @@ theorem Bimodule.add_rsmul (x : H₂) (a b : H₁ ⊗[R] H₂) : (a + b) •ᵣ 
   map_add _ _ _
 
 theorem Bimodule.lsmul_sum (x : H₁) {k : Type _} {s : Finset k} (a : k → H₁ ⊗[R] H₂) :
-    x •ₗ ∑ i in s, a i = ∑ i in s, x •ₗ a i :=
+    x •ₗ ∑ i ∈ s, a i = ∑ i ∈ s, x •ₗ a i :=
   map_sum _ _ _
 
 theorem Bimodule.sum_rsmul (x : H₂) {k : Type _} {s : Finset k} (a : k → H₁ ⊗[R] H₂) :
-    (∑ i in s, a i) •ᵣ x = ∑ i in s, a i •ᵣ x :=
+    (∑ i ∈ s, a i) •ᵣ x = ∑ i ∈ s, a i •ᵣ x :=
   map_sum _ _ _
 
 theorem Bimodule.one_lsmul (x : H₁ ⊗[R] H₂) : 1 •ₗ x = x := by
@@ -287,7 +287,7 @@ theorem LinearMap.isBimoduleMap_iff_ltensor_lsmul_rtensor_rsmul {R H₁ H₂ : T
 
 theorem LinearMap.IsBimoduleMap.sum_coe {p : Type _} {s : Finset p}
   (x : p → (IsBimoduleMaps R H₁ H₂)) :
-  (∑ i in s, x i : IsBimoduleMaps R H₁ H₂).1 = ∑ i in s, (x i).1 :=
+  (∑ i ∈ s, x i : IsBimoduleMaps R H₁ H₂).1 = ∑ i ∈ s, (x i).1 :=
 Submodule.coe_sum _ _ _
 
 theorem rmulMapLmul_apply_apply (x : H₁ ⊗[R] H₂) (a : H₁) (b : H₂) :

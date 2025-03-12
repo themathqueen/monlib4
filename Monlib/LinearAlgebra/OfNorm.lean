@@ -24,7 +24,7 @@ theorem cs_aux {x y : E} (hy : y ≠ 0) :
   simp only [inner_sub_sub_self, inner_smul_left, inner_smul_right, _root_.map_mul, inner_conj_symm,
     ← RCLike.ofReal_pow]
   simp_rw [inner_self_eq_norm_sq_to_K, starRingEnd_apply,
-    RCLike.ofReal_inv, star_inv', RCLike.star_def,
+    RCLike.ofReal_inv, star_inv₀, RCLike.star_def,
     RCLike.conj_ofReal, mul_assoc, ← RCLike.ofReal_pow, inv_mul_cancel₀ this, mul_one]
   letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
   calc
@@ -59,7 +59,7 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
     have hy' : ‖y‖ ^ 2 ≠ 0 := by
       rw [ne_eq, sq_eq_zero_iff, norm_eq_zero]
       exact hy
-    rw [← sq_eq_sq (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)), mul_pow, eq_comm, ←
+    rw [← sq_eq_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)), mul_pow, eq_comm, ←
       eq_mul_inv_iff_mul_eq₀ hy', ← sub_eq_zero, ← cs_aux hy, sq_eq_zero_iff, norm_eq_zero,
       sub_eq_zero] at h
     use Units.mk0 ((inner y x : 𝕜) * ((‖y‖ : 𝕜) ^ 2)⁻¹)
@@ -147,7 +147,7 @@ theorem re_innerDef_symm (x y : X) : re (innerDef x y : 𝕜) = re (innerDef y x
   simp_rw [re_innerDef]
   rw [add_comm]
   congr 2
-  simp only [sq_eq_sq, norm_nonneg, norm_sub_rev]
+  simp only [sq_eq_sq₀, norm_nonneg, norm_sub_rev]
 
 theorem im_innerDef_symm (x y : X) : im (innerDef x y : 𝕜) = -im (innerDef y x : 𝕜) :=
   by
@@ -683,7 +683,7 @@ by
     rw [this]
     calc spectrum 𝕜 (star a * a * (star b * b)) \ {0}
         = spectrum 𝕜 (a * (star b * b) * star a) \ {0} :=
-          by nth_rw 2 [spectrum.nonzero_mul_eq_swap_mul]; simp_rw [mul_assoc]
+          by nth_rw 2 [spectrum.nonzero_mul_comm]; simp_rw [mul_assoc]
       _ = spectrum 𝕜 (star (b * star a) * (b * star a)) \ {0} := by simp only [star_mul, star_star, mul_assoc]
       _ ⊆ {c : 𝕜 | 0 ≤ c} \ {0} := ?_
     rw [← this]

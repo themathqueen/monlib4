@@ -115,14 +115,14 @@ theorem comm_symm_map {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommM
 protected theorem map_sum {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid N₁] [AddCommMonoid N₂] [Module R M₁] [Module R M₂]
     [Module R N₁] [Module R N₂] (x : M₁ →ₗ[R] M₂) {α : Type _} (s : Finset α)
-    (n : α → N₁ →ₗ[R] N₂) : map x (∑ a : α in s, n a) = ∑ a : α in s, map x (n a) := by
+    (n : α → N₁ →ₗ[R] N₂) : map x (∑ a ∈ s, n a) = ∑ a ∈ s, map x (n a) := by
   simp_rw [TensorProduct.ext_iff', LinearMap.sum_apply, map_apply, LinearMap.coeFn_sum,
     Finset.sum_apply, tmul_sum, forall₂_true_iff]
 
 theorem sum_map {R : Type _} [CommSemiring R] {M₁ M₂ N₁ N₂ : Type _} [AddCommMonoid M₁]
     [AddCommMonoid M₂] [AddCommMonoid N₁] [AddCommMonoid N₂] [Module R M₁] [Module R M₂]
     [Module R N₁] [Module R N₂] {α : Type _} (s : Finset α) (n : α → N₁ →ₗ[R] N₂)
-    (x : M₁ →ₗ[R] M₂) : map (∑ a : α in s, n a) x = ∑ a : α in s, map (n a) x := by
+    (x : M₁ →ₗ[R] M₂) : map (∑ a ∈ s, n a) x = ∑ a ∈ s, map (n a) x := by
   simp_rw [TensorProduct.ext_iff', LinearMap.sum_apply, map_apply, LinearMap.coeFn_sum,
     Finset.sum_apply, sum_tmul, forall₂_true_iff]
 

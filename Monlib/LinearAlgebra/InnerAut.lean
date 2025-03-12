@@ -45,7 +45,7 @@ def unitary.innerAutStarAlg (K : Type _) {R : Type _} [CommSemiring K] [Semiring
     ⟨star (a : R), unitary.coe_star_mul_self a, unitary.coe_mul_star_self a⟩
   apply StarAlgEquiv.ofAlgEquiv (Algebra.autInner (a : R))
   intro x
-  simp only [Algebra.autInner_apply, star_mul, star_star, mul_assoc,
+  simp only [Algebra.autInner_apply, star_mul, star_star, this, mul_assoc,
     Invertible.invOf]
 
 theorem unitary.innerAutStarAlg_apply {K R : Type _} [CommSemiring K] [Semiring R] [StarMul R]
@@ -538,7 +538,7 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
   use U
   ext1 x
   simp_rw [innerAutStarAlg_apply_eq_innerAut_apply, innerAut_apply, ← hU2, hU3, hf,
-    Matrix.smul_mul, Matrix.mul_smul, smul_smul, ← RCLike.ofReal_inv, ← RCLike.ofReal_mul, ←
+    hU, Matrix.smul_mul, Matrix.mul_smul, smul_smul, ← RCLike.ofReal_inv, ← RCLike.ofReal_mul, ←
     Real.rpow_neg_one, ← Real.rpow_mul (le_of_lt this9), ← Real.rpow_add this9]
   norm_num
 

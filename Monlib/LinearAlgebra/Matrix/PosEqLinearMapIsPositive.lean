@@ -81,7 +81,7 @@ theorem Matrix.posSemidef_eq_linearMap_positive [Fintype n] [DecidableEq n] (x :
 by
   simp_rw [LinearMap.IsPositive, ← Matrix.isHermitian_iff_isSymmetric, Matrix.PosSemidef,
     Matrix.toEuclideanLin_eq_piLp_linearEquiv, PiLp.inner_apply, RCLike.inner_apply,
-    ← RCLike.star_def, Matrix.dotProduct, Pi.star_apply]
+    ← RCLike.star_def, dotProduct, Pi.star_apply]
   rfl
 
 theorem Matrix.posSemidef_iff [Fintype n] [DecidableEq n] (x : Matrix n n 𝕜) :
@@ -113,7 +113,7 @@ local notation "⟪" x "," y "⟫_𝕜" => @inner 𝕜 _ _ x y
 open scoped BigOperators
 
 theorem Matrix.dotProduct_eq_inner {n : Type _} [Fintype n] (x y : n → 𝕜) :
-    Matrix.dotProduct (star x) y = ∑ i : n, ⟪x i,y i⟫_𝕜 :=
+    dotProduct (star x) y = ∑ i : n, ⟪x i, y i⟫_𝕜 :=
   rfl
 
 theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [DecidableEq n]
@@ -128,7 +128,7 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     have :
       (star v ⬝ᵥ (yᴴ * y) *ᵥ v) = (star (y *ᵥ v) ⬝ᵥ y *ᵥ v) := by
       simp_rw [Matrix.star_mulVec, Matrix.dotProduct_mulVec, Matrix.vecMul_vecMul]
-    simp_rw [this, Matrix.dotProduct, Pi.star_apply, RCLike.star_def, ← RCLike.inner_apply,
+    simp_rw [this, dotProduct, Pi.star_apply, RCLike.star_def, ← RCLike.inner_apply,
       inner_self_eq_norm_sq_to_K]
     clear this
     apply Finset.sum_pos'
@@ -163,7 +163,7 @@ theorem Matrix.PosSemidef.invertible_iff_posDef {n : Type _} [Fintype n] [Decida
     push_neg at this
     cases' this with a ha
     specialize h a ha.2
-    rw [← Matrix.toLin'_apply, ha.1, Matrix.dotProduct_zero, lt_self_iff_false] at h
+    rw [← Matrix.toLin'_apply, ha.1, dotProduct_zero, lt_self_iff_false] at h
     exact h
 
 theorem Matrix.isHermitian_self_hMul_conjTranspose {m n : Type*} [Fintype m] (A : Matrix m n 𝕜) :
@@ -184,7 +184,7 @@ theorem Matrix.nonneg_eigenvalues_of_posSemidef [Fintype n] [DecidableEq n] {μ 
     (∑ x_1 : n, (A *ᵥ ⇑((PiLp.basisFun 2 𝕜 n).repr x)) x_1 * (starRingEnd 𝕜) (x x_1)) =
       (star x) ⬝ᵥ (A *ᵥ x) :=
     by
-    simp_rw [mul_comm, Matrix.dotProduct]
+    simp_rw [mul_comm, dotProduct]
     congr
   rw [this]
   exact (RCLike.nonneg_def.mp (H.2 _)).1
@@ -231,7 +231,7 @@ theorem Matrix.mulVec_sum {n m k R : Type _} [NonUnitalNonAssocSemiring R] [Fint
     x.mulVec (∑ i : k, y i) = ∑ i : k, x.mulVec (y i) :=
   by
   ext
-  simp only [Finset.sum_apply, Matrix.mulVec, Matrix.dotProduct, Finset.mul_sum]
+  simp only [Finset.sum_apply, Matrix.mulVec, dotProduct, Finset.mul_sum]
   rw [Finset.sum_comm]
 
 theorem Matrix.vecMul_sum {n m k R : Type _} [NonUnitalNonAssocSemiring R] [Fintype m] [Fintype n] [Fintype k]
@@ -239,7 +239,7 @@ theorem Matrix.vecMul_sum {n m k R : Type _} [NonUnitalNonAssocSemiring R] [Fint
   (∑ i : k, y i) ᵥ* x = ∑ i : k, (y i) ᵥ* x :=
   by
   ext
-  simp only [Finset.sum_apply, Matrix.vecMul, Matrix.dotProduct, Finset.sum_mul]
+  simp only [Finset.sum_apply, Matrix.vecMul, dotProduct, Finset.sum_mul]
   rw [Finset.sum_comm]
 
 open Matrix
@@ -630,13 +630,13 @@ open scoped BigOperators
 
 @[simp]
 theorem Finset.sum_abs_eq_zero_iff' {s : Type _} [Fintype s] {x : s → 𝕜} :
-    ∑ i : s in Finset.univ, ‖x i‖ ^ 2 = 0 ↔ ∀ i : s, ‖x i‖ ^ 2 = 0 :=
+    ∑ i, ‖x i‖ ^ 2 = 0 ↔ ∀ i : s, ‖x i‖ ^ 2 = 0 :=
   by
   have : ∀ i : s, 0 ≤ ‖x i‖ ^ 2 := fun i => sq_nonneg _
   constructor
   · intro h i
     have h' : ∀ i : s, i ∈ Finset.univ → 0 ≤ ‖x i‖ ^ 2 := by intro i _; exact this _
-    have h'' : ∑ i : s in _, ‖(x i : 𝕜)‖ ^ 2 = 0 := h
+    have h'' : ∑ i, ‖(x i : 𝕜)‖ ^ 2 = 0 := h
     rw [Finset.sum_eq_zero_iff_of_nonneg h'] at h''
     simp only [Finset.mem_univ, RCLike.normSq_eq_zero, forall_true_left] at h''
     exact h'' i

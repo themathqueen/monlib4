@@ -10,6 +10,7 @@ import Monlib.LinearAlgebra.IsReal
 import Monlib.LinearAlgebra.Ips.OpUnop
 import Monlib.LinearAlgebra.Ips.MulOp
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
+import Mathlib.RingTheory.TensorProduct.Finite
 
 /-!
 
@@ -31,8 +32,8 @@ variable {𝕜 E F G : Type _}
   [StarAddMonoid E] [StarAddMonoid F] [StarAddMonoid G]
   [Module 𝕜 E] [Module 𝕜 F] [Module 𝕜 G]
   [StarModule 𝕜 G]
-  [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
-  [FiniteDimensional 𝕜 G]
+  [Module.Finite 𝕜 E] [Module.Finite 𝕜 F]
+  [Module.Finite 𝕜 G]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
 noncomputable instance TensorProduct.Star : Star (E ⊗[𝕜] F)
@@ -88,8 +89,8 @@ def TensorProduct.starModule : StarModule 𝕜 (E ⊗[𝕜] F)
 theorem TensorProduct.map_real {A B E F : Type _} [AddCommGroup A] [AddCommGroup B] [AddCommGroup E]
     [AddCommGroup F] [StarAddMonoid A] [StarAddMonoid B] [StarAddMonoid E] [StarAddMonoid F]
     [Module 𝕜 A] [Module 𝕜 B] [Module 𝕜 E] [Module 𝕜 F] [StarModule 𝕜 A] [StarModule 𝕜 B]
-    [StarModule 𝕜 E] [StarModule 𝕜 F] [FiniteDimensional 𝕜 A] [FiniteDimensional 𝕜 B]
-    [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F] (f : E →ₗ[𝕜] F) (g : A →ₗ[𝕜] B) :
+    [StarModule 𝕜 E] [StarModule 𝕜 F] [Module.Finite 𝕜 A] [Module.Finite 𝕜 B]
+    [Module.Finite 𝕜 E] [Module.Finite 𝕜 F] (f : E →ₗ[𝕜] F) (g : A →ₗ[𝕜] B) :
     (TensorProduct.map f g).real = TensorProduct.map f.real g.real :=
   by
   rw [TensorProduct.ext_iff']
@@ -98,7 +99,7 @@ theorem TensorProduct.map_real {A B E F : Type _} [AddCommGroup A] [AddCommGroup
 
 
 variable (A : Type _) [Ring A] [Module 𝕜 A] [StarRing A] [StarModule 𝕜 A] [SMulCommClass 𝕜 A A]
-  [IsScalarTower 𝕜 A A] [FiniteDimensional 𝕜 A]
+  [IsScalarTower 𝕜 A A] [Module.Finite 𝕜 A]
 
 theorem LinearMap.mul'_real :
     (LinearMap.mul' 𝕜 A).real = LinearMap.mul' 𝕜 A ∘ₗ (TensorProduct.comm 𝕜 A A).toLinearMap :=
@@ -166,7 +167,7 @@ noncomputable def starAlgEquivOfLinearEquivTensorProduct
   [Algebra R A] [StarModule R A]
   [Ring B] [StarAddMonoid B] [Algebra R B] [StarModule R B]
   [Semiring C] [Algebra R C]
-  [FiniteDimensional R A] [FiniteDimensional R B] [StarAddMonoid C]
+  [Module.Finite R A] [Module.Finite R B] [StarAddMonoid C]
   (f : TensorProduct R A B ≃ₗ[R] C)
   (h_mul : ∀ (a₁ a₂ : A) (b₁ b₂ : B),
     f ((a₁ * a₂) ⊗ₜ[R] (b₁ * b₂)) = f (a₁ ⊗ₜ[R] b₁) * f (a₂ ⊗ₜ[R] b₂))
