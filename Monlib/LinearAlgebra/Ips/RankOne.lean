@@ -44,7 +44,7 @@ lemma ket_one_apply
   {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
   (x : E) :
   ket 𝕜 x 1 = x :=
-by simp only [ket_toFun_toFun, one_smul]
+by simp only [ket_apply_apply, one_smul]
 
 theorem ket_RCLike {𝕜 : Type*} [RCLike 𝕜] (x : 𝕜) :
   ket 𝕜 x = ContinuousLinearMap.mul 𝕜 𝕜 x :=
@@ -79,7 +79,7 @@ by
   ext
   apply ext_inner_left 𝕜
   intro y
-  simp only [ket_toFun_toFun, one_smul, ContinuousLinearMap.adjoint_inner_right,
+  simp only [ket_apply_apply, one_smul, ContinuousLinearMap.adjoint_inner_right,
     bra_apply_apply, RCLike.inner_apply, inner_conj_symm, mul_one]
 
 lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
@@ -157,13 +157,13 @@ theorem ket_eq_rankOne_one (x : E₁) :
   ket 𝕜 x = rankOne 𝕜 x 1 :=
 by
   ext
-  simp only [ket_toFun_toFun, one_smul, rankOne_apply_apply_toFun, RCLike.inner_apply, map_one,
+  simp only [ket_apply_apply, one_smul, rankOne_apply_apply_apply, RCLike.inner_apply, map_one,
     mul_one]
 theorem bra_eq_one_rankOne (x : E₁) :
   bra 𝕜 x = rankOne 𝕜 1 x :=
 by
   ext
-  simp only [innerSL_apply, rankOne_apply_apply_toFun, smul_eq_mul, mul_one]
+  simp only [innerSL_apply, rankOne_apply_apply_apply, smul_eq_mul, mul_one]
 
 
 open ContinuousLinearMap
@@ -599,8 +599,8 @@ theorem _root_.rankOne_lm_smul_smul {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [Nor
 theorem _root_.rankOne_lm_sum_sum {𝕜 E₁ E₂ : Type _} [RCLike 𝕜] [NormedAddCommGroup E₁]
   [NormedAddCommGroup E₂] [InnerProductSpace 𝕜 E₁] [InnerProductSpace 𝕜 E₂]
     {ι₁ ι₂ : Type _} {k : Finset ι₁} {k₂ : Finset ι₂} (f : ι₁ → E₁) (g : ι₂ → E₂) :
-    (rankOne 𝕜 (∑ i in k, f i) (∑ i in k₂, g i)).toLinearMap =
-      ∑ i in k, ∑ j in k₂, (rankOne 𝕜 (f i) (g j)).toLinearMap :=
+    (rankOne 𝕜 (∑ i ∈ k, f i) (∑ i ∈ k₂, g i)).toLinearMap =
+      ∑ i ∈ k, ∑ j ∈ k₂, (rankOne 𝕜 (f i) (g j)).toLinearMap :=
 by
   simp_rw [map_sum, LinearMap.sum_apply, ContinuousLinearMap.coe_sum]
   rw [Finset.sum_comm]

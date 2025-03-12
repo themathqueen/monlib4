@@ -31,6 +31,13 @@ variable {𝕜 n : Type _} [Field 𝕜] [Fintype n]
 theorem eq_zero {R n₁ n₂ : Type _} [Zero R] (x : Matrix n₁ n₂ R) :
     (∀ (i : n₁) (j : n₂), x i j = 0) ↔ x = 0 := by simp_rw [← Matrix.ext_iff, Matrix.zero_apply]
 
+theorem mulVec_stdBasis {R m n : Type _} [Semiring R] [Fintype n]
+    [DecidableEq n]
+    (a : Matrix m n R) (i : m) (j : n) :
+    (a.mulVec (Pi.basisFun R n j)) i = a i j := by
+  simp_rw [mulVec, dotProduct, Pi.basisFun_apply, Pi.single_apply,
+    mul_boole, Finset.sum_ite_eq', Finset.mem_univ, if_true]
+
 /--
 two matrices $a,b \in M_n$ are equal iff for all vectors $c \in \mathbb{k}^n$ we have $a c = b c$,
   essentially, treat them as linear maps on $\mathbb{k}^n$ so you can have extentionality with vectors -/
@@ -166,8 +173,8 @@ by
 theorem Matrix.IsHermitian.trace_eq [DecidableEq n] [DecidableEq 𝕜] {A : 𝕂 n} (hA : A.IsHermitian) :
     A.trace = ∑ i : n, hA.eigenvalues i :=
   by
-  simp_rw [hA.eigenvalues_eq', Matrix.trace, Matrix.diag, Matrix.dotProduct, Pi.star_apply,
-    Matrix.mulVec, transpose_apply, Matrix.dotProduct,
+  simp_rw [hA.eigenvalues_eq', Matrix.trace, Matrix.diag, dotProduct, Pi.star_apply,
+    Matrix.mulVec, transpose_apply, dotProduct,
     transpose_apply,
     ← conjTranspose_apply,
     Finset.mul_sum, ← mul_assoc, mul_comm (_ᴴ _ _ * _), ← mul_assoc, ← map_sum]

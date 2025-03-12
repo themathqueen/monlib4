@@ -78,7 +78,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       simp_rw [α, div_ne_zero_iff, star_ne_zero, ne_eq, this k i]
       exact ⟨hik, hik⟩
     have Hα : α⁻¹ = conj α := by
-      simp_rw [α, ← RCLike.star_def, star_div', star_star, inv_div, RCLike.star_def,
+      simp_rw [α, ← RCLike.star_def, star_div₀, star_star, inv_div, RCLike.star_def,
         div_eq_div_iff hik ((not_iff_not.mpr (this i k)).mp hik), ← RCLike.star_def,
         h (k, k) (i, i)]
     have conj_ : ∀ α : ℂ, RCLike.normSq α = RCLike.re (conj α * α) := fun α => by
@@ -91,7 +91,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       by
       intro p q _
       simp_rw [α, div_mul_eq_mul_div, mul_comm (x i k), ← RCLike.star_def, h (p, _) (_, _), ←
-        div_mul_eq_mul_div, ← star_div', div_self ((not_iff_not.mpr (this i k)).mp hik), star_one,
+        div_mul_eq_mul_div, ← star_div₀, div_self ((not_iff_not.mpr (this i k)).mp hik), star_one,
         one_mul]
     have : ∃ β : ℂ, β ^ 2 = α := by
       exists α ^ ((2 : ℕ) : ℂ)⁻¹
@@ -104,7 +104,7 @@ theorem isAlmostHermitian_iff (x : Matrix n n ℂ) : x.IsAlmostHermitian ↔ (x 
       by
       rw [← mul_left_inj' hβ', inv_mul_cancel₀ hβ', ← Complex.normSq_eq_conj_mul_self]
       norm_cast
-      simp_rw [Complex.normSq_eq_abs, ← Complex.abs_pow, hβ]
+      simp_rw [Complex.normSq_eq_norm_sq, ← Complex.norm_pow, hβ]
       exact Hα'.symm
     have hαβ : β * α⁻¹ = β⁻¹ := by
       rw [← hβ, pow_two, mul_inv, ← mul_assoc, mul_inv_cancel₀ hβ', one_mul]

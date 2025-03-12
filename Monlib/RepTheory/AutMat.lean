@@ -118,6 +118,7 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
       _ = (f A * f (vecMulVec x y)) *ᵥ z := by simp_rw [_root_.map_mul]
       _ = (f A) *ᵥ (T x) := by
         simp_rw [← mulVec_mulVec, ← AlgEquiv.toLinearMap_apply, ← mat_T_apply _ y z]
+        rfl
       _ = (f A * (LinearMap.toMatrix' T)) *ᵥ x := by
         simp_rw [← mulVec_mulVec, ← toLin'_apply (LinearMap.toMatrix' T), toLin'_toMatrix']
   refine' ⟨fir, _⟩
@@ -205,8 +206,9 @@ theorem automorphism_matrix_inner'' [DecidableEq n] [Nonempty n] (f : (M n) ≃�
   have : g.toLinearMap = toLin' T := by
     ext
     simp_rw [LinearMap.coe_comp, LinearEquiv.coe_toLinearMap, LinearMap.coe_single,
-      Function.comp_apply, Matrix.toLin'_apply, Matrix.mulVec_single, mul_one, g_mat_apply T r hr,
-      Matrix.toLin'_apply, Matrix.mulVec_single, mul_one]
+      Function.comp_apply, Matrix.toLin'_apply, Matrix.mulVec_single,
+      g, g_mat_apply T r hr,
+      Matrix.toLin'_apply, Matrix.mulVec_single]
   rw [this, LinearMap.toMatrix'_toLin', ← hT.1, ← LinearMap.toMatrix'_toLin' T, Matrix.mul_assoc, ←
     this]
   symm
@@ -604,11 +606,13 @@ by
     simp_rw [Submodule.mem_span_pair, ← he₁, ← he₂, h10, h11, Prod.mk_add_mk, add_zero]
     use 1, 0
     simp only [one_smul, zero_smul, add_zero]
+    rfl
   have he₂' : e₂ ∈ (Submodule.span 𝕜 {((1 : Mat 𝕜 n), (0 : Mat 𝕜 m)), (0, 1)} : Set _) := by
     simp only [SetLike.mem_coe]
     simp_rw [Submodule.mem_span_pair, ← he₁, ← he₂, h10, h11, Prod.mk_add_mk, add_zero]
     use 0, 1
     simp only [one_smul, zero_smul, zero_add]
+    rfl
   have : Set.center (Matrix n n 𝕜 × Matrix m m 𝕜) = Submodule.span 𝕜 {((1 : Mat 𝕜 n), (0 : Mat 𝕜 m)), (0, 1)} :=
   Matrix.prod_center
   rw [← this] at he₁' he₂'
@@ -666,6 +670,7 @@ by
         rw [← h₆, ← h₇]
         simp only [true_and, h10, h11, he₁, he₂, Prod.ext_iff, Hem, @eq_comm _ 0 (1 : Mat 𝕜 n),
           false_and, and_false, or_false]
+        simp only [Prod.smul_mk, smul_zero, true_and, e₁, e₂]
         rw [smul_one_eq_one_iff]
         exact h₉.2
       . simp_rw [h81, add_zero] at h₉

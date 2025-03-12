@@ -72,7 +72,7 @@ theorem linear_proj_isPositive_iff {U V : Submodule 𝕜 E} (hUV : IsCompl U V) 
   constructor
   · intro h u hu v hv
     rw [← Subtype.coe_mk u hu, ← Subtype.coe_mk v hv, ←
-      Submodule.linearProjOfIsCompl_apply_left hUV ⟨u, hu⟩, ← Submodule.subtype_apply U, ←
+      Submodule.linearProjOfIsCompl_apply_left hUV ⟨u, hu⟩, ← Submodule.subtype_apply (p := U), ←
       comp_apply, ← h.1 _ _, comp_apply, Submodule.linearProjOfIsCompl_apply_right hUV ⟨v, hv⟩,
       map_zero, inner_zero_left]
   · intro h
@@ -308,7 +308,7 @@ theorem sqrtAdjointSelfIsPositive (T : E →ₗ[𝕜] E) : (√T⋆T).IsPositive
 theorem norm_of_sqrt_adjoint_mul_self_eq (T : E →ₗ[𝕜] E) (x : E) :
     ‖(√T⋆T) x‖ = ‖T x‖ :=
   by
-  simp_rw [← sq_eq_sq (norm_nonneg _) (norm_nonneg _), ← @inner_self_eq_norm_sq 𝕜, ←
+  simp_rw [← sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _), ← @inner_self_eq_norm_sq 𝕜, ←
     adjoint_inner_left,
     isSelfAdjoint_iff'.mp
       ((isSymmetric_iff_isSelfAdjoint _).mp (sqrtAdjointSelfIsPositive T).1),
