@@ -86,7 +86,7 @@ theorem invariant_under'_iff_linear_proj_comp_self_comp_linear_proj_eq :
 theorem isCompl_invariantUnder_iff_linear_proj_and_self_commute :
     U.InvariantUnder T ∧ V.InvariantUnder T ↔ Commute (U.subtype ∘ₗ pᵤ) T :=
   by
-  simp_rw [Commute, SemiconjBy, LinearMap.ext_iff, LinearMap.mul_apply, LinearMap.comp_apply,
+  simp_rw [Commute, SemiconjBy, LinearMap.ext_iff, Module.End.mul_apply, LinearMap.comp_apply,
     U.subtype_apply]
   constructor
   · rintro ⟨h1, h2⟩ x
@@ -107,14 +107,14 @@ theorem commutes_with_linear_proj_iff_linear_proj_eq [Invertible T] :
     Commute (U.subtype.comp pᵤ) T ↔ (⅟ T).comp ((U.subtype.comp pᵤ).comp T) = U.subtype.comp pᵤ :=
   by
   rw [Commute, SemiconjBy]
-  simp_rw [LinearMap.mul_eq_comp]
+  simp_rw [Module.End.mul_eq_comp]
   constructor
   · intro h
-    simp_rw [h, ← LinearMap.mul_eq_comp, ← mul_assoc, invOf_mul_self, one_mul]
+    simp_rw [h, ← Module.End.mul_eq_comp, ← mul_assoc, invOf_mul_self, one_mul]
   · intro h
-    rw [← h]; simp_rw [← LinearMap.mul_eq_comp, ← mul_assoc, mul_invOf_self]
+    rw [← h]; simp_rw [← Module.End.mul_eq_comp, ← mul_assoc, mul_invOf_self]
     rw [mul_assoc (⅟ T) _ _]
-    simp_rw [LinearMap.mul_eq_comp, h]; rfl
+    simp_rw [Module.End.mul_eq_comp, h]; rfl
 
 theorem invariantUnder_inv_iff_U_subset_image [Invertible T] :
     U.InvariantUnder (⅟ T) ↔ ↑U ⊆ T '' U := by
@@ -122,14 +122,14 @@ theorem invariantUnder_inv_iff_U_subset_image [Invertible T] :
   · intro h x hx
     simp only [Set.mem_image, SetLike.mem_coe]
     use(⅟ T) x
-    rw [← LinearMap.comp_apply, ← LinearMap.mul_eq_comp, mul_invOf_self, LinearMap.one_apply,
+    rw [← LinearMap.comp_apply, ← Module.End.mul_eq_comp, mul_invOf_self, Module.End.one_apply,
       eq_self_iff_true, and_true]
     exact h hx
   · intro h x hx
     rw [Submodule.mem_comap]
     simp only [Set.subset_def, Set.mem_image] at h
     cases' h x hx with y hy
-    rw [← hy.2, ← LinearMap.comp_apply, ← LinearMap.mul_eq_comp, invOf_mul_self]
+    rw [← hy.2, ← LinearMap.comp_apply, ← Module.End.mul_eq_comp, invOf_mul_self]
     exact hy.1
 
 theorem inv_linear_proj_comp_map_eq_linear_proj_iff_images_eq [Invertible T] :
@@ -148,7 +148,7 @@ theorem inv_linear_proj_comp_map_eq_linear_proj_iff_images_eq [Invertible T] :
     Submodule.invariantUnder_inv_iff_U_subset_image,
     isCompl_invariantUnder_iff_linear_proj_and_self_commute U V hUV]
   rw [Submodule.commutes_with_linear_proj_iff_linear_proj_eq, Commute, SemiconjBy]
-  simp_rw [← LinearMap.mul_eq_comp]
+  simp_rw [← Module.End.mul_eq_comp]
   intro h
   rw [← h]
   simp_rw [mul_assoc _ _ (⅟ T), mul_invOf_self, h]

@@ -28,7 +28,7 @@ theorem directSumFromTo_apply_same {R : Type _} [Semiring R] {ι₁ : Type _} [D
   ext1 x
   simp only [directSumFromTo, LinearMap.comp_apply, LinearMap.coe_single, Pi.single,
     LinearMap.coe_proj, Function.eval_apply, Function.update_apply, Pi.zero_apply, ite_apply_lm,
-    LinearMap.zero_apply, LinearMap.one_apply]
+    LinearMap.zero_apply]
   simp
 
 theorem directSumFromTo_apply_ne_same {R : Type _} [Semiring R] {ι₁ : Type _} [DecidableEq ι₁]
@@ -38,5 +38,5 @@ theorem directSumFromTo_apply_ne_same {R : Type _} [Semiring R] {ι₁ : Type _}
   ext1 x
   simp only [directSumFromTo, LinearMap.comp_apply, LinearMap.coe_single, Pi.single,
     LinearMap.coe_proj, Function.eval_apply, Function.update_apply, Pi.zero_apply, ite_apply_lm,
-    LinearMap.zero_apply, LinearMap.one_apply]
+    LinearMap.zero_apply]
   simp [h]

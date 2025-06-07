@@ -6,7 +6,7 @@ Authors: Monica Omar
 import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Star.BigOperators
 -- import Monlib.LinearAlgebra.InnerAut
-import Mathlib.Algebra.Algebra.Spectrum
+import Mathlib.Algebra.Algebra.Spectrum.Basic
 import Monlib.LinearAlgebra.End
 import Monlib.Preq.StarAlgEquiv
 import Mathlib.Analysis.RCLike.Basic

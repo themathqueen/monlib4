@@ -5,7 +5,7 @@ Authors: Monica Omar
 -/
 import Mathlib.Data.Opposite
 -- import Mathlib.LinearAlgebra.Basis
-import Mathlib.LinearAlgebra.FiniteDimensional
+import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Adjoint
@@ -32,7 +32,7 @@ noncomputable def Basis.mulOpposite (b : Basis ι R H) : Basis ι R Hᵐᵒᵖ :
     exact this
   · simp_rw [top_le_iff]
     ext x
-    simp_rw [Submodule.mem_top, iff_true, mem_span_range_iff_exists_fun, ← MulOpposite.op_smul,
+    simp_rw [Submodule.mem_top, iff_true, Submodule.mem_span_range_iff_exists_fun, ← MulOpposite.op_smul,
       ← Finset.op_sum]
     use b.repr (MulOpposite.unop x)
     rw [Basis.sum_repr, MulOpposite.op_unop]
@@ -64,24 +64,24 @@ theorem mulOpposite_finiteDimensional {R H : Type _} [DivisionRing R] [AddCommGr
 
 @[instance]
 def MulOpposite.hasInner {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H] [InnerProductSpace 𝕜 H] :
-    Inner 𝕜 Hᵐᵒᵖ where inner x y := inner (MulOpposite.unop x) (MulOpposite.unop y)
+    Inner 𝕜 Hᵐᵒᵖ where inner x y := inner 𝕜 (MulOpposite.unop x) (MulOpposite.unop y)
 
 theorem MulOpposite.inner_eq {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] (x y : Hᵐᵒᵖ) :
-    (inner x y : 𝕜) = inner (MulOpposite.unop x) (MulOpposite.unop y) :=
+    inner 𝕜 x y = inner 𝕜 (MulOpposite.unop x) (MulOpposite.unop y) :=
   rfl
 
 theorem MulOpposite.inner_eq' {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] (x y : H) :
-    inner (MulOpposite.op x) (MulOpposite.op y) = (inner x y : 𝕜) :=
+    inner 𝕜 (MulOpposite.op x) (MulOpposite.op y) = inner 𝕜 x y :=
   rfl
 
 @[instance, reducible]
 def MulOpposite.innerProductSpace {𝕜 H : Type _} [RCLike 𝕜] [NormedAddCommGroup H]
     [InnerProductSpace 𝕜 H] : InnerProductSpace 𝕜 Hᵐᵒᵖ
     where
-  norm_sq_eq_inner x := by simp only [inner_eq, inner_self_eq_norm_sq, MulOpposite.norm_unop]
-  conj_symm x y := by simp only [inner_eq, inner_conj_symm]
+  norm_sq_eq_re_inner x := by simp only [inner_eq, inner_self_eq_norm_sq, MulOpposite.norm_unop]
+  conj_inner_symm x y := by simp only [inner_eq, inner_conj_symm]
   add_left x y z := by simp only [inner, inner_add_left, MulOpposite.unop_add]
   smul_left r x y := by simp only [inner, inner_smul_left, MulOpposite.unop_smul]
 

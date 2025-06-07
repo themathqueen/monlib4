@@ -15,12 +15,10 @@ This file contains some obvious lemmas on `module.End`.
 open scoped BigOperators
 
 theorem LinearMap.comp_one {R E F : Type _} [Semiring R] [AddCommMonoid E] [AddCommMonoid F]
-    [Module R F] [Module R E] (f : E →ₗ[R] F) : f ∘ₗ (1 : E →ₗ[R] E) = f := by
-  rw [LinearMap.one_eq_id, LinearMap.comp_id]
+    [Module R F] [Module R E] (f : E →ₗ[R] F) : f ∘ₗ (1 : E →ₗ[R] E) = f := rfl
 
 theorem LinearMap.one_comp {R E F : Type _} [Semiring R] [AddCommMonoid E] [AddCommMonoid F]
-    [Module R F] [Module R E] (f : E →ₗ[R] F) : (1 : F →ₗ[R] F) ∘ₗ f = f := by
-  rw [LinearMap.one_eq_id, LinearMap.id_comp]
+    [Module R F] [Module R E] (f : E →ₗ[R] F) : (1 : F →ₗ[R] F) ∘ₗ f = f := rfl
 
 theorem LinearMap.comp_sum {R M M₂ M₃ : Type _} [Semiring R] [AddCommMonoid M] [AddCommMonoid M₂]
     [AddCommMonoid M₃] [Module R M] [Module R M₂] [Module R M₃] (g : M₃ →ₗ[R] M₂) {α : Type _}

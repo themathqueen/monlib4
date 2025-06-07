@@ -15,7 +15,7 @@ import Monlib.LinearAlgebra.End
 theorem isUnit_comm (K E : Type _) [DivisionRing K] [AddCommGroup E] [Module K E]
     [FiniteDimensional K E] (x y : E →ₗ[K] E) : IsUnit (x ∘ₗ y) ↔ IsUnit (y ∘ₗ x) :=
   by
-  simp_rw [← LinearMap.mul_eq_comp]
+  simp_rw [← Module.End.mul_eq_comp]
   constructor
   all_goals
     intro h
