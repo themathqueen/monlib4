@@ -37,19 +37,19 @@ noncomputable instance TensorProduct.Inner : Inner 𝕜 (E ⊗[𝕜] F)
 --   (b₁ : orthonormal_basis n 𝕜 E) (b₂ : orthonormal_basis m 𝕜 F) :
 --   (b₁.to_basis.tensor_product b₂.to_basis).repr
 theorem TensorProduct.inner_tmul (x z : E) (y w : F) :
-    (inner (x ⊗ₜ[𝕜] y) (z ⊗ₜ[𝕜] w) : 𝕜) = inner x z * inner y w := by
+    inner 𝕜 (x ⊗ₜ[𝕜] y) (z ⊗ₜ[𝕜] w) = inner 𝕜 x z * inner 𝕜 y w := by
   simp_rw [inner, Basis.tensorProduct_repr_tmul_apply, OrthonormalBasis.coe_toBasis_repr_apply,
     smul_eq_mul,
     star_mul', RCLike.star_def, OrthonormalBasis.repr_apply_apply,
-    inner_conj_symm, mul_mul_mul_comm (inner y _) (inner x _),
+    inner_conj_symm, mul_mul_mul_comm (inner _ y _) (inner _ x _),
     ← Finset.sum_mul, ← Finset.mul_sum, OrthonormalBasis.sum_inner_mul_inner, mul_comm]
 
 protected theorem TensorProduct.inner_add_left (x y z : E ⊗[𝕜] F) :
-    (inner (x + y) z : 𝕜) = inner x z + inner y z := by
+    inner 𝕜 (x + y) z = inner 𝕜 x z + inner 𝕜 y z := by
   simp_rw [inner, ← Finset.sum_add_distrib, map_add, Finsupp.add_apply, star_add, add_mul]
 
 protected theorem TensorProduct.inner_zero_right (x : E ⊗[𝕜] F) :
-    (inner x (0 : E ⊗[𝕜] F) : 𝕜) = 0 :=
+    inner 𝕜 x (0 : E ⊗[𝕜] F) = 0 :=
   x.induction_on
   (by simp_rw [← TensorProduct.zero_tmul E (0 : F), TensorProduct.inner_tmul,
     inner_zero_left, MulZeroClass.zero_mul])
@@ -60,29 +60,29 @@ protected theorem TensorProduct.inner_zero_right (x : E ⊗[𝕜] F) :
     by simp_rw [TensorProduct.inner_add_left, ha, hb, add_zero])
 
 protected theorem TensorProduct.inner_conj_symm (x y : E ⊗[𝕜] F) :
-    starRingEnd 𝕜 (inner x y : 𝕜) = inner y x := by
+    starRingEnd 𝕜 (inner 𝕜 x y) = inner 𝕜 y x := by
   simp_rw [inner, starRingEnd_apply, star_sum, star_mul', star_star, mul_comm]
 
-protected theorem TensorProduct.inner_zero_left (x : E ⊗[𝕜] F) : (inner (0 : E ⊗[𝕜] F) x : 𝕜) = 0 :=
+protected theorem TensorProduct.inner_zero_left (x : E ⊗[𝕜] F) : inner 𝕜 (0 : E ⊗[𝕜] F) x = 0 :=
   by rw [← TensorProduct.inner_conj_symm, TensorProduct.inner_zero_right, map_zero]
 
 protected theorem TensorProduct.inner_add_right (x y z : E ⊗[𝕜] F) :
-    (inner x (y + z) : 𝕜) = inner x y + inner x z := by
+    inner 𝕜 x (y + z) = inner 𝕜 x y + inner 𝕜 x z := by
   rw [← TensorProduct.inner_conj_symm, TensorProduct.inner_add_left, map_add,
     TensorProduct.inner_conj_symm, TensorProduct.inner_conj_symm]
 
 protected theorem TensorProduct.inner_sum {n : Type _} [Fintype n] (x : n → E ⊗[𝕜] F)
-    (y : E ⊗[𝕜] F) : (inner (∑ i, x i) y : 𝕜) = ∑ i, inner (x i) y :=
+    (y : E ⊗[𝕜] F) : inner 𝕜 (∑ i, x i) y = ∑ i, inner 𝕜 (x i) y :=
   by
   simp_rw [inner, map_sum, Finset.sum_apply', star_sum, Finset.sum_mul]
   rw [Finset.sum_rotate]
 
 protected theorem TensorProduct.sum_inner {n : Type _} [Fintype n] (y : E ⊗[𝕜] F)
-    (x : n → E ⊗[𝕜] F) : (inner y (∑ i, x i) : 𝕜) = ∑ i, inner y (x i) := by
+    (x : n → E ⊗[𝕜] F) : inner 𝕜 y (∑ i, x i) = ∑ i, inner 𝕜 y (x i) := by
   rw [← TensorProduct.inner_conj_symm, TensorProduct.inner_sum, map_sum]
   simp_rw [TensorProduct.inner_conj_symm]
 
-protected theorem TensorProduct.inner_nonneg_re (x : E ⊗[𝕜] F) : 0 ≤ RCLike.re (inner x x : 𝕜) :=
+protected theorem TensorProduct.inner_nonneg_re (x : E ⊗[𝕜] F) : 0 ≤ RCLike.re (inner 𝕜 x x) :=
   by
   simp_rw [inner, map_sum, RCLike.star_def, RCLike.conj_mul, ← RCLike.ofReal_pow,
     RCLike.ofReal_re, ←
@@ -106,8 +106,8 @@ open scoped InnerProductSpace
 noncomputable def TensorProduct.normedAddCommGroup : NormedAddCommGroup (E ⊗[𝕜] F) :=
   @InnerProductSpace.Core.toNormedAddCommGroup 𝕜 (E ⊗[𝕜] F) _ _ _
     { inner := (⟪·, ·⟫_𝕜)
-      conj_symm := fun x y => y.inner_conj_symm x
-      nonneg_re := fun x => x.inner_nonneg_re
+      conj_inner_symm := fun x y => y.inner_conj_symm x
+      re_inner_nonneg := fun x => x.inner_nonneg_re
       definite := fun x hx =>
         by
         simp_rw [inner, RCLike.star_def, RCLike.conj_mul, ← Finset.sum_product',
@@ -134,7 +134,7 @@ noncomputable def TensorProduct.innerProductSpace :
   InnerProductSpace.ofCore _
 
 example (α β : 𝕜) (x y : E) :
-    TensorProduct.innerProductSpace.inner (α ⊗ₜ[𝕜] x) (β ⊗ₜ[𝕜] y) = inner α β * inner x y :=
+    TensorProduct.innerProductSpace.inner (α ⊗ₜ[𝕜] x) (β ⊗ₜ[𝕜] y) = inner 𝕜 α β * inner 𝕜 x y :=
   TensorProduct.inner_tmul _ _ _ _
 
 theorem TensorProduct.lid_adjoint :
@@ -149,7 +149,7 @@ theorem TensorProduct.lid_adjoint :
     (by simp only [inner_zero_right, map_zero])
     (fun α z => by
       simp only [TensorProduct.lid_tmul, TensorProduct.inner_tmul, RCLike.inner_apply,
-        starRingEnd_apply, star_one, one_mul, inner_smul_right])
+        starRingEnd_apply, star_one, one_mul, inner_smul_right, mul_one])
     (fun z w hz hw => by simp only [map_add, inner_add_right, hz, hw])
 
 theorem TensorProduct.comm_adjoint :
@@ -211,7 +211,7 @@ theorem TensorProduct.map_adjoint {A B C D : Type _} [NormedAddCommGroup A] [Nor
 
 theorem TensorProduct.inner_ext_iff (x z : E) (y w : F) :
     x ⊗ₜ y = z ⊗ₜ[𝕜] w ↔
-      ∀ (a : E) (b : F), inner (x ⊗ₜ[𝕜] y) (a ⊗ₜ[𝕜] b) = (inner (z ⊗ₜ[𝕜] w) (a ⊗ₜ[𝕜] b) : 𝕜) :=
+      ∀ (a : E) (b : F), inner 𝕜 (x ⊗ₜ[𝕜] y) (a ⊗ₜ[𝕜] b) = inner 𝕜 (z ⊗ₜ[𝕜] w) (a ⊗ₜ[𝕜] b) :=
   by
   refine' ⟨fun h a b => by rw [h], fun h => _⟩
   apply @ext_inner_right 𝕜
@@ -225,7 +225,7 @@ theorem TensorProduct.inner_ext_iff (x z : E) (y w : F) :
 theorem TensorProduct.forall_inner_eq_zero {𝕜 E F : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E]
     [FiniteDimensional 𝕜 F] (x : E ⊗[𝕜] F) :
-    (∀ (a : E) (b : F), (inner x (a ⊗ₜ[𝕜] b) : 𝕜) = 0) ↔ x = 0 :=
+    (∀ (a : E) (b : F), inner 𝕜 x (a ⊗ₜ[𝕜] b) = 0) ↔ x = 0 :=
   by
   refine' ⟨fun h => _, fun h a b => by rw [h, inner_zero_left]⟩
   rw [← @forall_inner_eq_zero_iff 𝕜]
@@ -235,8 +235,8 @@ theorem TensorProduct.forall_inner_eq_zero {𝕜 E F : Type _} [RCLike 𝕜] [No
 theorem TensorProduct.inner_ext_iff' {𝕜 E F : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E]
     [FiniteDimensional 𝕜 F] (x y : E ⊗[𝕜] F) :
-    x = y ↔ ∀ (a : E) (b : F), inner x (a ⊗ₜ[𝕜] b) = (inner y (a ⊗ₜ[𝕜] b) : 𝕜) := by
-  simp_rw [← @sub_eq_zero 𝕜 _ _ (inner _ _ : 𝕜), ← inner_sub_left,
+    x = y ↔ ∀ (a : E) (b : F), inner 𝕜 x (a ⊗ₜ[𝕜] b) = inner 𝕜 y (a ⊗ₜ[𝕜] b) := by
+  simp_rw [← @sub_eq_zero 𝕜 _ _ (inner _ _ _), ← inner_sub_left,
     TensorProduct.forall_inner_eq_zero, sub_eq_zero]
 
 theorem TensorProduct.lid_symm_adjoint {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]

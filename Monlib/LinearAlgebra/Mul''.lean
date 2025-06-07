@@ -144,9 +144,7 @@ def LinearMap.mulToClm (𝕜 X : Type _) [RCLike 𝕜] [NormedAddCommGroupOfRing
   toFun := mul_map_aux 𝕜 X
   map_add' := map_add _
   map_smul' := _root_.map_smul _
-  cont := by
-    simp only [LinearMap.mk_coe]
-    exact map_continuous _
+  cont := map_continuous _
 
 theorem LinearMap.mulToClm_apply {𝕜 X : Type _} [RCLike 𝕜] [NormedAddCommGroupOfRing X]
     [NormedSpace 𝕜 X] [SMulCommClass 𝕜 X X] [IsScalarTower 𝕜 X X] [FiniteDimensional 𝕜 X]

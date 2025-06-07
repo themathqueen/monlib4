@@ -55,9 +55,9 @@ open scoped Matrix
 private def mat_T [Semiring R] (f : (Mₙ n) →ₗ[R] Mₙ n) (y z : n → R) : (n → R) →ₗ[R] n → R
     where
   toFun x := (f (vecMulVec x y)).mulVec z
-  map_add' w p := by simp_rw [vecMulVec_eq (Fin 1), col_add w p, Matrix.add_mul, map_add, add_mulVec]
+  map_add' w p := by simp_rw [vecMulVec_eq (Fin 1), replicateCol_add w p, Matrix.add_mul, map_add, add_mulVec]
   map_smul' w r := by
-    simp_rw [vecMulVec_eq (Fin 1), RingHom.id_apply, col_smul, smul_mul, LinearMap.map_smul,
+    simp_rw [vecMulVec_eq (Fin 1), RingHom.id_apply, replicateCol_smul, smul_mul, LinearMap.map_smul,
       smul_mulVec_assoc]
 
 private theorem mat_T_apply [Semiring R] (f : (Mₙ n) →ₗ[R] Mₙ n) (y z r : n → R) :
@@ -114,7 +114,7 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
       _ = (f (vecMulVec (A *ᵥ x) y)) *ᵥ z := by
         rw [mat_T_apply, AlgEquiv.toLinearMap_apply]
       _ = (f (A * vecMulVec x y)) *ᵥ z := by
-        simp_rw [vecMulVec_eq (Fin 1), col_mulVec, ← Matrix.mul_assoc]
+        simp_rw [vecMulVec_eq (Fin 1), replicateCol_mulVec, ← Matrix.mul_assoc]
       _ = (f A * f (vecMulVec x y)) *ᵥ z := by simp_rw [_root_.map_mul]
       _ = (f A) *ᵥ (T x) := by
         simp_rw [← mulVec_mulVec, ← AlgEquiv.toLinearMap_apply, ← mat_T_apply _ y z]
@@ -151,14 +151,14 @@ theorem automorphism_matrix_inner [Field R] [DecidableEq n] [h5 : Nonempty n] (f
     -- `(f B) (T u) = wd⋆ * (T u) |w⟩ * d * (T u) = w = w`
     use B
     rw [hB, vecMulVec_eq (Fin 1), ← mulVec_mulVec]
-    suffices (row (Fin 1) d) *ᵥ (T u) = 1 by
+    suffices (replicateRow (Fin 1) d) *ᵥ (T u) = 1 by
       ext
-      simp_rw [this, mulVec, dotProduct, col_apply, Pi.one_apply, mul_one,
+      simp_rw [this, mulVec, dotProduct, replicateCol_apply, Pi.one_apply, mul_one,
         Finset.sum_const, nsmul_eq_mul]
       simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton,
         Nat.cast_one, one_mul]
     ext
-    simp_rw [mulVec, Pi.one_apply, ← hd, dotProduct, row_apply, mul_comm]
+    simp_rw [mulVec, Pi.one_apply, ← hd, dotProduct, replicateRow_apply, mul_comm]
   -- now let `B ∈ Mₙ` be our matrix such that `(f B) (T u) = w`
   cases' this2 with B hB
   -- then we let our vector be `M⁻¹(B) u`
@@ -412,7 +412,7 @@ theorem aut_mat_inner' [DecidableEq n] (f : (M n) ≃ₐ[𝕜] M n) :
   have hTinv : Tinv = LinearMap.toMatrix' T.symm := rfl
   refine' ⟨⟨T', Tinv, _, _⟩, by congr⟩
   all_goals
-    simp only [hT', hTinv, ← LinearMap.toMatrix'_mul, LinearMap.mul_eq_comp, LinearEquiv.comp_coe,
+    simp only [hT', hTinv, ← LinearMap.toMatrix'_mul, Module.End.mul_eq_comp, LinearEquiv.comp_coe,
       LinearEquiv.symm_trans_self, LinearEquiv.self_trans_symm, LinearEquiv.refl_toLinearMap,
       LinearMap.toMatrix'_id]
 
@@ -437,8 +437,8 @@ theorem Matrix.commutes_with_all_iff {R : Type _} [CommSemiring R] [DecidableEq 
     obtain ⟨i, _, _⟩ := h'
     have : x = diagonal x.diag := by
       ext k l
-      specialize h (stdBasisMatrix l k 1)
-      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, of_apply, boole_mul, mul_boole, ite_and,
+      specialize h (single l k 1)
+      simp_rw [← Matrix.ext_iff, mul_apply, single, of_apply, boole_mul, mul_boole, ite_and,
         Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at h
       specialize h k k
       simp_rw [diagonal, of_apply, Matrix.diag]
@@ -446,8 +446,8 @@ theorem Matrix.commutes_with_all_iff {R : Type _} [CommSemiring R] [DecidableEq 
       exact h.symm
     have this1 : ∀ k l : n, x k k = x l l := by
       intro k l
-      specialize h (stdBasisMatrix k l 1)
-      simp_rw [← Matrix.ext_iff, mul_apply, stdBasisMatrix, of_apply, boole_mul, mul_boole, ite_and,
+      specialize h (single k l 1)
+      simp_rw [← Matrix.ext_iff, mul_apply, single, of_apply, boole_mul, mul_boole, ite_and,
         Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true] at h
       specialize h k l
       simp_rw [if_true] at h
@@ -506,7 +506,7 @@ by
   simp_rw [Set.center_pi, Matrix.center]
   ext x
   simp only [Set.mem_pi, Set.mem_univ, SetLike.mem_coe, forall_true_left]
-  simp only [Submodule.mem_span_singleton, mem_span_range_iff_exists_fun,
+  simp only [Submodule.mem_span_singleton, Submodule.mem_span_range_iff_exists_fun,
     ← Pi.single_smul, funext_iff]
   rfl
 lemma PiMat.center {R ι : Type*} [CommSemiring R] [DecidableEq ι] [Fintype ι] {n : ι → Type*}
@@ -901,13 +901,13 @@ by simp_rw [Prod.mul_def, zero_mul, one_mul]
 
 macro "prod_map_add" : tactic =>
   `(tactic|
-    (simp only
+    (
      nth_rw 1 [← add_zero (0 : _)]
      simp_rw [← Prod.mk_add_mk, _root_.map_add]
      rfl))
 macro "prod_map_mul" : tactic =>
   `(tactic|
-    (simp only
+    (
      nth_rw 1 [← zero_mul (0 : _)]
      simp_rw [← Prod.mk_mul_mk, _root_.map_mul]
      rfl))
@@ -937,7 +937,6 @@ have Hf : (1, 0) = f.symm (1, 0) := by
   map_add' := λ a b => by prod_map_add
   map_mul' := λ a b => by prod_map_mul
   commutes' := λ r => by
-    simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
     rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_fst, hf] }
@@ -966,7 +965,6 @@ have Hf : (0, 1) = f.symm (0, 1) := by
   map_add' := λ a b => by prod_map_add
   map_mul' := λ a b => by prod_map_mul
   commutes' := λ r => by
-    simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
     rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_snd, hf] }
@@ -992,7 +990,6 @@ def AlgEquiv.of_prod_map₁₂ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   map_add' := λ x y => by prod_map_add
   map_mul' := λ x y => by prod_map_mul
   commutes' := λ r => by
-    simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
     rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_snd, hf] }
@@ -1018,7 +1015,6 @@ def AlgEquiv.of_prod_map₂₁ {K R₁ R₂ R₃ R₄ : Type*} [CommSemiring K]
   map_add' := λ x y => by prod_map_add
   map_mul' := λ x y => by prod_map_mul
   commutes' := λ r => by
-    simp only
     simp_rw [Algebra.algebraMap_eq_smul_one]
     nth_rw 1 [← smul_zero r]
     rw [← Prod.smul_mk, _root_.map_smul, Prod.smul_fst, hf] }

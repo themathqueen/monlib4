@@ -14,7 +14,7 @@ section Ex4
 variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
 theorem cs_aux {x y : E} (hy : y ≠ 0) :
-    ‖x - ((inner y x : 𝕜) * (‖y‖ ^ 2 : ℝ)⁻¹) • y‖ ^ 2 = ‖x‖ ^ 2 - ‖(inner x y : 𝕜)‖ ^ 2 * (‖y‖ ^ 2)⁻¹ :=
+    ‖x - (inner 𝕜 y x * (‖y‖ ^ 2 : ℝ)⁻¹) • y‖ ^ 2 = ‖x‖ ^ 2 - ‖inner 𝕜 x y‖ ^ 2 * (‖y‖ ^ 2)⁻¹ :=
   by
   have : ((‖y‖ ^ 2 : ℝ) : 𝕜) ≠ 0 :=
     by
@@ -29,13 +29,13 @@ theorem cs_aux {x y : E} (hy : y ≠ 0) :
   letI : InnerProductSpace.Core 𝕜 E := InnerProductSpace.toCore
   calc
     RCLike.re
-          (((‖x‖ ^ 2 : ℝ) : 𝕜) - (inner y x : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner x y : 𝕜)) -
-              (inner x y : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner y x : 𝕜)) +
-            (inner y x : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * (inner x y : 𝕜))) =
-        RCLike.re (((‖x‖ ^ 2 : ℝ) : 𝕜) - (inner x y : 𝕜) * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner y x)) :=
+          (((‖x‖ ^ 2 : ℝ) : 𝕜) - inner 𝕜 y x * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner 𝕜 x y) -
+              inner 𝕜 x y * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner 𝕜 y x) +
+            inner 𝕜 y x * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner 𝕜 x y)) =
+        RCLike.re (((‖x‖ ^ 2 : ℝ) : 𝕜) - inner 𝕜 x y * (((‖y‖ ^ 2 : ℝ) : 𝕜)⁻¹ * inner 𝕜 y x)) :=
       ?_
-    _ = RCLike.re (↑(‖x‖ ^ 2) - ‖(inner x y : 𝕜)‖ ^ 2 * (↑(‖y‖ ^ 2))⁻¹) := ?_
-    _ = ‖x‖ ^ 2 - ‖(inner x y : 𝕜)‖ ^ 2 * (‖y‖ ^ 2)⁻¹ := ?_
+    _ = RCLike.re (↑(‖x‖ ^ 2) - ‖inner 𝕜 x y‖ ^ 2 * (↑(‖y‖ ^ 2))⁻¹) := ?_
+    _ = ‖x‖ ^ 2 - ‖inner 𝕜 x y‖ ^ 2 * (‖y‖ ^ 2)⁻¹ := ?_
   · congr
     ring_nf
   · rw [mul_rotate', ← inner_conj_symm, RCLike.conj_mul, mul_comm,
@@ -47,11 +47,11 @@ theorem cs_aux {x y : E} (hy : y ≠ 0) :
 
 -- already exists in `mathlib`... but different proof... just for fun
 example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
-    ‖(inner x y : 𝕜)‖ = ‖x‖ * ‖y‖ ↔ ∃ α : 𝕜ˣ, x = (α : 𝕜) • y :=
+    ‖inner 𝕜 x y‖ = ‖x‖ * ‖y‖ ↔ ∃ α : 𝕜ˣ, x = (α : 𝕜) • y :=
   by
   constructor
   · intro h
-    have : (inner y x : 𝕜) ≠ 0 := by
+    have : inner 𝕜 y x ≠ 0 := by
       intro h'
       rw [inner_eq_zero_symm] at h'
       rw [h', norm_zero, eq_comm, mul_eq_zero] at h
@@ -62,7 +62,7 @@ example {x y : E} (hx : x ≠ 0) (hy : y ≠ 0) :
     rw [← sq_eq_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _)), mul_pow, eq_comm, ←
       eq_mul_inv_iff_mul_eq₀ hy', ← sub_eq_zero, ← cs_aux hy, sq_eq_zero_iff, norm_eq_zero,
       sub_eq_zero] at h
-    use Units.mk0 ((inner y x : 𝕜) * ((‖y‖ : 𝕜) ^ 2)⁻¹)
+    use Units.mk0 (inner 𝕜 y x * ((‖y‖ : 𝕜) ^ 2)⁻¹)
           (mul_ne_zero this
             (by
               rw [ne_eq, inv_eq_zero, sq_eq_zero_iff, RCLike.ofReal_eq_zero, norm_eq_zero]
@@ -262,7 +262,7 @@ open scoped Classical Topology BigOperators NNReal
 
 theorem IsContinuousLinearMap.ofInnerSymmetricFun {X : Type _} [NormedAddCommGroup X]
     [InnerProductSpace 𝕜 X] [CompleteSpace X] {f : X → X}
-    (h : ∀ a b : X, (inner (f a) b : 𝕜) = inner a (f b)) : IsContinuousLinearMap 𝕜 f :=
+    (h : ∀ a b : X, inner 𝕜 (f a) b = inner 𝕜 a (f b)) : IsContinuousLinearMap 𝕜 f :=
   by
   have : IsLinearMap 𝕜 f :=
     { map_add := fun x y => by
@@ -633,7 +633,7 @@ by
 }
 
 open NormedSpace in
-@[simps] def LinearEquiv.transpose {E F : Type*} (𝕜 : Type*) [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+@[simps] noncomputable def LinearEquiv.transpose {E F : Type*} (𝕜 : Type*) [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   (f : E ≃ₗᵢ[𝕜] F) :
   Dual 𝕜 F ≃ₗᵢ[𝕜] Dual 𝕜 E :=

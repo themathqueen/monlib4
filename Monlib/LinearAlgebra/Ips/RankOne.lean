@@ -34,7 +34,6 @@ noncomputable def ket (𝕜 : Type*) {E : Type*} [RCLike 𝕜] [NormedAddCommGro
   map_smul' := λ α _ => by simp_rw [smul_smul, mul_comm _ α, ← smul_smul]; rfl
   cont :=
   by
-    simp only
     refine continuous_clm_apply.mpr ?_
     intro
     simp only [ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk]
@@ -66,7 +65,7 @@ theorem bra_RCLike {𝕜 : Type*} [RCLike 𝕜] (x : 𝕜) :
   bra 𝕜 x = ContinuousLinearMap.mul 𝕜 𝕜 ((starRingEnd 𝕜) x) :=
 by
   ext
-  simp only [innerSL_apply, RCLike.inner_apply, mul_one, ContinuousLinearMap.mul_apply']
+  simp only [innerSL_apply, RCLike.inner_apply, mul_one, ContinuousLinearMap.mul_apply', one_mul]
 
 theorem bra_RCLike_one {𝕜 : Type*} [RCLike 𝕜] :
   bra 𝕜 (1 : 𝕜) = 1 :=
@@ -80,7 +79,7 @@ by
   apply ext_inner_left 𝕜
   intro y
   simp only [ket_apply_apply, one_smul, ContinuousLinearMap.adjoint_inner_right,
-    bra_apply_apply, RCLike.inner_apply, inner_conj_symm, mul_one]
+    bra_apply_apply, RCLike.inner_apply, inner_conj_symm, mul_one, one_mul]
 
 lemma _root_.ket_adjoint_eq_bra {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [CompleteSpace E] (x : E) :
@@ -297,12 +296,12 @@ by
   by_cases Hx : x = 0
   · use 1
     simp_rw [Hx, Units.val_one, one_smul, eq_comm, ← this, Hx]
-  · have ugh : inner y x ≠ (0 : 𝕜) := by
+  · have ugh : inner 𝕜 y x ≠ 0 := by
       intro hy
       specialize h x
       rw [hy, zero_smul, smul_eq_zero, inner_self_eq_zero, or_self_iff] at h
       contradiction
-    use Units.mk0 (inner y x / inner x x)
+    use Units.mk0 (inner 𝕜 y x / inner 𝕜 x x)
         (div_ne_zero ugh ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx))
     simp_rw [div_eq_inv_mul, Units.val_mk0, mul_smul, ← h, smul_smul,
       inv_mul_cancel₀ ((@inner_self_ne_zero 𝕜 _ _ _ _ _).mpr Hx), one_smul]
@@ -646,7 +645,7 @@ by
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
   rw [PiLp.inner_apply]
   simp_rw [OrthonormalBasis.repr_apply_apply, RCLike.inner_apply, inner_conj_symm,
-    mul_comm (⟪_,_⟫_𝕜), ← inner_smul_right, ← inner_sum, OrthonormalBasis.sum_repr_symm]
+    ← inner_smul_right, ← inner_sum, OrthonormalBasis.sum_repr_symm]
 
 theorem OrthonormalBasis.repr_adjoint'
   {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
@@ -668,12 +667,12 @@ theorem rankOne_toMatrix_of_onb
   (b₁ : OrthonormalBasis ι₁ 𝕜 E₁) (b₂ : OrthonormalBasis ι₂ 𝕜 E₂) (x : E₁) (y : E₂) :
   LinearMap.toMatrix b₂.toBasis b₁.toBasis (rankOne 𝕜 x y).toLinearMap
     =
-    (Matrix.col (Fin 1) (b₁.repr x)) * (Matrix.col (Fin 1) (b₂.repr y))ᴴ :=
+    (Matrix.replicateCol (Fin 1) (b₁.repr x)) * (Matrix.replicateCol (Fin 1) (b₂.repr y))ᴴ :=
 by
   ext1 i j
   simp_rw [LinearMap.toMatrix_apply, ContinuousLinearMap.coe_coe, rankOne_apply,
     map_smul, Finsupp.smul_apply, OrthonormalBasis.coe_toBasis_repr_apply,
     OrthonormalBasis.coe_toBasis,
-    Matrix.conjTranspose_col, ← Matrix.vecMulVec_eq, Matrix.vecMulVec_apply,
+    Matrix.conjTranspose_replicateCol, ← Matrix.vecMulVec_eq, Matrix.vecMulVec_apply,
     Pi.star_apply, OrthonormalBasis.repr_apply_apply, RCLike.star_def, inner_conj_symm,
     smul_eq_mul, mul_comm]

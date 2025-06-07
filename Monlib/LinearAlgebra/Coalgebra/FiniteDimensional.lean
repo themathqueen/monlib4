@@ -31,7 +31,7 @@ by
 lemma LinearMap.adjoint_id {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A]
   [InnerProductSpace 𝕜 A] [FiniteDimensional 𝕜 A] :
   adjoint (id : A →ₗ[𝕜] A) = id :=
-by rw [← one_eq_id, adjoint_one]
+by rw [← Module.End.one_eq_id, adjoint_one]
 
 lemma LinearMap.rTensor_adjoint {𝕜 A B C : Type*} [RCLike 𝕜]
   [NormedAddCommGroup A] [NormedAddCommGroup B] [NormedAddCommGroup C]
@@ -80,7 +80,6 @@ def Coalgebra.ofFiniteDimensionalHilbertAlgebra
 { comul := (LinearMap.adjoint (LinearMap.mul' R A : (A ⊗[R] A) →ₗ[R] A) : A →ₗ[R] A ⊗[R] A)
   counit := (LinearMap.adjoint (Algebra.linearMap R A : R →ₗ[R] A) : A →ₗ[R] R)
   coassoc := by
-    simp only
     rw [← LinearMap.rTensor_adjoint, ← LinearMap.lTensor_adjoint, ← TensorProduct.assoc_symm_adjoint]
     simp_rw [← LinearMap.adjoint_comp, Algebra.mul_comp_rTensor_mul]
     simp_rw [LinearMap.comp_assoc]
@@ -88,12 +87,10 @@ def Coalgebra.ofFiniteDimensionalHilbertAlgebra
       LinearMap.id_comp]
     rfl
   rTensor_counit_comp_comul := by
-    simp only
     rw [← LinearMap.rTensor_adjoint, ← LinearMap.adjoint_comp, Algebra.mul_comp_rTensor_unit,
       TensorProduct.lid_adjoint]
     rfl
   lTensor_counit_comp_comul := by
-    simp only
     rw [← LinearMap.lTensor_adjoint, ← LinearMap.adjoint_comp, Algebra.mul_comp_lTensor_unit,
       TensorProduct.rid_adjoint]
     rfl }
@@ -128,7 +125,7 @@ by
   apply ext_inner_left R
   intro a
   simp_rw [LinearMap.adjoint_inner_right, Algebra.linearMap_apply,
-    Algebra.algebraMap_eq_smul_one, inner_smul_left, inner]
+    Algebra.algebraMap_eq_smul_one, inner_smul_left, inner, mul_comm]
 -- @[reducible]
 -- class NormedAddCommGroupOfStarRing (B : Type _) extends
 --   NormedAddCommGroupOfRing B, StarRing B

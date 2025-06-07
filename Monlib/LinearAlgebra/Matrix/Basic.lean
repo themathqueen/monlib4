@@ -76,7 +76,8 @@ theorem vecMulVec_ne_zero {R n : Type _} [Semiring R]
   rw [← vec_ne_zero] at hα hβ
   cases' hβ with i hiy
   cases' hα with j hju
-  simp_rw [vecMulVec_eq (Fin 1), mul_apply, col_apply, row_apply, Finset.sum_const,
+  simp_rw [vecMulVec_eq (Fin 1), mul_apply, replicateCol_apply, replicateRow_apply,
+    Finset.sum_const,
     nsmul_eq_mul, Matrix.zero_apply, mul_eq_zero, Classical.not_forall]
   simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton,
     Nat.cast_one, not_or, exists_and_left, exists_and_right]
@@ -91,8 +92,8 @@ open scoped BigOperators
 
 /-- the identity written as a sum of the standard basis -/
 theorem one_eq_sum_std_matrix {n R : Type _} [CommSemiring R] [Fintype n] [DecidableEq n] :
-    (1 : Matrix n n R) = ∑ r : n, Matrix.stdBasisMatrix r r (1 : R) := by
-  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.one_apply, Matrix.stdBasisMatrix, ite_and,
+    (1 : Matrix n n R) = ∑ r : n, Matrix.single r r (1 : R) := by
+  simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.one_apply, Matrix.single, ite_and,
     of_apply, Finset.sum_ite_eq', Finset.mem_univ, if_true, forall₂_true_iff]
 
 open scoped Matrix ComplexConjugate
@@ -227,8 +228,9 @@ noncomputable instance : Inner 𝕜 (n → 𝕜) :=
 { inner := fun x y => ⟪(EuclideanSpace.equiv n 𝕜).symm x, (EuclideanSpace.equiv n 𝕜).symm y⟫_𝕜 }
 
 theorem EuclideanSpace.inner_eq {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] {x y : n → 𝕜} :
-  inner x y = star (x : n → 𝕜) ⬝ᵥ (y : n → 𝕜) :=
-  rfl
+  inner 𝕜 x y = star (x : n → 𝕜) ⬝ᵥ (y : n → 𝕜) :=
+by simp only [inner, PiLp.continuousLinearEquiv_symm_apply, WithLp.equiv_symm_pi_apply, dotProduct,
+  Pi.star_apply, RCLike.star_def, mul_comm]
 
 theorem EuclideanSpace.rankOne_of_orthonormalBasis_eq_one {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n]
     (h : OrthonormalBasis n 𝕜 (EuclideanSpace 𝕜 n)) :
@@ -251,10 +253,10 @@ theorem kmul_representation {R n₁ n₂ : Type _} [Fintype n₁] [Fintype n₂]
     [DecidableEq n₂] [Semiring R] (x : Matrix (n₁ × n₂) (n₁ × n₂) R) :
     x =
       ∑ i : n₁, ∑ j : n₁, ∑ k : n₂, ∑ l : n₂,
-        x (i, k) (j, l) • Matrix.stdBasisMatrix i j (1 : R) ⊗ₖ Matrix.stdBasisMatrix k l (1 : R) :=
+        x (i, k) (j, l) • Matrix.single i j (1 : R) ⊗ₖ Matrix.single k l (1 : R) :=
   by
   simp_rw [← Matrix.ext_iff, Matrix.sum_apply, Matrix.smul_apply, Matrix.kroneckerMap,
-    Matrix.stdBasisMatrix, Matrix.of_apply, ite_mul, MulZeroClass.zero_mul, one_mul, smul_ite,
+    Matrix.single, Matrix.of_apply, ite_mul, MulZeroClass.zero_mul, one_mul, smul_ite,
     smul_zero, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq',
     Finset.mem_univ, if_true, Prod.mk.eta, smul_eq_mul, mul_one, forall₂_true_iff]
 
@@ -296,11 +298,11 @@ open scoped Matrix
 
 variable {R n m : Type _} [Semiring R] [StarAddMonoid R] [DecidableEq n] [DecidableEq m]
 
-theorem Matrix.stdBasisMatrix_conjTranspose (i : n) (j : m) (a : R) :
-    (Matrix.stdBasisMatrix i j a)ᴴ = Matrix.stdBasisMatrix j i (star a) :=
+theorem Matrix.single_conjTranspose (i : n) (j : m) (a : R) :
+    (Matrix.single i j a)ᴴ = Matrix.single j i (star a) :=
   by
   ext x y
-  simp_rw [conjTranspose_apply, Matrix.stdBasisMatrix, ite_and]
+  simp_rw [conjTranspose_apply, Matrix.single, ite_and]
   by_cases h : j = x ∧ i = y
   · simp_rw [h.1, h.2, of_apply, if_true]
   by_cases h' : a = 0
@@ -313,21 +315,21 @@ theorem Matrix.stdBasisMatrix_conjTranspose (i : n) (j : m) (a : R) :
     exfalso
     exact h H
 
-theorem Matrix.stdBasisMatrix.star_apply (i k : n) (j l : m) (a : R) :
-    star (Matrix.stdBasisMatrix i j a k l) = Matrix.stdBasisMatrix j i (star a) l k := by
-  rw [← Matrix.stdBasisMatrix_conjTranspose, ← Matrix.conjTranspose_apply]
+theorem Matrix.single.star_apply (i k : n) (j l : m) (a : R) :
+    star (Matrix.single i j a k l) = Matrix.single j i (star a) l k := by
+  rw [← Matrix.single_conjTranspose, ← Matrix.conjTranspose_apply]
 
-theorem Matrix.stdBasisMatrix.star_apply' (i : n) (j : m) (x : n × m) (a : R) :
-    star (Matrix.stdBasisMatrix i j a x.fst x.snd) =
-      Matrix.stdBasisMatrix j i (star a) x.snd x.fst :=
-  by rw [Matrix.stdBasisMatrix.star_apply]
+theorem Matrix.single.star_apply' (i : n) (j : m) (x : n × m) (a : R) :
+    star (Matrix.single i j a x.fst x.snd) =
+      Matrix.single j i (star a) x.snd x.fst :=
+  by rw [Matrix.single.star_apply]
 
 /-- $e_{ij}^*=e_{ji}$ -/
-theorem Matrix.stdBasisMatrix.star_one {R : Type _} [Semiring R] [StarRing R] (i : n) (j : m) :
-    (Matrix.stdBasisMatrix i j (1 : R))ᴴ = Matrix.stdBasisMatrix j i (1 : R) :=
+theorem Matrix.single.star_one {R : Type _} [Semiring R] [StarRing R] (i : n) (j : m) :
+    (Matrix.single i j (1 : R))ᴴ = Matrix.single j i (1 : R) :=
   by
   nth_rw 2 [← _root_.star_one]
-  exact Matrix.stdBasisMatrix_conjTranspose _ _ _
+  exact Matrix.single_conjTranspose _ _ _
 
 open scoped BigOperators
 
@@ -335,31 +337,31 @@ theorem Matrix.trace_iff {R n : Type _} [AddCommMonoid R] [Fintype n] (x : Matri
     x.trace = ∑ k : n, x k k :=
   rfl
 
-theorem Matrix.stdBasisMatrix.hMul_apply_basis {R p q : Type _} [Semiring R] [DecidableEq p]
+theorem Matrix.single.hMul_apply_basis {R p q : Type _} [Semiring R] [DecidableEq p]
     [DecidableEq q] (i x : n) (j y : m) (k z : p) (l w : q) :
-    Matrix.stdBasisMatrix k l (Matrix.stdBasisMatrix i j (1 : R) x y) z w =
-      Matrix.stdBasisMatrix i j (1 : R) x y * Matrix.stdBasisMatrix k l (1 : R) z w :=
+    Matrix.single k l (Matrix.single i j (1 : R) x y) z w =
+      Matrix.single i j (1 : R) x y * Matrix.single k l (1 : R) z w :=
   by
-  simp_rw [Matrix.stdBasisMatrix, ite_and, of_apply, ite_mul, MulZeroClass.zero_mul, one_mul, ← ite_and,
+  simp_rw [Matrix.single, ite_and, of_apply, ite_mul, MulZeroClass.zero_mul, one_mul, ← ite_and,
     and_rotate, ← @and_assoc (k = z), @and_comm _ (i = x),
     ← and_assoc, @and_assoc _ (k = z), and_comm, and_assoc]
 
-theorem Matrix.stdBasisMatrix.mul_apply_basis' {R p q : Type _} [Semiring R] [DecidableEq p]
+theorem Matrix.single.mul_apply_basis' {R p q : Type _} [Semiring R] [DecidableEq p]
     [DecidableEq q] (i x : n) (j y : m) (k z : p) (l w : q) :
-    Matrix.stdBasisMatrix k l (Matrix.stdBasisMatrix i j (1 : R) x y) z w =
+    Matrix.single k l (Matrix.single i j (1 : R) x y) z w =
       ite (i = x ∧ j = y ∧ k = z ∧ l = w) 1 0 :=
   by
-  simp_rw [Matrix.stdBasisMatrix.hMul_apply_basis, Matrix.stdBasisMatrix, ite_and, of_apply, ite_mul,
+  simp_rw [Matrix.single.hMul_apply_basis, Matrix.single, ite_and, of_apply, ite_mul,
     MulZeroClass.zero_mul, one_mul]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x x_1) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_2 x_3) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x x_1) -/
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (x_2 x_3) -/
-theorem Matrix.stdBasisMatrix.hMul_apply {R : Type _} [Fintype n] [Semiring R] (i j k l m p : n) :
+theorem Matrix.single.hMul_apply {R : Type _} [Fintype n] [Semiring R] (i j k l m p : n) :
     ∑ x : n × n, ∑ x_1 : n × n, ∑ x_2 : n, ∑ x_3 : n,
-        Matrix.stdBasisMatrix l k (Matrix.stdBasisMatrix p m (1 : R) x_1.snd x_1.fst) x.snd x.fst *
-          Matrix.stdBasisMatrix i x_2 (Matrix.stdBasisMatrix x_3 j (1 : R) x_1.fst x_1.snd) x.fst
+        Matrix.single l k (Matrix.single p m (1 : R) x_1.snd x_1.fst) x.snd x.fst *
+          Matrix.single i x_2 (Matrix.single x_3 j (1 : R) x_1.fst x_1.snd) x.fst
             x.snd =
       ∑ x : n × n, ∑ x_1 : n × n, ∑ x_2 : n, ∑ x_3 : n,
         ite
@@ -368,51 +370,51 @@ theorem Matrix.stdBasisMatrix.hMul_apply {R : Type _} [Fintype n] [Semiring R] (
               l = x.snd ∧ k = x.fst ∧ x_3 = x_1.fst ∧ j = x_1.snd ∧ i = x.fst ∧ x_2 = x.snd)
           1 0 :=
   by
-  simp_rw [Matrix.stdBasisMatrix.mul_apply_basis', ite_mul, one_mul, MulZeroClass.zero_mul, ←
+  simp_rw [Matrix.single.mul_apply_basis', ite_mul, one_mul, MulZeroClass.zero_mul, ←
     ite_and, and_assoc]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (k l m p) -/
 @[simp]
-theorem Matrix.stdBasisMatrix.sum_star_hMul_self [Fintype n] (i j : n) (a b : R) :
+theorem Matrix.single.sum_star_hMul_self [Fintype n] (i j : n) (a b : R) :
     ∑ k : n, ∑ l : n, ∑ m : n, ∑ p : n,
-        Matrix.stdBasisMatrix i j a k l * star (Matrix.stdBasisMatrix i j b) m p =
+        Matrix.single i j a k l * star (Matrix.single i j b) m p =
       a * star b :=
   by
-  simp_rw [Matrix.star_apply, Matrix.stdBasisMatrix.star_apply, Matrix.stdBasisMatrix, of_apply, ite_mul,
+  simp_rw [Matrix.star_apply, Matrix.single.star_apply, Matrix.single, of_apply, ite_mul,
     MulZeroClass.zero_mul, mul_ite, MulZeroClass.mul_zero, ite_and, Finset.sum_ite_irrel,
     Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (kl mp) -/
-theorem Matrix.stdBasisMatrix.sum_star_hMul_self' {R : Type _} [Fintype n] [Semiring R] [StarRing R]
+theorem Matrix.single.sum_star_hMul_self' {R : Type _} [Fintype n] [Semiring R] [StarRing R]
     (i j : n) :
     ∑ kl : n × n, ∑ mp : n × n,
-        Matrix.stdBasisMatrix i j (1 : R) kl.1 kl.2 *
-          star Matrix.stdBasisMatrix i j (1 : R) mp.1 mp.2 =
+        Matrix.single i j (1 : R) kl.1 kl.2 *
+          star Matrix.single i j (1 : R) mp.1 mp.2 =
       1 :=
   by
   nth_rw 3 [← one_mul (1 : R)]
   nth_rw 4 [← _root_.star_one R]
-  nth_rw 1 [← Matrix.stdBasisMatrix.sum_star_hMul_self i j _ _]
+  nth_rw 1 [← Matrix.single.sum_star_hMul_self i j _ _]
   simp_rw [← Finset.mul_sum, ← Finset.sum_product']
   rfl
 
-theorem Matrix.stdBasisMatrix.hMul_stdBasisMatrix {R p : Type _} [Semiring R] [DecidableEq p]
+theorem Matrix.single.hMul_stdBasisMatrix {R p : Type _} [Semiring R] [DecidableEq p]
     [Fintype m] (i x : n) (j k : m) (l y : p) (a b : R) :
-    (Matrix.stdBasisMatrix i j a * Matrix.stdBasisMatrix k l b) x y =
+    (Matrix.single i j a * Matrix.single k l b) x y =
       ite (i = x ∧ j = k ∧ l = y) (a * b) 0 :=
   by
-  simp_rw [Matrix.mul_apply, Matrix.stdBasisMatrix, ite_and,
+  simp_rw [Matrix.mul_apply, Matrix.single, ite_and,
     of_apply, ite_mul, MulZeroClass.zero_mul,
     mul_ite, MulZeroClass.mul_zero, Finset.sum_ite_irrel, Finset.sum_ite_eq, Finset.mem_univ,
     if_true, Finset.sum_const_zero, eq_comm]
 
-theorem Matrix.stdBasisMatrix.hMul_stdBasis_matrix' {R p : Type _} [Fintype n] [DecidableEq p]
+theorem Matrix.single.hMul_stdBasis_matrix' {R p : Type _} [Fintype n] [DecidableEq p]
     [Semiring R] (i : m) (j k : n) (l : p) :
-    Matrix.stdBasisMatrix i j (1 : R) * Matrix.stdBasisMatrix k l (1 : R) =
-      ite (j = k) (1 : R) 0 • Matrix.stdBasisMatrix i l (1 : R) :=
+    Matrix.single i j (1 : R) * Matrix.single k l (1 : R) =
+      ite (j = k) (1 : R) 0 • Matrix.single i l (1 : R) :=
   by
   ext x y
-  simp_rw [Matrix.smul_apply, Matrix.mul_apply, Matrix.stdBasisMatrix, ite_and, of_apply, ite_mul,
+  simp_rw [Matrix.smul_apply, Matrix.mul_apply, Matrix.single, ite_and, of_apply, ite_mul,
     MulZeroClass.zero_mul, one_mul, Finset.sum_ite_irrel, Finset.sum_ite_eq, Finset.mem_univ,
     if_true, Finset.sum_const_zero, smul_ite, smul_zero, smul_eq_mul, mul_one, ← ite_and, eq_comm,
     and_comm]
@@ -425,7 +427,7 @@ def LinearEquiv.toInvertibleMatrix {n R : Type _} [CommSemiring R] [Fintype n] [
     (x : (n → R) ≃ₗ[R] n → R) :
     Invertible (LinearMap.toMatrix' (x : (n → R) →ₗ[R] n → R)) := by
   refine' Invertible.mk (LinearMap.toMatrix' (x.symm : (n → R) →ₗ[R] n → R)) _ _ <;>
-    simp only [← LinearMap.toMatrix'_mul, LinearMap.mul_eq_comp,
+    simp only [← LinearMap.toMatrix'_mul, Module.End.mul_eq_comp,
       LinearEquiv.comp_coe, LinearEquiv.self_trans_symm, LinearEquiv.symm_trans_self,
       LinearEquiv.refl_toLinearMap, LinearMap.toMatrix'_id]
 
@@ -440,10 +442,10 @@ open Matrix
 
 theorem Matrix.dotProduct_eq_trace {R n : Type _} [CommSemiring R] [StarRing R] [Fintype n]
     (x : n → R) (y : Matrix n n R) :
-    star x ⬝ᵥ y.mulVec x = ((Matrix.col (Fin 1) x * Matrix.row (Fin 1) (star x))ᴴ * y).trace :=
+    star x ⬝ᵥ y.mulVec x = ((Matrix.replicateCol (Fin 1) x * Matrix.replicateRow (Fin 1) (star x))ᴴ * y).trace :=
   by
-  simp_rw [trace_iff, dotProduct, conjTranspose_mul, conjTranspose_row, conjTranspose_col,
-    star_star, mul_apply, mulVec, dotProduct, col_apply, row_apply, Pi.star_apply,
+  simp_rw [trace_iff, dotProduct, conjTranspose_mul, conjTranspose_replicateRow, conjTranspose_replicateCol,
+    star_star, mul_apply, mulVec, dotProduct, replicateCol_apply, replicateRow_apply, Pi.star_apply,
     Finset.sum_const]
   simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.card_singleton, one_smul]
   simp_rw [Finset.mul_sum, mul_comm (x _), mul_comm _ (x _), ← mul_assoc, mul_comm]

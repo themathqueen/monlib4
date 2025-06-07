@@ -87,7 +87,7 @@ open Matrix
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
 theorem Matrix.kronecker_eq_sum_std_basis (x : Matrix (m × n) (m × n) R) :
-    x = ∑ i, ∑ j, ∑ k, ∑ l, x (i, k) (j, l) • stdBasisMatrix i j 1 ⊗ₖ stdBasisMatrix k l 1 :=
+    x = ∑ i, ∑ j, ∑ k, ∑ l, x (i, k) (j, l) • single i j 1 ⊗ₖ single k l 1 :=
   kmul_representation _
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j k l) -/
@@ -98,29 +98,29 @@ theorem Matrix.kronecker_eq_sum_std_basis (x : Matrix (m × n) (m × n) R) :
 theorem TensorProduct.matrix_eq_sum_std_basis (x : Matrix m m R ⊗[R] Matrix n n R) :
     x =
       ∑ i, ∑ j, ∑ k, ∑ l,
-        (toKronecker x) (i, k) (j, l) • stdBasisMatrix i j 1 ⊗ₜ stdBasisMatrix k l 1 :=
+        (toKronecker x) (i, k) (j, l) • single i j 1 ⊗ₜ single k l 1 :=
   by
   rw [eq_comm]
   calc
     ∑ i, ∑ j, ∑ k, ∑ l,
           (toKronecker x) (i, k) (j, l) •
-            stdBasisMatrix i j (1 : R) ⊗ₜ stdBasisMatrix k l (1 : R) =
+            single i j (1 : R) ⊗ₜ single k l (1 : R) =
         ∑ i, ∑ j, ∑ k, ∑ l,
           (toKronecker x) (i, k) (j, l) •
-            kroneckerToTensorProduct (toKronecker (stdBasisMatrix i j (1 : R) ⊗ₜ
-                  stdBasisMatrix k l (1 : R))) :=
+            kroneckerToTensorProduct (toKronecker (single i j (1 : R) ⊗ₜ
+                  single k l (1 : R))) :=
       by simp_rw [TensorProduct.toKronecker_to_tensorProduct]
     _ =
         ∑ i, ∑ j, ∑ k, ∑ l,
           toKronecker x (i, k) (j, l) •
-            kroneckerToTensorProduct (stdBasisMatrix i j (1 : R) ⊗ₖ
-                stdBasisMatrix k l (1 : R)) :=
+            kroneckerToTensorProduct (single i j (1 : R) ⊗ₖ
+                single k l (1 : R)) :=
       by simp_rw [TensorProduct.toKronecker_apply]
     _ =
         kroneckerToTensorProduct (∑ i, ∑ j, ∑ k, ∑ l,
             toKronecker x (i, k) (j, l) •
-              stdBasisMatrix i j (1 : R) ⊗ₖ
-                stdBasisMatrix k l (1 : R)) :=
+              single i j (1 : R) ⊗ₖ
+                single k l (1 : R)) :=
       by simp_rw [map_sum, _root_.map_smul]
     _ = kroneckerToTensorProduct (toKronecker x) := by rw [← Matrix.kronecker_eq_sum_std_basis]
     _ = x := TensorProduct.toKronecker_to_tensorProduct _
