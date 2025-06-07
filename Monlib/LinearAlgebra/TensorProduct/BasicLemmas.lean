@@ -66,16 +66,16 @@ theorem assoc_comp_map {R : Type _} [CommSemiring R] {M N M₂ N₂ P Q : Type _
   simp_rw [LinearMap.comp_apply, LinearEquiv.coe_coe,
     TensorProduct.map_apply, TensorProduct.assoc_tmul, TensorProduct.map_apply]
 
-theorem ext_threefold' {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid M]
-    [AddCommMonoid N] [AddCommMonoid P] [AddCommMonoid Q] [Module R M] [Module R N] [Module R P]
-    [Module R Q] {g h : M ⊗[R] N ⊗[R] P →ₗ[R] Q}
-    (H : ∀ (x : M) (y : N) (z : P), g (x ⊗ₜ[R] y ⊗ₜ[R] z) = h (x ⊗ₜ[R] y ⊗ₜ[R] z)) : g = h :=
-  by
-  apply TensorProduct.ext
-  ext1 x
-  rw [TensorProduct.mk, TensorProduct.ext_iff']
-  intro y z
-  exact H x y z
+-- theorem ext_threefold' {R : Type _} [CommSemiring R] {M N P Q : Type _} [AddCommMonoid M]
+--     [AddCommMonoid N] [AddCommMonoid P] [AddCommMonoid Q] [Module R M] [Module R N] [Module R P]
+--     [Module R Q] {g h : M ⊗[R] N ⊗[R] P →ₗ[R] Q}
+--     (H : ∀ (x : M) (y : N) (z : P), g (x ⊗ₜ[R] y ⊗ₜ[R] z) = h (x ⊗ₜ[R] y ⊗ₜ[R] z)) : g = h :=
+--   by
+--   apply TensorProduct.ext
+--   ext1 x
+--   rw [TensorProduct.mk, TensorProduct.ext_iff']
+--   intro y z
+--   exact H x y z
 
 theorem assoc_symm_comp_map {R : Type _} [CommSemiring R] {M N M₂ N₂ P Q : Type _} [AddCommMonoid M]
     [AddCommMonoid N] [AddCommMonoid M₂] [AddCommMonoid N₂] [AddCommMonoid P] [AddCommMonoid Q]

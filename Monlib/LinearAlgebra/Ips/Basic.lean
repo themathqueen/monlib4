@@ -15,7 +15,7 @@ This files provides some useful and obvious results for linear maps and continuo
 -/
 
 theorem _root_.ext_inner_left_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x y : E) : x = y ↔ ∀ v : E, inner x v = (inner y v : 𝕜) :=
+    (x y : E) : x = y ↔ ∀ v : E, inner 𝕜 x v = inner 𝕜 y v :=
   by
   constructor
   · intro h v
@@ -24,10 +24,10 @@ theorem _root_.ext_inner_left_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddComm
     intro h; exact h _
 
 theorem inner_self_re {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (x : E) : (RCLike.re (inner x x : 𝕜) : 𝕜) = inner x x := by simp only [inner_self_ofReal_re]
+    (x : E) : (RCLike.re (inner 𝕜 x x) : 𝕜) = inner 𝕜 x x := by simp only [inner_self_ofReal_re]
 
 theorem forall_inner_eq_zero_iff {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] (x : E) : (∀ y, (inner x y : 𝕜) = 0) ↔ x = 0 :=
+    [InnerProductSpace 𝕜 E] (x : E) : (∀ y, inner 𝕜 x y = 0) ↔ x = 0 :=
   by
   refine' ⟨fun h => _, fun h y => by rw [h, inner_zero_left]⟩
   specialize h x
@@ -42,7 +42,7 @@ variable {E : Type*} [NormedAddCommGroup E]
 /-- linear maps $p,q$ are equal if and only if
   $\langle p x, x \rangle = \langle q x, x \rangle$ for any $x$. -/
 theorem LinearMap.ext_iff_inner_map [InnerProductSpace ℂ E] (p q : E →ₗ[ℂ] E) :
-    p = q ↔ ∀ x : E, inner (p x) x = (inner (q x) x : ℂ) :=
+    p = q ↔ ∀ x : E, inner ℂ (p x) x = inner ℂ (q x) x :=
   by
   constructor
   · intro h
@@ -147,7 +147,7 @@ simp_rw [@RCLike.nonneg_def 𝕜, inner_self_nonneg, true_and, inner_self_im]
 lemma inner_self_nonpos' {E : Type _} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] {x : E} :
   ⟪x, x⟫_𝕜 ≤ 0 ↔ x = 0 :=
 by
-simp_rw [@RCLike.nonpos_def 𝕜, inner_self_nonpos, inner_self_im, and_true]
+simp_rw [@RCLike.nonpos_def 𝕜, re_inner_self_nonpos, inner_self_im, and_true]
 
 
 lemma _root_.isometry_iff_norm {E F : Type _} [SeminormedAddGroup E] [SeminormedAddGroup F]
@@ -187,7 +187,7 @@ by
     simp_rw [sub_zero] at this
     simp_rw [this]
   . intro h x y
-    simp_rw [@norm_eq_sqrt_inner R, h]
+    simp_rw [@norm_eq_sqrt_re_inner R, h]
 lemma _root_.isometry_iff_inner_norm'
   {R E F : Type _} [RCLike R] [_root_.NormedAddCommGroup E] [_root_.NormedAddCommGroup F]
   [_root_.InnerProductSpace R E] [_root_.InnerProductSpace R F]

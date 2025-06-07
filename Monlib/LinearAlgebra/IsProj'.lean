@@ -37,29 +37,30 @@ end
 
 variable {E 𝕜 : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
 
-theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] :
-    (orthogonalProjection K : E →ₗ[𝕜] K) =
+theorem orthogonalProjection_eq_linear_proj' {K : Submodule 𝕜 E} [K.HasOrthogonalProjection] :
+    (K.orthogonalProjection : E →ₗ[𝕜] K) =
       Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace :=
   by
   have : IsCompl K Kᗮ := Submodule.isCompl_orthogonal_of_completeSpace
   ext x : 1
   nth_rw 1 [← Submodule.linear_proj_add_linearProjOfIsCompl_eq_self this x]
-  rw [ContinuousLinearMap.coe_coe, map_add, orthogonalProjection_mem_subspace_eq_self,
-    orthogonalProjection_mem_subspace_orthogonalComplement_eq_zero (Submodule.coe_mem _), add_zero]
+  rw [ContinuousLinearMap.coe_coe, map_add, Submodule.orthogonalProjection_mem_subspace_eq_self,
+    Submodule.orthogonalProjection_mem_subspace_orthogonalComplement_eq_zero (Submodule.coe_mem _),
+    add_zero]
 
-theorem orthogonalProjection_eq_linear_proj'' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] (x : E) :
-    orthogonalProjection K x =
+theorem orthogonalProjection_eq_linear_proj'' {K : Submodule 𝕜 E} [K.HasOrthogonalProjection] (x : E) :
+    K.orthogonalProjection x =
       Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace x :=
-  by rw [← orthogonalProjection_eq_linear_proj]
+  by rw [← Submodule.orthogonalProjection_eq_linear_proj]
 
-noncomputable def orthogonalProjection' (U : Submodule 𝕜 E) [HasOrthogonalProjection U] : E →L[𝕜] E :=
-  U.subtypeL.comp (orthogonalProjection U)
+noncomputable def orthogonalProjection' (U : Submodule 𝕜 E) [U.HasOrthogonalProjection] : E →L[𝕜] E :=
+  U.subtypeL.comp U.orthogonalProjection
 
-theorem orthogonalProjection'_apply (U : Submodule 𝕜 E) [HasOrthogonalProjection U] (x : E) :
-    orthogonalProjection' U x = orthogonalProjection U x :=
+theorem orthogonalProjection'_apply (U : Submodule 𝕜 E) [U.HasOrthogonalProjection] (x : E) :
+    orthogonalProjection' U x = U.orthogonalProjection x :=
   rfl
 
-local notation "P" => orthogonalProjection
+local notation "P" => Submodule.orthogonalProjection
 
 local notation "↥P" => orthogonalProjection'
 
@@ -71,19 +72,19 @@ theorem ContinuousLinearMap.range_toLinearMap {F : Type*} [NormedAddCommGroup F]
 open ContinuousLinearMap
 
 @[simp]
-theorem orthogonalProjection.range (U : Submodule 𝕜 E) [HasOrthogonalProjection U] :
+theorem orthogonalProjection.range (U : Submodule 𝕜 E) [U.HasOrthogonalProjection] :
     LinearMap.range (↥P U) = U := by
   simp_rw [orthogonalProjection', ← range_toLinearMap, coe_comp,
     orthogonalProjection_eq_linear_proj', Submodule.coe_subtypeL, LinearMap.range_comp,
     Submodule.linearProjOfIsCompl_range, Submodule.map_subtype_top]
 
 @[simp]
-theorem orthogonalProjection'_eq (U : Submodule 𝕜 E) [HasOrthogonalProjection U] :
+theorem orthogonalProjection'_eq (U : Submodule 𝕜 E) [U.HasOrthogonalProjection] :
     ↥P U = U.subtypeL.comp (P U) :=
   rfl
 
-theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [HasOrthogonalProjection K] :
-    (K.subtypeL.comp (orthogonalProjection K) : E →ₗ[𝕜] E) =
+theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [K.HasOrthogonalProjection] :
+    (K.subtypeL.comp K.orthogonalProjection : E →ₗ[𝕜] E) =
      (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) :=
   by
@@ -91,7 +92,7 @@ theorem orthogonal_projection'_eq_linear_proj {K : Submodule 𝕜 E} [HasOrthogo
   simp_rw [ContinuousLinearMap.coe_coe, LinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     Submodule.subtypeL_apply, Submodule.subtype_apply, orthogonalProjection_eq_linear_proj'']
 
-theorem orthogonalProjection'_eq_linear_proj' {K : Submodule 𝕜 E} [HasOrthogonalProjection K] (x : E) :
+theorem orthogonalProjection'_eq_linear_proj' {K : Submodule 𝕜 E} [K.HasOrthogonalProjection] (x : E) :
     (orthogonalProjection' K : E →ₗ[𝕜] E) x =
       (K.subtype).comp
         (Submodule.linearProjOfIsCompl K _ Submodule.isCompl_orthogonal_of_completeSpace) x :=

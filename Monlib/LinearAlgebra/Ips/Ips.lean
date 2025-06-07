@@ -24,7 +24,7 @@ We let $V$ be an inner product space over $\mathbb{k}$.
 
 variable {V 𝕜 : Type _} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
 
-local notation "P" => orthogonalProjection
+local notation "P" => Submodule.orthogonalProjection
 
 -- local notation `↥P` := orthogonal_projection'
 
@@ -103,7 +103,7 @@ theorem LinearMap.IsProj.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup
     constructor
     · intro h'
       cases' h'.2 with y hy
-      rw [← hy, ← IsIdempotentElem.eq this, LinearMap.mul_apply, hy]
+      rw [← hy, ← IsIdempotentElem.eq this, Module.End.mul_apply, hy]
       exact h'.1
     · intro h'
       rw [h', map_zero]
@@ -120,7 +120,7 @@ theorem LinearMap.IsProj.isCompl_range_ker {V R : Type _} [Ring R] [AddCommGroup
     intro x
     use ⟨x - T x, ?_⟩, ⟨T x, ?_⟩
     . simp only [Submodule.coe_mk, sub_add_cancel]
-    . rw [LinearMap.mem_ker, map_sub, ← LinearMap.mul_apply, IsIdempotentElem.eq this, sub_self]
+    . rw [LinearMap.mem_ker, map_sub, ← Module.End.mul_apply, IsIdempotentElem.eq this, sub_self]
     . rw [LinearMap.mem_range]
       simp only [exists_apply_eq_apply]
 
@@ -142,7 +142,7 @@ theorem LinearMap.is_idempotent_isSelfAdjoint_iff_ker_ortho_range [InnerProductS
       Submodule.existsUnique_add_of_isCompl (LinearMap.IsProj.isCompl_range_ker U T hT) x
     simp only [LinearMap.sub_apply, inner_sub_left, LinearMap.adjoint_inner_left]
     cases' SetLike.coe_mem w with y hy
-    rw [← hvw, map_add, LinearMap.mem_ker.mp (SetLike.coe_mem v), ← hy, ← LinearMap.mul_apply,
+    rw [← hvw, map_add, LinearMap.mem_ker.mp (SetLike.coe_mem v), ← hy, ← Module.End.mul_apply,
       IsIdempotentElem.eq h, zero_add, hy, inner_add_left, inner_add_right, ← inner_conj_symm (w : V) (v : V),
       (Submodule.mem_orthogonal (ker T) (w : V)).mp (by rw [h1]; exact SetLike.coe_mem w) v
         (SetLike.coe_mem v),
@@ -163,7 +163,7 @@ by rw [Commute.symm_iff]; exact ⟨fun hT => hT.star_comm_self, IsStarNormal.mk�
 
 theorem isSymmetric_hMul_adjoint_self [FiniteDimensional 𝕜 V] (T : V →ₗ[𝕜] V) :
     IsSymmetric (T * (adjoint T)) := fun u v => by
-  simp_rw [mul_apply, ← adjoint_inner_left T, ← adjoint_inner_right T]
+  simp_rw [Module.End.mul_apply, ← adjoint_inner_left T, ← adjoint_inner_right T]
 
 theorem IsSymmetric.neg (T : V →ₗ[𝕜] V) (hT : T.IsSymmetric) : IsSymmetric (-T) :=
   by
@@ -184,7 +184,7 @@ theorem LinearMap.IsStarNormal.norm_eq_adjoint [FiniteDimensional 𝕜 V] (T : V
   simp_rw [←
     IsSymmetric.inner_map_self_eq_zero
       (IsSymmetric.sub (isSymmetric_hMul_adjoint_self T) (isSymmetric_adjoint_mul_self T)),
-    sub_apply, inner_sub_left, mul_apply, adjoint_inner_left, inner_self_eq_norm_sq_to_K, ←
+    sub_apply, inner_sub_left, Module.End.mul_apply, adjoint_inner_left, inner_self_eq_norm_sq_to_K, ←
     adjoint_inner_right T, inner_self_eq_norm_sq_to_K, sub_eq_zero, ←
     sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)]
   norm_cast
@@ -249,14 +249,14 @@ theorem ContinuousLinearMap.ker_adjoint_eq_ortho_range {W : Type _} [NormedAddCo
 rw [ker_eq_ortho_adjoint_range, adjoint_adjoint]
 
 theorem ContinuousLinearMap.ker_adjoint_ortho_eq_range {W : Type _} [NormedAddCommGroup W]
-    [InnerProductSpace 𝕜 W] [CompleteSpace V] [CompleteSpace W] (T : V →L[𝕜] W) [HasOrthogonalProjection (range T)] :
+    [InnerProductSpace 𝕜 W] [CompleteSpace V] [CompleteSpace W] (T : V →L[𝕜] W) [(range T).HasOrthogonalProjection] :
     (ker (adjoint T))ᗮ = (range T) :=
 by
   rw [ker_adjoint_eq_ortho_range, Submodule.orthogonal_orthogonal]
 
 theorem ContinuousLinearMap.IsStarNormal.isCompl_ker_range (T : V →L[𝕜] V)
   [CompleteSpace V]
-  [HasOrthogonalProjection (range T)]
+  [(range T).HasOrthogonalProjection]
   (h : IsStarNormal T) : IsCompl (ker T) (range T) :=
   by
   simp_rw [← ContinuousLinearMap.ker_adjoint_ortho_eq_range]
@@ -288,7 +288,7 @@ theorem ContinuousLinearMap.IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_ra
     intro x
     rw [ContinuousLinearMap.IsIdempotentElem.toLinearMap] at h
     have := IsIdempotentElem.eq h
-    rw [LinearMap.mul_eq_comp] at this
+    rw [Module.End.mul_eq_comp] at this
     obtain ⟨U, hT⟩ := T.toLinearMap.isProj_iff_isIdempotentElem.mpr this
     obtain ⟨v, w, hvw, _⟩ :=
       Submodule.existsUnique_add_of_isCompl (LinearMap.IsProj.isCompl_range_ker U (↑T) hT) x
@@ -296,7 +296,7 @@ theorem ContinuousLinearMap.IsIdempotentElem.isSelfAdjoint_iff_ker_isOrtho_to_ra
     cases' SetLike.coe_mem w with y hy
     simp_rw [ContinuousLinearMap.coe_coe, ContinuousLinearMap.adjoint_inner_left, ←
       ContinuousLinearMap.coe_coe, ← hvw, map_add, LinearMap.mem_ker.mp (SetLike.coe_mem v), ← hy,
-      ← LinearMap.mul_apply, IsIdempotentElem.eq h, zero_add, hy, inner_add_left, inner_add_right, ←
+      ← Module.End.mul_apply, IsIdempotentElem.eq h, zero_add, hy, inner_add_left, inner_add_right, ←
       inner_conj_symm (w : V) (v : V),
       (Submodule.mem_orthogonal (ker T) (w : V)).mp
         (by rw [h1]; intro y hy; rw [inner_eq_zero_symm]; exact hy w (SetLike.coe_mem w)) v
@@ -350,7 +350,7 @@ lemma ContinuousLinearMap.ker_to_linearMap_ker {W : Type _} [NormedAddCommGroup 
 
 /-- $T$ is injective if and only if $T^*$ is surjective  -/
 theorem ContinuousLinearMap.adjoint_injective_iff_surjective {W : Type _} [NormedAddCommGroup W]
-    [InnerProductSpace 𝕜 W] [CompleteSpace W] [CompleteSpace V] (T : V →L[𝕜] W) [HasOrthogonalProjection (LinearMap.range T)] :
+    [InnerProductSpace 𝕜 W] [CompleteSpace W] [CompleteSpace V] (T : V →L[𝕜] W) [(LinearMap.range T).HasOrthogonalProjection] :
     Function.Injective (adjoint T) ↔ Function.Surjective T := by
   rw [← ContinuousLinearMap.coe_coe, ← LinearMap.ker_eq_bot, ← LinearMap.range_eq_top,
     ← ContinuousLinearMap.ker_to_linearMap_ker,

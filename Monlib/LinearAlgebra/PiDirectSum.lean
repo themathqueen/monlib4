@@ -134,7 +134,7 @@ theorem Pi.tensorProj_apply_pi_tensorOf {R : Type _} [CommRing R] {ι₁ : Type 
   simp only [Pi.tensorOf, Pi.tensorProj, ← LinearMap.comp_apply, ← TensorProduct.map_comp, t1, t2]
   split_ifs with h
   · rw [h]
-    simp only [directSumFromTo_apply_same, TensorProduct.map_one, LinearMap.one_apply]
+    simp only [directSumFromTo_apply_same, TensorProduct.map_one, Module.End.one_apply]
   · rw [Prod.eq_iff_fst_eq_snd_eq, not_and_or] at h
     rcases h with (h | h)
     · rw [directSumFromTo_apply_ne_same h, TensorProduct.zero_map, LinearMap.zero_apply]
@@ -225,7 +225,6 @@ noncomputable def directSumTensorAlgEquiv (R : Type _) {ι₁ ι₂ : Type _} [C
   map_add' x y := by simp only [map_add]
   map_mul' x y := by
     ext
-    simp only
     rw [directSumTensorToFun.map_mul]
   commutes' r := by
     ext

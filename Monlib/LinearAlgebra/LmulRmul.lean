@@ -88,7 +88,7 @@ theorem lmul_eq_alg_lmul {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H
 theorem lmul_one {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁]
     [IsScalarTower R H₁ H₁] : (lmul (1 : H₁) : l(R,H₁)) = 1 := by
     ext
-    simp_rw [lmul_apply, LinearMap.one_apply, one_mul]
+    simp_rw [lmul_apply, Module.End.one_apply, one_mul]
 
 def rmul : H₂ →ₗ[R] l(R,H₂) where
   toFun x := LinearMap.mulRight R x
@@ -109,7 +109,7 @@ theorem rmul_one {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCo
     [IsScalarTower R H₁ H₁] : (rmul (1 : H₁) : l(R,H₁)) = 1 :=
   by
   ext
-  simp only [rmul_apply, mul_one, LinearMap.one_apply]
+  simp only [rmul_apply, mul_one, Module.End.one_apply]
 
 open scoped TensorProduct
 
@@ -131,7 +131,7 @@ theorem rmulMapLmul_one {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] 
   rw [TensorProduct.ext_iff']
   intro a b
   simp_rw [rmulMapLmul_apply, TensorProduct.map_tmul, rmul_apply, lmul_apply, mul_one, one_mul,
-    LinearMap.one_apply]
+    Module.End.one_apply]
 
 open scoped BigOperators
 
@@ -158,7 +158,7 @@ theorem rmul_eq_zero_iff {H₁ : Type _} [Semiring H₁] [Algebra R H₁] (x : H
 theorem lmul_eq_one_iff {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁]
     [IsScalarTower R H₁ H₁] (x : H₁) : (lmul x : l(R,H₁)) = 1 ↔ x = 1 :=
   by
-  simp_rw [LinearMap.ext_iff, lmul_apply, LinearMap.one_apply]
+  simp_rw [LinearMap.ext_iff, lmul_apply, Module.End.one_apply]
   refine' ⟨fun h => _, fun h a => by rw [h, one_mul]⟩
   · specialize h 1
     rw [mul_one] at h
@@ -171,7 +171,7 @@ theorem LinearMap.mulLeft_eq_one_iff {H₁ : Type _} [NonAssocSemiring H₁] [Mo
 theorem rmul_eq_one_iff {H₁ : Type _} [NonAssocSemiring H₁] [Module R H₁] [SMulCommClass R H₁ H₁]
     [IsScalarTower R H₁ H₁] (x : H₁) : (rmul x : l(R,H₁)) = 1 ↔ x = 1 :=
   by
-  simp_rw [LinearMap.ext_iff, rmul_apply, LinearMap.one_apply]
+  simp_rw [LinearMap.ext_iff, rmul_apply, Module.End.one_apply]
   refine' ⟨fun h => _, fun h a => by rw [h, mul_one]⟩
   · specialize h 1
     rw [one_mul] at h
