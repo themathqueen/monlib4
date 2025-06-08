@@ -62,7 +62,7 @@ noncomputable def schurMul {B C : Type _}
 @[inherit_doc schurMul]
 -- scoped[schurMul] infix:100 " •ₛ " => schurMul
 notation3:80 (name := schurMulNotation) x:81 " •ₛ " y:80 => schurMul x y
-open scoped schurMul
+-- open scoped schurMul
 
 variable {A B C : Type _}
   [starAlgebra A] [starAlgebra B] [starAlgebra C]
@@ -235,7 +235,7 @@ theorem schurMul_one_right_rankOne (a b : B) :
   let f := stdOrthonormalBasis ℂ B
   rw [← rankOne.sum_orthonormalBasis_eq_id_lm f]
   simp_rw [map_sum, LinearMap.sum_apply, schurMul.apply_rankOne, ContinuousLinearMap.coe_coe,
-    rankOne_apply, LinearMap.mul_apply, lmul_apply, sum_inner, inner_smul_left,
+    rankOne_apply, Module.End.mul_apply, lmul_apply, sum_inner, inner_smul_left,
     hB.inner_star_left,
     inner_conj_symm, OrthonormalBasis.sum_inner_mul_inner, lmul_adjoint, lmul_apply]
 
@@ -247,7 +247,7 @@ theorem schurMul_one_left_rankOne (a b : B) :
   let f := stdOrthonormalBasis ℂ B
   rw [← rankOne.sum_orthonormalBasis_eq_id_lm f, map_sum, LinearMap.sum_apply]
   simp_rw [schurMul.apply_rankOne, LinearMap.sum_apply, ContinuousLinearMap.coe_coe,
-    rankOne_apply, LinearMap.mul_apply, rmul_apply, sum_inner, inner_smul_left,
+    rankOne_apply, Module.End.mul_apply, rmul_apply, sum_inner, inner_smul_left,
     QuantumSet.inner_conj_left, inner_conj_symm,
     OrthonormalBasis.sum_inner_mul_inner, ← QuantumSet.inner_conj_left,
     rmul_adjoint, rmul_apply]

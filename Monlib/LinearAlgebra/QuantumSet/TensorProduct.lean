@@ -1,14 +1,15 @@
 import Monlib.LinearAlgebra.QuantumSet.Basic
 import Monlib.LinearAlgebra.TensorProduct.OrthonormalBasis
 
-variable {A : Type*} [ha : starAlgebra A] [hA : QuantumSet A]
-  {B : Type*} [hb : starAlgebra B] [hB : QuantumSet B]
+variable {A : Type*} [ha : starAlgebra A]
+  {B : Type*} [hb : starAlgebra B]
 
 open scoped TensorProduct
 -- noncomputable instance :
 --   NormedAddCommGroupOfRing (A ⊗[ℂ] B) where
 set_option synthInstance.maxHeartbeats 80000 in
-noncomputable instance tensorStarAlgebra :
+noncomputable instance tensorStarAlgebra
+  [Module.Finite ℂ A] [Module.Finite ℂ B] :
     starAlgebra (A ⊗[ℂ] B) where
   star_mul x y := x.induction_on (by simp only [zero_mul, star_zero, mul_zero])
     (y.induction_on
@@ -31,10 +32,10 @@ noncomputable instance tensorStarAlgebra :
     (λ _ _ => by simp only [AlgEquiv.TensorProduct.map_tmul, TensorProduct.star_tmul, starAlgebra.modAut_star])
     (λ _ _ h1 h2 => by simp only [map_add, star_add, h1, h2])
 
-lemma modAut_tensor (r : ℝ) :
+lemma modAut_tensor [Module.Finite ℂ A] [Module.Finite ℂ B] (r : ℝ) :
   tensorStarAlgebra.modAut r = AlgEquiv.TensorProduct.map (ha.modAut r) (hb.modAut (r)) :=
 rfl
-lemma modAut_tensor_tmul (r : ℝ) (x : A) (y : B) :
+lemma modAut_tensor_tmul [Module.Finite ℂ A] [Module.Finite ℂ B] (r : ℝ) (x : A) (y : B) :
   tensorStarAlgebra.modAut r (x ⊗ₜ[ℂ] y) = (ha.modAut r x) ⊗ₜ[ℂ] (hb.modAut (r) y) :=
 rfl
 
@@ -56,14 +57,12 @@ rfl
   --   simp_rw [Algebra.algebraMap_eq_smul_one, ← TensorProduct.smul_tmul',
   --     ← Algebra.TensorProduct.one_def, smul_mul_assoc, one_mul]
 
--- noncomputable instance tensorInner :
---   InnerProductSpace ℂ (A ⊗[ℂ] B) :=
--- TensorProduct.innerProductSpace
-
-noncomputable instance :
+noncomputable instance
+  [InnerProductAlgebra A] [InnerProductAlgebra B]
+  [Module.Finite ℂ A] [Module.Finite ℂ B] :
     InnerProductAlgebra (A ⊗[ℂ] B) where
   -- norm_smul_le _ _ := by rw [← norm_smul]
-  norm_sq_eq_inner _ := norm_sq_eq_inner (𝕜 := ℂ) _
+  norm_sq_eq_inner _ := norm_sq_eq_re_inner (𝕜 := ℂ) _
   conj_symm x y := inner_conj_symm (𝕜 := ℂ) x y
     -- x.induction_on
     -- (by simp only [inner_zero_right, map_zero, inner_zero_left])
@@ -78,7 +77,8 @@ noncomputable instance :
 
 set_option maxHeartbeats 900000 in
 set_option synthInstance.maxHeartbeats 60000 in
-noncomputable instance QuantumSet.tensorProduct [h : Fact (hA.k = hB.k)] :
+noncomputable instance QuantumSet.tensorProduct
+  [hA : QuantumSet A] [hB : QuantumSet B] [h : Fact (hA.k = hB.k)] :
     QuantumSet (A ⊗[ℂ] B) where
   modAut_isSymmetric r _ _ := by
     simp_rw [← AlgEquiv.toLinearMap_apply, modAut_tensor, AlgEquiv.TensorProduct.map_toLinearMap]
@@ -129,18 +129,21 @@ noncomputable instance QuantumSet.tensorProduct [h : Fact (hA.k = hB.k)] :
       star_add, map_add, h1, h2]))
     (λ _ _ h1 h2 => by simp only [add_mul, mul_add, inner_add_left, inner_add_right,
       h1, h2, star_add, map_add])
+  n := _
+  n_isFintype := _
   onb := hA.onb.tensorProduct hB.onb
   n_isDecidableEq := by infer_instance
 
-theorem QuantumSet.tensorProduct.k_eq₁ [Fact (hA.k = hB.k)] :
+theorem QuantumSet.tensorProduct.k_eq₁ [hA : QuantumSet A] [hB : QuantumSet B] [Fact (hA.k = hB.k)] :
   (QuantumSet.tensorProduct : QuantumSet (A ⊗[ℂ] B)).k = hA.k :=
 rfl
-theorem QuantumSet.tensorProduct.k_eq₂ [h : Fact (hA.k = hB.k)] :
+theorem QuantumSet.tensorProduct.k_eq₂ [hA : QuantumSet A] [hB : QuantumSet B] [h : Fact (hA.k = hB.k)] :
   (QuantumSet.tensorProduct : QuantumSet (A ⊗[ℂ] B)).k = hB.k :=
 by rw [← h.out]; rfl
 
 -- set_option trace.Meta.isDefEq true in
-theorem comul_real :
+theorem comul_real
+  [hA : QuantumSet A] :
   (Coalgebra.comul : A →ₗ[ℂ] A ⊗[ℂ] A).real = (TensorProduct.comm ℂ A A).toLinearMap ∘ₗ Coalgebra.comul :=
 by
   letI := Fact.mk (rfl : hA.k = hA.k)
@@ -166,3 +169,89 @@ by
 --   _ = (hA.modAut 1).toLinearMap
 --     ∘ₗ (LinearMap.adjoint (LinearMap.mul' ℂ A ∘ₗ (TensorProduct.comm ℂ A A).toLinearMap)) := ?_
 --   _ =
+
+noncomputable def swap_middle_tensor
+  (R : Type*) [CommSemiring R] (A B C D : Type*)
+  [AddCommMonoid A] [AddCommMonoid B] [AddCommMonoid C] [AddCommMonoid D]
+  [Module R A] [Module R B] [Module R C] [Module R D] :
+  (A ⊗[R] B) ⊗[R] (C ⊗[R] D) ≃ₗ[R] (A ⊗[R] C) ⊗[R] (B ⊗[R] D) :=
+((TensorProduct.assoc R (A ⊗[R] B) C D).symm.trans
+    (LinearEquiv.rTensor D (
+      ((TensorProduct.assoc R A B C).trans
+      ((LinearEquiv.lTensor A (TensorProduct.comm R B C)))).trans (TensorProduct.assoc R A C B).symm
+    ))).trans (TensorProduct.assoc R (A ⊗[R] C) _ _)
+
+@[simp]
+lemma swap_middle_tensor_tmul_apply
+  {R : Type*} [CommSemiring R] {A B C D : Type*}
+  [AddCommMonoid A] [AddCommMonoid B] [AddCommMonoid C] [AddCommMonoid D]
+  [Module R A] [Module R B] [Module R C] [Module R D]
+  (x : A) (y : B) (z : C) (w : D) :
+  swap_middle_tensor R A B C D ((x ⊗ₜ[R] y) ⊗ₜ[R] (z ⊗ₜ[R] w))
+    = (x ⊗ₜ z) ⊗ₜ (y ⊗ₜ w) :=
+rfl
+@[simp]
+lemma swap_middle_tensor_symm
+  {R : Type*} [CommSemiring R] {A B C D : Type*}
+  [AddCommMonoid A] [AddCommMonoid B] [AddCommMonoid C] [AddCommMonoid D]
+  [Module R A] [Module R B] [Module R C] [Module R D] :
+  (swap_middle_tensor R A B C D).symm = swap_middle_tensor R A C B D :=
+rfl
+lemma swap_middle_tensor_comp_map
+  {R : Type*} [CommSemiring R] {A B C D E F G H : Type*}
+  [AddCommMonoid A] [AddCommMonoid B] [AddCommMonoid C] [AddCommMonoid D]
+  [Module R A] [Module R B] [Module R C] [Module R D]
+  [AddCommMonoid E] [AddCommMonoid F] [AddCommMonoid G] [AddCommMonoid H]
+  [Module R E] [Module R F] [Module R G] [Module R H]
+  (f : A →ₗ[R] B) (g : C →ₗ[R] D)
+  (h : E →ₗ[R] F) (k : G →ₗ[R] H) :
+  (swap_middle_tensor R B D F H).toLinearMap ∘ₗ
+   (TensorProduct.map (TensorProduct.map f g) (TensorProduct.map h k))
+    =
+      (TensorProduct.map (TensorProduct.map f h) (TensorProduct.map g k))
+      ∘ₗ (swap_middle_tensor R A C E G).toLinearMap :=
+by
+  apply TensorProduct.ext_fourfold'
+  simp
+
+lemma LinearMap.mul'_tensorProduct {R A B : Type*}
+  [CommSemiring R] [NonUnitalNonAssocSemiring A]
+  [NonUnitalNonAssocSemiring B] [Module R A] [Module R B]
+  [SMulCommClass R A A] [SMulCommClass R B B] [IsScalarTower R A A] [IsScalarTower R B B] :
+  LinearMap.mul' R (A ⊗[R] B) = (TensorProduct.map (LinearMap.mul' R A) (LinearMap.mul' R B))
+    ∘ₗ (swap_middle_tensor R A B A B).toLinearMap :=
+by
+  apply TensorProduct.ext_fourfold'
+  simp
+
+lemma swap_middle_tensor_map_conj {R A B C D E F G H : Type*} [CommSemiring R]
+  [AddCommMonoid A] [AddCommMonoid B] [AddCommMonoid C] [AddCommMonoid D]
+  [Module R A] [Module R B] [Module R C] [Module R D]
+  [AddCommMonoid E] [AddCommMonoid F] [AddCommMonoid G] [AddCommMonoid H]
+  [Module R E] [Module R F] [Module R G] [Module R H]
+  (f : A →ₗ[R] B) (g : C →ₗ[R] D)
+  (h : E →ₗ[R] F) (k : G →ₗ[R] H) :
+ (swap_middle_tensor R B D F H).toLinearMap
+   ∘ₗ (TensorProduct.map (TensorProduct.map f g)
+     (TensorProduct.map h k))
+    ∘ₗ (swap_middle_tensor R A C E G).symm.toLinearMap
+  = TensorProduct.map (TensorProduct.map f h)
+    (TensorProduct.map g k) :=
+by
+  apply TensorProduct.ext_fourfold'
+  simp
+
+lemma swap_middle_tensor_adjoint
+  {𝕜 E F G H : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
+  [NormedAddCommGroup G] [NormedAddCommGroup H]
+  [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
+  [InnerProductSpace 𝕜 G] [InnerProductSpace 𝕜 H]
+  [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+  [FiniteDimensional 𝕜 G] [FiniteDimensional 𝕜 H]:
+  LinearMap.adjoint (swap_middle_tensor 𝕜 E F G H).toLinearMap
+    = (swap_middle_tensor 𝕜 E F G H).symm.toLinearMap :=
+by
+  apply TensorProduct.ext_fourfold'
+  intros x y z w
+  rw [TensorProduct.inner_ext_fourfold_iff']
+  simp [LinearMap.adjoint_inner_left, mul_mul_mul_comm]

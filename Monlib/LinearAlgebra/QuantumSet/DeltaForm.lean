@@ -12,6 +12,6 @@ noncomputable def QuantumSet.DeltaForm.mul_comp_comul_isInvertible {A : Type*} [
   Invertible (LinearMap.mul' ℂ A ∘ₗ Coalgebra.comul) :=
 by
   apply IsUnit.invertible
-  rw [LinearMap.isUnit_iff_ker_eq_bot, hA2.mul_comp_comul_eq, LinearMap.ker_smul, LinearMap.one_eq_id,
+  rw [LinearMap.isUnit_iff_ker_eq_bot, hA2.mul_comp_comul_eq, LinearMap.ker_smul, Module.End.one_eq_id,
     LinearMap.ker_id]
   exact ne_of_gt hA2.delta_pos

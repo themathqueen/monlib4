@@ -232,12 +232,50 @@ theorem TensorProduct.forall_inner_eq_zero {𝕜 E F : Type _} [RCLike 𝕜] [No
   exact fun y => y.induction_on (inner_zero_right _) h
     (fun c d hc hd => by rw [inner_add_right, hc, hd, add_zero])
 
+theorem TensorProduct.forall_fourfold_inner_eq_zero
+  {𝕜 E F G H : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+    [NormedAddCommGroup F]
+    [NormedAddCommGroup G] [NormedAddCommGroup H]
+    [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
+    [InnerProductSpace 𝕜 G] [InnerProductSpace 𝕜 H]
+    [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+    [FiniteDimensional 𝕜 G] [FiniteDimensional 𝕜 H]
+    (x : (E ⊗[𝕜] F) ⊗[𝕜] (G ⊗[𝕜] H)) :
+    (∀ (a : E) (b : F) (c : G) (d : H),
+      inner 𝕜 x ((a ⊗ₜ[𝕜] b) ⊗ₜ[𝕜] (c ⊗ₜ[𝕜] d)) = 0) ↔ x = 0 :=
+by
+  refine' ⟨fun h => _, fun h a b c d => by rw [h, inner_zero_left]⟩
+  rw [← forall_inner_eq_zero]
+  intro a b
+  induction a
+  . simp
+  . induction b
+    . simp
+    . simp [h]
+    . rw [tmul_add, inner_add_right]
+      simp_all only [add_zero]
+  . rw [add_tmul, inner_add_right]
+    simp_all only [add_zero]
+
+
 theorem TensorProduct.inner_ext_iff' {𝕜 E F : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [NormedAddCommGroup F] [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F] [FiniteDimensional 𝕜 E]
     [FiniteDimensional 𝕜 F] (x y : E ⊗[𝕜] F) :
     x = y ↔ ∀ (a : E) (b : F), inner 𝕜 x (a ⊗ₜ[𝕜] b) = inner 𝕜 y (a ⊗ₜ[𝕜] b) := by
   simp_rw [← @sub_eq_zero 𝕜 _ _ (inner _ _ _), ← inner_sub_left,
     TensorProduct.forall_inner_eq_zero, sub_eq_zero]
+
+theorem TensorProduct.inner_ext_fourfold_iff' {𝕜 E F G H : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+    [NormedAddCommGroup F]
+    [NormedAddCommGroup G] [NormedAddCommGroup H]
+    [InnerProductSpace 𝕜 E] [InnerProductSpace 𝕜 F]
+    [InnerProductSpace 𝕜 G] [InnerProductSpace 𝕜 H]
+    [FiniteDimensional 𝕜 E] [FiniteDimensional 𝕜 F]
+    [FiniteDimensional 𝕜 G] [FiniteDimensional 𝕜 H]
+    (x y : (E ⊗[𝕜] F) ⊗[𝕜] (G ⊗[𝕜] H)) :
+    x = y ↔ ∀ (a : E) (b : F) (c : G) (d : H), inner 𝕜 x ((a ⊗ₜ[𝕜] b) ⊗ₜ[𝕜] (c ⊗ₜ[𝕜] d)) = inner 𝕜 y ((a ⊗ₜ[𝕜] b) ⊗ₜ[𝕜] c ⊗ₜ d) := by
+  simp_rw [← @sub_eq_zero 𝕜 _ _ (inner _ _ _), ← inner_sub_left (E := (E ⊗[𝕜] F) ⊗[𝕜] G ⊗[𝕜] H),
+    TensorProduct.forall_fourfold_inner_eq_zero, sub_eq_zero]
 
 theorem TensorProduct.lid_symm_adjoint {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E] :
