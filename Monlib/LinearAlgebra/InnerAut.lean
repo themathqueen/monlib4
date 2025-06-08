@@ -246,7 +246,7 @@ theorem innerAut.spectrum_eq [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matr
 
 theorem innerAut_one [DecidableEq n] : innerAut (1 : unitaryGroup n 𝕜) = 1 := by
   simp_rw [LinearMap.ext_iff, innerAut_apply, UnitaryGroup.inv_apply, UnitaryGroup.one_apply,
-    star_one, Matrix.mul_one, Matrix.one_mul, LinearMap.one_apply,
+    star_one, Matrix.mul_one, Matrix.one_mul, Module.End.one_apply,
     forall_true_iff]
 
 theorem innerAut_comp_innerAut_inv [DecidableEq n] (U : unitaryGroup n 𝕜) :
@@ -261,7 +261,7 @@ theorem innerAut_apply_innerAut_inv [DecidableEq n] (U₁ U₂ : unitaryGroup n 
 
 theorem innerAut_apply_innerAut_inv_self [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     innerAut U (innerAut U⁻¹ x) = x := by
-  rw [innerAut_apply_innerAut_inv, mul_inv_cancel, innerAut_one, LinearMap.one_apply]
+  rw [innerAut_apply_innerAut_inv, mul_inv_cancel, innerAut_one, Module.End.one_apply]
 
 theorem innerAut_inv_apply_innerAut_self [DecidableEq n] (U : unitaryGroup n 𝕜) (x : Matrix n n 𝕜) :
     innerAut U⁻¹ (innerAut U x) = x :=
@@ -543,14 +543,17 @@ theorem _root_.StarAlgEquiv.of_matrix_is_inner
   norm_num
 
 noncomputable def _root_.StarAlgEquiv.of_matrix_unitary
-    (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜) : unitaryGroup n 𝕜 :=
-  by
-  choose U _ using f.of_matrix_is_inner
+  (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜) : unitaryGroup n 𝕜 :=
+by
+  choose U hU using f.of_matrix_is_inner
   exact U
 
 lemma _root_.StarAlgEquiv.eq_innerAut (f : Matrix n n 𝕜 ≃⋆ₐ[𝕜] Matrix n n 𝕜) :
     innerAutStarAlg f.of_matrix_unitary = f :=
-StarAlgEquiv.of_matrix_unitary.proof_1 _
+by
+  rw [StarAlgEquiv.of_matrix_unitary]
+  generalize_proofs
+  (expose_names; exact pf_1)
 
 theorem IsHermitian.spectral_theorem'' {𝕜 : Type _} [RCLike 𝕜] {x : Matrix n n 𝕜}
     (hx : x.IsHermitian) :
@@ -614,7 +617,7 @@ theorem innerAut_commutes_with_map_lid_symm (U : Matrix.unitaryGroup n 𝕜) :
       (TensorProduct.lid 𝕜 (Matrix n n 𝕜)).symm.toLinearMap ∘ₗ innerAut U :=
   by
   simp_rw [LinearMap.ext_iff, LinearMap.comp_apply,
-    LinearEquiv.coe_coe, TensorProduct.lid_symm_apply, TensorProduct.map_tmul, LinearMap.one_apply,
+    LinearEquiv.coe_coe, TensorProduct.lid_symm_apply, TensorProduct.map_tmul, Module.End.one_apply,
     forall_const]
 
 -- MOVE:
@@ -627,7 +630,7 @@ theorem innerAut_commutes_with_lid_comm (U : Matrix.unitaryGroup n 𝕜) :
   by
   simp_rw [TensorProduct.ext_iff', LinearMap.comp_apply, TensorProduct.map_apply,
     LinearEquiv.coe_coe, TensorProduct.comm_tmul,
-    TensorProduct.lid_tmul, LinearMap.one_apply, _root_.map_smul,
+    TensorProduct.lid_tmul, Module.End.one_apply, _root_.map_smul,
     forall₂_true_iff]
 
 theorem unitaryGroup.conj_mem {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]

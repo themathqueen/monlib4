@@ -55,6 +55,7 @@ we finally have (i) if and only if (iv) for idempotent self-adjoint operators on
 
 -/
 
+open Module.End
 
 section
 
@@ -139,7 +140,7 @@ open ContinuousLinearMap
 
 variable {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
 
-local notation "P" => orthogonalProjection
+local notation "P" => Submodule.orthogonalProjection
 
 /-- given self-adjoint operators $p,q$,
   we have $pq=p$ iff $qp=p$ -/
@@ -152,12 +153,14 @@ theorem self_adjoint_proj_commutes [InnerProductSpace 𝕜 E] [CompleteSpace E] 
 
 local notation "↥P" => orthogonalProjection'
 
+open Submodule
+
 theorem orthogonalProjection.isIdempotentElem [InnerProductSpace 𝕜 E] (U : Submodule 𝕜 E)
-    [HasOrthogonalProjection U] : IsIdempotentElem (↥P U) :=
+    [U.HasOrthogonalProjection] : IsIdempotentElem (↥P U) :=
   by
   rw [IsIdempotentElem]
   ext
-  simp_rw [mul_apply, orthogonalProjection'_eq, comp_apply, Submodule.subtypeL_apply,
+  simp_rw [ContinuousLinearMap.mul_apply, orthogonalProjection'_eq, comp_apply, Submodule.subtypeL_apply,
     orthogonalProjection_mem_subspace_eq_self]
 
 class ContinuousLinearMap.IsOrthogonalProjection [InnerProductSpace 𝕜 E]
@@ -173,7 +176,7 @@ lemma ContinuousLinearMap.IsOrthogonalProjection.eq [InnerProductSpace 𝕜 E]
 theorem IsIdempotentElem.clm_to_lm [InnerProductSpace 𝕜 E] {T : E →L[𝕜] E} :
     IsIdempotentElem T ↔ IsIdempotentElem (T : E →ₗ[𝕜] E) :=
   by
-  simp_rw [IsIdempotentElem, LinearMap.mul_eq_comp, ← coe_comp, coe_inj]
+  simp_rw [IsIdempotentElem, Module.End.mul_eq_comp, ← coe_comp, coe_inj]
   rfl
 
 lemma ContinuousLinearMap.HasOrthogonalProjection_of_isOrthogonalProjection [InnerProductSpace 𝕜 E]
@@ -226,7 +229,7 @@ theorem IsIdempotentElem.isCompl_range_ker {V R : Type _} [Semiring R] [AddCommG
     constructor
     · intro h'
       cases' h'.2 with y hy
-      rw [← hy, ← IsIdempotentElem.eq h, LinearMap.mul_apply, hy]
+      rw [← hy, ← IsIdempotentElem.eq h, Module.End.mul_apply, hy]
       exact h'.1
     · intro h'
       rw [h', map_zero]
@@ -243,7 +246,7 @@ theorem IsIdempotentElem.isCompl_range_ker {V R : Type _} [Semiring R] [AddCommG
     intro x
     use ⟨x - T x, ?_⟩, ⟨T x, ?_⟩
     . simp only [Submodule.coe_mk, sub_add_cancel]
-    . rw [LinearMap.mem_ker, map_sub, ← LinearMap.mul_apply, IsIdempotentElem.eq h, sub_self]
+    . rw [LinearMap.mem_ker, map_sub, ← Module.End.mul_apply, IsIdempotentElem.eq h, sub_self]
     . rw [LinearMap.mem_range]; simp only [exists_apply_eq_apply]
 
 theorem IsCompl.of_orthogonal_projection [InnerProductSpace 𝕜 E] {T : E →L[𝕜] E}
@@ -304,7 +307,7 @@ instance LinearMap.IsSymmetric.hasLe {𝕜 E : Type _} [RCLike 𝕜] [NormedAddC
   by
   refine' { le := _ }
   intro u v
-  exact (v - u : E →ₗ[𝕜] E).IsPositive
+  exact (v - u : E →ₗ[𝕜] E).IsPositive'
 
 @[reducible]
 def SymmetricLM (g : Type*) [NormedAddCommGroup g] [InnerProductSpace ℂ g] :=
@@ -320,8 +323,9 @@ local notation "L(" x "," y ")" => x →L[y] x
 local notation "l(" x "," y ")" => x →ₗ[y] x
 
 open scoped ComplexOrder
+set_option synthInstance.maxHeartbeats 40000 in
 instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] : PartialOrder (E →ₗ[𝕜] E) where
-  le := fun u v => LinearMap.IsPositive (v - u : E →ₗ[𝕜] E)
+  le := fun u v => LinearMap.IsPositive' (v - u : E →ₗ[𝕜] E)
   le_refl := fun a => by
     simp_rw [sub_self]
     constructor
@@ -331,11 +335,9 @@ instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpa
       simp_rw [LinearMap.zero_apply, inner_zero_right, le_refl]
   le_trans := by
     intro a b c hab hbc
-    simp only
     rw [← add_zero (c : E →ₗ[𝕜] E), ← sub_self ↑b, ← add_sub_assoc, add_sub_right_comm, add_sub_assoc]
-    exact LinearMap.IsPositive.add hbc hab
+    exact LinearMap.IsPositive'.add hbc hab
   le_antisymm := by
-    dsimp
     rintro a b hba hab
     rw [← sub_eq_zero]
     rw [← LinearMap.IsSymmetric.inner_map_self_eq_zero hab.1]
@@ -346,8 +348,8 @@ instance {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpa
     apply le_antisymm hba2 (hab.2 _)
 
 /-- `p ≤ q` means `q - p` is positive -/
-theorem LinearMap.IsPositive.hasLe {E : Type _} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
-    {p q : SymmetricLM E} : p ≤ q ↔ (q - p : l(E,ℂ)).IsPositive := by rfl
+theorem LinearMap.IsPositive'.hasLe {E : Type _} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
+    {p q : SymmetricLM E} : p ≤ q ↔ (q - p : l(E,ℂ)).IsPositive' := by rfl
 
 noncomputable instance IsSymmetric.hasZero {E : Type _} [NormedAddCommGroup E]
     [InnerProductSpace ℂ E] : Zero ↥{x : E →ₗ[ℂ] E | x.IsSymmetric} :=
@@ -359,8 +361,8 @@ noncomputable instance IsSymmetric.hasZero {E : Type _} [NormedAddCommGroup E]
     inner_zero_right, forall_const]
 
 /-- saying `p` is positive is the same as saying `0 ≤ p` -/
-theorem LinearMap.IsPositive.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
-    [InnerProductSpace 𝕜 E] {p : l(E,𝕜)} : p.IsPositive ↔ 0 ≤ p :=
+theorem LinearMap.IsPositive'.is_nonneg {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
+    [InnerProductSpace 𝕜 E] {p : l(E,𝕜)} : p.IsPositive' ↔ 0 ≤ p :=
   by
   nth_rw 1 [← sub_zero p]
   rfl
@@ -375,7 +377,7 @@ theorem SelfAdjointAndIdempotent.is_positive {𝕜 E : Type _} [RCLike 𝕜] [No
   rw [ContinuousLinearMap.nonneg_iff_isPositive]
   refine' ⟨hpa, _⟩
   rw [← hp.eq]
-  simp_rw [reApplyInnerSelf_apply, mul_apply]
+  simp_rw [reApplyInnerSelf_apply, ContinuousLinearMap.mul_apply]
   intro x
   simp_rw [← adjoint_inner_right _ _ x, isSelfAdjoint_iff'.mp hpa]
   exact inner_self_nonneg
@@ -451,7 +453,7 @@ theorem ContinuousLinearMap.isPositive_iff_exists_adjoint_hMul_self [InnerProduc
   [FiniteDimensional 𝕜 E] (T : E →L[𝕜] E) :
     T.IsPositive ↔ ∃ S : E →L[𝕜] E, T = adjoint S * S :=
   by
-  rw [← IsPositive.toLinearMap, LinearMap.isPositive_iff_exists_adjoint_hMul_self]
+  rw [IsPositive.toLinearMap', LinearMap.isPositive'_iff_exists_adjoint_hMul_self]
   constructor <;> rintro ⟨S, hS⟩
   use LinearMap.toContinuousLinearMap S
   · ext
@@ -475,7 +477,7 @@ theorem ContinuousLinearMap.is_positive_le_iff_inner [InnerProductSpace 𝕜 E]
   constructor
   · intro h x
     rw [← sub_nonneg, ← map_sub, ← inner_sub_right, ← sub_apply]
-    exact IsPositive.inner_nonneg_right h x
+    exact IsPositive.re_inner_nonneg_right h x
   · intro h
     refine' ⟨IsSelfAdjoint.sub hqa hpa, fun x => _⟩
     simp_rw [reApplyInnerSelf_apply, sub_apply, inner_sub_left, map_sub, sub_nonneg]
@@ -513,13 +515,14 @@ theorem self_adjoint_and_idempotent_is_positive_iff_commutes
   symm
   rw [← sub_eq_zero]
   nth_rw 1 [← mul_one p]
-  simp_rw [mul_def, ← comp_sub, ← ContinuousLinearMap.inner_map_self_eq_zero, comp_apply, sub_apply,
-    one_apply]
+  simp_rw [ContinuousLinearMap.mul_def, ← comp_sub, ← ContinuousLinearMap.inner_map_self_eq_zero, comp_apply, sub_apply,
+    ContinuousLinearMap.one_apply]
   intro x
   specialize h ((1 - q) x)
-  simp_rw [sub_apply, map_sub, ← mul_apply, mul_one, hq.eq, sub_self, inner_zero_right, one_apply,
-    mul_apply, ← map_sub, zero_re'] at h
-  rw [← hp.eq, mul_apply, ← adjoint_inner_left, isSelfAdjoint_iff'.mp hpa, inner_self_nonpos] at h
+  simp_rw [sub_apply, map_sub, ← ContinuousLinearMap.mul_apply, mul_one, hq.eq,
+    sub_self, inner_zero_right, ContinuousLinearMap.one_apply,
+    ContinuousLinearMap.mul_apply, ← map_sub, zero_re] at h
+  rw [← hp.eq, ContinuousLinearMap.mul_apply, ← adjoint_inner_left, isSelfAdjoint_iff'.mp hpa, re_inner_self_nonpos] at h
   rw [h, inner_zero_left]
 
 /-- in a complex-finite-dimensional Hilbert space `E`, we have
@@ -713,7 +716,7 @@ theorem orthogonal_projection_iff [InnerProductSpace 𝕜 E] [FiniteDimensional 
   · rintro ⟨U, rfl⟩
     exact ⟨orthogonalProjection_isSelfAdjoint _, orthogonalProjection.isIdempotentElem _⟩
   · rintro ⟨h1, h2⟩
-    simp_rw [IsIdempotentElem, mul_def, ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe,
+    simp_rw [IsIdempotentElem, ContinuousLinearMap.mul_def, ContinuousLinearMap.ext_iff, ← ContinuousLinearMap.coe_coe,
       coe_comp, ← LinearMap.ext_iff] at h2
     rcases(LinearMap.isProj_iff_isIdempotentElem _).mpr h2 with ⟨W, hp⟩
     let p' := isProj' hp
@@ -803,7 +806,7 @@ theorem orthogonalProjection.isMinimalProjection_to_clm [InnerProductSpace 𝕜 
 
 theorem Submodule.isOrtho_iff_inner_eq' {𝕜 E : Type _} [RCLike 𝕜] [NormedAddCommGroup E]
     [InnerProductSpace 𝕜 E] {U W : Submodule 𝕜 E} :
-    U ⟂ W ↔ ∀ (u : ↥U) (w : ↥W), (inner (u : E) (w : E) : 𝕜) = 0 :=
+    U ⟂ W ↔ ∀ (u : ↥U) (w : ↥W), inner 𝕜 (u : E) (w : E) = 0 :=
   by
   rw [Submodule.isOrtho_iff_inner_eq]
   constructor
@@ -897,7 +900,7 @@ lemma lmul_isIdempotentElem_iff {R A : Type*} [CommSemiring R]
   [Semiring A] [Module R A] [SMulCommClass R A A] [IsScalarTower R A A] (a : A) :
   (IsIdempotentElem (lmul a : _ →ₗ[R] _)) ↔ (IsIdempotentElem a) :=
 by
-  simp_rw [IsIdempotentElem, LinearMap.mul_eq_comp, lmul_eq_mul, ← LinearMap.mulLeft_mul]
+  simp_rw [IsIdempotentElem, mul_eq_comp, lmul_eq_mul, ← LinearMap.mulLeft_mul]
   refine ⟨λ h => ?_, λ h => by rw [h]⟩
   rw [LinearMap.ext_iff] at h
   specialize h 1
