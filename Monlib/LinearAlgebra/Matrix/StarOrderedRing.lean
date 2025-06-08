@@ -47,10 +47,11 @@ theorem eq_zero_iff {n : Type _} [Fintype n] [DecidableEq n] {x : Matrix n n ℂ
     x = 0 ↔ ∀ a : n → ℂ, star a ⬝ᵥ x.mulVec a = 0 := by
   calc
     x = 0 ↔ toEuclideanLin x = 0 := by simp only [LinearEquiv.map_eq_zero_iff]
-    _ ↔ ∀ a : EuclideanSpace ℂ n, (inner a (toEuclideanLin x a) :
+    _ ↔ ∀ a : EuclideanSpace ℂ n, (inner ℂ a (toEuclideanLin x a) :
     ℂ) = 0 := by
       simp_rw [← inner_map_self_eq_zero, inner_eq_zero_symm]
-    _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x *ᵥ a = 0 := by rfl
+    _ ↔ ∀ a : EuclideanSpace ℂ n, (star (a : n → ℂ) : n → ℂ) ⬝ᵥ x *ᵥ a = 0 :=
+      by simp_rw [dotProduct_eq_inner]; rfl
     _ ↔ ∀ a : n → ℂ, star a ⬝ᵥ x *ᵥ a = 0 := by rfl
 
 @[reducible]
@@ -285,10 +286,10 @@ by
   calc spectrum 𝕜 (toLin' (aᴴ * a * (bᴴ * b)))
       = spectrum 𝕜 ((toLin' a) * toLin' (bᴴ * b) * toLin' aᴴ) :=
       by
-        rw [LinearMap.mul_eq_comp, spectrum.comm]
-        simp_rw [LinearMap.mul_eq_comp, ← toLin'_mul, mul_assoc]
+        rw [Module.End.mul_eq_comp, spectrum.comm]
+        simp_rw [Module.End.mul_eq_comp, ← toLin'_mul, mul_assoc]
     _ = spectrum 𝕜 (toLin' ((b * aᴴ)ᴴ * (b * aᴴ))) :=
-      by simp_rw [conjTranspose_mul, conjTranspose_conjTranspose, LinearMap.mul_eq_comp,
+      by simp_rw [conjTranspose_mul, conjTranspose_conjTranspose, Module.End.mul_eq_comp,
         ← toLin'_mul, mul_assoc]
   exact (posSemidef_iff_isHermitian_and_nonneg_spectrum.mp (posSemidef_conjTranspose_mul_self _)).2
 

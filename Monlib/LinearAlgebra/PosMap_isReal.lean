@@ -114,8 +114,8 @@ theorem ContinuousLinearMap.nonneg_iff_isSelfAdjoint_and_nonneg_spectrum
   (T : B →L[ℂ] B) :
   0 ≤ T ↔ IsSelfAdjoint T ∧ spectrum ℂ T ⊆ {a : ℂ | 0 ≤ a} :=
 by
-  rw [nonneg_iff_isPositive, ← ContinuousLinearMap.IsPositive.toLinearMap,
-    LinearMap.isPositive_iff_isSymmetric_and_nonneg_spectrum,
+  rw [nonneg_iff_isPositive, ContinuousLinearMap.IsPositive.toLinearMap',
+    LinearMap.isPositive'_iff_isSymmetric_and_nonneg_spectrum,
     isSelfAdjoint_iff_isSymmetric, spectrum_coe]
 
 theorem ContinuousLinearMap.nonneg_iff_exists
@@ -219,9 +219,9 @@ by
 lemma Matrix.orthogonalProjection_isPosSemidef {U : Submodule ℂ (EuclideanSpace ℂ n)} :
   (Matrix.orthogonalProjection U).PosSemidef :=
 by
-  rw [posSemidef_eq_linearMap_positive, ← coe_toEuclideanCLM_eq_toEuclideanLin,
+  rw [posSemidef_eq_linearMap_positive', ← coe_toEuclideanCLM_eq_toEuclideanLin,
     Matrix.CLM_apply_orthogonalProjection,
-    ContinuousLinearMap.IsPositive.toLinearMap,
+    ← ContinuousLinearMap.IsPositive.toLinearMap',
     ← ContinuousLinearMap.nonneg_iff_isPositive]
   exact orthogonalProjection.is_positive
 
@@ -236,7 +236,7 @@ by
   simp only [ContinuousLinearMap.mul_apply, ContinuousLinearMap.zero_apply]
   simp only [orthogonalProjection'_eq, ContinuousLinearMap.coe_comp', Submodule.coe_subtypeL',
     Submodule.coe_subtype, Function.comp_apply, ZeroMemClass.coe_eq_zero,
-    orthogonalProjection_eq_zero_iff]
+    Submodule.orthogonalProjection_eq_zero_iff]
   rw [ContinuousLinearMap.ker_eq_ortho_adjoint_range, Submodule.orthogonal_orthogonal,
     ← ContinuousLinearMap.star_eq_adjoint]
   simp only [← map_star, star_eq_conjTranspose, hx.eq]
@@ -414,9 +414,9 @@ theorem Matrix.IsHermitian.posSemidefDecomposition'
 by
   let hx := Fact.mk hx
   simp_rw [posSemidefDecomposition_eq]
-  obtain ⟨α, hα⟩ := posSemidef_iff_eq_transpose_mul_self.mp
+  obtain ⟨α, hα⟩ := posSemidef_iff_eq_conjTranspose_mul_self.mp
     (posSemidefDecomposition_posSemidef_left_right hx).1
-  obtain ⟨β, hβ⟩ := posSemidef_iff_eq_transpose_mul_self.mp
+  obtain ⟨β, hβ⟩ := posSemidef_iff_eq_conjTranspose_mul_self.mp
     (posSemidefDecomposition_posSemidef_left_right hx).2
   use α, β
   rw [← hα, ← hβ]
@@ -498,7 +498,7 @@ let f : Matrix n n ℂ ≃⋆ₐ[ℂ] PiMat ℂ Unit (λ _ => n) :=
   hrk₁ := fun i ↦ by infer_instance
   hrk₂ := fun i ↦ by infer_instance }
 
-omit [StarModule ℂ A] in
+omit [StarModule ℂ A] [PartialOrder A] [StarOrderedRing A] in
 theorem IsSelfAdjoint.isPositiveDecomposition_of_starAlgEquiv_piMat
   (hφ : isEquivToPiMat A)
   {x : A} (hx : _root_.IsSelfAdjoint x) :
@@ -952,9 +952,9 @@ by
   exact IsSelfAdjoint.star_mul_self _
 
 open scoped InnerProductSpace
-theorem LinearMap.IsPositive.add_ker_eq_inf_ker
+theorem LinearMap.IsPositive'.add_ker_eq_inf_ker
   {𝕜 V : Type*} [RCLike 𝕜] [NormedAddCommGroup V] [InnerProductSpace 𝕜 V]
-  [FiniteDimensional 𝕜 V] {S T : V →ₗ[𝕜] V} (hS : S.IsPositive) (hT : T.IsPositive) :
+  [FiniteDimensional 𝕜 V] {S T : V →ₗ[𝕜] V} (hS : S.IsPositive') (hT : T.IsPositive') :
     LinearMap.ker (S + T) = LinearMap.ker S ⊓ LinearMap.ker T :=
 by
   ext x
@@ -965,9 +965,9 @@ by
   have : ⟪x, S x⟫_𝕜 = 0 := eq_of_le_of_le
     (by rw [h, inner_neg_right, neg_le, neg_zero]; exact hT.2 x)
     (hS.2 x)
-  obtain ⟨f, rfl⟩ := (LinearMap.isPositive_iff_exists_adjoint_hMul_self _).mp hS
-  simp only [LinearMap.mul_apply, LinearMap.adjoint_inner_right, inner_self_eq_zero] at this
-  simp only [LinearMap.mul_apply, this, map_zero, zero_eq_neg] at h
+  obtain ⟨f, rfl⟩ := (LinearMap.isPositive'_iff_exists_adjoint_hMul_self _).mp hS
+  simp only [Module.End.mul_apply, LinearMap.adjoint_inner_right, inner_self_eq_zero] at this
+  simp only [Module.End.mul_apply, this, map_zero, zero_eq_neg] at h
   exact h
 
 theorem mem_unitary_iff_isStarNormal_and_decomposition_left_sq_add_right_sq_eq_one

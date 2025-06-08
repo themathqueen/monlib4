@@ -23,7 +23,7 @@ variable {R I J 𝕜 : Type _} [Fintype I] [Fintype J] [RCLike 𝕜] [CommSemiri
 
 open scoped BigOperators
 
-open Matrix
+open Matrix Module.End
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
 /-- the star-algebraic isomorphism from `E →ₗ[𝕜] E` to the matrix ring `M_n(𝕜)` given by
@@ -32,13 +32,13 @@ noncomputable def OrthonormalBasis.toMatrix {n E : Type _} [Fintype n] [Decidabl
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
     (b : OrthonormalBasis n 𝕜 E) : (E →ₗ[𝕜] E) ≃⋆ₐ[𝕜] Matrix n n 𝕜
     where
-  toFun x k p := inner (b k) (x (b p))
+  toFun x k p := inner 𝕜 (b k) (x (b p))
   invFun x := ∑ i, ∑ j, x i j • (rankOne 𝕜 (b i) (b j))
   map_add' x y := by simp only [LinearMap.add_apply, inner_add_right]; rfl
   map_smul' r x := by simp only [LinearMap.smul_apply, inner_smul_right]; rfl
   map_mul' x y := by
     ext
-    simp only [LinearMap.mul_apply, Matrix.mul_apply, ← LinearMap.adjoint_inner_left x,
+    simp only [Module.End.mul_apply, Matrix.mul_apply, ← LinearMap.adjoint_inner_left x,
       OrthonormalBasis.sum_inner_mul_inner]
   map_star' x := by
     ext
@@ -61,7 +61,7 @@ noncomputable def OrthonormalBasis.toMatrix {n E : Type _} [Fintype n] [Decidabl
 theorem OrthonormalBasis.toMatrix_apply {n E : Type _} [Fintype n] [DecidableEq n]
     [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [FiniteDimensional 𝕜 E]
     (b : OrthonormalBasis n 𝕜 E) (x : E →ₗ[𝕜] E) (i j : n) :
-    b.toMatrix x i j = inner (b i) (x (b j)) :=
+    b.toMatrix x i j = inner 𝕜 (b i) (x (b j)) :=
   rfl
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
@@ -126,7 +126,7 @@ theorem LinearEquiv.refl_conj {R E : Type _} [CommSemiring R] [AddCommMonoid E] 
 theorem LinearEquiv.conj_hMul {R E F : Type _} [CommSemiring R] [AddCommMonoid E] [AddCommMonoid F]
     [Module R E] [Module R F] (f : E ≃ₗ[R] F) (x y : Module.End R E) :
     f.conj (x * y) = f.conj x * f.conj y := by
-  simp only [LinearMap.mul_eq_comp, LinearEquiv.conj_comp]
+  simp only [mul_eq_comp, LinearEquiv.conj_comp]
 
 theorem LinearEquiv.conj_apply_one {R E F : Type _} [CommSemiring R] [AddCommMonoid E]
     [AddCommMonoid F] [Module R E] [Module R F] (f : E ≃ₗ[R] F) : f.conj 1 = 1 :=
@@ -171,11 +171,11 @@ theorem Matrix.stdBasis_repr_eq_reshape : (Matrix.stdBasis R I J).equivFun = res
   · intro i
     ext j
     simp only [Finsupp.single_apply]
-    calc reshape (stdBasis R I J i) j = reshape (Matrix.stdBasisMatrix i.1 i.2 (1 : R)) j :=
-        by rw [← stdBasis_eq_stdBasisMatrix]
-      _ = Matrix.stdBasisMatrix i.1 i.2 (1 : R) j.1 j.2 := rfl
+    calc reshape (stdBasis R I J i) j = reshape (Matrix.single i.1 i.2 (1 : R)) j :=
+        by rw [← stdBasis_eq_single]
+      _ = Matrix.single i.1 i.2 (1 : R) j.1 j.2 := rfl
       _ = if i = j then 1 else 0 :=
-        by simp_rw [stdBasisMatrix, of_apply, ← Prod.eq_iff_fst_eq_snd_eq]
+        by simp_rw [single, of_apply, ← Prod.eq_iff_fst_eq_snd_eq]
 
 def LinearEquiv.innerConj {R E F : Type _} [CommSemiring R] [AddCommMonoid E] [AddCommMonoid F]
     [Module R E] [Module R F] (ϱ : E ≃ₗ[R] F) : (E →ₗ[R] E) ≃ₐ[R] F →ₗ[R] F :=
@@ -219,7 +219,7 @@ theorem toMatrixOfAlgEquiv_symm_apply (x : Matrix (I × J) (I × J) R) :
   rfl
 
 theorem toMatrixOfAlgEquiv_apply' (x : Matrix I J R →ₗ[R] Matrix I J R) (ij kl : I × J) :
-    toMatrixOfAlgEquiv x ij kl = x (stdBasisMatrix kl.1 kl.2 (1 : R)) ij.1 ij.2 :=
+    toMatrixOfAlgEquiv x ij kl = x (Matrix.single kl.1 kl.2 (1 : R)) ij.1 ij.2 :=
   by
   simp_rw [toMatrixOfAlgEquiv_apply, toMatrixAlgEquiv'_apply, LinearMap.comp_apply,
     LinearEquiv.coe_coe, reshape_apply]
@@ -227,8 +227,8 @@ theorem toMatrixOfAlgEquiv_apply' (x : Matrix I J R →ₗ[R] Matrix I J R) (ij 
       = x (reshape.symm (fun i ↦ if i.1 = kl.1 ∧ i.2 = kl.2 then 1 else 0)) ij.1 ij.2 :=
       by simp_rw [← Prod.eq_iff_fst_eq_snd_eq]
     _ = x (fun i j ↦ if i = kl.1 ∧ j = kl.2 then 1 else 0) ij.1 ij.2 := rfl
-    _ = x (stdBasisMatrix kl.1 kl.2 1) ij.1 ij.2 :=
-      by simp_rw [stdBasisMatrix_eq, eq_comm]
+    _ = x (Matrix.single kl.1 kl.2 1) ij.1 ij.2 :=
+      by simp_rw [single_eq, eq_comm]
 
 end LinearMap
 
@@ -245,14 +245,14 @@ theorem toLinOfAlgEquiv_apply (x : Matrix (I × J) (I × J) R) (y : Matrix I J R
 def rankOneStdBasis {I J : Type _} [DecidableEq I] [DecidableEq J] (ij kl : I × J) (r : R) :
     Matrix I J R →ₗ[R] Matrix I J R
     where
-  toFun x := stdBasisMatrix ij.1 ij.2 (r • r • x kl.1 kl.2)
-  map_add' x y := by simp_rw [Matrix.add_apply, smul_add, stdBasisMatrix_add]
+  toFun x := single ij.1 ij.2 (r • r • x kl.1 kl.2)
+  map_add' x y := by simp_rw [Matrix.add_apply, smul_add, single_add]
   map_smul' r x := by
-    simp_rw [RingHom.id_apply, Matrix.smul_apply, smul_stdBasisMatrix, smul_smul, mul_rotate']
+    simp_rw [RingHom.id_apply, Matrix.smul_apply, smul_single, smul_smul, mul_rotate']
 
 theorem rankOneStdBasis_apply {I J : Type _} [DecidableEq I] [DecidableEq J] (ij kl : I × J) (r : R)
     (x : Matrix I J R) :
-    rankOneStdBasis ij kl r x = stdBasisMatrix ij.1 ij.2 (r • r • x kl.1 kl.2) :=
+    rankOneStdBasis ij kl r x = single ij.1 ij.2 (r • r • x kl.1 kl.2) :=
   rfl
 
 open scoped BigOperators
@@ -262,7 +262,7 @@ theorem toLinOfAlgEquiv_eq (x : Matrix (I × J) (I × J) R) :
     toLinOfAlgEquiv x = ∑ ij : I × J, ∑ kl : I × J, x ij kl • rankOneStdBasis ij kl (1 : R) := by
   simp_rw [LinearMap.ext_iff, ← ext_iff, toLinOfAlgEquiv_apply, reshape_symm_apply,
     LinearMap.sum_apply, Matrix.sum_apply, toLinAlgEquiv'_apply, mulVec, dotProduct,
-    reshape_apply, LinearMap.smul_apply, Matrix.smul_apply, rankOneStdBasis_apply, stdBasisMatrix,
+    reshape_apply, LinearMap.smul_apply, Matrix.smul_apply, rankOneStdBasis_apply, single,
     of_apply, smul_ite, ← Prod.mk_inj, Prod.mk.eta, one_smul, smul_zero, smul_eq_mul,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true,
     forall₃_true_iff]
@@ -290,7 +290,7 @@ theorem innerAut_toMatrix (U : unitaryGroup n 𝕜) :
   LinearMap.toMatrixOfAlgEquiv (innerAut U) = U ⊗ₖ Uᴴᵀ :=
   by
   ext
-  simp_rw [LinearMap.toMatrixOfAlgEquiv_apply', innerAut_apply', mul_apply, stdBasisMatrix,
+  simp_rw [LinearMap.toMatrixOfAlgEquiv_apply', innerAut_apply', Matrix.mul_apply, single,
     of_apply, mul_ite, mul_one, MulZeroClass.mul_zero, Finset.sum_mul, ite_mul, MulZeroClass.zero_mul,
     ite_and, ← unitaryGroup.star_coe_eq_coe_star, star_apply, kroneckerMap_apply, conj_apply]
   simp only [Finset.sum_ite_eq, Finset.mem_univ, if_true]

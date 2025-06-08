@@ -125,14 +125,17 @@ noncomputable instance InnerProductAlgebra.toNormedAddCommGroupOfRing {A : Type*
   [starAlgebra A] [InnerProductAlgebra A] :
     NormedAddCommGroupOfRing A where
   dist_eq := InnerProductAlgebra.dist_eq
+instance InnerProductAlgebra.toNormSMulClass {A : Type*}
+  [starAlgebra A] [InnerProductAlgebra A] :
+    NormSMulClass ℂ A :=
+  NormedDivisionRing.toNormSMulClass
 noncomputable instance InnerProductAlgebra.toInnerProductSpace {A : Type*}
   [starAlgebra A] [InnerProductAlgebra A] :
     InnerProductSpace ℂ A where
   norm_smul_le _ _ := by
     rw [norm_smul]
-
-  norm_sq_eq_inner := InnerProductAlgebra.norm_sq_eq_inner
-  conj_symm := InnerProductAlgebra.conj_symm
+  norm_sq_eq_re_inner := InnerProductAlgebra.norm_sq_eq_inner
+  conj_inner_symm := InnerProductAlgebra.conj_symm
   add_left := InnerProductAlgebra.add_left
   smul_left := InnerProductAlgebra.smul_left
 
@@ -202,7 +205,7 @@ section Complex
   conj_symm := inner_conj_symm
   add_left := inner_add_left
   smul_left := inner_smul_left
-  norm_sq_eq_inner := norm_sq_eq_inner
+  norm_sq_eq_inner := norm_sq_eq_re_inner
   dist_eq _ _ := rfl
 
   noncomputable instance Complex.quantumSet :
@@ -210,11 +213,11 @@ section Complex
   modAut_isSymmetric _ _ _ := rfl
   k := 0
   inner_star_left _ _ _ := by
-    simp_rw [RCLike.inner_apply, modAut, RCLike.star_def, ← mul_assoc, mul_comm, map_mul,
-      AlgEquiv.one_apply]
+    simp_rw [RCLike.inner_apply, modAut, RCLike.star_def, AlgEquiv.one_apply, mul_comm, map_mul]
+    ring
   inner_conj_left x y z := by
-    simp_rw [RCLike.inner_apply, modAut, map_mul, RCLike.star_def, AlgEquiv.one_apply, mul_comm z,
-      ← mul_assoc]
+    simp_rw [RCLike.inner_apply, modAut, map_mul, RCLike.star_def, AlgEquiv.one_apply, mul_comm z]
+    rw [mul_assoc, mul_comm]
   n := Fin 1
   n_isFintype := Fin.fintype 1
   n_isDecidableEq := instDecidableEqFin 1
@@ -261,7 +264,7 @@ section Complex
     intro a b
     simp_rw [Coalgebra.comul_eq_mul_adjoint, LinearMap.adjoint_inner_left, LinearMap.mul'_apply,
       LinearEquiv.coe_toLinearMap, TensorProduct.lid_symm_apply,
-      TensorProduct.inner_tmul, RCLike.inner_apply, starRingEnd_apply, star_one, one_mul]
+      TensorProduct.inner_tmul, RCLike.inner_apply, starRingEnd_apply, star_one, mul_one]
 
 end Complex
 
@@ -309,7 +312,7 @@ by
   intro a
   simp_rw [LinearMap.adjoint_inner_right, Algebra.linearMap_apply,
     Algebra.algebraMap_eq_smul_one, inner_smul_left]
-  rfl
+  rw [RCLike.inner_apply']
 
 lemma QuantumSet.inner_conj (a b : A) :
   ⟪a, b⟫_ℂ = ⟪star b, (ha.modAut (-(2 * hA.k) - 1) (star a))⟫_ℂ :=
@@ -400,7 +403,7 @@ by
 example (kms : k A = - (1 / 2)) (x : A) :
   ‖star x‖ = ‖x‖ :=
 by
-  simp only [norm_eq_sqrt_inner (𝕜 := ℂ)]
+  simp only [norm_eq_sqrt_re_inner (𝕜 := ℂ)]
   congr 2
   rw [QuantumSet.inner_conj'', star_star]
   simp [kms]
@@ -673,18 +676,18 @@ by
 theorem ket_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
   {ι : Type*} [Fintype ι] (b : Basis ι 𝕜 A) (x : A) :
   LinearMap.toMatrix (Basis.singleton Unit 𝕜) b (ket 𝕜 x)
-    = Matrix.col Unit (b.repr x) :=
+    = Matrix.replicateCol Unit (b.repr x) :=
 by
   ext
-  simp only [Matrix.col_apply, LinearMap.toMatrix_apply,
+  simp only [Matrix.replicateCol_apply, LinearMap.toMatrix_apply,
     Basis.singleton_apply, ContinuousLinearMap.coe_coe, ket_apply_apply, one_smul]
 open scoped Matrix
 theorem bra_toMatrix {𝕜 A : Type*} [RCLike 𝕜] [NormedAddCommGroup A] [InnerProductSpace 𝕜 A]
   {ι : Type*} [Fintype ι] [DecidableEq ι] (b : OrthonormalBasis ι 𝕜 A) (x : A) :
-  LinearMap.toMatrix b.toBasis (Basis.singleton Unit 𝕜) (bra 𝕜 x) = (Matrix.col Unit (b.repr x))ᴴ :=
+  LinearMap.toMatrix b.toBasis (Basis.singleton Unit 𝕜) (bra 𝕜 x) = (Matrix.replicateCol Unit (b.repr x))ᴴ :=
 by
   ext
-  simp only [Matrix.conjTranspose_col, Matrix.row_apply, Pi.star_apply, RCLike.star_def,
+  simp only [Matrix.conjTranspose_replicateCol, Matrix.replicateRow_apply, Pi.star_apply, RCLike.star_def,
     LinearMap.toMatrix_apply, OrthonormalBasis.coe_toBasis, ContinuousLinearMap.coe_coe,
     innerSL_apply, Basis.singleton_repr, OrthonormalBasis.repr_apply_apply, inner_conj_symm]
 
@@ -704,13 +707,13 @@ by
     ← ContinuousLinearMap.coe_comp, bra_ket_apply]
   rw [LinearMap.trace_eq_matrix_trace 𝕜 (Basis.singleton Unit 𝕜),
     ket_toMatrix, Matrix.trace]
-  simp only [Finset.univ_unique, PUnit.default_eq_unit, Matrix.diag_apply, Matrix.col_apply,
+  simp only [Finset.univ_unique, PUnit.default_eq_unit, Matrix.diag_apply, Matrix.replicateCol_apply,
     Basis.singleton_repr, Finset.sum_const, Finset.card_singleton, one_smul]
 
 lemma _root_.LinearMap.apply_eq_id {R M : Type*} [Semiring R] [AddCommMonoid M]
   [Module R M] {f : M →ₗ[R] M} :
   (∀ x, f x = x) ↔ f = 1 :=
-by simp_rw [LinearMap.ext_iff, LinearMap.one_apply]
+by simp_rw [LinearMap.ext_iff, Module.End.one_apply]
 
 theorem _root_.QuantumSet.starAlgEquiv_is_isometry_tfae
     -- (gns₁ : hA.k = 0) (gns₂ : hB.k = 0)
@@ -723,7 +726,7 @@ theorem _root_.QuantumSet.starAlgEquiv_is_isometry_tfae
         Isometry f] :=
 by
   tfae_have 3 ↔ 1 := by
-    simp_rw [@norm_eq_sqrt_inner ℂ, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
+    simp_rw [@norm_eq_sqrt_re_inner ℂ, Real.sqrt_inj inner_self_nonneg inner_self_nonneg,
       ← @RCLike.ofReal_inj ℂ, @inner_self_re ℂ, ← @sub_eq_zero _ _ _ ⟪_, _⟫_ℂ]
     have :
       ∀ x y,
@@ -731,7 +734,7 @@ by
           ⟪(LinearMap.adjoint f.toLinearMap ∘ₗ f.toLinearMap - 1) x, y⟫_ℂ :=
       by
       intro x y
-      simp only [LinearMap.sub_apply, LinearMap.one_apply, inner_sub_left, LinearMap.comp_apply,
+      simp only [LinearMap.sub_apply, Module.End.one_apply, inner_sub_left, LinearMap.comp_apply,
         LinearMap.adjoint_inner_left, StarAlgEquiv.toLinearMap_apply]
     simp_rw [this, inner_map_self_eq_zero, sub_eq_zero, StarAlgEquiv.comp_eq_iff,
       LinearMap.one_comp]

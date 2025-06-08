@@ -44,11 +44,11 @@ if and only if `e.ker` and `e.range` are `M'`
 (i.e., the commutant of `M` or `M.centralizer`) invariant subspaces -/
 theorem elem_idempotent_iff_ker_and_range_invariantUnder_commutant (M : VonNeumannAlgebra H)
     (e : H →L[ℂ] H) (h : IsIdempotentElem e) :
-    e ∈ M ↔ ∀ y : H →L[ℂ] H, y ∈ M.commutant → e.ker.InvariantUnder y ∧ e.range.InvariantUnder y :=
+    e ∈ M ↔ ∀ y : H →L[ℂ] H, y ∈ M.commutant → (LinearMap.ker e).InvariantUnder y ∧ (LinearMap.range e).InvariantUnder y :=
   by
   simp_rw [Submodule.invariantUnder_iff, Set.subset_def,
     ContinuousLinearMap.coe_coe, Set.mem_image, SetLike.mem_coe, LinearMap.mem_ker,
-    LinearMap.mem_range, ContinuousLinearMap.coe_coe, forall_exists_index, and_imp,
+    LinearMap.mem_range, forall_exists_index, and_imp,
     forall_apply_eq_imp_iff₂]
   constructor
   · intro he y hy

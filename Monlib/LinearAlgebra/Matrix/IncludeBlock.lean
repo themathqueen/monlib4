@@ -165,10 +165,10 @@ theorem blockDiagonal'_includeBlock_trace {R k : Type _} [CommSemiring R] [Finty
 
 open scoped Matrix
 
-theorem stdBasisMatrix_hMul_trace {R n p : Type _} [Semiring R] [Fintype p] [DecidableEq p]
+theorem single_hMul_trace {R n p : Type _} [Semiring R] [Fintype p] [DecidableEq p]
     [Fintype n] [DecidableEq n] (i : n) (j : p) (x : Matrix p n R) :
-    Matrix.trace (stdBasisMatrix i j (1 : R) * x) = x j i := by
-  simp_rw [Matrix.trace, Matrix.diag, mul_apply, stdBasisMatrix, of_apply, boole_mul, ite_and,
+    Matrix.trace (single i j (1 : R) * x) = x j i := by
+  simp_rw [Matrix.trace, Matrix.diag, mul_apply, single, of_apply, boole_mul, ite_and,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true]
 
 theorem ext_iff_trace {R n p : Type _} [Fintype n] [Fintype p] [DecidableEq n] [DecidableEq p]
@@ -176,8 +176,8 @@ theorem ext_iff_trace {R n p : Type _} [Fintype n] [Fintype p] [DecidableEq n] [
   by
   refine' ⟨fun h a => by rw [h], fun h => _⟩
   ext i j
-  specialize h (stdBasisMatrix j i 1)
-  simp_rw [trace_mul_comm _ (stdBasisMatrix _ _ _), Matrix.stdBasisMatrix_hMul_trace j i] at h
+  specialize h (single j i 1)
+  simp_rw [trace_mul_comm _ (single _ _ _), Matrix.single_hMul_trace j i] at h
   exact h
 
 variable {R : Type _} [CommSemiring R]
@@ -344,10 +344,10 @@ theorem isBlockDiagonal_iff {k : Type _} [DecidableEq k] {s : k → Type _}
   ⟨fun h => ⟨x.blockDiag', h.symm⟩, by
     rintro ⟨y, rfl⟩; exact Matrix.IsBlockDiagonal.blockDiagonal' y⟩
 
-def stdBasisMatrixBlockDiagonal {k : Type _} [DecidableEq k] {s : k → Type _}
+def singleBlockDiagonal {k : Type _} [DecidableEq k] {s : k → Type _}
     [∀ i, DecidableEq (s i)] (i : k) (j l : s i) (α : R) :
     (BlockDiagonals R k s) :=
-  ⟨stdBasisMatrix ⟨i, j⟩ ⟨i, l⟩ α,
+  ⟨single ⟨i, j⟩ ⟨i, l⟩ α,
     by
     simp only [Matrix.IsBlockDiagonal, blockDiag'_apply, blockDiagonal'_apply,
       Matrix.blockDiagonal'_ext, dite_eq_iff', cast_eq]
@@ -358,7 +358,7 @@ def stdBasisMatrixBlockDiagonal {k : Type _} [DecidableEq k] {s : k → Type _}
       simp only [cast_heq]
     · intro h
       symm
-      apply StdBasisMatrix.apply_of_ne
+      apply single_apply_of_ne
       rintro ⟨⟨rfl, h2⟩, ⟨rfl, h4⟩⟩
       contradiction⟩
 
@@ -411,19 +411,19 @@ theorem includeBlock_apply_ne_same {R k : Type _} [CommSemiring R] [Fintype k] [
     (x : Matrix (s i) (s i) R) (h : i ≠ j) : includeBlock x j = 0 := by
   simp only [includeBlock_apply, h, dif_neg, not_false_iff]
 
-theorem includeBlock_apply_stdBasisMatrix {R k : Type _} [CommSemiring R] [Fintype k]
+theorem includeBlock_apply_single {R k : Type _} [CommSemiring R] [Fintype k]
     [DecidableEq k] {s : k → Type _} [∀ i, Fintype (s i)] [∀ i, DecidableEq (s i)] {i : k}
     (a b : s i) :
-    includeBlock (stdBasisMatrix a b (1 : R)) =
-      (stdBasisMatrix (⟨i, a⟩ : Σ j, s j) (⟨i, b⟩ : Σ j, s j) (1 : R)).blockDiag' :=
+    includeBlock (single a b (1 : R)) =
+      (single (⟨i, a⟩ : Σ j, s j) (⟨i, b⟩ : Σ j, s j) (1 : R)).blockDiag' :=
   by
   ext c d e
   simp_rw [includeBlock_apply, blockDiag'_apply]
   split_ifs with h
-  · simp only [h, eq_mp_eq_cast, cast_eq, stdBasisMatrix]
+  · simp only [h, eq_mp_eq_cast, cast_eq, single]
     aesop
   · symm
-    apply StdBasisMatrix.apply_of_ne
+    apply single_apply_of_ne
     simp only [Sigma.mk.inj_iff, h, false_and, and_self, not_false_eq_true]
 
 theorem includeBlock_hMul_includeBlock {R k : Type _} [CommSemiring R] [Fintype k] [DecidableEq k]

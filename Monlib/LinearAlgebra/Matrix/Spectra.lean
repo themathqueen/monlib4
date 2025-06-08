@@ -28,20 +28,31 @@ variable {n 𝕜 : Type _} [RCLike 𝕜] [Fintype n] [DecidableEq n]
 
 open scoped Matrix
 
+noncomputable def IsAlmostHermitian.scalar_matrix {n : Type _} {x : Matrix n n 𝕜}
+  (hx : x.IsAlmostHermitian) : 𝕜 × (Matrix n n 𝕜) :=
+by choose! α y hy using hx; exact ⟨α, y⟩
+
 noncomputable def IsAlmostHermitian.scalar {n : Type _} {x : Matrix n n 𝕜}
-    (hx : x.IsAlmostHermitian) : 𝕜 := by choose α _ using hx; exact α
+    (hx : x.IsAlmostHermitian) : 𝕜 := hx.scalar_matrix.1
 
 noncomputable def IsAlmostHermitian.matrix {n : Type _} {x : Matrix n n 𝕜}
-    (hx : x.IsAlmostHermitian) : Matrix n n 𝕜 := by
-  choose y _ using IsAlmostHermitian.scalar.proof_1 hx; exact y
+    (hx : x.IsAlmostHermitian) : Matrix n n 𝕜 := hx.scalar_matrix.2
 
 theorem IsAlmostHermitian.eq_smul_matrix {n : Type _} {x : Matrix n n 𝕜}
     (hx : x.IsAlmostHermitian) : x = hx.scalar • hx.matrix :=
-  (IsAlmostHermitian.matrix.proof_1 hx).1.symm
+  by
+    rw [IsAlmostHermitian.scalar, IsAlmostHermitian.matrix, IsAlmostHermitian.scalar_matrix]
+    generalize_proofs
+    simp_all
+    -- (IsAlmostHermitian.matrix.proof_1 hx).1.symm
 
 theorem IsAlmostHermitian.matrix_isHermitian {n : Type _} {x : Matrix n n 𝕜}
     (hx : x.IsAlmostHermitian) : hx.matrix.IsHermitian :=
-  (IsAlmostHermitian.matrix.proof_1 hx).2
+  by
+    rw [IsAlmostHermitian.matrix, IsAlmostHermitian.scalar_matrix]
+    generalize_proofs
+    simp_all
+  -- (IsAlmostHermitian.matrix.proof_1 hx).2
 
 noncomputable def IsAlmostHermitian.eigenvalues {x : Matrix n n 𝕜} (hx : x.IsAlmostHermitian) :
     n → 𝕜 :=

@@ -56,25 +56,25 @@ open Matrix
 
 /- ./././Mathport/Syntax/Translate/Expr.lean:107:6: warning: expanding binder group (i j) -/
 /-- the matrix of a linear map `φ : M_n →ₗ[R] R` is given by
-  `∑ i j, stdBasisMatrix j i (φ (stdBasisMatrix i j 1))`. -/
+  `∑ i j, single j i (φ (single i j 1))`. -/
 def Module.Dual.matrix (φ : Module.Dual R (Matrix n n R)) :=
-∑ i : n, ∑ j : n, Matrix.stdBasisMatrix j i (φ (Matrix.stdBasisMatrix i j 1))
+∑ i : n, ∑ j : n, Matrix.single j i (φ (Matrix.single i j 1))
 
 /-- given any linear functional `φ : M_n →ₗ[R] R`, we get `φ a = (φ.matrix ⬝ a).trace`. -/
 theorem Module.Dual.apply (φ : Module.Dual R (Matrix n n R)) (a : Matrix n n R) :
     φ a = (φ.matrix * a).trace :=
   by
-  simp_rw [Module.Dual.matrix, smul_stdBasisMatrix' _ _ (φ _)]
+  simp_rw [Module.Dual.matrix, smul_single' _ _ (φ _)]
   simp_rw [Matrix.sum_mul, Matrix.smul_mul, trace_sum, trace_smul, Matrix.trace, Matrix.diag,
-    mul_apply, stdBasisMatrix_eq, boole_mul, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
+    mul_apply, single_eq, boole_mul, ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, ← ite_and, smul_eq_mul, mul_comm (φ _) _, ←
     smul_eq_mul, ← _root_.map_smul, ← map_sum]
   have :
     ∀ ⦃i : n⦄ ⦃j : n⦄ ⦃a : R⦄,
-      stdBasisMatrix i j (a : R) = fun k l => ite (i = k ∧ j = l) (a : R) (0 : R) :=
+      single i j (a : R) = fun k l => ite (i = k ∧ j = l) (a : R) (0 : R) :=
     fun i j a => rfl
-  simp_rw [← this, smul_stdBasisMatrix, smul_eq_mul, mul_one]
-  rw [← matrix_eq_sum_stdBasisMatrix a]
+  simp_rw [← this, smul_single, smul_eq_mul, mul_one]
+  rw [← matrix_eq_sum_single a]
 
 /--
 we linear maps `φ_i : M_[n_i] →ₗ[R] R`, we define its direct sum as the linear map `(Π i, M_[n_i]) →ₗ[R] R`. -/
@@ -229,7 +229,7 @@ open scoped MatrixOrder
 lemma Matrix.nonneg_iff {k : Type*} [Fintype k]
   [DecidableEq k] {x : Matrix k k ℂ} :
   0 ≤ x ↔ ∃ y : Matrix k k ℂ, x = star y * y :=
-by rw [nonneg_def]; exact posSemidef_iff_eq_transpose_mul_self
+by rw [nonneg_def]; exact posSemidef_iff_eq_conjTranspose_mul_self
 lemma PiMat.nonneg_iff {k : Type _} [Fintype k]
   [DecidableEq k] {s : k → Type _} [Π i, Fintype (s i)] [Π i, DecidableEq (s i)]
   {x : PiMat ℂ k s} :
@@ -348,8 +348,8 @@ theorem Module.Dual.isPosMap_iff_of_matrix (φ : Module.Dual ℂ (Matrix n n ℂ
     have thiseq : ∀ y, star y ⬝ᵥ φ.matrix *ᵥ y = (φ.matrix * vecMulVec y (star y)).trace :=
       by
       intro y
-      rw [vecMulVec_eq Unit, trace_mul_cycle', ← col_mulVec]
-      simp_rw [Matrix.trace_iff', row_mul_col_apply, Fintype.univ_punit, Finset.sum_const,
+      rw [vecMulVec_eq Unit, trace_mul_cycle', ← replicateCol_mulVec]
+      simp_rw [Matrix.trace_iff', replicateRow_mul_replicateCol_apply, Fintype.univ_punit, Finset.sum_const,
         Finset.card_singleton, nsmul_eq_mul, Nat.cast_one, one_mul]
     simp_rw [PosSemidef.complex, thiseq]
     intro y
@@ -381,8 +381,8 @@ theorem Module.Dual.IsPosMap.isFaithful_iff_of_matrix {φ : Module.Dual ℂ (Mat
       intro x hx
       have : star x ⬝ᵥ φ.matrix.mulVec x = (φ.matrix * vecMulVec x (star x)).trace :=
         by
-        rw [vecMulVec_eq Unit, trace_mul_cycle', ← col_mulVec]
-        simp_rw [Matrix.trace_iff', row_mul_col_apply, Fintype.univ_punit, Finset.sum_const,
+        rw [vecMulVec_eq Unit, trace_mul_cycle', ← replicateCol_mulVec]
+        simp_rw [Matrix.trace_iff', replicateRow_mul_replicateCol_apply, Fintype.univ_punit, Finset.sum_const,
           Finset.card_singleton, nsmul_eq_mul, Nat.cast_one, one_mul]
       rw [this]
       have this2 := HHH (vecMulVec x (star x)) (vecMulVec_posSemidef _)
@@ -465,15 +465,15 @@ theorem Module.Dual.isTracial_pos_map_iff_of_matrix (φ : Module.Dual ℂ (Matri
     have : ∀ p q r : n, Q p q = ite (p = q) (Q r r) 0 := fun p q r =>
       calc
         Q p q =
-            ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix q r 1) j k * (stdBasisMatrix r p 1) k i :=
+            ∑ i, ∑ j, Q i j * ∑ k, (single q r 1) j k * (single r p 1) k i :=
           by
-          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [single, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, eq_self_iff_true, if_true,
             mul_ite, MulZeroClass.mul_zero, mul_one]
-        _ = ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix r p 1) j k * (stdBasisMatrix q r 1) k i :=
+        _ = ∑ i, ∑ j, Q i j * ∑ k, (single r p 1) j k * (single q r 1) k i :=
           by rw [h2]
         _ = ite (p = q) (Q r r) 0 := by
-          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [single, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_ite,
             MulZeroClass.mul_zero, mul_one]
     by_cases h : IsEmpty n
@@ -533,15 +533,15 @@ theorem Module.Dual.isTracial_pos_map_iff'_of_matrix [Nonempty n]
     have : ∀ p q r : n, Q p q = ite (p = q) (Q r r) 0 := fun p q r =>
       calc
         Q p q =
-            ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix q r 1) j k * (stdBasisMatrix r p 1) k i :=
+            ∑ i, ∑ j, Q i j * ∑ k, (single q r 1) j k * (single r p 1) k i :=
           by
-          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [single, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, eq_self_iff_true, if_true,
             mul_ite, MulZeroClass.mul_zero, mul_one]
-        _ = ∑ i, ∑ j, Q i j * ∑ k, (stdBasisMatrix r p 1) j k * (stdBasisMatrix q r 1) k i :=
+        _ = ∑ i, ∑ j, Q i j * ∑ k, (single r p 1) j k * (single q r 1) k i :=
           by rw [h2]
         _ = ite (p = q) (Q r r) 0 := by
-          simp only [stdBasisMatrix, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
+          simp only [single, of_apply, boole_mul, ite_and, Finset.sum_ite_irrel,
             Finset.sum_const_zero, Finset.sum_ite_eq, Finset.mem_univ, if_true, mul_ite,
             MulZeroClass.mul_zero, mul_one]
     let i : n := Nonempty.some (by infer_instance)
@@ -635,14 +635,14 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
 --     simp_rw [linear_map.is_tracial, hQ3, matrix.trace, matrix.diag, mul_apply] at h2,
 --     have : ∀ p q r : n, Q p q = ite (p = q) (Q r r) 0 :=
 --     λ p q r, calc Q p q = ∑ i j, Q i j
---       * ∑ k, (stdBasisMatrix q r 1) j k * (stdBasisMatrix r p 1) k i :
---     by { simp only [stdBasisMatrix, boole_mul, ite_and, finset.sum_ite_irrel,
+--       * ∑ k, (single q r 1) j k * (single r p 1) k i :
+--     by { simp only [single, boole_mul, ite_and, finset.sum_ite_irrel,
 --       finset.sum_const_zero, finset.sum_ite_eq, finset.mem_univ, eq_self_iff_true, if_true,
 --       mul_ite, mul_zero, mul_one], }
 --       ... = ∑ i j, Q i j
---       * ∑ k, (stdBasisMatrix r p 1) j k * (stdBasisMatrix q r 1) k i : by rw h2
+--       * ∑ k, (single r p 1) j k * (single q r 1) k i : by rw h2
 --       ... = ite (p = q) (Q r r) 0 :
---     by { simp only [stdBasisMatrix, boole_mul, ite_and, finset.sum_ite_irrel,
+--     by { simp only [single, boole_mul, ite_and, finset.sum_ite_irrel,
 --       finset.sum_const_zero, finset.sum_ite_eq, finset.mem_univ, if_true, mul_ite,
 --       mul_zero, mul_one], },
 --     let i : n := _inst_5.some,
@@ -685,9 +685,9 @@ theorem Module.Dual.isTracial_faithful_pos_map_iff_of_matrix [Nonempty n]
 --         rintros y ⟨hy1, hy2, hy3⟩,
 --         ext1 i j,
 --         simp_rw [pi.smul_apply, one_apply, smul_eq_mul, mul_boole],
---         specialize hy3 (stdBasisMatrix j i (1 : ℂ)),
---         simp_rw [stdBasisMatrix.trace, matrix.trace, matrix.diag, mul_apply,
---           stdBasisMatrix, mul_boole, ite_and] at hy3,
+--         specialize hy3 (single j i (1 : ℂ)),
+--         simp_rw [single.trace, matrix.trace, matrix.diag, mul_apply,
+--           single, mul_boole, ite_and] at hy3,
 --         simp only [finset.sum_ite_eq, finset.mem_univ, if_true] at hy3,
 --         simp_rw @eq_comm _ j i at hy3,
 --         exact hy3.symm, }, },
@@ -700,8 +700,8 @@ theorem Matrix.ext_iff_trace' {R m n : Type _} [Semiring R] [StarRing R] [Fintyp
   by
   refine' ⟨fun h => _, fun h x => by rw [h]⟩
   ext i j
-  specialize h (stdBasisMatrix i j (1 : R))
-  simp_rw [stdBasisMatrix_conjTranspose, star_one, Matrix.stdBasisMatrix_hMul_trace] at h
+  specialize h (single i j (1 : R))
+  simp_rw [single_conjTranspose, star_one, Matrix.single_hMul_trace] at h
   exact h
 
 theorem Module.Dual.isReal_iff {φ : Module.Dual ℂ (Matrix n n ℂ)} :
@@ -779,8 +779,8 @@ noncomputable def Module.Dual.NormedAddCommGroup [hφ : φ.IsFaithfulPosMap] :
   -- have := φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ
   @InnerProductSpace.Core.toNormedAddCommGroup ℂ (Matrix n n ℂ) _ _ _
     { inner := fun x y => φ (xᴴ * y)
-      conj_symm := fun _ _ => ((φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).1 _ _).symm
-      nonneg_re := fun _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.1 _
+      conj_inner_symm := fun _ _ => ((φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).1 _ _).symm
+      re_inner_nonneg := fun _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.1 _
       definite := fun _ hx => ((φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.1 _).mp hx
       add_left := fun _ _ _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.2.1 _ _ _
       smul_left := fun _ _ _ => (φ.isFaithfulPosMap_iff_isInner_of_matrix.mp hφ).2.2.2.2 _ _ _ }
