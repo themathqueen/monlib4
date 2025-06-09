@@ -293,14 +293,14 @@ by
 theorem commute_real_real {R A : Type _} [Semiring R] [StarRing R] [AddCommMonoid A] [Module R A]
     [StarAddMonoid A] [StarModule R A] (f g : A →ₗ[R] A) :
     Commute (f.real : A →ₗ[R] A) (g.real : A →ₗ[R] A) ↔ Commute f g := by
-  simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp, ← LinearMap.real_comp, ←
+  simp_rw [Commute, SemiconjBy, Module.End.mul_eq_comp, ← LinearMap.real_comp, ←
     LinearMap.real_inj_eq]
 
 theorem linearMap_commute_modAut_pos_neg (r : ℝ) (x : B →ₗ[ℂ] B) :
     Commute x (hb.modAut r).toLinearMap ↔
       Commute x (hb.modAut (-r)).toLinearMap :=
   by
-  simp_rw [Commute, SemiconjBy, LinearMap.mul_eq_comp]
+  simp_rw [Commute, SemiconjBy, Module.End.mul_eq_comp]
   rw [AlgEquiv.linearMap_comp_eq_iff, ← starAlgebra.modAut_symm]
   nth_rw 1 [← AlgEquiv.comp_linearMap_eq_iff]
   rw [eq_comm]

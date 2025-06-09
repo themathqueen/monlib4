@@ -530,15 +530,16 @@ lemma _root_.QuantumSet.rTensor_mul_comp_lTensor_comul_eq_comul_comp_mul :
    = Coalgebra.comul ∘ₗ mul' ℂ A :=
 by
   rw [Coalgebra.comul_eq_mul_adjoint, Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint]
-  exact ⟨modAut _, fun x y z ↦ inner_star_left x y z⟩
+  exact ⟨_, fun x y z ↦ inner_star_left x y z⟩
 open LinearMap in
 lemma _root_.QuantumSet.lTensor_mul_comp_rTensor_comul_eq_comul_comp_mul :
   lTensor A (mul' ℂ A) ∘ₗ (TensorProduct.assoc ℂ _ _ _).toLinearMap ∘ₗ rTensor A (Coalgebra.comul)
    = Coalgebra.comul ∘ₗ mul' ℂ A :=
 by
   rw [Coalgebra.comul_eq_mul_adjoint, Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of]
-  exact ⟨modAut _, fun x y z ↦ inner_star_left x y z⟩
+  exact ⟨_, fun x y z ↦ inner_star_left x y z⟩
 
+@[instance]
 noncomputable def _root_.QuantumSet.isFrobeniusAlgebra :
     FrobeniusAlgebra ℂ A where
   lTensor_mul_comp_rTensor_comul_commute := by

@@ -140,9 +140,9 @@ by
 
 open Coalgebra LinearMap TensorProduct in
 theorem Coalgebra.rTensor_mul_comp_lTensor_comul
-  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
-  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
+  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ x * z⟫_R) :
   (rT A (m A)) ∘ₗ (ϰ A A A).symm.toLinearMap ∘ₗ (lT A comul) = comul ∘ₗ (m A) :=
 by
   rw [TensorProduct.ext_iff']
@@ -158,9 +158,9 @@ by
 
 -- open scoped ofFiniteDimensionalHilbertAlgebra in
 theorem Coalgebra.rTensor_mul_comp_lTensor_mul_adjoint
-  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
-  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
+  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ x * z⟫_R) :
   (rT A (m A)) ∘ₗ (ϰ A A A).symm.toLinearMap ∘ₗ (lT A (LinearMap.adjoint (m A))) = (LinearMap.adjoint (m A)) ∘ₗ (m A) :=
 Coalgebra.rTensor_mul_comp_lTensor_comul h
 
@@ -239,9 +239,9 @@ Coalgebra.rTensor_mul_comp_lTensor_comul h
 
 open Coalgebra LinearMap TensorProduct in
 theorem Coalgebra.lTensor_mul_comp_rTensor_comul_of
-  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
-  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
+  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ x * z⟫_R) :
   (lT A (m A)) ∘ₗ (ϰ A A A).toLinearMap ∘ₗ (rT A comul) = comul ∘ₗ (m A) :=
 by
   apply_fun adjoint using LinearEquiv.injective _
@@ -255,16 +255,16 @@ by
 
 open Coalgebra LinearMap TensorProduct in
 theorem Coalgebra.lTensor_mul_comp_rTensor_mul_adjoint_of
-  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
-  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
+  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ x * z⟫_R) :
   (lT A (m A)) ∘ₗ (ϰ A A A).toLinearMap ∘ₗ (rT A (LinearMap.adjoint (m A))) = LinearMap.adjoint (m A) ∘ₗ (m A) :=
 Coalgebra.lTensor_mul_comp_rTensor_comul_of h
 
 noncomputable def FiniteDimensionalCoAlgebra_isFrobeniusAlgebra_of
-  [RCLike R] [NormedAddCommGroupOfRing A] [Star A] [InnerProductSpace R A]
+  [RCLike R] [NormedAddCommGroupOfRing A] [InnerProductSpace R A]
   [SMulCommClass R A A] [IsScalarTower R A A] [FiniteDimensional R A]
-  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ (star x) * z⟫_R) :
+  (h : ∃ σ : A → A, ∀ x y z : A, ⟪x * y, z⟫_R = ⟪y, σ x * z⟫_R) :
     FrobeniusAlgebra R A where
   lTensor_mul_comp_rTensor_comul_commute := by
     rw [Coalgebra.lTensor_mul_comp_rTensor_comul_of h, Coalgebra.rTensor_mul_comp_lTensor_comul h]
