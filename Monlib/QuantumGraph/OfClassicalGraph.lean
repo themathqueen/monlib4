@@ -21,13 +21,14 @@ theorem EuclideanSpace.comul_eq {n : Type*} [Fintype n] [DecidableEq n] (x : PiQ
 by
   intro e
   have : ∀ y i, ⟪e i, y⟫_ℂ = y i := λ _ _ => by
-    simp only [PiLp.inner_apply, RCLike.inner_apply, e, starRingEnd_apply,
-      star_ite, star_zero, star_one, boole_mul, Finset.sum_ite_eq, Finset.mem_univ,
+    simp only [PiLp.inner_apply, RCLike.inner_apply', e, starRingEnd_apply,
+      star_ite, star_zero, star_one, mul_boole, boole_mul, Finset.sum_ite_eq, Finset.mem_univ,
       if_true]
   rw [TensorProduct.inner_ext_iff']
   intro a b
   simp only [TensorProduct.inner_tmul, Coalgebra.comul, LinearMap.adjoint_inner_left,
     LinearMap.mul'_apply, sum_inner, inner_smul_left, this]
+  simp only [PiLp.inner_apply, RCLike.inner_apply']
   rfl
 
 open scoped Matrix
@@ -112,7 +113,7 @@ by
   simp only [schurMul_apply_apply, LinearMap.comp_apply]
   rw [EuclideanSpace.comul_eq]
   simp only [map_sum, map_smul, TensorProduct.map_tmul, LinearMap.mul'_apply,
-    Matrix.toEuclideanLin_apply', LinearMap.one_apply]
+    Matrix.toEuclideanLin_apply', Module.End.one_apply]
   ext
   rw [Finset.sum_apply]
   simp only [PiLp.smul_apply, PiLp.mul_apply, adjMatrix_mulVec_apply,

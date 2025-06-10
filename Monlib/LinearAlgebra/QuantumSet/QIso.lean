@@ -428,10 +428,10 @@ noncomputable def QFun.qBijective.toLinearEquiv
   invFun := LinearMap.adjoint P
   left_inv _ := by
     simp only [LinearMap.toFun_eq_coe, ← LinearMap.comp_apply]
-    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).2, LinearMap.one_apply]
+    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).2, Module.End.one_apply]
   right_inv _ := by
     simp only [LinearMap.toFun_eq_coe, ← LinearMap.comp_apply]
-    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).1, LinearMap.one_apply]
+    rw [(hp.qBijective_iff_inv_eq_adjoint.mp h).1, Module.End.one_apply]
 
 lemma QFun.qBijective.toLinearEquiv_toLinearMap
   {P : (B₁ ⊗[ℂ] H) →ₗ[ℂ] (H ⊗[ℂ] B₂)} [hp : QFun H P]

@@ -189,7 +189,7 @@ by
 theorem
   Module.Dual.pi.IsFaithfulPosMap.includeBlock_right_inner {i : ι}
    (x : PiMat ℂ ι p) (y : Matrix (p i) (p i) ℂ) :
-    (inner x (Matrix.includeBlock y) : ℂ) = inner (x i) y :=
+    inner ℂ x (Matrix.includeBlock y) = inner ℂ (x i) y :=
 by rw [← LinearMap.adjoint_inner_left, includeBlock_adjoint]
 
 variable
@@ -286,7 +286,7 @@ lemma Pi.nat_eq_zero_of_sum_eq_one_and_unique_one
   {j : ι} (hj : j ≠ i) : f j = 0 :=
 by
   rw [Finset.sum_eq_add_sum_diff_singleton (Finset.mem_univ i), hd] at h
-  simp only [add_right_eq_self, Finset.sum_eq_zero_iff, Finset.mem_sdiff, Finset.mem_univ,
+  simp only [add_eq_left, Finset.sum_eq_zero_iff, Finset.mem_sdiff, Finset.mem_univ,
     Finset.mem_singleton, true_and] at h
   exact h _ hj
 
@@ -555,14 +555,16 @@ by
   rw [LinearMap.proj_adjoint,
     ← LinearMap.single_adjoint (hφ := hφ),
     ← NonUnitalAlgHom.single_toLinearMap]
-  simp_rw [schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint (NonUnitalAlgHom.single ℂ (fun r ↦ Mat ℂ (p r)) i)
-    (NonUnitalAlgHom.single ℂ (fun r ↦ Mat ℂ (p r)) i),
+  simp_rw [schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint,
     NonUnitalAlgHom.single_toLinearMap, LinearMap.single_adjoint]
   nth_rw 2 [LinearMap.real_of_isReal (LinearMap.single_isReal i)]
   nth_rw 3 [LinearMap.real_of_isReal (congrFun rfl)]
-  simp_rw [LinearMap.single_comp_inj,
-    LinearMap.comp_proj_inj (R := ℂ) (ι := ι)
-      (φ := λ r => Mat ℂ (p r)) i]
+  simp_rw [LinearMap.single_comp_inj]
+
+  simp only [LinearMap.ext_iff, LinearMap.comp_apply, LinearMap.proj_apply]
+  refine ⟨λ h => ⟨λ x => h.1 (x i), λ x => h.2 (x i)⟩, λ h => ⟨λ x => ?_, λ x => ?_⟩⟩
+  . simpa only [Pi.single_eq_same] using h.1 (Pi.single i x)
+  . simpa only [Pi.single_eq_same] using h.2 (Pi.single i x)
 
 theorem QuantumGraph.Real.conj_proj_isReal
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
@@ -578,7 +580,7 @@ by
       (φ := λ r => Mat ℂ (p r)) _), LinearMap.real_of_isReal hf.2, and_true]
   rw [← LinearMap.proj_adjoint,
     ← AlgHom.proj_toLinearMap]
-  simp_rw [schurMul_algHom_comp_algHom_adjoint, hf.1]
+  simp_rw [QuantumSet.schurMul_algHom_comp_algHom_adjoint, hf.1]
 
 lemma schurMul_proj_adjoint_comp
   {B : Type*} [starAlgebra B] [QuantumSet B]
@@ -594,6 +596,7 @@ by
   congr 2
   exact Eq.symm (nonUnitalAlgHom_comp_mul (NonUnitalAlgHom.single ℂ (fun r ↦ Mat ℂ (p r)) i))
 
+omit [Fintype ι] [DecidableEq ι] in
 lemma schurMul_proj_comp
   {B : Type*} [starAlgebra B] [QuantumSet B]
   (f g : B →ₗ[ℂ] PiMat ℂ ι p) (i : ι) :
@@ -627,6 +630,7 @@ by
   simp only [schurMul_adjoint, LinearMap.adjoint_comp, LinearMap.adjoint_adjoint]
   exact schurMul_proj_comp (LinearMap.adjoint f) (LinearMap.adjoint g) i
 
+set_option maxHeartbeats 0 in
 theorem QuantumGraph.Real.proj_adjoint_comp_proj_conj_isRealQuantumGraph
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph.Real (PiMat ℂ ι p) f)
@@ -639,11 +643,13 @@ theorem QuantumGraph.Real.proj_adjoint_comp_proj_conj_isRealQuantumGraph
       ∘ₗ LinearMap.proj i.2) :=
 by
   constructor
-  . rw [schurMul_proj_adjoint_comp, schurMul_proj_comp]
+  .
+    rw [schurMul_proj_adjoint_comp, schurMul_proj_comp]
     simp only [← LinearMap.comp_assoc]
     rw [schurMul_comp_proj, schurMul_comp_proj_adjoint]
     simp only [LinearMap.comp_assoc, hf.1]
-  . simp only [LinearMap.isReal_iff, LinearMap.real_comp,
+  .
+    simp only [LinearMap.isReal_iff, LinearMap.real_comp,
       LinearMap.proj_adjoint, LinearMap.real_of_isReal
         (LinearMap.single_isReal (R := ℂ) (φ := λ r => Mat ℂ (p r)) _),
       LinearMap.real_of_isReal (LinearMap.proj_isReal (R := ℂ) (φ := λ r => Mat ℂ (p r)) _),
@@ -689,6 +695,7 @@ by
   simp only [schurMul_adjoint, LinearMap.adjoint_comp, map_zero]
   exact schurMul_proj_adjoint_comp_of_ne_eq_zero hij (LinearMap.adjoint f) (LinearMap.adjoint g)
 
+set_option maxHeartbeats 0 in
 theorem piMat_isRealQuantumGraph_iff_forall_conj_adjoint_proj_comp_proj
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p} :
   QuantumGraph.Real (PiMat ℂ ι p) f
@@ -707,7 +714,7 @@ by
     congr
     ext1 i
     rw [Finset.sum_eq_add_sum_diff_singleton (i := i) (Finset.mem_univ i)]
-    simp only [LinearMap.comp_assoc, (h i).1, add_right_eq_self]
+    simp only [LinearMap.comp_assoc, (h i).1, add_eq_left]
     apply Finset.sum_eq_zero
     intro j hj
     simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and] at hj
@@ -771,6 +778,7 @@ by
     LinearMap.single_apply]
   exact PiMat_finTwo_same_swapAlgEquiv_apply_piSingle_one
 
+set_option maxHeartbeats 0 in
 theorem QuantumGraph.Real.schurProjection_proj_conj
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph.Real _ f)

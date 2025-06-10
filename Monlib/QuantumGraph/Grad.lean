@@ -92,7 +92,7 @@ by
   apply (IsIdempotentElem.comp_idempotent_iff this (p := QuantumGraph.Grad A)).mp
   rw [QuantumGraph.Grad_eq gns, LinearMap.comp_sub]
   simp_rw [← LinearMap.comp_assoc, LinearMap.real_of_isReal hA.2,
-    ← LinearMap.mul_eq_comp, this.eq]
+    ← Module.End.mul_eq_comp, this.eq]
 
 theorem Upsilon_symm_grad_apply_apply (gns : k B = 0) (A : B →ₗ[ℂ] B) (x : B) :
   Upsilon.symm (QuantumGraph.Grad A x)
@@ -129,9 +129,9 @@ by
   simp_rw [LinearMap.adjoint_adjoint, ← Coalgebra.comul_eq_mul_adjoint]
   rw [LinearMap.comp_assoc]
   nth_rw 2 [← LinearMap.comp_assoc]
-  simp only [← LinearMap.mul_eq_comp, sub_mul, mul_sub,
+  simp only [← Module.End.mul_eq_comp, sub_mul, mul_sub,
     ← LinearMap.rTensor_mul, ← LinearMap.lTensor_mul]
-  simp only [LinearMap.mul_eq_comp,
+  simp only [Module.End.mul_eq_comp,
     LinearMap.lTensor_comp_rTensor, LinearMap.rTensor_comp_lTensor]
   simp only [LinearMap.sub_comp, LinearMap.comp_sub, LinearMap.rTensor, LinearMap.lTensor,
     ← schurMul_apply_apply, outDegree_apply_schurMul gns, inDegree_apply_schurMul gns,

@@ -330,11 +330,12 @@ theorem comul_comp_algHom_adjoint (f : A →ₐ[ℂ] B) :
     = ((LinearMap.adjoint f.toLinearMap) ⊗ₘ (LinearMap.adjoint f.toLinearMap)) ∘ₗ Coalgebra.comul :=
 comul_comp_nonUnitalAlgHom_adjoint f.toNonUnitalAlgHom
 
-omit [FiniteDimensional ℂ C] in
 set_option linter.deprecated false in
-theorem schurMul_nonUnitalAlgHom_comp_coalgHom {D : Type*}
-  [Semiring D] [Module ℂ D]
-  [SMulCommClass ℂ D D] [IsScalarTower ℂ D D]
+theorem schurMul_nonUnitalAlgHom_comp_coalgHom {C D : Type*}
+  [Semiring C] [Semiring D]
+  [Module ℂ C] [Module ℂ D]
+  [SMulCommClass ℂ C C] [SMulCommClass ℂ D D]
+  [IsScalarTower ℂ C C] [IsScalarTower ℂ D D]
   (g : C →ₙₐ[ℂ] D) (f : A →ₗc[ℂ] B) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ f.toLinearMap) •ₛ (g.toLinearMap ∘ₗ y ∘ₗ f.toLinearMap)
     = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ f.toLinearMap :=
@@ -346,20 +347,22 @@ by
   congr 1
   simp_rw [TensorProduct.map_comp]
 
-omit [FiniteDimensional ℂ C] in
-theorem schurMul_algHom_comp_coalgHom {D : Type*}
-  [Semiring D] [Module ℂ D]
-  [SMulCommClass ℂ D D] [IsScalarTower ℂ D D]
+theorem schurMul_algHom_comp_coalgHom {C D : Type*}
+  [Semiring C] [Semiring D]
+  [Module ℂ C] [Module ℂ D]
+  [SMulCommClass ℂ C C] [SMulCommClass ℂ D D]
+  [IsScalarTower ℂ C C] [IsScalarTower ℂ D D]
   (g : C →ₐ[ℂ] D) (f : A →ₗc[ℂ] B) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ f.toLinearMap) •ₛ (g.toLinearMap ∘ₗ y ∘ₗ f.toLinearMap)
     = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ f.toLinearMap :=
 schurMul_nonUnitalAlgHom_comp_coalgHom (g.toNonUnitalAlgHom) f x y
 
-omit [FiniteDimensional ℂ C] in
 set_option linter.deprecated false in
-theorem schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint {D : Type*}
-  [Semiring D] [Module ℂ D]
-  [SMulCommClass ℂ D D] [IsScalarTower ℂ D D]
+theorem schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint {C D : Type*}
+  [Semiring C] [Semiring D]
+  [Module ℂ C] [Module ℂ D]
+  [SMulCommClass ℂ C C] [SMulCommClass ℂ D D]
+  [IsScalarTower ℂ C C] [IsScalarTower ℂ D D]
   (g : C →ₙₐ[ℂ] D) (f : B →ₙₐ[ℂ] A) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap))
     •ₛ (g.toLinearMap ∘ₗ y ∘ₗ LinearMap.adjoint f.toLinearMap)
@@ -372,14 +375,23 @@ by
   congr 1
   simp_rw [TensorProduct.map_comp]
 
-omit [FiniteDimensional ℂ C] in
-theorem schurMul_algHom_comp_algHom_adjoint {D : Type*}
-  [Semiring D] [Module ℂ D]
-  [SMulCommClass ℂ D D] [IsScalarTower ℂ D D]
+theorem schurMul_algHom_comp_algHom_adjoint {C D : Type*}
+  [Semiring C] [Semiring D]
+  [Module ℂ C] [Module ℂ D]
+  [SMulCommClass ℂ C C] [SMulCommClass ℂ D D]
+  [IsScalarTower ℂ C C] [IsScalarTower ℂ D D]
   (g : C →ₐ[ℂ] D) (f : B →ₐ[ℂ] A) (x y : B →ₗ[ℂ] C) :
   (g.toLinearMap ∘ₗ x ∘ₗ (LinearMap.adjoint f.toLinearMap))
     •ₛ (g.toLinearMap ∘ₗ y ∘ₗ LinearMap.adjoint f.toLinearMap)
     = g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ LinearMap.adjoint f.toLinearMap :=
+schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint g.toNonUnitalAlgHom f.toNonUnitalAlgHom x y
+
+protected lemma QuantumSet.schurMul_algHom_comp_algHom_adjoint {A B C D : Type*}
+  [starAlgebra A] [starAlgebra B] [QuantumSet A] [QuantumSet B]
+  [starAlgebra C] [starAlgebra D] [QuantumSet C] [QuantumSet D]
+  (g : C →ₐ[ℂ] D) (f : B →ₐ[ℂ] A) (x y : B →ₗ[ℂ] C) :
+  (g.toLinearMap ∘ₗ x ∘ₗ LinearMap.adjoint f.toLinearMap) •ₛ g.toLinearMap ∘ₗ y ∘ₗ LinearMap.adjoint f.toLinearMap =
+    g.toLinearMap ∘ₗ (x •ₛ y) ∘ₗ LinearMap.adjoint f.toLinearMap :=
 schurMul_nonUnitalAlgHom_comp_nonUnitalAlgHom_adjoint g.toNonUnitalAlgHom f.toNonUnitalAlgHom x y
 
 theorem schurMul_one_iff_one_schurMul_of_isReal

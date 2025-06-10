@@ -66,17 +66,17 @@ theorem norm_tmul {𝕜 B C : Type*} [RCLike 𝕜] [NormedAddCommGroup B]
     [FiniteDimensional 𝕜 C] (x : B) (y : C) : ‖x ⊗ₜ[𝕜] y‖ = ‖x‖ * ‖y‖ := by
   symm
   calc
-    ‖x‖ * ‖y‖ = Real.sqrt (RCLike.re (inner x x : 𝕜)) * Real.sqrt (RCLike.re (inner y y : 𝕜)) := by
-      simp_rw [@norm_eq_sqrt_inner 𝕜]
-    _ = Real.sqrt (RCLike.re (inner x x : 𝕜) * RCLike.re (inner y y : 𝕜)) := by
+    ‖x‖ * ‖y‖ = Real.sqrt (RCLike.re (inner 𝕜 x x)) * Real.sqrt (RCLike.re (inner 𝕜 y y)) := by
+      simp_rw [@norm_eq_sqrt_re_inner 𝕜]
+    _ = Real.sqrt (RCLike.re (inner 𝕜 x x) * RCLike.re (inner 𝕜 y y)) := by
       rw [Real.sqrt_mul inner_self_nonneg]
-    _ = Real.sqrt (RCLike.re ((inner x x : 𝕜) * (inner y y : 𝕜))) :=
+    _ = Real.sqrt (RCLike.re ((inner 𝕜 x x) * (inner 𝕜 y y))) :=
       by
       congr 1
       simp only [RCLike.mul_re, @inner_self_im 𝕜, MulZeroClass.zero_mul, sub_zero]
-    _ = Real.sqrt (RCLike.re (inner (x ⊗ₜ[𝕜] y) (x ⊗ₜ[𝕜] y) : 𝕜)) := by
+    _ = Real.sqrt (RCLike.re (inner 𝕜 (x ⊗ₜ[𝕜] y) (x ⊗ₜ[𝕜] y))) := by
       rw [TensorProduct.inner_tmul]
-    _ = ‖x ⊗ₜ[𝕜] y‖ := by rw [@norm_eq_sqrt_inner 𝕜]
+    _ = ‖x ⊗ₜ[𝕜] y‖ := by rw [@norm_eq_sqrt_re_inner 𝕜]
 
 open scoped InnerProductSpace
 lemma TensorProduct.mapIncl_norm_map (V : Submodule 𝕜 E) (W : Submodule 𝕜 F) (x : V ⊗[𝕜] W) :
@@ -85,7 +85,7 @@ by
   obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
   simp only [TensorProduct.mapIncl, map_sum, TensorProduct.map_tmul, Submodule.coe_subtype]
 
-  simp_rw [@norm_eq_sqrt_inner 𝕜]
+  simp_rw [@norm_eq_sqrt_re_inner 𝕜]
   congr 2
   simp only [sum_inner, inner_sum, TensorProduct.inner_tmul, ← Submodule.coe_inner]
 
@@ -177,10 +177,10 @@ by
 
 theorem orthogonalProjection'_ortho_eq {𝕜 E : Type*} [RCLike 𝕜]
   [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] (K : Submodule 𝕜 E)
-  [HasOrthogonalProjection K] :
+  [K.HasOrthogonalProjection] :
   orthogonalProjection' Kᗮ = ContinuousLinearMap.id 𝕜 _ - orthogonalProjection' K :=
 by
-  simp_rw [id_eq_sum_orthogonalProjection_self_orthogonalComplement K,
+  simp_rw [K.id_eq_sum_orthogonalProjection_self_orthogonalComplement,
     ← orthogonalProjection'_eq, add_sub_cancel_left]
 
 theorem TensorProduct.submodule_exists_le_tensorProduct_ofFiniteDimensional
@@ -215,12 +215,12 @@ def piProdUnitEquivPi {R n : Type*} [Semiring R] : (n × Unit → R) ≃ₗ[R] n
   invFun x i := x i.1
   left_inv x := by
     ext; simp
-  right_inv x := by ext1; simp only [col_apply]
+  right_inv x := by ext1; simp only [replicateCol_apply]
   map_add' x y := by simp only [Pi.add_apply]; rfl
   map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
 
-/-- `matrix.col` written as a linear equivalence -/
-def Matrix.ofCol {R n : Type*} [Semiring R] : Matrix n Unit R ≃ₗ[R] n → R :=
+/-- `matrix.replicateCol` written as a linear equivalence -/
+def Matrix.ofReplicateCol {R n : Type*} [Semiring R] : Matrix n Unit R ≃ₗ[R] n → R :=
   (reshape : Matrix n Unit R ≃ₗ[R] n × Unit → R).trans piProdUnitEquivPi
 
 def matrixProdUnitRight {R n m : Type*} [Semiring R] : Matrix n (m × Unit) R ≃ₗ[R] Matrix n m R
@@ -229,22 +229,23 @@ def matrixProdUnitRight {R n m : Type*} [Semiring R] : Matrix n (m × Unit) R �
   invFun x i j := x i j.1
   left_inv x := by
     ext; simp
-  right_inv x := by ext1; simp only [col_apply]
-  map_add' x y := by simp only [Pi.add_apply]; rfl
+  right_inv x := by ext1; simp only [replicateCol_apply]
+  map_add' x y := by rfl
   map_smul' r x := by simp only [Pi.smul_apply, RingHom.id_apply]; rfl
 
 open Kronecker
 /-- `vec_mulVec x y` written as a kronecker product -/
-theorem col_hMul_col_conjTranspose_is_kronecker_of_vectors {R m n : Type*} [Semiring R]
+theorem replicateCol_hMul_replicateCol_conjTranspose_is_kronecker_of_vectors {R m n : Type*} [Semiring R]
     (x : m → R) (y : n → R) :
     vecMulVec x y =
       reshape.symm
-        (Matrix.ofCol (matrixProdUnitRight (col Unit x ⊗ₖ col Unit y))) :=
+        (Matrix.ofReplicateCol (matrixProdUnitRight (replicateCol Unit x ⊗ₖ replicateCol Unit y))) :=
 by
   ext
-  simp_rw [reshape_symm_apply, Matrix.ofCol, matrixProdUnitRight, piProdUnitEquivPi,
-    LinearEquiv.trans_apply, LinearEquiv.coe_mk, reshape_apply, kronecker_apply, col_apply,
-    vecMulVec_apply]
+  simp_rw [reshape_symm_apply, Matrix.ofReplicateCol, matrixProdUnitRight, piProdUnitEquivPi,
+    LinearEquiv.trans_apply, LinearEquiv.coe_mk]
+  simp only [LinearMap.coe_mk, AddHom.coe_mk, kroneckerMap_apply, replicateCol_apply]
+  rw [reshape_apply, vecMulVec_apply]
 
 section
 
@@ -269,7 +270,7 @@ theorem PiLp_tensorEquiv_norm_map
   (x : (PiLp 2 M₁ ⊗[𝕜] PiLp 2 M₂)) :
   ‖(PiLp_tensorEquiv x : PiLp 2 (λ i : ι₁ × ι₂ => M₁ i.1 ⊗[𝕜] M₂ i.2))‖ = ‖x‖ :=
 by
-  simp_rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
+  simp_rw [norm_eq_sqrt_re_inner (𝕜 := 𝕜)]
   obtain ⟨S, rfl⟩ := TensorProduct.exists_finset x
   simp_rw [map_sum, sum_inner, inner_sum]
   simp_rw [TensorProduct.inner_tmul, PiLp.inner_apply, PiLp_tensorEquiv_tmul, Finset.sum_mul,
@@ -308,9 +309,9 @@ noncomputable def TensorProduct.lid_linearIsometryEquiv
     (𝕜 ⊗[𝕜] E) ≃ₗᵢ[𝕜] E where
   toLinearEquiv := TensorProduct.lid _ _
   norm_map' x := by
-    rw [norm_eq_sqrt_inner (𝕜 := 𝕜)]
+    rw [norm_eq_sqrt_re_inner (𝕜 := 𝕜)]
     simp only [← LinearEquiv.coe_toLinearMap, ← LinearMap.adjoint_inner_left, TensorProduct.lid_adjoint]
-    simp only [LinearEquiv.coe_coe, LinearEquiv.symm_apply_apply, ← norm_eq_sqrt_inner]
+    simp only [LinearEquiv.coe_coe, LinearEquiv.symm_apply_apply, ← norm_eq_sqrt_re_inner]
 
 noncomputable abbrev euclideanSpaceTensor' {R : Type*} [RCLike R] {ι₁ ι₂ : Type*}
   [Fintype ι₁] [Fintype ι₂]
@@ -357,5 +358,5 @@ by
     Module.finrank R V * Module.finrank R W := Submodule.tensorProduct_finrank
   rw [← hVW, hU] at this
   exact
-    (Nat.not_prime_mul' this.symm (Ne.symm (Nat.ne_of_lt hVW₁)) (Ne.symm (Nat.ne_of_lt hVW₂)))
+    (Nat.not_prime_of_mul_eq this.symm (Ne.symm (Nat.ne_of_lt hVW₁)) (Ne.symm (Nat.ne_of_lt hVW₂)))
     hp

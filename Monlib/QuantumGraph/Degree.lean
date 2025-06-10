@@ -258,7 +258,7 @@ by
   simp only [gns]
   ring_nf
   simp only [starAlgebra.modAut_zero, AlgEquiv.one_apply]
-  simp only [rmul_eq_mul, LinearMap.mulRight_mul, LinearMap.mul_eq_comp]
+  simp only [rmul_eq_mul, LinearMap.mulRight_mul, Module.End.mul_eq_comp]
   rw [Finset.sum_comm]
 
 def QuantumGraph.IsRegular

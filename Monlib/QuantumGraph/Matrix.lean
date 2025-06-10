@@ -16,7 +16,7 @@ by
     onb, Module.Dual.IsFaithfulPosMap.inner_coord hφ,
     hφ.orthonormalBasis_apply, mul_assoc, Matrix.PosDef.rpow_mul_rpow,
     neg_add_cancel, Matrix.PosDef.rpow_zero, mul_one, Matrix.mul_apply,
-    Matrix.stdBasisMatrix_eq, Matrix.one_apply, mul_boole, ite_and, Finset.sum_ite_eq,
+    Matrix.single_eq, Matrix.one_apply, mul_boole, ite_and, Finset.sum_ite_eq,
     Finset.mem_univ, if_true, eq_comm]
 
 theorem rmul_toMatrix (x : Matrix n n ℂ) :
@@ -28,21 +28,21 @@ by
     onb, Module.Dual.IsFaithfulPosMap.inner_coord hφ,
     hφ.orthonormalBasis_apply, mul_assoc,
     modAut, ← mul_assoc (Matrix.PosDef.rpow _ _), ← sig_apply, Matrix.mul_apply,
-    Matrix.stdBasisMatrix_eq, Matrix.one_apply, boole_mul, ite_and,
+    Matrix.single_eq, Matrix.one_apply, boole_mul, ite_and,
     Finset.sum_ite_irrel, Finset.sum_const_zero, Finset.sum_ite_eq,
     Finset.mem_univ, if_true, eq_comm]
   rfl
 
 open Matrix
 
-theorem Matrix.stdBasisMatrix_transpose {R n p : Type*} [DecidableEq n] [DecidableEq p]
+theorem Matrix.single_transpose {R n p : Type*} [DecidableEq n] [DecidableEq p]
     [Zero R] {i : n} {j : p} {α : R} :
-    (stdBasisMatrix i j α)ᵀ = stdBasisMatrix j i α :=
-by ext; simp_rw [transpose_apply, stdBasisMatrix, of_apply,  and_comm]
+    (single i j α)ᵀ = single j i α :=
+by ext; simp_rw [transpose_apply, single, of_apply,  and_comm]
 
 lemma Module.Dual.IsFaithfulPosMap.inner_coord'
   (y : Matrix n n ℂ) (i j : n) :
-  inner (onb (i, j)) y = (y * hφ.matrixIsPosDef.rpow (1 / 2)) i j :=
+  inner ℂ (onb (i, j)) y = (y * hφ.matrixIsPosDef.rpow (1 / 2)) i j :=
 hφ.inner_coord _ _
 
 abbrev Matrix.transposeStarAlgEquiv (ι : Type*) [Fintype ι] [DecidableEq ι] :
@@ -70,7 +70,7 @@ by
   simp only [← StarAlgEquiv.coe_toAlgEquiv,
     ← orthonormalBasis_toMatrix_eq_basis_toMatrix,
     LinearMap.toMatrixAlgEquiv, AlgEquiv.ofLinearEquiv_apply,
-    rankOne_toMatrix_of_onb, conjTranspose_col, ← vecMulVec_eq]
+    rankOne_toMatrix_of_onb, conjTranspose_replicateCol, ← vecMulVec_eq]
   rw [kmul_representation (vecMulVec _ _)]
   simp only [map_sum, _root_.map_smul, kroneckerToTensor, tensorToKronecker_symm_apply,
     kroneckerToTensorProduct_apply, StarAlgEquiv.coe_toAlgEquiv,
@@ -78,24 +78,24 @@ by
     QuantumSet.Psi_invFun_apply, vecMulVec_apply, neg_zero, starAlgebra.modAut_zero,
     transposeStarAlgEquiv_apply, MulOpposite.unop_op, AlgEquiv.one_apply]
   simp_rw [← rankOne_lm_smul_smul, Pi.star_apply, star_star,
-    stdBasisMatrix_transpose, star_eq_conjTranspose, stdBasisMatrix_conjTranspose,
+    single_transpose, star_eq_conjTranspose, single_conjTranspose,
     star_one]
   ext1
   simp only [LinearMap.sum_apply, ContinuousLinearMap.coe_coe,
     rankOne_apply, inner_smul_left, QuantumSet.modAut_isSymmetric,
-    LinearMap.mul_apply, rmul_adjoint, rmul_apply, lmul_apply,
-    OrthonormalBasis.repr_apply_apply, inner_stdBasisMatrix_left,
+    Module.End.mul_apply, rmul_adjoint, rmul_apply, lmul_apply,
+    OrthonormalBasis.repr_apply_apply, inner_single_left,
     Module.Dual.IsFaithfulPosMap.inner_coord' (hφ := hφ)]
   simp_rw [starRingEnd_apply, smul_smul, mul_assoc,
     ← mul_comm _ ((modAut (-(1/2)) (_ : Matrix n n ℂ) * φ.matrix) _ _),
     ]
   rw [Finset.sum_sum_comm_sum]
   simp only [← Finset.sum_smul, ← Finset.mul_sum, ← mul_apply]
-  simp_rw [mul_comm (star _), ← conjTranspose_apply, ← mul_apply, ← smul_stdBasisMatrix',
+  simp_rw [mul_comm (star _), ← conjTranspose_apply, ← mul_apply, ← smul_single',
     QuantumSet.k, conjTranspose_apply, modAut, sig_apply,
     star_eq_conjTranspose, conjTranspose_mul,
     (PosDef.rpow.isPosDef _ _).1.eq, hφ.matrixIsPosDef.1.eq]
-  rw [← matrix_eq_sum_stdBasisMatrix]
+  rw [← matrix_eq_sum_single]
   simp_rw [← mul_assoc]
   nth_rw 1 [mul_assoc _ (PosDef.rpow _ _) (PosDef.rpow _ _)]
   rw [PosDef.rpow_mul_rpow]
@@ -148,7 +148,11 @@ lemma QuantumGraph.Real.matrix_orthogonalProjection_eq
       ((StarAlgEquiv.lTensor (Matrix n n ℂ)
         (transposeStarAlgEquiv n).symm)
         ((QuantumSet.Psi 0 (1 / 2)) A))))) :=
-QuantumGraph.Real.matrix_submodule.proof_19 hA
+by
+  rw [matrix_submodule]
+  generalize_proofs
+  (expose_names; exact pf_22)
+-- QuantumGraph.Real.matrix_submodule.proof_19 hA
 
 theorem StarAlgEquiv.lTensor_symm {R A B C : Type*}
   [RCLike R] [Ring A] [Ring B] [Ring C] [Algebra R A] [Algebra R B] [Algebra R C]
@@ -187,14 +191,14 @@ noncomputable abbrev QuantumGraph.Real.of_norm_one_matrix
   Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ :=
 lmul (u * φ.matrix) * (LinearMap.adjoint (rmul (φ.matrix * u)))
 
-theorem OrthonormalBasis.norm_eq_one
-  {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
-  [InnerProductSpace 𝕜 E] [Fintype ι] [DecidableEq ι]
-  (u : OrthonormalBasis ι 𝕜 E) (i : ι) :
-    ‖u i‖ = 1 :=
-by
-  rw [@norm_eq_sqrt_inner 𝕜, Real.sqrt_eq_one]
-  simp_rw [orthonormal_iff_ite.mp u.orthonormal, if_true, RCLike.one_re]
+-- theorem OrthonormalBasis.norm_eq_one
+--   {ι 𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
+--   [InnerProductSpace 𝕜 E] [Fintype ι] [DecidableEq ι]
+--   (u : OrthonormalBasis ι 𝕜 E) (i : ι) :
+--     ‖u i‖ = 1 :=
+-- by
+--   rw [@norm_eq_sqrt_inner 𝕜, Real.sqrt_eq_one]
+--   simp_rw [orthonormal_iff_ite.mp u.orthonormal, if_true, RCLike.one_re]
 
 theorem orthogonalProjection'_of_finrank_eq_one
   {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
@@ -230,14 +234,14 @@ by
     AlgEquiv.eq_apply_iff_symm_eq, map_sum, StarAlgEquiv.lTensor_symm_tmul, kroneckerToTensor_symm_apply,
     TensorProduct.toKronecker_apply, transposeStarAlgEquiv_symm_apply,
     MulOpposite.unop_op, starAlgebra.modAut_zero, AlgEquiv.one_apply,
-    conjTranspose_col, ← vecMulVec_eq]
+    conjTranspose_replicateCol, ← vecMulVec_eq]
   have : ∀ x, modAut (1 / 2) (hφ.orthonormalBasis x)
     = (hφ.orthonormalBasis x.swap)ᴴ :=
   by
     intro x
     simp only [modAut, sig_apply, hφ.orthonormalBasis_apply, conjTranspose_mul,
       mul_assoc, PosDef.rpow_mul_rpow, neg_add_cancel, PosDef.rpow_zero,
-      mul_one, (PosDef.rpow.isPosDef _ _).1.eq, stdBasisMatrix_conjTranspose,
+      mul_one, (PosDef.rpow.isPosDef _ _).1.eq, single_conjTranspose,
       star_one]
     rfl
   simp only [this, star_eq_conjTranspose, conjTranspose_conjTranspose]
@@ -245,7 +249,7 @@ by
   simp only [sum_apply, kroneckerMap_apply, vecMulVec_apply,
     Pi.star_apply, OrthonormalBasis.repr_apply_apply, transpose_apply,
     Module.Dual.IsFaithfulPosMap.orthonormalBasis_apply, mul_apply,
-    stdBasisMatrix_eq, boole_mul]
+    single_eq, boole_mul]
   simp_rw [ite_and, Finset.sum_ite_irrel, Finset.sum_const_zero,
     Finset.sum_ite_eq, Finset.mem_univ, if_true, ite_mul, zero_mul,
     Prod.swap, mul_ite, mul_zero, Finset.sum_product_univ, Finset.sum_ite_irrel,
@@ -260,7 +264,7 @@ by
 theorem
   Module.Dual.IsFaithfulPosMap.inner_dualMatrix_right
   (x : Matrix n n ℂ) :
-    inner x φ.matrix⁻¹ = star (x : Matrix n n ℂ).trace :=
+    inner ℂ x φ.matrix⁻¹ = star (x : Matrix n n ℂ).trace :=
 by
   simp only [hφ.inner_eq']
   letI := hφ.matrixIsPosDef.invertible
@@ -276,11 +280,11 @@ by
     ←
     Function.Injective.eq_iff (QuantumSet.Psi 0 (1 / 2)).injective,
     Psi.schurMul, LinearEquiv.apply_symm_apply, QuantumSet.Psi_apply_matrix_one,
-    ← _root_.map_mul, ← _root_.map_mul onb.toMatrix, map_zero]
+    ← _root_.map_mul, ← _root_.map_mul onb.toMatrix, LinearEquiv.map_zero]
   simp only [map_eq_zero_iff _ (StarAlgEquiv.injective _),
     map_eq_zero_iff _ (AlgEquiv.injective _)]
   rw [map_eq_zero_iff _ (StarAlgEquiv.injective onb.toMatrix)]
-  simp only [LinearMap.mul_eq_comp, LinearMap.comp_rankOne,
+  simp only [Module.End.mul_eq_comp, LinearMap.comp_rankOne,
     ContinuousLinearMap.coe_coe, rankOne_apply,
     ContinuousLinearMap.coe_eq_zero, rankOne.eq_zero_iff, smul_eq_zero,
     hφ.inner_dualMatrix_right, star_eq_zero]
@@ -340,7 +344,7 @@ by
     ← _root_.map_mul, ← _root_.map_mul onb.toMatrix,
     (StarAlgEquiv.injective _).eq_iff, (AlgEquiv.injective _).eq_iff,
     (StarAlgEquiv.injective onb.toMatrix).eq_iff]
-  simp only [LinearMap.mul_eq_comp, LinearMap.comp_rankOne, ContinuousLinearMap.coe_coe,
+  simp only [Module.End.mul_eq_comp, LinearMap.comp_rankOne, ContinuousLinearMap.coe_coe,
     rankOne_apply, ContinuousLinearMap.coe_inj, hφ.inner_dualMatrix_right]
   rw [← sub_eq_zero]
   simp_rw [← LinearMap.sub_apply, ← map_sub]
@@ -385,6 +389,7 @@ theorem QuantumGraph.NumOfEdges_eq {A : Type*} [starAlgebra A] [QuantumSet A]
   QuantumGraph.NumOfEdges B = ⟪1, B 1⟫_ℂ :=
 rfl
 
+set_option maxHeartbeats 0 in
 theorem QuantumGraph.Real.matrix_submodule_finrank_eq_numOfEdges_of_counit_eq_trace
   (hc : Coalgebra.counit (R := ℂ) (A := Matrix n n ℂ) = Matrix.traceLinearMap n ℂ ℂ)
   {A : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ}
@@ -407,8 +412,7 @@ by
   rw [← bra_apply_apply ℂ (1 : Matrix n n ℂ ⊗[ℂ] (Matrix n n ℂ)ᵐᵒᵖ),
     ← ContinuousLinearMap.coe_coe,
     ← Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
-  simp only [LinearMap.coe_comp, Function.comp_apply,
-    TensorProduct.instCoalgebraStruct_counit, hc, Coalgebra.counit_mulOpposite]
+  simp only [TensorProduct.counit_def, hc, Coalgebra.counit_mulOpposite]
 
 theorem Matrix.traceLinearMap_dualMatrix_eq
   {n : Type*} [DecidableEq n] [Fintype n] :

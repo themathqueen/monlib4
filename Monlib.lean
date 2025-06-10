@@ -94,3 +94,4 @@ import Monlib.LinearAlgebra.QuantumSet.QIso
 import Monlib.LinearAlgebra.QuantumSet.PhiMap
 import Monlib.LinearAlgebra.QuantumSet.DeltaForm
 import Monlib.LinearAlgebra.QuantumSet.Subset
+import Monlib.LinearAlgebra.QuantumSet.schurMulTensor

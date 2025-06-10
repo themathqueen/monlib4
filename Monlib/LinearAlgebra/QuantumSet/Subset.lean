@@ -57,14 +57,12 @@ noncomputable def QuantumSet.subset_normedAddCommGroup [hA : QuantumSet A]
   letI : starAlgebra (subset new_k A) := QuantumSet.subsetStarAlgebra new_k
   @InnerProductSpace.Core.toNormedAddCommGroup ℂ (subset new_k A) _ _ _
   { inner := λ x y => hA.inner ((toSubset_equiv new_k).symm x) ((ha.modAut (new_k + -hA.k) ((toSubset_equiv new_k).symm y)))
-    conj_symm := λ _ _ => by simp only [inner_conj_symm, QuantumSet.modAut_isSymmetric]
-    nonneg_re := λ _ => by
-      simp only
+    conj_inner_symm := λ _ _ => by simp only [inner_conj_symm, QuantumSet.modAut_isSymmetric]
+    re_inner_nonneg := λ _ => by
       rw [← add_halves (new_k + -k A), ← QuantumSet.modAut_apply_modAut,
-        ← QuantumSet.modAut_isSymmetric, ← norm_sq_eq_inner]
+        ← QuantumSet.modAut_isSymmetric, ← norm_sq_eq_re_inner]
       exact sq_nonneg _
     definite := λ _ => by
-      simp only
       rw [← add_halves (new_k + -k A), ← QuantumSet.modAut_apply_modAut,
         ← QuantumSet.modAut_isSymmetric, inner_self_eq_zero,
         AlgEquiv.map_eq_zero_iff]
@@ -89,7 +87,7 @@ letI : starAlgebra (subset new_k A) := QuantumSet.subsetStarAlgebra new_k
 letI := hA.subset_normedAddCommGroup new_k
 letI := hA.subset_innerProductSpace new_k
 { norm_sq_eq_inner := λ _ => by
-    simp only [RCLike.re_to_complex, ← norm_sq_eq_inner]
+    simp only [RCLike.re_to_complex, ← norm_sq_eq_re_inner]
   conj_symm := inner_conj_symm
   add_left := inner_add_left
   smul_left := inner_smul_left }
@@ -180,12 +178,12 @@ let to_ := @toSubset_equiv new_k A
         simp only [OrthonormalBasis.repr_symm_single, orthonormal_iff_ite.mp hA.onb.orthonormal] }
 
 open QuantumSet in
-abbrev LinearMap.toSubsetQuantumSet {B : Type*} [starAlgebra B]
+noncomputable abbrev LinearMap.toSubsetQuantumSet {B : Type*} [starAlgebra B]
   [QuantumSet A] [QuantumSet B] (f : A →ₗ[ℂ] B) (sk₁ sk₂ : ℝ) :
   subset sk₁ A →ₗ[ℂ] subset sk₂ B :=
 (toSubset_algEquiv sk₂).toLinearMap ∘ₗ f ∘ₗ (toSubset_algEquiv sk₁).symm.toLinearMap
 open QuantumSet in
-abbrev LinearMap.ofSubsetQuantumSet {B : Type*} [starAlgebra B]
+noncomputable abbrev LinearMap.ofSubsetQuantumSet {B : Type*} [starAlgebra B]
   [QuantumSet A] [QuantumSet B] (sk₁ sk₂ : ℝ)
   (f : subset sk₁ A →ₗ[ℂ] subset sk₂ B) :
   A →ₗ[ℂ] B :=
@@ -496,7 +494,7 @@ theorem QuantumSet.normOne_toSubset {A : Type*} [starAlgebra A] [QuantumSet A] (
   ‖(1 : A)‖ = ‖(1 : QuantumSet.subset r A)‖ :=
 by
   letI := QuantumSet.instSubset (A := A) (by infer_instance) r
-  simp_rw [norm_eq_sqrt_inner (𝕜 := ℂ), QuantumSet.subset_inner_eq,
+  simp_rw [norm_eq_sqrt_re_inner (𝕜 := ℂ), QuantumSet.subset_inner_eq,
     ← QuantumSet.toSubset_algEquiv_symm_eq_toSubset_equiv, map_one]
 
 theorem LinearMap.toSubsetQuantumSet_eq_iff {A B : Type*}  [ha : starAlgebra A]

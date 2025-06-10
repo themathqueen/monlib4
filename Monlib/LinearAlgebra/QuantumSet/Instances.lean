@@ -247,7 +247,7 @@ by
         specialize h2 (hQ.1.eigenvectorMatrixᵀ i)
         rw [← IsHermitian.eigenvalues_eq'] at h2
         nth_rw 3 [le_iff_eq_or_lt] at h2
-        simp only [hi, false_or, not_lt_of_le (hQ.eigenvalues_nonneg _),
+        simp only [hi, false_or, not_lt_of_ge (hQ.eigenvalues_nonneg _),
           and_false, or_false, h, and_true] at h2
         exact ⟨h2, h⟩
       . simp only [RCLike.star_def, mul_eq_mul_right_iff, and_imp]
@@ -416,7 +416,7 @@ set_option synthInstance.checkSynthOrder false in
 noncomputable def Module.Dual.IsFaithfulPosMap.innerProductAlgebra [hφ : φ.IsFaithfulPosMap] :
     InnerProductAlgebra (Matrix n n ℂ) where
   -- norm_smul_le _ _ := by rw [← norm_smul]
-  norm_sq_eq_inner := norm_sq_eq_inner (𝕜 := ℂ)
+  norm_sq_eq_inner := norm_sq_eq_re_inner (𝕜 := ℂ)
   conj_symm := inner_conj_symm
   add_left := inner_add_left
   smul_left := inner_smul_left

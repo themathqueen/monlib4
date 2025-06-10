@@ -2,6 +2,7 @@ import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 import Monlib.LinearAlgebra.TensorProduct.Submodule
 import Mathlib.LinearAlgebra.TensorProduct.Finiteness
+import Mathlib.RingTheory.Coalgebra.TensorProduct
 
 variable {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
   [Π i, Fintype (p i)] [Π i, DecidableEq (p i)]
@@ -39,7 +40,7 @@ noncomputable def PiMat.transposeStarAlgEquiv
     rfl
   map_add' _ _ := rfl
   map_smul' _ _ := by
-    simp only [MulOpposite.op_inj, Matrix.transpose_smul]
+    -- simp only [MulOpposite.op_inj, Matrix.transpose_smul]
     rfl
   map_star' _ := rfl
 
@@ -169,7 +170,11 @@ theorem QuantumGraph.PiMat_submoduleIsProj {f : PiMat ℂ ι p →ₗ[ℂ] PiMat
   LinearMap.IsProj (hf.PiMat_submodule t r i)
   (PiMat_toEuclideanLM (PiMatTensorProductEquiv ((StarAlgEquiv.lTensor _
     (PiMat.transposeStarAlgEquiv ι p).symm) (QuantumSet.Psi t r f))) i) :=
-QuantumGraph.PiMat_submodule.proof_17 hf t r i
+by
+  rw [PiMat_submodule]
+  generalize_proofs
+  (expose_names; exact pf_23 i)
+-- QuantumGraph.PiMat_submodule.proof_17 hf t r i
 
 theorem QuantumGraph.PiMat_submoduleIsProj_codRestrict {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
   (hf : QuantumGraph (PiMat ℂ ι p) f) (t r : ℝ) (i : ι × ι) :
@@ -238,6 +243,40 @@ theorem StarAlgEquiv.lTensor_toLinearMap {R A B C : Type*}
   (StarAlgEquiv.lTensor C f).toLinearMap = LinearMap.lTensor C f.toLinearMap :=
 rfl
 
+attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
+
+-- noncomputable instance MulOppositeCoalgebra {A : Type*} [Semiring A] [Algebra ℂ A]
+--   [Coalgebra ℂ A] :
+--     Coalgebra ℂ Aᵐᵒᵖ where
+--   coassoc := by
+
+--   rTensor_counit_comp_comul := sorry
+--   lTensor_counit_comp_comul := sorry
+
+-- remove this...
+noncomputable def TensorProduct.instCoalgebraStruct'
+  {R S A B : Type*} [CommSemiring R] [CommSemiring S] [AddCommMonoid A] [AddCommMonoid B]
+    [Algebra R S] [Module R A] [Module S A] [Module R B] [CoalgebraStruct R B]
+    [CoalgebraStruct S A] [IsScalarTower R S A] : CoalgebraStruct S (A ⊗[R] B) where
+  comul :=
+    AlgebraTensorModule.tensorTensorTensorComm R S R S A A B B ∘ₗ
+      AlgebraTensorModule.map CoalgebraStruct.comul CoalgebraStruct.comul
+  counit := AlgebraTensorModule.rid R S S ∘ₗ AlgebraTensorModule.map CoalgebraStruct.counit CoalgebraStruct.counit
+
+lemma TensorProduct.instCoalgebraStruct'_counit
+  {R S A B : Type*} [CommSemiring R] [CommSemiring S] [AddCommMonoid A] [AddCommMonoid B]
+  [Algebra R S] [Module R A] [Module S A] [Module R B] [CoalgebraStruct R B]
+  [CoalgebraStruct S A] [IsScalarTower R S A] :
+  (TensorProduct.instCoalgebraStruct' : CoalgebraStruct S (A ⊗[R] B)).counit =
+    AlgebraTensorModule.rid R S S ∘ₗ AlgebraTensorModule.map CoalgebraStruct.counit CoalgebraStruct.counit :=
+rfl
+
+attribute [local instance] TensorProduct.instCoalgebraStruct'
+
+-- instance :
+--   Coalgebra ℂ (PiMat ℂ ι p ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) :=
+-- Coalgebra.ofFiniteDimensionalHilbertAlgebra (R := ℂ) (A := PiMat ℂ ι p ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ)
+
 theorem QuantumGraph.dim_of_piMat_submodule_eq_trace_counit
   (hc : (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = PiMat.traceLinearMap)
   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
@@ -245,7 +284,7 @@ theorem QuantumGraph.dim_of_piMat_submodule_eq_trace_counit
   QuantumGraph.dim_of_piMat_submodule hf =
     (Coalgebra.counit (R := ℂ)) (QuantumSet.Psi 0 (1 / 2) f) :=
 by
-  simp only [TensorProduct.instCoalgebraStruct_counit,
+  simp only [TensorProduct.instCoalgebraStruct'_counit,
     LinearMap.coe_comp, Function.comp_apply, hc, Coalgebra.counit_mulOpposite]
   rw [QuantumGraph.dim_of_piMat_submodule_eq_trace]
   simp only [← StarAlgEquiv.toLinearMap_apply, ← LinearMap.comp_apply,
@@ -253,36 +292,48 @@ by
     PiMat.traceLinearMap_comp_piMatTensorProductEquiv_eq,
     StarAlgEquiv.lTensor_toLinearMap]
   rw [LinearMap.comp_assoc, LinearMap.map_comp_lTensor]
-  rfl
+  simp
+  congr 1
+  ext; simp
 
+-- set_option maxHeartbeats 500000 in
 theorem Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one
   {A : Type*} [NormedAddCommGroupOfRing A]
   [InnerProductSpace ℂ A] [SMulCommClass ℂ A A] [IsScalarTower ℂ A A] [FiniteDimensional ℂ A] :
-  letI : Algebra ℂ A := Algebra.ofIsScalarTowerSmulCommClass
   Coalgebra.counit (R := ℂ) (A := A ⊗[ℂ] Aᵐᵒᵖ)
     = (bra ℂ (1 : A ⊗[ℂ] Aᵐᵒᵖ)).toLinearMap :=
 by
+  -- letI : FiniteDimensional ℂ (A ⊗[ℂ] Aᵐᵒᵖ) := by infer_instance
+  -- -- letI
+  -- letI := TensorProduct.instNormedAddCommGroupOfRing (R:= ℂ) (A := A) (B := Aᵐᵒᵖ)
+  -- exact @Coalgebra.counit_eq_bra_one ℂ (A ⊗[ℂ] Aᵐᵒᵖ)
+  --   _ _ _ _ _ _
   apply TensorProduct.ext'
   intro x y
-  simp only [TensorProduct.instCoalgebraStruct_counit, LinearMap.coe_comp, Function.comp_apply,
+  -- rw [TensorProduct.counit_def]
+  simp only [TensorProduct.instCoalgebraStruct'_counit, LinearMap.coe_comp, Function.comp_apply,
     TensorProduct.map_tmul, LinearMap.mul'_apply, Algebra.TensorProduct.one_def,
     ContinuousLinearMap.coe_coe, innerSL_apply, TensorProduct.inner_tmul,
     Coalgebra.inner_eq_counit', Coalgebra.counit_mulOpposite_eq,
-    MulOpposite.inner_eq, MulOpposite.unop_one]
-  rfl
+    MulOpposite.inner_eq, MulOpposite.unop_one,
+    TensorProduct.AlgebraTensorModule.map_tmul]
+  simp only [LinearEquiv.coe_coe, TensorProduct.AlgebraTensorModule.rid_tmul, smul_eq_mul, mul_comm]
 
-set_option maxHeartbeats 400000 in
-theorem QuantumGraph.dim_of_piMat_submodule_eq_numOfEdges_of_trace_counit
-  (hc : (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = PiMat.traceLinearMap)
-  {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
-  (hf : QuantumGraph _ f) :
-  hf.dim_of_piMat_submodule = QuantumGraph.NumOfEdges f :=
-by
-  rw [QuantumGraph.dim_of_piMat_submodule_eq_trace_counit hc]
-  simp only [NumOfEdges, LinearMap.coe_mk, AddHom.coe_mk,
-    oneInner_map_one_eq_oneInner_Psi_map _ 0 (1/2),
-    Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
-  rfl
+lemma QuantumGraph.NumOfEdges_apply {A : Type*} [starAlgebra A] [QuantumSet A]
+  (f : A →ₗ[ℂ] A) : NumOfEdges f = inner ℂ 1 (f 1) :=
+rfl
+
+-- -- set_option maxHeartbeats 40000 in
+-- theorem QuantumGraph.dim_of_piMat_submodule_eq_numOfEdges_of_trace_counit
+--   (hc : (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = PiMat.traceLinearMap)
+--   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+--   (hf : QuantumGraph _ f) :
+--   hf.dim_of_piMat_submodule = QuantumGraph.NumOfEdges f :=
+-- by
+--   rw [QuantumGraph.dim_of_piMat_submodule_eq_trace_counit hc,
+--     NumOfEdges_apply, oneInner_map_one_eq_oneInner_Psi_map _ 0 (1/2)]
+--   simp only [Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
+--   rfl
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
@@ -427,7 +478,11 @@ theorem QuantumGraph.Real.PiMat_submoduleOrthogonalProjection
     ((PiMat_toEuclideanLM (PiMatTensorProductEquiv
     ((StarAlgEquiv.lTensor (PiMat ℂ ι p) (PiMat.transposeStarAlgEquiv ι p).symm)
     (QuantumSet.Psi 0 (1/2) A))) i))) :=
-QuantumGraph.Real.PiMat_submodule.proof_28 hA i
+by
+  rw [QuantumGraph.Real.PiMat_submodule]
+  generalize_proofs
+  (expose_names; exact pf_32)
+-- QuantumGraph.Real.PiMat_submodule.proof_28 hA i
 
 set_option synthInstance.maxHeartbeats 0 in
 noncomputable def QuantumGraph.Real.PiMat_orthonormalBasis {A : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
@@ -503,7 +558,7 @@ theorem Matrix.vecMulVec_toEuclideanLin {n m : Type*} [Fintype n] [DecidableEq n
 by
   apply_fun Matrix.toEuclideanLin.symm using LinearEquiv.injective _
   simp only [LinearEquiv.symm_apply_apply, rankOne.EuclideanSpace.toEuclideanLin_symm]
-  simp only [conjTranspose_col, star_star]
+  simp only [conjTranspose_replicateCol, star_star]
   simp only [← vecMulVec_eq]
 
 open Matrix in
@@ -532,7 +587,11 @@ theorem TensorProduct.chooseFinset_spec {R M N : Type*} [CommSemiring R]
   [AddCommMonoid M] [AddCommMonoid N] [Module R M] [Module R N]
   (x : TensorProduct R M N) :
   x = ∑ s ∈ (TensorProduct.chooseFinset x), s.1 ⊗ₜ s.2 :=
-TensorProduct.chooseFinset.proof_1 x
+by
+  rw [TensorProduct.chooseFinset]
+  generalize_proofs
+  (expose_names; exact pf_2)
+-- TensorProduct.chooseFinset.proof_1 x
 
 -- changed from choosing some `Finset (_ × _)` like above to the following
 noncomputable def EuclideanSpace.prod_choose {n m : Type*} [Fintype n] [DecidableEq n]
@@ -611,7 +670,7 @@ by
     QuantumSet.Psi_apply, QuantumSet.Psi_toFun_apply,
     StarAlgEquiv.lTensor_tmul,
     PiMat_toEuclideanLM, PiMatTensorProductEquiv_apply]
-  simp only [starAlgebra.modAut_zero, Matrix.conjTranspose_col, AlgEquiv.one_apply, one_div,
+  simp only [starAlgebra.modAut_zero, Matrix.conjTranspose_replicateCol, AlgEquiv.one_apply, one_div,
     starAlgebra.modAut_star, Finset.sum_apply, StarAlgEquiv.piCongrRight_apply,
     PiMatTensorProductEquiv_apply, StarAlgEquiv.ofAlgEquiv_coe, AlgEquiv.ofLinearEquiv_apply,
     Fintype.sum_prod_type, map_sum, directSumTensorToFun_apply,
@@ -669,7 +728,7 @@ by
   calc (QuantumSet.onb (A := (PiMat ℂ ι p)) a i).trace
       = ∑ j, QuantumSet.onb (A := PiMat ℂ ι p) a i j j := rfl
     _ = ∑ j, (Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis hφ) a i j j := rfl
-    _ = ∑ j, Matrix.includeBlock (Matrix.stdBasisMatrix a.2.1 a.2.2 1
+    _ = ∑ j, Matrix.includeBlock (Matrix.single a.2.1 a.2.2 1
       * (hφ a.1).matrixIsPosDef.rpow (-(1 / 2))) i j j
       := by simp only [Module.Dual.pi.IsFaithfulPosMap.orthonormalBasis_apply]
     _ = if a.1 = i then (hφ a.1).matrixIsPosDef.rpow (-(1 / 2)) a.2.2 a.2.1 else 0 :=
@@ -679,7 +738,7 @@ by
           subst h
           simp only [Matrix.includeBlock_apply, dif_pos]
           simp only [one_div, eq_mp_eq_cast, cast_eq]
-          simp only [← Matrix.trace_iff, Matrix.stdBasisMatrix_hMul_trace]
+          simp only [← Matrix.trace_iff, Matrix.single_hMul_trace]
         next h =>
           simp_all only [one_div, Matrix.includeBlock_apply, h, dif_neg]
           simp only [↓reduceDIte, Matrix.zero_apply, Finset.sum_const_zero]
@@ -835,11 +894,11 @@ noncomputable def Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv {n : Type*}
         = √ (RCLike.re ((star ((A : Matrix n n ℂ) *ᵥ x)) ⬝ᵥ ((A : Matrix n n ℂ) *ᵥ x))) := ?_
       _ = √ (RCLike.re ((star x) ⬝ᵥ (((star (A : Matrix n n ℂ) * (A : Matrix n n ℂ)) *ᵥ x)))) := ?_
       _ = ‖x‖ := ?_
-    . rw [norm_eq_sqrt_inner (𝕜 := ℂ)]
+    . rw [norm_eq_sqrt_re_inner (𝕜 := ℂ), dotProduct_eq_inner]
       rfl
     . rw [star_mulVec, ← dotProduct_mulVec, mulVec_mulVec]
       rfl
-    . rw [star_mul_self, one_mulVec, norm_eq_sqrt_inner (𝕜 := ℂ)]
+    . rw [star_mul_self, one_mulVec, norm_eq_sqrt_re_inner (𝕜 := ℂ), dotProduct_eq_inner]
       rfl
 
 theorem Matrix.UnitaryGroup.toEuclideanLinearIsometryEquiv_apply {n : Type*} [Fintype n] [DecidableEq n]
