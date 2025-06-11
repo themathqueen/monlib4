@@ -270,7 +270,8 @@ by
   letI := hφ.matrixIsPosDef.invertible
   rw [trace_mul_cycle, inv_mul_of_invertible, one_mul, trace_conjTranspose]
 
-set_option synthInstance.maxHeartbeats 50000 in
+set_option synthInstance.maxHeartbeats 40000 in
+set_option maxHeartbeats 300000 in
 theorem QuantumGraph.Real.of_norm_one_matrix_is_irreflexive_iff
   [Nontrivial n] (x : { x : Matrix n n ℂ // ‖x‖ = 1 }) :
     of_norm_one_matrix x •ₛ 1 = 0 ↔ (x : Matrix n n ℂ).trace = 0 :=
@@ -389,7 +390,7 @@ theorem QuantumGraph.NumOfEdges_eq {A : Type*} [starAlgebra A] [QuantumSet A]
   QuantumGraph.NumOfEdges B = ⟪1, B 1⟫_ℂ :=
 rfl
 
-set_option maxHeartbeats 0 in
+-- set_option maxHeartbeats 0 in
 theorem QuantumGraph.Real.matrix_submodule_finrank_eq_numOfEdges_of_counit_eq_trace
   (hc : Coalgebra.counit (R := ℂ) (A := Matrix n n ℂ) = Matrix.traceLinearMap n ℂ ℂ)
   {A : Matrix n n ℂ →ₗ[ℂ] Matrix n n ℂ}
@@ -412,7 +413,11 @@ by
   rw [← bra_apply_apply ℂ (1 : Matrix n n ℂ ⊗[ℂ] (Matrix n n ℂ)ᵐᵒᵖ),
     ← ContinuousLinearMap.coe_coe,
     ← Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
-  simp only [TensorProduct.counit_def, hc, Coalgebra.counit_mulOpposite]
+  simp only [TensorProduct.instCoalgebraStruct'_counit, hc, Coalgebra.counit_mulOpposite,
+    LinearMap.comp_apply]
+  congr 1
+  apply TensorProduct.ext'
+  simp [mul_comm]
 
 theorem Matrix.traceLinearMap_dualMatrix_eq
   {n : Type*} [DecidableEq n] [Fintype n] :
@@ -484,7 +489,7 @@ by
       IsUnit.mul_inv_cancel_right]
   · rintro rfl
     rw [QuantumGraph.NumOfEdges_eq, Qam.trivialGraph_eq,
-      LinearMap.smul_apply, inner_smul_right, LinearMap.one_apply]
+      LinearMap.smul_apply, inner_smul_right, Module.End.one_apply]
     have : φ = Matrix.traceLinearMap n ℂ ℂ := by
       rw [← hc]; exact Eq.symm counit_eq_dual
     simp only [QuantumSetDeltaForm.delta, this,
@@ -510,6 +515,7 @@ by
   simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply,
     traceLinearMap_apply, blockDiagonal'AlgHom_apply, blockDiagonal'_includeBlock_trace']
 
+set_option maxHeartbeats 800000 in
 theorem QuantumGraph.Real.PiMatFinTwo_same_isSelfAdjoint_reflexive_and_numOfEdges_eq_one
   {φ : Π i, Module.Dual ℂ (Matrix (PiFinTwo_same n i) (PiFinTwo_same n i) ℂ)}
   [hφ : Π i, (φ i).IsFaithfulPosMap]
@@ -541,7 +547,7 @@ by
     have hf₂ : QuantumGraph.Real _ f := QuantumGraph.Real.conj_proj_isReal hA _
     have hf₃ : f •ₛ 1 = 1 := by
       simp only [f]
-      simp only [LinearMap.one_eq_id]
+      simp only [Module.End.one_eq_id]
       nth_rw 1 [← LinearMap.proj_comp_single_same ℂ (φ := λ r => Mat ℂ (PiFinTwo_same n r)) _]
       nth_rw 3 [← LinearMap.comp_one (LinearMap.proj _)]
       simp only [LinearMap.comp_assoc, schurMul_proj_comp]
@@ -662,7 +668,7 @@ theorem PiMat_finTwo_same_proj_one_comp_swapStarAlgEquiv
     = LinearMap.proj 0 :=
 rfl
 
-set_option maxHeartbeats 500000 in
+set_option maxHeartbeats 0 in
 theorem
   QuantumGraph.Real.piMatFinTwo_same_eq_zero_of_isSelfAdjoint_and_reflexive_and_numOfEdges_eq_one
   [Nontrivial n]
@@ -679,14 +685,14 @@ by
   have hp : ∀ j, p j = LinearMap.proj j := λ j => rfl
   have : ∀ j, p j ∘ₗ LinearMap.adjoint (p j) = 1 :=
   λ j => by
-    simp only [LinearMap.proj_adjoint, p, LinearMap.one_eq_id, LinearMap.proj_comp_single_same]
+    simp only [LinearMap.proj_adjoint, p, Module.End.one_eq_id, LinearMap.proj_comp_single_same]
   have this' : ∀ j, (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j)) •ₛ 1 = 1 :=
   λ j => by
     calc (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j)) •ₛ 1
         = (p j ∘ₗ A ∘ₗ LinearMap.adjoint (p j) ∘ₗ 1) •ₛ (p j ∘ₗ 1 ∘ₗ LinearMap.adjoint (p j)) :=
           by simp only [LinearMap.one_comp, LinearMap.comp_one, this]
       _ = p j ∘ₗ ((A ∘ₗ LinearMap.adjoint (p j)) •ₛ (1 ∘ₗ LinearMap.adjoint (p j))) :=
-          schurMul_proj_comp (hφ := λ _ => hφ) _ _ _
+          schurMul_proj_comp _ _ _
       _ = p j ∘ₗ (A •ₛ 1) ∘ₗ LinearMap.adjoint (p j) :=
           by rw [schurMul_comp_proj_adjoint (hφ := λ _ => hφ)]
       _ = 1 := by simp only [hA₃, LinearMap.one_comp, this]
@@ -699,7 +705,7 @@ by
             Finset.sum_singleton, add_sub_cancel, p]
     _ = 1 :=
         by
-          rw [LinearMap.one_eq_id, ← LinearMap.sum_single_comp_proj]
+          rw [Module.End.one_eq_id, ← LinearMap.sum_single_comp_proj]
           simp only [p, LinearMap.proj_adjoint]
     _ = A •ₛ 1 := hA₃.symm
     _ = ∑ j, (LinearMap.adjoint (p i) ∘ₗ (p i) ∘ₗ A ∘ₗ LinearMap.adjoint (p i) ∘ₗ (p i))
@@ -709,7 +715,7 @@ by
           simp_rw [← map_sum,
             LinearMap.one_comp]
           congr
-          rw [LinearMap.one_eq_id, ← LinearMap.sum_single_comp_proj]
+          rw [Module.End.one_eq_id, ← LinearMap.sum_single_comp_proj]
           simp only [p, LinearMap.proj_adjoint, map_sum]
     _ = (LinearMap.adjoint (p i) ∘ₗ (p i) ∘ₗ A ∘ₗ LinearMap.adjoint (p i) ∘ₗ (p i))
         •ₛ (LinearMap.adjoint (p i) ∘ₗ 1 ∘ₗ p i)
@@ -724,7 +730,7 @@ by
           simp only [map_add, LinearMap.add_apply, p, schurMul_proj_adjoint_comp]
           simp only [← LinearMap.comp_assoc, schurMul_comp_proj]
           simp only [LinearMap.comp_assoc, ← hp, this']
-          simp only [LinearMap.one_comp, add_right_eq_self]
+          simp only [LinearMap.one_comp, add_eq_left]
           apply Finset.sum_eq_zero
           simp only [Finset.mem_sdiff, Finset.mem_univ, Finset.mem_singleton, true_and]
           push_neg
@@ -738,7 +744,7 @@ by
   specialize this 1 (if i = 0 then 1 else 0)
   rcases hii with (hii | hii)
   <;> rw [hii] at this
-  <;> simp only [add_right_eq_self, add_left_eq_self, includeBlock_apply,
+  <;> simp only [add_eq_left, add_eq_right, includeBlock_apply,
       LinearMap.single_apply, dite_eq_right_iff] at this
   <;> simp only [Fin.isValue, ↓reduceIte, ↓dreduceIte, Pi.one_apply, eq_mp_eq_cast, cast_eq,
     one_ne_zero, imp_false, not_true_eq_false, p] at this

@@ -2,7 +2,6 @@ import Monlib.QuantumGraph.Basic
 import Monlib.QuantumGraph.Example
 import Monlib.LinearAlgebra.TensorProduct.Submodule
 import Mathlib.LinearAlgebra.TensorProduct.Finiteness
-import Mathlib.RingTheory.Coalgebra.TensorProduct
 
 variable {ι : Type*} {p : ι → Type*} [Fintype ι] [DecidableEq ι]
   [Π i, Fintype (p i)] [Π i, DecidableEq (p i)]
@@ -248,13 +247,12 @@ attribute [local instance] Algebra.ofIsScalarTowerSmulCommClass
 -- noncomputable instance MulOppositeCoalgebra {A : Type*} [Semiring A] [Algebra ℂ A]
 --   [Coalgebra ℂ A] :
 --     Coalgebra ℂ Aᵐᵒᵖ where
---   coassoc := by
-
+--   coassoc := sorry
 --   rTensor_counit_comp_comul := sorry
 --   lTensor_counit_comp_comul := sorry
 
 -- remove this...
-noncomputable def TensorProduct.instCoalgebraStruct'
+noncomputable instance TensorProduct.instCoalgebraStruct'
   {R S A B : Type*} [CommSemiring R] [CommSemiring S] [AddCommMonoid A] [AddCommMonoid B]
     [Algebra R S] [Module R A] [Module S A] [Module R B] [CoalgebraStruct R B]
     [CoalgebraStruct S A] [IsScalarTower R S A] : CoalgebraStruct S (A ⊗[R] B) where
@@ -271,7 +269,7 @@ lemma TensorProduct.instCoalgebraStruct'_counit
     AlgebraTensorModule.rid R S S ∘ₗ AlgebraTensorModule.map CoalgebraStruct.counit CoalgebraStruct.counit :=
 rfl
 
-attribute [local instance] TensorProduct.instCoalgebraStruct'
+-- attribute [local instance] TensorProduct.instCoalgebraStruct'
 
 -- instance :
 --   Coalgebra ℂ (PiMat ℂ ι p ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) :=
@@ -323,17 +321,49 @@ lemma QuantumGraph.NumOfEdges_apply {A : Type*} [starAlgebra A] [QuantumSet A]
   (f : A →ₗ[ℂ] A) : NumOfEdges f = inner ℂ 1 (f 1) :=
 rfl
 
--- -- set_option maxHeartbeats 40000 in
--- theorem QuantumGraph.dim_of_piMat_submodule_eq_numOfEdges_of_trace_counit
---   (hc : (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = PiMat.traceLinearMap)
---   {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
---   (hf : QuantumGraph _ f) :
---   hf.dim_of_piMat_submodule = QuantumGraph.NumOfEdges f :=
--- by
---   rw [QuantumGraph.dim_of_piMat_submodule_eq_trace_counit hc,
---     NumOfEdges_apply, oneInner_map_one_eq_oneInner_Psi_map _ 0 (1/2)]
---   simp only [Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
---   rfl
+-- instance {A : Type*} [NormedAddCommGroupOfRing A] :
+--   NormedAddCommGroupOfRing Aᵐᵒᵖ where
+-- noncomputable instance {A : Type*} [NormedAddCommGroup A]
+--   [InnerProductSpace ℂ A] : InnerProductSpace ℂ Aᵐᵒᵖ where
+--   norm_sq_eq_re_inner _ := by
+--     simp [MulOpposite.inner_eq, norm_eq_sqrt_re_inner (𝕜 := ℂ)]
+--     rw [← RCLike.re_eq_complex_re]
+--     exact Real.sq_sqrt (inner_self_nonneg)
+--   conj_inner_symm _ _ := inner_conj_symm _ _
+--   add_left _ _ _ := inner_add_left _ _ _
+--   smul_left x y _ := inner_smul_left _ _ _
+-- noncomputable instance {A : Type*} [NormedAddCommGroupOfRing A] [InnerProductSpace ℂ A]
+--   [SMulCommClass ℂ A A] [IsScalarTower ℂ A A]
+--   [FiniteDimensional ℂ A] :
+--   NormedAddCommGroupOfRing (A ⊗[ℂ] Aᵐᵒᵖ) where
+
+private lemma Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one_piMat :
+  CoalgebraStruct.counit (R:= ℂ) (A:= PiMat ℂ ι p ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ) = ((bra ℂ) (1 : PiMat ℂ ι p ⊗[ℂ] (PiMat ℂ ι p)ᵐᵒᵖ)).toLinearMap :=
+by
+  apply TensorProduct.ext'
+  intro _ _
+  rw [Algebra.TensorProduct.one_def, bra_tmul, LinearMap.comp_apply,
+    _root_.TensorProduct.map_tmul, TensorProduct.instCoalgebraStruct'_counit,
+    LinearMap.comp_apply, TensorProduct.AlgebraTensorModule.map_tmul]
+  simp_rw [counit_mulOpposite_eq, Coalgebra.counit_eq_bra_one]
+  rw [← MulOpposite.op_one]
+  simp [mul_comm, MulOpposite.inner_eq]
+
+set_option maxHeartbeats 400000 in
+theorem QuantumGraph.dim_of_piMat_submodule_eq_numOfEdges_of_trace_counit
+  (hc : (Coalgebra.counit (R := ℂ) (A := PiMat ℂ ι p)) = PiMat.traceLinearMap)
+  {f : PiMat ℂ ι p →ₗ[ℂ] PiMat ℂ ι p}
+  (hf : QuantumGraph _ f) :
+  hf.dim_of_piMat_submodule = QuantumGraph.NumOfEdges f :=
+by
+  rw [QuantumGraph.dim_of_piMat_submodule_eq_trace_counit hc,
+    NumOfEdges_apply, oneInner_map_one_eq_oneInner_Psi_map _ 0 (1/2)]
+  simp only [Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one_piMat]
+  rfl
+
+  -- rw [Coalgebra.counit_eq_bra_one]
+  -- rw [Coalgebra.counit_self_tensor_mulOpposite_eq_bra_one]
+  -- rfl
 
 set_option synthInstance.maxHeartbeats 0 in
 set_option maxHeartbeats 0 in
