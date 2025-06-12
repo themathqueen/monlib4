@@ -1,4 +1,4 @@
-import Monlib.LinearAlgebra.TensorProduct.lemmas
+import Monlib.LinearAlgebra.TensorProduct.Lemmas
 import Monlib.LinearAlgebra.LinearMapOp
 import Monlib.LinearAlgebra.Coalgebra.Lemmas
 import Mathlib.LinearAlgebra.TensorProduct.Opposite
