@@ -77,6 +77,7 @@ import Monlib.LinearAlgebra.Matrix.Cast
 
 import Monlib.LinearAlgebra.Coalgebra.Lemmas
 import Monlib.LinearAlgebra.Coalgebra.FiniteDimensional
+import Monlib.LinearAlgebra.Coalgebra.MulOpposite
 
 import Monlib.LinearAlgebra.TensorProduct.BasicLemmas
 import Monlib.LinearAlgebra.TensorProduct.Lemmas
